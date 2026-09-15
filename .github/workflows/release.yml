@@ -8,8 +8,10 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  version:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     steps:
       - name: Read the version
         id: version
@@ -22,6 +24,13 @@ jobs:
           fi
           echo "version=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
 
+  build:
+    needs: version
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        loader: [fabric, neoforge, forge]
+    steps:
       - uses: actions/checkout@v7
         with:
           lfs: true
@@ -35,12 +44,14 @@ jobs:
 
       - name: Build
         env:
-          VERSION: ${{ steps.version.outputs.version }}
-        run: ./gradlew build -Pversion="$VERSION"
+          LOADER: ${{ matrix.loader }}
+          VERSION: ${{ needs.version.outputs.version }}
+        run: ./gradlew ":$LOADER:build" --configure-on-demand -Pversion="$VERSION"
 
-      - name: Upload the jars
+      - name: Upload the jar
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.event.release.tag_name }}
-          VERSION: ${{ steps.version.outputs.version }}
-        run: gh release upload "$TAG" {fabric,neoforge,forge}/build/libs/*-"$VERSION".jar --clobber
+          LOADER: ${{ matrix.loader }}
+          VERSION: ${{ needs.version.outputs.version }}
+        run: gh release upload "$TAG" "$LOADER"/build/libs/*-"$VERSION".jar --clobber
