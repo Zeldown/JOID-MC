@@ -24,6 +24,10 @@ tasks.withType(Jar).configureEach {
     }
 }
 
+tasks.withType(Javadoc).configureEach {
+    options.addBooleanOption('Xdoclint:-missing', true)
+}
+
 jar {
 
     manifest {
