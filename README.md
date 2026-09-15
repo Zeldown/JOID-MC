@@ -1,32 +1,87 @@
-# MultiLoader Template
+<div align="center">
 
-This project provides a Gradle project template that can compile Minecraft mods for multiple modloaders using a common project for the sources. This project does not require any third party libraries or dependencies. If you have any questions or want to discuss the project, please join our [Discord](https://discord.myceliummod.network).
+# JOID Blaze3D
+## JOID interfaces inside Minecraft 26.2
 
-## Getting Started
+</div>
 
-### IntelliJ IDEA
-This guide will show how to import the MultiLoader Template into IntelliJ IDEA. The setup process is roughly equivalent to setting up the modloaders independently and should be very familiar to anyone who has worked with their MDKs.
+**JOID Blaze3D** is a backend that runs [JOID](https://github.com/Zeldown/JOID) user interfaces inside Minecraft 26.2. JOID is a pure Java UI toolkit: a retained-mode node tree, reactive signals, a composable shader pipeline and MSDF text, with no CSS, no XML and no runtime parser. It never talks to a graphics API directly and goes through bridges instead. This project implements those bridges on top of **Blaze3D**, Minecraft's rendering abstraction, so the same UIs run on both its OpenGL and Vulkan backends, on Fabric, NeoForge and Forge.
 
-1. Clone or download this repository to your computer.
-2. Configure the project by setting the properties in the `gradle.properties` file. You will also need to change the `rootProject.name`  property in `settings.gradle`, this should match the folder name of your project, or else IDEA may complain.
-3. Open the template's root folder as a new project in IDEA. This is the folder that contains this README.md file and the gradlew executable.
-4. If your default JVM/JDK is not Java 25 you will encounter an error when opening the project. This error is fixed by going to `File > Settings > Build, Execution, Deployment > Build Tools > Gradle > Gradle JVM` and changing the value to a valid Java 25 JVM. You will also need to set the Project SDK to Java 25. This can be done by going to `File > Project Structure > Project SDK`. Once both have been set open the Gradle tab in IDEA and click the refresh button to reload the project.
-5. Open your Run/Debug Configurations. Under the `Application` category there should now be options to run Fabric and NeoForge projects. Select one of the client options and try to run it.
-6. Assuming you were able to run the game in step 5 your workspace should now be set up.
+## Compatibility
 
-### Eclipse
-While it is possible to use this template in Eclipse it is not recommended. During the development of this template multiple critical bugs and quirks related to Eclipse were found at nearly every level of the required build tools. While we continue to work with these tools to report and resolve issues support for projects like these are not there yet. For now Eclipse is considered unsupported by this project. The development cycle for build tools is notoriously slow so there are no ETAs available.
+| | Version |
+|---|---|
+| Minecraft | 26.2 |
+| Java | 25 |
+| JOID | 7.0.0 |
+| Fabric | Loader 0.19.3, Fabric API 0.152.1+26.2 |
+| NeoForge | 26.2.0.1-beta |
+| Forge | 65.1.3 |
 
-## Development Guide
-When using this template the majority of your mod should be developed in the `common` project. The `common` project is compiled against the vanilla game and is used to hold code that is shared between the different loader-specific versions of your mod. The `common` project has no knowledge or access to ModLoader specific code, apis, or concepts. Code that requires something from a specific loader must be done through the project that is specific to that loader, such as the `fabric` or `neoforge` projects.
+## Bridges
 
-Loader specific projects such as the `fabric` and `neoforge` project are used to load the `common` project into the game. These projects also define code that is specific to that loader. Loader specific projects can access all the code in the `common` project. It is important to remember that the `common` project can not access code from loader specific projects.
+| Class | JOID bridge | Role |
+|---|---|---|
+| `render.RenderBridge` | `IRenderBridge` | Draws JOID with Blaze3D render pipelines. JOID shaders are translated to GLSL at runtime, textures and framebuffers are GPU textures, and the frame is rendered offscreen then composited into the GUI. |
+| `screen.ScreenBridge` | `IWindowBridge`, `IUIBridge` | Window size, mouse, keyboard and clipboard from Minecraft, and the host that opens JOID UIs in Minecraft screens. JOID tooltips are shown as vanilla tooltips. |
+| `audio.AudioBridge` | `IAudioBridge` | Streaming audio sources on Minecraft's OpenAL context, following the master volume. |
 
-## Removing Platforms and Loaders
-While this template has support for many modloaders, new loaders may appear in the future, and existing loaders may become less relevant.
+`screen.JOIDScreen` hosts JOID UIs in a regular screen, and `screen.JOIDMenuScreen` in a container screen, drawn under the slots. Every class lives in the `fr.augma.joidblaze3d` package of the `common` project.
 
-Removing loader specific projects is as easy as deleting the folder, and removing the `include("projectname")` line from the `settings.gradle` file.
-For example if you wanted to remove support for `forge` you would follow the following steps:
+## Usage
 
-1. Delete the subproject folder. For example, delete `MultiLoader-Template/forge`.
-2. Remove the project from `settings.gradle`. For example, remove `include("forge")`. 
+The bridges are registered once, when the client starts, through `Backend.register()`. Open a UI from the client like with any JOID backend:
+
+```java
+JOID.open(new MyUI());
+```
+
+For a menu, extend `JOIDMenuScreen` and register the screen for your `MenuType` with the menu screen API of your loader:
+
+```java
+public class MyMenuScreen extends JOIDMenuScreen<MyMenu> {
+
+	public MyMenuScreen(final MyMenu menu, final Inventory inventory, final Component title) {
+		super(menu, inventory, title, 176, 166, new MyMenuUI());
+	}
+
+}
+```
+
+In game, the `/joid` client command opens the JOID demo chooser.
+
+## How it works
+
+- **Rendering** happens during the GUI extraction of the screen. JOID draws into its own texture, sized to the window framebuffer, which is then blitted pixel for pixel into the deferred GUI.
+- **Shaders** are written once in JOID GLSL. They are translated to GLSL 330, with every uniform packed in a single `std140` block, and compiled by Blaze3D for OpenGL or Vulkan.
+- **Masks** rely on the stencil buffer in JOID, which Blaze3D 26.2 does not expose. The stencil is emulated with an 8-bit texture that the generated shaders test and write, with the same behaviour as the native OpenGL backends.
+
+## Building
+
+The JOID jar in `libs/` is stored with [Git LFS](https://git-lfs.com), so install it before cloning. Then build with a JDK 25:
+
+```
+./gradlew build
+```
+
+Each loader writes two jars to `<loader>/build/libs`: the main jar, which embeds JOID and its runtime libraries (vecmath, JavaCV and FFmpeg with the natives of Windows, Linux and macOS), and a `-slim` jar without them.
+
+## Known limitations
+
+- Lines drawn without smoothing are one pixel wide, Blaze3D has no wide lines.
+- `TextureWrap.CLAMP_TO_BORDER` behaves like `CLAMP_TO_EDGE`, Blaze3D has no border mode.
+- The main jar weighs about 200 MB with the demo build of JOID, mostly FFmpeg natives and demo videos.
+- The font and resource loaders of JOID keep non-daemon threads alive, so Minecraft reports a shutdown watchdog crash when it closes.
+
+## Credits
+
+JOID — https://github.com/Zeldown/JOID
+
+This project uses JOID, licensed under the JOID Community Source License v1.0.
+See https://github.com/Zeldown/JOID/blob/main/LICENSE.md for the full text.
+
+JOID is developed by **Zeldown**. This project also builds on:
+
+- [MultiLoader Template](https://github.com/jaredlll08/MultiLoader-Template) by **Jared** — Fabric, NeoForge and Forge project layout
+- [JavaCV / FFmpeg](https://github.com/bytedeco/javacv) by **Bytedeco** — video decoding used by JOID
+- [vecmath](https://search.maven.org/artifact/javax.vecmath/vecmath) — vector math used by JOID
