@@ -24,13 +24,13 @@
 |---|---|---|
 | `render.RenderBridge` | `IRenderBridge` | Draws JOID with Blaze3D render pipelines. JOID shaders are translated to GLSL at runtime, textures and framebuffers are GPU textures, and the frame is rendered offscreen then composited into the GUI. |
 | `screen.ScreenBridge` | `IWindowBridge`, `IUIBridge` | Window size, mouse, keyboard and clipboard from Minecraft, and the host that opens JOID UIs in Minecraft screens. JOID tooltips are shown as vanilla tooltips. |
-| `audio.AudioBridge` | `IAudioBridge` | Streaming audio sources on Minecraft's OpenAL context, following the master volume. |
+| `audio.AudioBridge` | `IAudioBridge` | Streaming audio sources on Minecraft's OpenAL context, following the UI sound category. |
 
 `screen.JOIDScreen` hosts JOID UIs in a regular screen, and `screen.JOIDMenuScreen` in a container screen, drawn under the slots. Every class lives in the `fr.augma.joidblaze3d` package of the `common` project.
 
 ## Usage
 
-The bridges are registered once, when the client starts, through `Backend.register()`. Open a UI from the client like with any JOID backend:
+The bridges are registered once, when the client starts, through `JoidBlaze3D.register()`. Open a UI from the client like with any JOID backend:
 
 ```java
 JOID.open(new MyUI());
