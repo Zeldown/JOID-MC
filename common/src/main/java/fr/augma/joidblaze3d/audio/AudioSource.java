@@ -72,7 +72,7 @@ public final class AudioSource implements IAudioSource {
 	public void gain(final float gain) {
 		this.gain = gain;
 		if (this.isAvailable()) {
-			AL10.alSourcef(this.source, AL10.AL_GAIN, this.gain * Minecraft.getInstance().options.getFinalSoundSourceVolume(SoundSource.MASTER));
+			AL10.alSourcef(this.source, AL10.AL_GAIN, this.gain * Minecraft.getInstance().options.getFinalSoundSourceVolume(SoundSource.UI));
 		}
 	}
 
@@ -131,7 +131,7 @@ public final class AudioSource implements IAudioSource {
 			AL10.alSourcei(this.source, AL10.AL_SOURCE_RELATIVE, AL10.AL_TRUE);
 			AL10.alSourcei(this.source, AL10.AL_DISTANCE_MODEL, AL10.AL_NONE);
 			AL10.alSource3f(this.source, AL10.AL_POSITION, 0F, 0F, 0F);
-			AL10.alSourcef(this.source, AL10.AL_GAIN, this.gain * Minecraft.getInstance().options.getFinalSoundSourceVolume(SoundSource.MASTER));
+			AL10.alSourcef(this.source, AL10.AL_GAIN, this.gain * Minecraft.getInstance().options.getFinalSoundSourceVolume(SoundSource.UI));
 		}
 		return true;
 	}
