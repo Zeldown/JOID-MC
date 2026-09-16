@@ -6,12 +6,10 @@ import fr.augma.joidblaze3d.audio.AudioBridge;
 import fr.augma.joidblaze3d.render.RenderBridge;
 import fr.augma.joidblaze3d.screen.ScreenBridge;
 
-public final class Backend {
-
-	public static final String JOID_VERSION = "7.0.0";
+public final class JoidBlaze3D {
 
 	public static void register() {
-		JOID.checkVersion(Backend.JOID_VERSION);
+		JOID.checkVersion(Constants.JOID_VERSION);
 		BridgeHandler.AUDIO.register(new AudioBridge());
 		BridgeHandler.WINDOW.register(ScreenBridge.inst());
 		BridgeHandler.RENDER.register(new RenderBridge());

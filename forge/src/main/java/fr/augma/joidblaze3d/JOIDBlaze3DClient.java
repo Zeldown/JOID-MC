@@ -9,7 +9,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 public final class JOIDBlaze3DClient {
 
 	public static void init(final BusGroup busGroup) {
-		FMLClientSetupEvent.getBus(busGroup).addListener(event -> event.enqueueWork(Backend::register));
+		FMLClientSetupEvent.getBus(busGroup).addListener(event -> event.enqueueWork(JoidBlaze3D::register));
 		RegisterClientCommandsEvent.BUS.addListener(event -> event.getDispatcher().register(JOIDCommand.create()));
 	}
 

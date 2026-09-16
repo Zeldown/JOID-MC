@@ -9,10 +9,9 @@ import net.minecraftforge.fml.loading.FMLLoader;
 public class JOIDBlaze3D {
 
 	public JOIDBlaze3D(final FMLJavaModLoadingContext context) {
-		Constants.LOG.info("Hello Forge world!");
-		CommonClass.init();
 		if (FMLLoader.getDist() == Dist.CLIENT) {
 			JOIDBlaze3DClient.init(context.getModBusGroup());
 		}
 	}
+
 }
