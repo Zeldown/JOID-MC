@@ -10,7 +10,7 @@ public class JOIDBlaze3DClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
-		ClientLifecycleEvents.CLIENT_STARTED.register(minecraft -> JoidBlaze3D.register());
+		ClientLifecycleEvents.CLIENT_STARTED.register(minecraft -> JOIDMC.register());
 		ClientCommandRegistrationCallback.EVENT.register((dispatcher, context) -> dispatcher.register(JOIDCommand.create()));
 	}
 

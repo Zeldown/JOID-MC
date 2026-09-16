@@ -6,7 +6,7 @@ import fr.augma.joidblaze3d.audio.AudioBridge;
 import fr.augma.joidblaze3d.render.RenderBridge;
 import fr.augma.joidblaze3d.screen.ScreenBridge;
 
-public final class JoidBlaze3D {
+public final class JOIDMC {
 
 	public static void register() {
 		JOID.checkVersion(Constants.JOID_VERSION);

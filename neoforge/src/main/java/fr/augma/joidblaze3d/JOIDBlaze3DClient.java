@@ -13,7 +13,7 @@ import net.neoforged.neoforge.common.NeoForge;
 public class JOIDBlaze3DClient {
 
 	public JOIDBlaze3DClient(final IEventBus eventBus) {
-		eventBus.addListener((final FMLClientSetupEvent event) -> event.enqueueWork(JoidBlaze3D::register));
+		eventBus.addListener((final FMLClientSetupEvent event) -> event.enqueueWork(JOIDMC::register));
 		NeoForge.EVENT_BUS.addListener((final RegisterClientCommandsEvent event) -> event.getDispatcher().register(JOIDCommand.create()));
 	}
 
