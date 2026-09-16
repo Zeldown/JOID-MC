@@ -42,7 +42,7 @@ public abstract class JOIDMenuScreen<T extends AbstractContainerMenu> extends Ab
 	protected void init() {
 		super.init();
 		if (ScreenBridge.inst().isOpened(this.ui)) {
-			ScreenBridge.inst().load();
+			ScreenBridge.inst().reload();
 		} else {
 			JOID.open(this.ui);
 		}

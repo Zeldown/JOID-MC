@@ -34,7 +34,7 @@ public class JOIDScreen extends Screen {
 
 	@Override
 	protected void init() {
-		ScreenBridge.inst().load();
+		ScreenBridge.inst().reload();
 	}
 
 	@Override

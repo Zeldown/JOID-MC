@@ -30,7 +30,7 @@
 
 ## Usage
 
-The bridges are registered once, when the client starts, through `JoidBlaze3D.register()`. Open a UI from the client like with any JOID backend:
+The bridges are registered once, when the client starts, through `JOIDMC.register()`. Open a UI from the client like with any JOID backend:
 
 ```java
 JOID.open(new MyUI());
@@ -47,6 +47,17 @@ public class MyMenuScreen extends JOIDMenuScreen<MyMenu> {
 
 }
 ```
+
+A UI is laid out in the JOID design space, stretched to the whole window, so it ignores the Minecraft GUI scale. Annotate it with `@UIMCData` to make it follow the GUI Scale option instead:
+
+```java
+@UIMCData
+public class MyUI extends UI {
+
+}
+```
+
+At the highest GUI scale the UI keeps its full size, and every step down shrinks it by the same ratio as a vanilla screen. Without the annotation, or with `@UIMCData(guiScale = false)`, the UI stays independent of the option.
 
 In game, the `/joid` client command opens the JOID demo chooser.
 

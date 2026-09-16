@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import fr.augma.joidblaze3d.screen.data.UIMCData;
 import org.lwjgl.glfw.GLFW;
 
 import be.zeldown.joid.internal.JOID;
@@ -205,7 +206,7 @@ public final class ScreenBridge extends UIBridge implements IWindowBridge {
 	@Override
 	public void add(final @NonNull UI ui) {
 		super.getUiList().add(ui);
-		ui.load(this.getWidth(), this.getHeight());
+		ui.load(this.getWidth(), this.getHeight(), ScreenBridge.zoom(ui));
 	}
 
 	@Override
@@ -360,6 +361,12 @@ public final class ScreenBridge extends UIBridge implements IWindowBridge {
 		}
 	}
 
+	public void reload() {
+		for (final UI ui : super.getUiList().copy()) {
+			ui.load(this.getWidth(), this.getHeight(), ScreenBridge.zoom(ui));
+		}
+	}
+
 	public void closeAll() {
 		for (final UI ui : super.getUiList().copy()) {
 			ui.properlyClose();
@@ -369,6 +376,16 @@ public final class ScreenBridge extends UIBridge implements IWindowBridge {
 
 	public static @NonNull Key getKey(final int code) {
 		return ScreenBridge.KEY_MAP.getOrDefault(code, Key.UNKNOWN);
+	}
+
+	private static double zoom(final UI ui) {
+		final UIMCData data = ui.getClass().getAnnotation(UIMCData.class);
+		if (data == null || !data.guiScale()) {
+			return 1D;
+		}
+
+		final Minecraft minecraft = Minecraft.getInstance();
+		return minecraft.getWindow().getGuiScale() / (double) minecraft.getWindow().calculateScale(0, minecraft.options.forceUnicodeFont().get());
 	}
 
 	private static boolean isTextKey(final int code) {
