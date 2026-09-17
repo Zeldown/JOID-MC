@@ -37,9 +37,12 @@ import net.minecraft.world.item.ItemStack;
 
 public final class ScreenBridge extends UIBridge implements IWindowBridge {
 
-	private static final Map<Key, Integer> CODE_MAP = new EnumMap<>(Key.class);
-	private static final Map<Integer, Key> KEY_MAP  = new HashMap<>();
-	private static final ScreenBridge      INSTANCE = new ScreenBridge();
+	private static final Map<Key, Integer> CODE_MAP  = new EnumMap<>(Key.class);
+	private static final Map<Integer, Key> KEY_MAP   = new HashMap<>();
+	private static final ScreenBridge      INSTANCE  = new ScreenBridge();
+	private static final int               REFERENCE = 4;
+	private static final double            DEPTH     = -2000D;
+	private static final double            PIPELINE  = 10D;
 
 	static {
 		ScreenBridge.map(Key.A, GLFW.GLFW_KEY_A);
@@ -347,7 +350,7 @@ public final class ScreenBridge extends UIBridge implements IWindowBridge {
 
 		final RenderBridge render = (RenderBridge) BridgeHandler.RENDER.get();
 		render.beginFrame(this.getWidth(), this.getHeight());
-		super.draw();
+		this.draw(render);
 		final GpuTextureView view = render.endFrame();
 
 		final float scale = 1F / Minecraft.getInstance().getWindow().getGuiScale();
@@ -391,6 +394,24 @@ public final class ScreenBridge extends UIBridge implements IWindowBridge {
 		return ScreenBridge.KEY_MAP.getOrDefault(code, Key.UNKNOWN);
 	}
 
+	private void draw(final RenderBridge render) {
+		double depth = ScreenBridge.DEPTH;
+		double level = 0D;
+		for (final UI ui : super.getUiList().copy()) {
+			if (!ui.getData().visible()) {
+				continue;
+			}
+
+			level += ui.getData().zlevel();
+			depth += level;
+			render.pushMatrix();
+			render.translate(0D, 0D, depth);
+			ui.draw(this.getMouseX(), this.getMouseY());
+			render.popMatrix();
+			level += ui.getRenderPipelineLevel() + ScreenBridge.PIPELINE;
+		}
+	}
+
 	private static double zoom(final UI ui) {
 		final UIMCData data = ui.getClass().getAnnotation(UIMCData.class);
 		if (data == null || !data.guiScale()) {
@@ -398,7 +419,9 @@ public final class ScreenBridge extends UIBridge implements IWindowBridge {
 		}
 
 		final Minecraft minecraft = Minecraft.getInstance();
-		return minecraft.getWindow().getGuiScale() / (double) minecraft.getWindow().calculateScale(0, minecraft.options.forceUnicodeFont().get());
+		final int maximum = minecraft.getWindow().calculateScale(0, minecraft.options.forceUnicodeFont().get());
+		final int scale = data.guiScaleLimit() > 0 ? Math.min(minecraft.getWindow().getGuiScale(), data.guiScaleLimit()) : minecraft.getWindow().getGuiScale();
+		return Math.min(1D, scale / (double) Math.min(maximum, ScreenBridge.REFERENCE));
 	}
 
 	private static boolean isTextKey(final int code) {

@@ -13,4 +13,6 @@ public @interface UIMCData {
 
 	public boolean guiScale() default true;
 
+	public int guiScaleLimit() default 0;
+
 }

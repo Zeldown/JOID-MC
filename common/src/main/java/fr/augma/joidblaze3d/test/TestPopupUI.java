@@ -6,9 +6,7 @@ import be.zeldown.joid.lib.ui.core.UI;
 import be.zeldown.joid.lib.ui.core.data.popup.UIDataPopup;
 import be.zeldown.joid.lib.ui.node.impl.design.shape.RectNode;
 import be.zeldown.joid.lib.utils.align.Align;
-import fr.augma.joidblaze3d.screen.data.UIMCData;
 
-@UIMCData
 @UIDataPopup(active = true, transition = UIDataPopup.PopupTransition.IN_OUT)
 public final class TestPopupUI extends UI {
 
