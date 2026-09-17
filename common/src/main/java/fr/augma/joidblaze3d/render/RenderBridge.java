@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 import org.joml.Vector4f;
 
 import be.zeldown.joid.lib.bridge.render.framebuffer.IFrameBuffer;
@@ -25,6 +27,9 @@ import be.zeldown.joid.lib.bridge.render.vertex.DrawMode;
 import be.zeldown.joid.lib.bridge.render.vertex.VertexBuffer;
 import fr.augma.joidblaze3d.Constants;
 import fr.augma.joidblaze3d.render.framebuffer.FrameBuffer;
+import fr.augma.joidblaze3d.render.raster.RasterCell;
+import fr.augma.joidblaze3d.render.raster.Rasterizer;
+import fr.augma.joidblaze3d.render.text.GlyphCapture;
 import fr.augma.joidblaze3d.render.pipeline.PipelineKey;
 import fr.augma.joidblaze3d.render.shader.Shader;
 import fr.augma.joidblaze3d.render.shader.ShaderTranslator;
@@ -57,11 +62,31 @@ import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
+import com.mojang.blaze3d.platform.Lighting;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.font.TextRenderable;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.client.renderer.item.TrackingItemStackRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.util.ARGB;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
 
 public final class RenderBridge extends be.zeldown.joid.lib.bridge.render.RenderBridge {
 
 	private static final int          STAGING_CAPACITY = 1 << 20;
+	private static final BlendState   ITEM_BLEND       = BlendState.create(BlendState.Equation.ADD, BlendState.Factor.ONE, BlendState.Factor.ONE_MINUS_SRC_ALPHA);
+	private static final int          FULL_BRIGHT      = 15728880;
+	private static final float        DEGREE           = (float) Math.PI / 180F;
+	private static final int[]        QUAD_ORDER       = {0, 1, 2, 0, 2, 3};
+	private static final Matrix4f     IDENTITY         = new Matrix4f();
 	private static final VertexFormat VERTEX_FORMAT    = VertexFormat.builder(0)
 			.addAttribute("aPosition", VertexBuffer.POSITION_OFFSET, 12, GpuFormat.RGB32_FLOAT, 1)
 			.addAttribute("aTexCoord", VertexBuffer.TEXTURE_OFFSET, 8, GpuFormat.RG32_FLOAT, 1)
@@ -78,7 +103,12 @@ public final class RenderBridge extends be.zeldown.joid.lib.bridge.render.Render
 	private final List<Operation>                  operationList;
 	private final Texture                          target;
 	private final Texture                          emptyTexture;
+	private final Texture                          itemTexture;
 	private final Shader                           fixedShader;
+	private final TrackingItemStackRenderState     itemState;
+	private final Rasterizer                       rasterizer;
+	private final GlyphCapture                     glyph;
+	private final ByteBuffer                       itemData;
 
 	private ByteBuffer     vertexData;
 	private ByteBuffer     uniformData;
@@ -108,6 +138,11 @@ public final class RenderBridge extends be.zeldown.joid.lib.bridge.render.Render
 		this.pixelData         = RenderBridge.allocate(RenderBridge.STAGING_CAPACITY);
 		this.target            = new Texture(this);
 		this.emptyTexture      = new Texture(this).allocate(1, 1).upload(new int[] {0xFFFFFFFF}, 1, 1);
+		this.itemTexture       = new Texture(this);
+		this.itemState         = new TrackingItemStackRenderState();
+		this.rasterizer        = new Rasterizer();
+		this.glyph             = new GlyphCapture();
+		this.itemData          = RenderBridge.allocate(6 * VertexBuffer.STRIDE);
 		this.fixedShader       = (Shader) this.createShader(ShaderSource.read(ShaderStage.VERTEX, ShaderSource.class.getResourceAsStream("/assets/shaders/fixed/fixed.vsh")), ShaderSource.read(ShaderStage.FRAGMENT, ShaderSource.class.getResourceAsStream("/assets/shaders/fixed/fixed.fsh")), BlendState.DISABLED);
 	}
 
@@ -125,6 +160,7 @@ public final class RenderBridge extends be.zeldown.joid.lib.bridge.render.Render
 			this.stencilCopyView = this.device.createTextureView(this.stencilCopy);
 		}
 
+		this.rasterizer.begin();
 		this.vertexPosition  = 0;
 		this.uniformPosition = 0;
 		this.vertexUploaded  = 0;
@@ -149,6 +185,155 @@ public final class RenderBridge extends be.zeldown.joid.lib.bridge.render.Render
 		this.flush();
 		this.frameActive = false;
 		return this.target.getView();
+	}
+
+	public void item(final @NonNull ItemStack stack, final double x, final double y, final double width, final double height, final boolean durability, final boolean stackCount) {
+		this.requireFrame();
+		final Minecraft minecraft = Minecraft.getInstance();
+		this.itemState.clear();
+		minecraft.getItemModelResolver().updateForTopItem(this.itemState, stack, ItemDisplayContext.GUI, minecraft.level, minecraft.player, 0);
+		if (this.itemState.isEmpty()) {
+			return;
+		}
+
+		final RasterCell cell = this.rasterizer.render(this.itemState.getModelIdentity(), this.getPixelSize(x, y, width, height), this.itemState.usesBlockLight() ? Lighting.Entry.ITEMS_3D : Lighting.Entry.ITEMS_FLAT, (pose, collector, resolution) -> {
+			pose.scale(resolution, -resolution, resolution);
+			this.itemState.submit(pose, collector, RenderBridge.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0);
+		});
+		if (cell == null) {
+			return;
+		}
+
+		this.blit(cell, x, y, width, height);
+		this.decorations(stack, x, y, width, height, durability, stackCount);
+	}
+
+	public void entity(final @NonNull Entity entity, final double x, final double y, final double width, final double height, final double scale, final float yaw, final float pitch, final float rotationYaw, final float rotationPitch, final double overflow, final boolean stencil) {
+		this.requireFrame();
+		final EntityRenderDispatcher dispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
+		final EntityRenderState state = dispatcher.getRenderer(entity).createRenderState(entity, 1F);
+		state.shadowPieces.clear();
+		state.outlineColor = 0;
+		state.lightCoords  = RenderBridge.FULL_BRIGHT;
+		if (state instanceof final LivingEntityRenderState living) {
+			living.bodyRot           = 180F + yaw;
+			living.yRot              = yaw;
+			living.xRot              = pitch;
+			living.boundingBoxWidth  = living.boundingBoxWidth / living.scale;
+			living.boundingBoxHeight = living.boundingBoxHeight / living.scale;
+			living.scale             = 1F;
+		}
+
+		final Quaternionf camera = new Quaternionf().rotateX(-pitch * RenderBridge.DEGREE);
+		final Quaternionf rotation = new Quaternionf().rotateZ((float) Math.PI).mul(camera);
+		final Quaternionf orientation = new Quaternionf().rotateY(rotationYaw * RenderBridge.DEGREE).rotateX(rotationPitch * RenderBridge.DEGREE);
+		final float offset = state.boundingBoxHeight / 2F + 0.0625F;
+		final double frameX = x - width * overflow;
+		final double frameY = y - height * overflow;
+		final double frameWidth = width * (1D + overflow * 2D);
+		final double frameHeight = height * (1D + overflow * 2D);
+		final RasterCell cell = this.rasterizer.render(List.of(entity, width, height, scale, yaw, pitch, rotationYaw, rotationPitch, overflow), this.getPixelSize(frameX, frameY, frameWidth, frameHeight), Lighting.Entry.ENTITY_IN_UI, (pose, collector, resolution) -> {
+			final float factorX = (float) (resolution * scale / frameWidth);
+			final float factorY = (float) (resolution * scale / frameHeight);
+			pose.scale(factorX, factorY, -factorX);
+			pose.translate(0F, offset, 0F);
+			pose.mulPose(orientation);
+			pose.mulPose(rotation);
+			final CameraRenderState cameraState = new CameraRenderState();
+			cameraState.orientation = camera.conjugate(new Quaternionf()).rotateY((float) Math.PI);
+			dispatcher.submit(state, cameraState, 0D, 0D, 0D, pose, collector);
+		});
+		if (cell == null) {
+			return;
+		}
+
+		final RenderState render = super.getState();
+		final boolean stencilTest = render.isStencilTest();
+		render.setStencilTest(stencil && stencilTest);
+		this.blit(cell, frameX, frameY, frameWidth, frameHeight);
+		render.setStencilTest(stencilTest);
+	}
+
+	private void decorations(final ItemStack stack, final double x, final double y, final double width, final double height, final boolean durability, final boolean stackCount) {
+		final double scaleX = width / 16D;
+		final double scaleY = height / 16D;
+		if (durability && stack.isBarVisible()) {
+			this.rect(x + 2D * scaleX, y + 13D * scaleY, 13D * scaleX, 2D * scaleY, 0xFF000000);
+			this.rect(x + 2D * scaleX, y + 13D * scaleY, stack.getBarWidth() * scaleX, scaleY, ARGB.opaque(stack.getBarColor()));
+		}
+
+		if (stackCount && stack.getCount() != 1) {
+			final Font font = Minecraft.getInstance().font;
+			final String count = String.valueOf(stack.getCount());
+			this.text(font, count, x + (17D - font.width(count)) * scaleX, y + 9D * scaleY, scaleX, scaleY);
+		}
+	}
+
+	private void blit(final RasterCell cell, final double x, final double y, final double width, final double height) {
+		final RenderState state = super.getState();
+		final ITexture texture = state.getTexture();
+		final TextureFilter filter = state.getTextureFilter();
+		final BlendState blend = state.getBlend();
+		state.setTexture(this.itemTexture.borrow(cell.getView()));
+		state.setTextureFilter(TextureFilter.LINEAR);
+		state.setBlend(RenderBridge.ITEM_BLEND);
+		this.draw(DrawMode.TRIANGLES, this.itemBuffer(x, y, width, height, cell.getU0(), cell.getV0(), cell.getU1(), cell.getV1()));
+		state.setBlend(blend);
+		state.setTextureFilter(filter);
+		state.setTexture(texture);
+	}
+
+	private void rect(final double x, final double y, final double width, final double height, final int argb) {
+		final int color = RenderBridge.toVertexColor(argb);
+		RenderBridge.itemVertex(this.itemData, 0, x, y, 0F, 0F, color);
+		RenderBridge.itemVertex(this.itemData, 1, x, y + height, 0F, 0F, color);
+		RenderBridge.itemVertex(this.itemData, 2, x + width, y + height, 0F, 0F, color);
+		RenderBridge.itemVertex(this.itemData, 3, x, y, 0F, 0F, color);
+		RenderBridge.itemVertex(this.itemData, 4, x + width, y + height, 0F, 0F, color);
+		RenderBridge.itemVertex(this.itemData, 5, x + width, y, 0F, 0F, color);
+
+		final RenderState state = super.getState();
+		final ITexture texture = state.getTexture();
+		final BlendState blend = state.getBlend();
+		state.setTexture(null);
+		state.setBlend(BlendState.NORMAL);
+		this.draw(DrawMode.TRIANGLES, VertexBuffer.create(this.itemData, 6, true, true, false));
+		state.setBlend(blend);
+		state.setTexture(texture);
+	}
+
+	private void text(final Font font, final String text, final double x, final double y, final double scaleX, final double scaleY) {
+		final RenderState state = super.getState();
+		final ITexture texture = state.getTexture();
+		final BlendState blend = state.getBlend();
+		final TextureFilter filter = state.getTextureFilter();
+		state.setBlend(BlendState.NORMAL);
+		state.setTextureFilter(TextureFilter.NEAREST);
+		font.prepareText(text, 0F, 0F, -1, true, 0).visit(new Font.GlyphVisitor() {
+
+			@Override
+			public void acceptRenderable(final TextRenderable renderable) {
+				RenderBridge.this.glyph.reset();
+				renderable.render(RenderBridge.IDENTITY, RenderBridge.this.glyph, RenderBridge.FULL_BRIGHT, true);
+				state.setTexture(RenderBridge.this.itemTexture.borrow(renderable.textureView()));
+				for (int quad = 0; quad < RenderBridge.this.glyph.getQuadCount(); quad++) {
+					for (int index = 0; index < RenderBridge.QUAD_ORDER.length; index++) {
+						final int vertex = quad * 4 + RenderBridge.QUAD_ORDER[index];
+						RenderBridge.itemVertex(RenderBridge.this.itemData, index, x + RenderBridge.this.glyph.getX(vertex) * scaleX, y + RenderBridge.this.glyph.getY(vertex) * scaleY, RenderBridge.this.glyph.getU(vertex), RenderBridge.this.glyph.getV(vertex), RenderBridge.this.glyph.getColor(vertex));
+					}
+
+					RenderBridge.this.draw(DrawMode.TRIANGLES, VertexBuffer.create(RenderBridge.this.itemData, 6, true, true, false));
+				}
+			}
+
+		});
+		state.setTextureFilter(filter);
+		state.setBlend(blend);
+		state.setTexture(texture);
+	}
+
+	private static int toVertexColor(final int argb) {
+		return ARGB.red(argb) | ARGB.green(argb) << 8 | ARGB.blue(argb) << 16 | ARGB.alpha(argb) << 24;
 	}
 
 	@Override
@@ -431,6 +616,50 @@ public final class RenderBridge extends be.zeldown.joid.lib.bridge.render.Render
 		this.stencilTexture.close();
 		this.stencilCopyView.close();
 		this.stencilCopy.close();
+	}
+
+	private double getPixelSize(final double x, final double y, final double width, final double height) {
+		final float[] modelView = super.getModelView().getMatrix();
+		final float[] projection = super.getProjection().getMatrix();
+		final float[] first = RenderBridge.project(modelView, projection, (float) x, (float) y);
+		final float[] second = RenderBridge.project(modelView, projection, (float) (x + width), (float) (y + height));
+		final RenderState state = super.getState();
+		return Math.max(Math.abs(second[0] - first[0]) * state.getViewportWidth(), Math.abs(second[1] - first[1]) * state.getViewportHeight()) / 2D;
+	}
+
+	private static float[] project(final float[] modelView, final float[] projection, final float x, final float y) {
+		final float viewX = modelView[0] * x + modelView[4] * y + modelView[12];
+		final float viewY = modelView[1] * x + modelView[5] * y + modelView[13];
+		final float viewZ = modelView[2] * x + modelView[6] * y + modelView[14];
+		final float viewW = modelView[3] * x + modelView[7] * y + modelView[15];
+		final float clipX = projection[0] * viewX + projection[4] * viewY + projection[8] * viewZ + projection[12] * viewW;
+		final float clipY = projection[1] * viewX + projection[5] * viewY + projection[9] * viewZ + projection[13] * viewW;
+		final float clipW = projection[3] * viewX + projection[7] * viewY + projection[11] * viewZ + projection[15] * viewW;
+		return new float[] {clipX / clipW, clipY / clipW};
+	}
+
+	private VertexBuffer itemBuffer(final double x, final double y, final double width, final double height, final float u0, final float v0, final float u1, final float v1) {
+		RenderBridge.itemVertex(this.itemData, 0, x, y, u0, v0);
+		RenderBridge.itemVertex(this.itemData, 1, x, y + height, u0, v1);
+		RenderBridge.itemVertex(this.itemData, 2, x + width, y + height, u1, v1);
+		RenderBridge.itemVertex(this.itemData, 3, x, y, u0, v0);
+		RenderBridge.itemVertex(this.itemData, 4, x + width, y + height, u1, v1);
+		RenderBridge.itemVertex(this.itemData, 5, x + width, y, u1, v0);
+		return VertexBuffer.create(this.itemData, 6, true, false, false);
+	}
+
+	private static void itemVertex(final ByteBuffer buffer, final int index, final double x, final double y, final float u, final float v) {
+		final int offset = index * VertexBuffer.STRIDE;
+		buffer.putFloat(offset + VertexBuffer.POSITION_OFFSET, (float) x);
+		buffer.putFloat(offset + VertexBuffer.POSITION_OFFSET + 4, (float) y);
+		buffer.putFloat(offset + VertexBuffer.POSITION_OFFSET + 8, 0F);
+		buffer.putFloat(offset + VertexBuffer.TEXTURE_OFFSET, u);
+		buffer.putFloat(offset + VertexBuffer.TEXTURE_OFFSET + 4, v);
+	}
+
+	private static void itemVertex(final ByteBuffer buffer, final int index, final double x, final double y, final float u, final float v, final int color) {
+		RenderBridge.itemVertex(buffer, index, x, y, u, v);
+		buffer.putInt(index * VertexBuffer.STRIDE + VertexBuffer.COLOR_OFFSET, color);
 	}
 
 	private void requireFrame() {

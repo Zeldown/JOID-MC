@@ -39,6 +39,14 @@ public final class Texture implements ITexture {
 		return this;
 	}
 
+	public @NonNull Texture borrow(final @NonNull GpuTextureView view) {
+		this.release();
+		this.view   = view;
+		this.width  = view.getWidth(0);
+		this.height = view.getHeight(0);
+		return this;
+	}
+
 	@Override
 	public @NonNull Texture upload(final @NonNull int[] pixels, final int width, final int height) {
 		this.bridge.upload(this.texture, pixels, width, height);
