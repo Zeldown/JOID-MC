@@ -14,7 +14,7 @@ public final class JOIDMC {
 		BridgeHandler.WINDOW.register(ScreenBridge.inst());
 		BridgeHandler.RENDER.register(new RenderBridge());
 		BridgeHandler.UI.register(ScreenBridge.inst());
-		JOID.inst().setDevMode(dev).setDemoMode(true).load();
+		JOID.inst().setDevMode(dev).load();
 	}
 
 }
