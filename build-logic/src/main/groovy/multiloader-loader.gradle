@@ -35,7 +35,7 @@ dependencies {
     commonJava(project(path: ':common', configuration: 'commonJava'))
     commonResources(project(path: ':common', configuration: 'commonResources'))
     javacv("org.bytedeco:javacv:${javacv_version}")
-    shade(files(rootProject.file("libs/joid-core-${joid_core_version}-dev.jar")))
+    shade(files(rootProject.file("libs/joid-core-${joid_core_version}-prod.jar")))
     shade("javax.vecmath:vecmath:${vecmath_version}")
     shade(files(javacvJar))
     shade("org.bytedeco:javacpp:${javacv_version}")
