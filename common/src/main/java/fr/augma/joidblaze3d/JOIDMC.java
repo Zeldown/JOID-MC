@@ -8,13 +8,13 @@ import fr.augma.joidblaze3d.screen.ScreenBridge;
 
 public final class JOIDMC {
 
-	public static void register() {
+	public static void register(final boolean dev) {
 		JOID.checkVersion(Constants.JOID_VERSION);
 		BridgeHandler.AUDIO.register(new AudioBridge());
 		BridgeHandler.WINDOW.register(ScreenBridge.inst());
 		BridgeHandler.RENDER.register(new RenderBridge());
 		BridgeHandler.UI.register(ScreenBridge.inst());
-		JOID.inst().setDemoMode(true).load();
+		JOID.inst().setDevMode(dev).setDemoMode(true).load();
 	}
 
 }

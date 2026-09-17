@@ -6,6 +6,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.common.NeoForge;
 
@@ -13,7 +14,7 @@ import net.neoforged.neoforge.common.NeoForge;
 public class JOIDBlaze3DClient {
 
 	public JOIDBlaze3DClient(final IEventBus eventBus) {
-		eventBus.addListener((final FMLClientSetupEvent event) -> event.enqueueWork(JOIDMC::register));
+		eventBus.addListener((final FMLClientSetupEvent event) -> event.enqueueWork(() -> JOIDMC.register(!FMLLoader.getCurrent().isProduction())));
 		NeoForge.EVENT_BUS.addListener((final RegisterClientCommandsEvent event) -> event.getDispatcher().register(JOIDCommand.create()));
 	}
 
