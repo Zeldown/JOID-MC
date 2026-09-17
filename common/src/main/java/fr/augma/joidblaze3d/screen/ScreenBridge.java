@@ -33,6 +33,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 
 public final class ScreenBridge extends UIBridge implements IWindowBridge {
 
@@ -164,6 +165,7 @@ public final class ScreenBridge extends UIBridge implements IWindowBridge {
 	@Getter @Setter private Screen host;
 
 	private List<String> hoverList;
+	private ItemStack    hoverStack;
 	private ClickType    clickType;
 	private long         pressTime;
 	private Key          pendingKey;
@@ -354,11 +356,22 @@ public final class ScreenBridge extends UIBridge implements IWindowBridge {
 		graphics.blit(view, RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST), 0, 0, view.getWidth(0), view.getHeight(0), 0F, 1F, 1F, 0F);
 		graphics.pose().popMatrix();
 
+		final ItemStack hoverStack = this.hoverStack;
+		this.hoverStack = null;
+		if (hoverStack != null) {
+			graphics.setTooltipForNextFrame(Minecraft.getInstance().font, hoverStack, mouseX, mouseY);
+			return;
+		}
+
 		final List<String> hoverList = this.hoverList;
 		this.hoverList = null;
 		if (hoverList != null && !hoverList.isEmpty()) {
 			graphics.setComponentTooltipForNextFrame(Minecraft.getInstance().font, hoverList.stream().<Component>map(Component::literal).collect(Collectors.toList()), mouseX, mouseY);
 		}
+	}
+
+	public void drawHover(final @NonNull ItemStack stack) {
+		this.hoverStack = stack;
 	}
 
 	public void reload() {
