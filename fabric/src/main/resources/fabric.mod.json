@@ -13,7 +13,7 @@
     },
     "license": "${license}",
     "icon": "${mod_id}.png",
-    "environment": "client",
+    "environment": "*",
     "entrypoints": {
         "client": [
             "fr.augma.joidblaze3d.JOIDBlaze3DClient"
