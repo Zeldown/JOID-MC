@@ -1,12 +1,14 @@
 package fr.augma.joidblaze3d.test;
 
 import be.zeldown.joid.lib.color.Color;
+import be.zeldown.joid.lib.resource.Resource;
 import be.zeldown.joid.lib.ui.core.UI;
 import be.zeldown.joid.lib.ui.core.data.debug.UIDataDebug;
 import be.zeldown.joid.lib.ui.node.Node;
 import be.zeldown.joid.lib.ui.node.impl.design.shape.RectNode;
 import be.zeldown.joid.lib.ui.node.impl.structure.flex.FlexNode;
 import be.zeldown.joid.lib.ui.node.impl.structure.grid.GridNode;
+import be.zeldown.joid.lib.ui.node.property.overflow.OverflowProperty;
 import be.zeldown.joid.lib.utils.align.Align;
 import lombok.Getter;
 import fr.augma.joidblaze3d.screen.data.UIMCData;
@@ -55,6 +57,7 @@ public final class TestMenuUI extends UI {
 			RectNode
 			.create(120, 32, 180, 280)
 			.color(Color.BLACK.copyAlpha(0.6F))
+			.overflow(OverflowProperty.HIDDEN)
 			.body(entityContainer -> {
 				final double width = 120D;
 				final double height = 220D;
@@ -106,6 +109,7 @@ public final class TestMenuUI extends UI {
 	private Node slot(final int index) {
 		return SlotNode
 		.create(this.menu.getSlot(index), 0, 0, TestMenuUI.CELL)
+		.placeholder(Resource.of("https://placehold.co/400x400.png"))
 		.body(slot -> {
 			RectNode
 			.create(0, 0, TestMenuUI.CELL, TestMenuUI.CELL)
