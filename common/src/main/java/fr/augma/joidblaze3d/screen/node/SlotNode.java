@@ -24,12 +24,14 @@ public class SlotNode extends Node {
 
 	@Getter private boolean durability;
 	@Getter private boolean stackCount;
+	@Getter private boolean cooldown;
 
 	protected SlotNode(final Slot slot, final double x, final double y, final double size) {
 		super(x, y, size, size);
 		this.slot       = slot;
 		this.durability = true;
 		this.stackCount = true;
+		this.cooldown   = true;
 	}
 
 	public static @NonNull SlotNode create(final @NonNull Slot slot, final double x, final double y, final double size) {
@@ -49,7 +51,7 @@ public class SlotNode extends Node {
 
 		final ItemStack stack = screen.getRenderStack(this.slot);
 		if (!stack.isEmpty()) {
-			MCDrawUtils.ITEM.drawItem(stack, super.getX(), super.getY(), super.getWidth(), super.getHeight(), this.durability, this.stackCount);
+			MCDrawUtils.ITEM.drawItem(stack, super.getX(), super.getY(), super.getWidth(), super.getHeight(), Color.WHITE, this.durability, this.stackCount, this.cooldown, null);
 		}
 
 		if (super.isHovered(mouseX, mouseY, true)) {
@@ -64,6 +66,11 @@ public class SlotNode extends Node {
 
 	public final <T extends SlotNode> @NonNull T stackCount(final boolean stackCount) {
 		this.stackCount = stackCount;
+		return (T) this;
+	}
+
+	public final <T extends SlotNode> @NonNull T cooldown(final boolean cooldown) {
+		this.cooldown = cooldown;
 		return (T) this;
 	}
 

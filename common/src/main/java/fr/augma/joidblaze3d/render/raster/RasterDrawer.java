@@ -6,6 +6,6 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 
 public interface RasterDrawer {
 
-	public void draw(PoseStack pose, SubmitNodeCollector collector, int resolution);
+	public void draw(PoseStack pose, SubmitNodeCollector collector);
 
 }

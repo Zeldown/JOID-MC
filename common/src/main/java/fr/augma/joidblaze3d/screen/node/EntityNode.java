@@ -25,9 +25,7 @@ public class EntityNode extends Node {
 	private double rotationYaw;
 	private double rotationPitch;
 
-	private double  outset;
 	private boolean followMouse;
-	private boolean stencil;
 	private float   yaw;
 	private float   pitch;
 
@@ -35,9 +33,7 @@ public class EntityNode extends Node {
 		super(x, y, width, height);
 
 		this.size        = 1D;
-		this.outset      = 0.25D;
 		this.followMouse = false;
-		this.stencil     = true;
 	}
 
 	public static @NonNull EntityNode create(final double x, final double y, final double size) {
@@ -69,7 +65,7 @@ public class EntityNode extends Node {
 			pitch = (float) (Math.atan((mouseY - super.getAbsoluteY() - super.getHeight() / 2D) / (super.getHeight() * EntityNode.REFERENCE)) * EntityNode.AMPLITUDE);
 		}
 
-		MCDrawUtils.ENTITY.drawEntity(entity, super.getX() + this.xOffset, super.getY() + this.yOffset, super.getWidth(), super.getHeight(), scale, yaw, pitch, (float) this.rotationYaw, (float) this.rotationPitch, this.outset, this.stencil);
+		MCDrawUtils.ENTITY.drawEntity(entity, super.getX() + this.xOffset, super.getY() + this.yOffset, super.getWidth(), super.getHeight(), scale, yaw, pitch, (float) this.rotationYaw, (float) this.rotationPitch);
 	}
 
 	public final Entity getEntityInstance() {
@@ -107,16 +103,6 @@ public class EntityNode extends Node {
 
 	public <T extends EntityNode> @NonNull T rotationPitch(final double rotationPitch) {
 		this.rotationPitch = rotationPitch;
-		return (T) this;
-	}
-
-	public final <T extends EntityNode> @NonNull T outset(final double outset) {
-		this.outset = outset;
-		return (T) this;
-	}
-
-	public final <T extends EntityNode> @NonNull T stencil(final boolean stencil) {
-		this.stencil = stencil;
 		return (T) this;
 	}
 
