@@ -84,6 +84,7 @@ public final class OverlayHandler {
 			ScreenMouseEvents.allowMouseDrag(screen).register((current, event, horizontal, vertical) -> !OverlayBridge.inst().mouseDragged());
 			ScreenMouseEvents.allowMouseScroll(screen).register((current, mouseX, mouseY, horizontal, vertical) -> !OverlayBridge.inst().mouseScrolled(vertical));
 			ScreenKeyboardEvents.allowKeyPress(screen).register((current, event) -> !OverlayBridge.inst().keyPressed(event.key()));
+			ScreenKeyboardEvents.allowCharType(screen).register((current, event) -> !OverlayBridge.inst().charTyped(event.codepoint()));
 		});
 	}
 
