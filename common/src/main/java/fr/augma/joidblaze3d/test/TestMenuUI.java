@@ -109,7 +109,7 @@ public final class TestMenuUI extends UI {
 	private Node slot(final int index) {
 		return SlotNode
 		.create(this.menu.getSlot(index), 0, 0, TestMenuUI.CELL)
-		.placeholder(Resource.of("https://placehold.co/400x400.png"))
+		.placeholder(Resource.of("https://placehold.co/40x40.png"))
 		.body(slot -> {
 			RectNode
 			.create(0, 0, TestMenuUI.CELL, TestMenuUI.CELL)
