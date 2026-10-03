@@ -1,11 +1,14 @@
 package fr.augma.joidblaze3d;
 
 import fr.augma.joidblaze3d.command.JOIDCommand;
+import fr.augma.joidblaze3d.render.resource.MCResourceResolver;
 
+import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.common.NeoForge;
@@ -18,6 +21,7 @@ public class JOIDBlaze3DClient {
 	public JOIDBlaze3DClient(final IEventBus eventBus) {
 		NeoForge.EVENT_BUS.addListener((final ClientTickEvent.Post event) -> JOIDBlaze3DClient.register());
 		NeoForge.EVENT_BUS.addListener((final RegisterClientCommandsEvent event) -> event.getDispatcher().register(JOIDCommand.create()));
+		eventBus.addListener((final AddClientReloadListenersEvent event) -> event.addListener(Identifier.fromNamespaceAndPath(Constants.MOD_ID, "resources"), MCResourceResolver.inst()));
 		OverlayHandler.register();
 	}
 

@@ -2,8 +2,10 @@ package fr.augma.joidblaze3d;
 
 import be.zeldown.joid.internal.JOID;
 import be.zeldown.joid.lib.bridge.BridgeHandler;
+import be.zeldown.joid.lib.resource.dto.resolver.ResourceResolver;
 import fr.augma.joidblaze3d.audio.AudioBridge;
 import fr.augma.joidblaze3d.render.RenderBridge;
+import fr.augma.joidblaze3d.render.resource.MCResourceResolver;
 import fr.augma.joidblaze3d.screen.ScreenBridge;
 import fr.augma.joidblaze3d.screen.overlay.OverlayBridge;
 
@@ -16,6 +18,7 @@ public final class JOIDMC {
 		BridgeHandler.RENDER.register(new RenderBridge());
 		BridgeHandler.UI.register(OverlayBridge.inst());
 		BridgeHandler.UI.register(ScreenBridge.inst());
+		ResourceResolver.register(MCResourceResolver.inst());
 		JOID.inst().setDevMode(dev).load();
 	}
 
