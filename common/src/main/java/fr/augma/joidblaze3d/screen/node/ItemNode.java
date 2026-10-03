@@ -5,7 +5,7 @@ import java.util.function.Supplier;
 import be.zeldown.joid.lib.color.Color;
 import be.zeldown.joid.lib.ui.node.Node;
 import fr.augma.joidblaze3d.draw.MCDrawUtils;
-import fr.augma.joidblaze3d.screen.ScreenBridge;
+import fr.augma.joidblaze3d.screen.MCUIBridge;
 import lombok.Getter;
 import lombok.NonNull;
 
@@ -52,7 +52,7 @@ public class ItemNode extends Node {
 
 		MCDrawUtils.ITEM.drawItem(stack, super.getX(), super.getY(), super.getWidth(), super.getHeight(), this.color, this.durability, this.stackCount, this.cooldown, this.text);
 		if (this.tooltip && super.isHovered(mouseX, mouseY, true)) {
-			ScreenBridge.inst().drawHover(stack);
+			((MCUIBridge) super.getUi().getBridge()).drawHover(stack);
 		}
 	}
 

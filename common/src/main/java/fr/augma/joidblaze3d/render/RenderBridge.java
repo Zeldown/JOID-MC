@@ -106,7 +106,7 @@ public final class RenderBridge extends be.zeldown.joid.lib.bridge.render.Render
 	private final Map<PipelineKey, RenderPipeline> pipelineMap;
 	private final List<Operation>                  operationList;
 	private final List<ScreenRectangle>            regionList;
-	private final Texture                          target;
+	private final List<Texture>                    targetList;
 	private final Texture                          emptyTexture;
 	private final Texture                          itemTexture;
 	private final Shader                           fixedShader;
@@ -128,6 +128,9 @@ public final class RenderBridge extends be.zeldown.joid.lib.bridge.render.Render
 	private GpuTextureView stencilView;
 	private GpuTexture     stencilCopy;
 	private GpuTextureView stencilCopyView;
+	private Texture        target;
+	private int            targetIndex;
+	private long           frameTime;
 	private boolean        frameActive;
 
 	public RenderBridge() {
@@ -142,7 +145,7 @@ public final class RenderBridge extends be.zeldown.joid.lib.bridge.render.Render
 		this.vertexData        = RenderBridge.allocate(RenderBridge.STAGING_CAPACITY);
 		this.uniformData       = RenderBridge.allocate(RenderBridge.STAGING_CAPACITY);
 		this.pixelData         = RenderBridge.allocate(RenderBridge.STAGING_CAPACITY);
-		this.target            = new Texture(this);
+		this.targetList        = new ArrayList<>();
 		this.emptyTexture      = new Texture(this).allocate(1, 1).upload(new int[] {0xFFFFFFFF}, 1, 1);
 		this.itemTexture       = new Texture(this);
 		this.itemState         = new TrackingItemStackRenderState();
@@ -157,7 +160,17 @@ public final class RenderBridge extends be.zeldown.joid.lib.bridge.render.Render
 			throw new IllegalStateException("The JOID frame has already begun");
 		}
 
-		this.target.allocate(width, height);
+		final long frameTime = Minecraft.getInstance().getFrameTimeNs();
+		if (frameTime != this.frameTime) {
+			this.frameTime   = frameTime;
+			this.targetIndex = 0;
+		}
+
+		if (this.targetIndex == this.targetList.size()) {
+			this.targetList.add(new Texture(this));
+		}
+
+		this.target = this.targetList.get(this.targetIndex++).allocate(width, height);
 		if (this.stencilTexture == null || this.stencilTexture.getWidth(0) != width || this.stencilTexture.getHeight(0) != height) {
 			this.releaseStencil();
 			this.stencilTexture  = this.createStencil("JOID Stencil", width, height);
@@ -262,6 +275,11 @@ public final class RenderBridge extends be.zeldown.joid.lib.bridge.render.Render
 		this.composite(view, region, viewportWidth, viewportHeight, Color.WHITE);
 	}
 
+	public void text(final @NonNull String text, final double x, final double y, final double scale, final int color, final boolean shadow) {
+		this.requireFrame();
+		this.text(Minecraft.getInstance().font, text, x, y, scale, scale, color, shadow);
+	}
+
 	private void decorations(final ItemStack stack, final double x, final double y, final double width, final double height, final boolean durability, final boolean stackCount, final boolean cooldown, final String text) {
 		final double scaleX = width / 16D;
 		final double scaleY = height / 16D;
@@ -284,7 +302,7 @@ public final class RenderBridge extends be.zeldown.joid.lib.bridge.render.Render
 		if (stackCount && (stack.getCount() != 1 || text != null)) {
 			final Font font = Minecraft.getInstance().font;
 			final String count = text == null ? String.valueOf(stack.getCount()) : text;
-			this.text(font, count, x + (17D - font.width(count)) * scaleX, y + 9D * scaleY, scaleX, scaleY);
+			this.text(font, count, x + (17D - font.width(count)) * scaleX, y + 9D * scaleY, scaleX, scaleY, -1, true);
 		}
 	}
 
@@ -334,14 +352,14 @@ public final class RenderBridge extends be.zeldown.joid.lib.bridge.render.Render
 		state.setTexture(texture);
 	}
 
-	private void text(final Font font, final String text, final double x, final double y, final double scaleX, final double scaleY) {
+	private void text(final Font font, final String text, final double x, final double y, final double scaleX, final double scaleY, final int color, final boolean shadow) {
 		final RenderState state = super.getState();
 		final ITexture texture = state.getTexture();
 		final BlendState blend = state.getBlend();
 		final TextureFilter filter = state.getTextureFilter();
 		state.setBlend(BlendState.NORMAL);
 		state.setTextureFilter(TextureFilter.NEAREST);
-		font.prepareText(text, 0F, 0F, -1, true, 0).visit(new Font.GlyphVisitor() {
+		font.prepareText(text, 0F, 0F, color, shadow, 0).visit(new Font.GlyphVisitor() {
 
 			@Override
 			public void acceptRenderable(final TextRenderable renderable) {

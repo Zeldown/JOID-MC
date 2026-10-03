@@ -5,6 +5,7 @@ import be.zeldown.joid.lib.bridge.BridgeHandler;
 import fr.augma.joidblaze3d.audio.AudioBridge;
 import fr.augma.joidblaze3d.render.RenderBridge;
 import fr.augma.joidblaze3d.screen.ScreenBridge;
+import fr.augma.joidblaze3d.screen.overlay.OverlayBridge;
 
 public final class JOIDMC {
 
@@ -13,6 +14,7 @@ public final class JOIDMC {
 		BridgeHandler.AUDIO.register(new AudioBridge());
 		BridgeHandler.WINDOW.register(ScreenBridge.inst());
 		BridgeHandler.RENDER.register(new RenderBridge());
+		BridgeHandler.UI.register(OverlayBridge.inst());
 		BridgeHandler.UI.register(ScreenBridge.inst());
 		JOID.inst().setDevMode(dev).load();
 	}

@@ -1,48 +1,34 @@
 package fr.augma.joidblaze3d.screen;
 
-import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import fr.augma.joidblaze3d.screen.data.UIMCData;
 import org.lwjgl.glfw.GLFW;
 
 import be.zeldown.joid.internal.JOID;
-import be.zeldown.joid.lib.bridge.BridgeHandler;
 import be.zeldown.joid.lib.bridge.ui.IUIBridge;
-import be.zeldown.joid.lib.bridge.ui.UIBridge;
 import be.zeldown.joid.lib.bridge.window.IWindowBridge;
 import be.zeldown.joid.lib.ui.core.UI;
 import be.zeldown.joid.lib.utils.click.ClickType;
 import be.zeldown.joid.lib.utils.key.Key;
-import fr.augma.joidblaze3d.render.RenderBridge;
+import fr.augma.joidblaze3d.screen.overlay.OverlayBridge;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.FilterMode;
-import com.mojang.blaze3d.textures.GpuTextureView;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.ItemStack;
 
-public final class ScreenBridge extends UIBridge implements IWindowBridge {
+public final class ScreenBridge extends MCUIBridge implements IWindowBridge {
 
-	private static final Map<Key, Integer> CODE_MAP  = new EnumMap<>(Key.class);
-	private static final Map<Integer, Key> KEY_MAP   = new HashMap<>();
-	private static final ScreenBridge      INSTANCE  = new ScreenBridge();
-	private static final int               REFERENCE = 4;
-	private static final double            DEPTH     = -2000D;
-	private static final double            PIPELINE  = 10D;
+	private static final Map<Key, Integer> CODE_MAP = new EnumMap<>(Key.class);
+	private static final Map<Integer, Key> KEY_MAP  = new HashMap<>();
+	private static final ScreenBridge      INSTANCE = new ScreenBridge();
 
 	static {
 		ScreenBridge.map(Key.A, GLFW.GLFW_KEY_A);
@@ -167,11 +153,9 @@ public final class ScreenBridge extends UIBridge implements IWindowBridge {
 
 	@Getter @Setter private Screen host;
 
-	private List<String> hoverList;
-	private ItemStack    hoverStack;
-	private ClickType    clickType;
-	private long         pressTime;
-	private Key          pendingKey;
+	private ClickType clickType;
+	private long      pressTime;
+	private Key       pendingKey;
 
 	private ScreenBridge() {}
 
@@ -211,17 +195,12 @@ public final class ScreenBridge extends UIBridge implements IWindowBridge {
 	@Override
 	public void add(final @NonNull UI ui) {
 		super.getUiList().add(ui);
-		ui.load(this.getWidth(), this.getHeight(), ScreenBridge.zoom(ui));
+		ui.load(this.getWidth(), this.getHeight(), MCUIBridge.zoom(ui));
 	}
 
 	@Override
 	public void remove(final @NonNull UI ui) {
 		super.getUiList().remove(ui);
-	}
-
-	@Override
-	public void drawHover(final @NonNull UI ui, final @NonNull List<@NonNull String> lines, final double mouseX, final double mouseY) {
-		this.hoverList = new ArrayList<>(lines);
 	}
 
 	@Override
@@ -234,12 +213,12 @@ public final class ScreenBridge extends UIBridge implements IWindowBridge {
 
 	@Override
 	public boolean canHandle(final @NonNull Class<? extends UI> ui) {
-		return true;
+		return !OverlayBridge.inst().canHandle(ui);
 	}
 
 	@Override
 	public boolean canHandle(final @NonNull UI ui) {
-		return true;
+		return !OverlayBridge.inst().canHandle(ui);
 	}
 
 	@Override
@@ -347,39 +326,12 @@ public final class ScreenBridge extends UIBridge implements IWindowBridge {
 	public void render(final @NonNull GuiGraphicsExtractor graphics, final int mouseX, final int mouseY) {
 		this.flushKey();
 		super.update();
-
-		final RenderBridge render = (RenderBridge) BridgeHandler.RENDER.get();
-		render.beginFrame(this.getWidth(), this.getHeight());
-		this.draw(render);
-		final GpuTextureView view = render.endFrame();
-
-		final float scale = 1F / Minecraft.getInstance().getWindow().getGuiScale();
-		graphics.pose().pushMatrix();
-		graphics.pose().scale(scale, scale);
-		graphics.blit(view, RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST), 0, 0, view.getWidth(0), view.getHeight(0), 0F, 1F, 1F, 0F);
-		graphics.pose().popMatrix();
-
-		final ItemStack hoverStack = this.hoverStack;
-		this.hoverStack = null;
-		if (hoverStack != null) {
-			graphics.setTooltipForNextFrame(Minecraft.getInstance().font, hoverStack, mouseX, mouseY);
-			return;
-		}
-
-		final List<String> hoverList = this.hoverList;
-		this.hoverList = null;
-		if (hoverList != null && !hoverList.isEmpty()) {
-			graphics.setComponentTooltipForNextFrame(Minecraft.getInstance().font, hoverList.stream().<Component>map(Component::literal).collect(Collectors.toList()), mouseX, mouseY);
-		}
-	}
-
-	public void drawHover(final @NonNull ItemStack stack) {
-		this.hoverStack = stack;
+		super.extract(graphics, super.getUiList().copy().ordered(), mouseX, mouseY);
 	}
 
 	public void reload() {
 		for (final UI ui : super.getUiList().copy()) {
-			ui.load(this.getWidth(), this.getHeight(), ScreenBridge.zoom(ui));
+			ui.load(this.getWidth(), this.getHeight(), MCUIBridge.zoom(ui));
 		}
 	}
 
@@ -392,36 +344,6 @@ public final class ScreenBridge extends UIBridge implements IWindowBridge {
 
 	public static @NonNull Key getKey(final int code) {
 		return ScreenBridge.KEY_MAP.getOrDefault(code, Key.UNKNOWN);
-	}
-
-	private void draw(final RenderBridge render) {
-		double depth = ScreenBridge.DEPTH;
-		double level = 0D;
-		for (final UI ui : super.getUiList().copy()) {
-			if (!ui.getData().visible()) {
-				continue;
-			}
-
-			level += ui.getData().zlevel();
-			depth += level;
-			render.pushMatrix();
-			render.translate(0D, 0D, depth);
-			ui.draw(this.getMouseX(), this.getMouseY());
-			render.popMatrix();
-			level += ui.getRenderPipelineLevel() + ScreenBridge.PIPELINE;
-		}
-	}
-
-	private static double zoom(final UI ui) {
-		final UIMCData data = ui.getClass().getAnnotation(UIMCData.class);
-		if (data == null || !data.guiScale()) {
-			return 1D;
-		}
-
-		final Minecraft minecraft = Minecraft.getInstance();
-		final int maximum = minecraft.getWindow().calculateScale(0, minecraft.options.forceUnicodeFont().get());
-		final int scale = data.guiScaleLimit() > 0 ? Math.min(minecraft.getWindow().getGuiScale(), data.guiScaleLimit()) : minecraft.getWindow().getGuiScale();
-		return Math.min(1D, scale / (double) Math.min(maximum, ScreenBridge.REFERENCE));
 	}
 
 	private static boolean isTextKey(final int code) {
