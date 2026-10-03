@@ -9,9 +9,17 @@ import fr.augma.joidblaze3d.screen.data.overlay.render.ElementType;
 import fr.augma.joidblaze3d.screen.overlay.OverlayBridge;
 import fr.augma.joidblaze3d.screen.overlay.OverlayLayerMap;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.Hud;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.client.event.AddGuiOverlayLayersEvent;
 import net.minecraftforge.client.event.ScreenEvent;
+import net.minecraftforge.client.gui.overlay.ForgeLayer;
 import net.minecraftforge.client.gui.overlay.ForgeLayeredDraw;
 
 public final class OverlayHandler {
@@ -65,10 +73,71 @@ public final class OverlayHandler {
 			draw.addAbove(OverlayHandler.getStack(last), OverlayHandler.getIdentifier(type, true), last, (graphics, delta) -> OverlayBridge.inst().extract(graphics, type, true, false));
 		}
 
+		OverlayHandler.splitHealthBar(draw);
 		for (final Map.Entry<Identifier, List<Identifier>> entry : OverlayHandler.STACK_MAP.entrySet()) {
 			for (final Identifier layer : entry.getValue()) {
 				draw.addConditionTo(entry.getKey(), layer, () -> !OverlayHandler.LAYER_MAP.isCancelled(layer));
 			}
+		}
+	}
+
+	private static void splitHealthBar(final ForgeLayeredDraw draw) {
+		final ForgeLayeredDraw hotbar = draw.getChild(ForgeLayeredDraw.HOTBAR_AND_DECOS);
+		final ForgeLayer layer = hotbar == null ? null : hotbar.getLayer(ForgeLayeredDraw.HEALTH_BAR);
+		if (layer == null) {
+			return;
+		}
+
+		draw.replace(ForgeLayeredDraw.HOTBAR_AND_DECOS, ForgeLayeredDraw.HEALTH_BAR, (graphics, delta) -> {
+			if (OverlayHandler.isSplit()) {
+				OverlayHandler.extractHealthBar(graphics);
+				return;
+			}
+
+			layer.extract(graphics, delta);
+		});
+	}
+
+	private static boolean isSplit() {
+		return OverlayBridge.inst().isCancelled(ElementType.ARMOR) || OverlayBridge.inst().isCancelled(ElementType.HEALTH) || OverlayBridge.inst().isCancelled(ElementType.FOOD) || OverlayBridge.inst().isCancelled(ElementType.AIR);
+	}
+
+	private static void extractHealthBar(final GuiGraphicsExtractor graphics) {
+		final Hud hud = Minecraft.getInstance().gui.hud;
+		final Player player = hud.getCameraPlayer();
+		if (player == null) {
+			return;
+		}
+
+		final int health = Mth.ceil(player.getHealth());
+		final int absorption = Mth.ceil(player.getAbsorptionAmount());
+		final float maximum = Math.max((float) player.getAttributeValue(Attributes.MAX_HEALTH), health);
+		final int rows = Mth.ceil((maximum + absorption) / 2F / 10F);
+		final int rowHeight = Math.max(10 - (rows - 2), 3);
+		final int left = graphics.guiWidth() / 2 - 91;
+		final int right = graphics.guiWidth() / 2 + 91;
+		final int line = graphics.guiHeight() - 39;
+		final int offset = player.hasEffect(MobEffects.REGENERATION) ? hud.getGuiTicks() % Mth.ceil(maximum + 5F) : -1;
+		final int mount = hud.getVehicleMaxHearts(hud.getPlayerVehicleWithHealth());
+		int air = line - 10;
+		if (!OverlayBridge.inst().isCancelled(ElementType.ARMOR)) {
+			Hud.extractArmor(graphics, player, line, rows, rowHeight, left);
+		}
+
+		if (!OverlayBridge.inst().isCancelled(ElementType.HEALTH)) {
+			hud.extractHearts(graphics, player, left, line, rowHeight, offset, maximum, health, health, absorption, false);
+		}
+
+		if (mount == 0) {
+			if (!OverlayBridge.inst().isCancelled(ElementType.FOOD)) {
+				hud.extractFood(graphics, player, line, right);
+			}
+
+			air -= 10;
+		}
+
+		if (!OverlayBridge.inst().isCancelled(ElementType.AIR)) {
+			hud.extractAirBubbles(graphics, player, mount, air, right);
 		}
 	}
 

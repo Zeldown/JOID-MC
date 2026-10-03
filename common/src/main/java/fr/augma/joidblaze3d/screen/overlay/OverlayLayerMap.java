@@ -50,13 +50,20 @@ public final class OverlayLayerMap {
 		}
 
 		final boolean shared = this.layerMap.values().stream().filter(layerList -> layerList.contains(layer)).count() > 1L;
+		boolean cancelled = false;
 		for (final Map.Entry<ElementType, List<Identifier>> entry : this.layerMap.entrySet()) {
-			if (entry.getValue().contains(layer) && (!shared || entry.getKey().isActive()) && OverlayBridge.inst().isCancelled(entry.getKey())) {
-				return true;
+			if (!entry.getValue().contains(layer) || shared && !entry.getKey().isActive()) {
+				continue;
 			}
+
+			if (!OverlayBridge.inst().isCancelled(entry.getKey())) {
+				return false;
+			}
+
+			cancelled = true;
 		}
 
-		return false;
+		return cancelled;
 	}
 
 }
