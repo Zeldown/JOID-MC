@@ -87,8 +87,8 @@ Each loader writes two jars to `<loader>/build/libs`: the main jar, which embeds
 
 JOID — https://github.com/Zeldown/JOID
 
-This project uses JOID, licensed under the JOID Community Source License v1.0.
-See https://github.com/Zeldown/JOID/blob/main/LICENSE.md for the full text.
+This project uses JOID, licensed under the Apache License 2.0.
+See https://github.com/Zeldown/JOID/blob/main/LICENSE for the full text.
 
 JOID is developed by **Zeldown**. This project also builds on:
 
