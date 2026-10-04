@@ -40,7 +40,7 @@ neoForge {
 }
 
 configurations {
-    additionalRuntimeClasspath.extendsFrom(shade)
+    additionalRuntimeClasspath.extendsFrom(shade, joidDev)
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }

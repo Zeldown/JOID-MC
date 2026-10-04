@@ -14,7 +14,11 @@ configurations {
         transitive = false
     }
     shade
+    joidProd
+    joidDev
     implementation.extendsFrom(shade)
+    compileOnly.extendsFrom(joidProd)
+    runtimeOnly.extendsFrom(joidDev)
 }
 
 def javacvJar = tasks.register('javacvJar', Jar) {
@@ -35,7 +39,8 @@ dependencies {
     commonJava(project(path: ':common', configuration: 'commonJava'))
     commonResources(project(path: ':common', configuration: 'commonResources'))
     javacv("org.bytedeco:javacv:${javacv_version}")
-    shade(files(rootProject.file("libs/joid-core-${joid_core_version}-prod.jar")))
+    joidProd(files(rootProject.file("libs/joid-core-${joid_core_version}-prod.jar")))
+    joidDev(files(rootProject.file("libs/joid-core-${joid_core_version}-dev.jar")))
     shade("javax.vecmath:vecmath:${vecmath_version}")
     shade(files(javacvJar))
     shade("org.bytedeco:javacpp:${javacv_version}")
@@ -74,7 +79,7 @@ jar {
 }
 
 shadowJar {
-    configurations = [project.configurations.shade]
+    configurations = [project.configurations.shade, project.configurations.joidProd]
     archiveClassifier = ''
     exclude('module-info.class', 'META-INF/versions/*/module-info.class')
 }
