@@ -16,7 +16,7 @@
     "environment": "*",
     "entrypoints": {
         "client": [
-            "fr.augma.joidblaze3d.JOIDBlaze3DClient"
+            "fr.augma.joidmc.JOIDMCClient"
         ]
     },
     "depends": {
