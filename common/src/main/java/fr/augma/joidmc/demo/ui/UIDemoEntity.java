@@ -1,4 +1,4 @@
-package fr.augma.joidmc.demo;
+package fr.augma.joidmc.demo.ui;
 
 import be.zeldown.joid.demo.ui.UIDemo;
 import be.zeldown.joid.lib.ui.node.impl.structure.flex.FlexNode;
