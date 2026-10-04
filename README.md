@@ -9,6 +9,7 @@
   <img align="center" src="https://img.shields.io/badge/neoforge-26.2.0.88-orange">
   <img align="center" src="https://img.shields.io/badge/forge-65.1.3-1e2d44">
   <img align="center" src="https://img.shields.io/badge/license-Apache 2.0-green">
+  <img align="center" src="https://img.shields.io/badge/maintainer-Augma-orange">
 </div>
 
 ## JOID interfaces inside Minecraft 26.2
