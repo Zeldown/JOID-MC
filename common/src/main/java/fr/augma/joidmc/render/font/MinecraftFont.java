@@ -1,4 +1,4 @@
-package fr.augma.joidmc.font;
+package fr.augma.joidmc.render.font;
 
 import be.zeldown.joid.lib.bridge.BridgeHandler;
 import be.zeldown.joid.lib.font.FontProvider;
