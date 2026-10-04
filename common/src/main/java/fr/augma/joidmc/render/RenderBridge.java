@@ -264,8 +264,8 @@ public final class RenderBridge extends be.zeldown.joid.lib.bridge.render.Render
 		final GpuTextureView view = this.rasterizer.render(region, Lighting.Entry.ENTITY_IN_UI, (pose, collector) -> {
 			pose.mulPose(matrix);
 			pose.scale((float) scale, (float) scale, (float) -scale);
-			pose.translate(0F, offset, 0F);
 			pose.mulPose(orientation);
+			pose.translate(0F, offset, 0F);
 			pose.mulPose(rotation);
 			final CameraRenderState cameraState = new CameraRenderState();
 			cameraState.orientation = camera.conjugate(new Quaternionf()).rotateY((float) Math.PI);
