@@ -19,7 +19,7 @@ public final class JOIDMC {
 		BridgeHandler.UI.register(OverlayBridge.inst());
 		BridgeHandler.UI.register(ScreenBridge.inst());
 		ResourceResolver.register(MCResourceResolver.inst());
-		JOID.inst().setDevMode(dev).load();
+		JOID.inst().setDevMode(dev).setDemoMode(dev).load();
 	}
 
 }
