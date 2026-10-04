@@ -1,5 +1,6 @@
 package fr.augma.joidmc.command;
 
+import be.zeldown.joid.demo.ui.UIDemoChoice;
 import be.zeldown.joid.internal.JOID;
 import fr.augma.joidmc.test.TestEffectOverlayUI;
 import fr.augma.joidmc.test.TestHotbarOverlayUI;
@@ -40,6 +41,9 @@ public final class JOIDCommand {
 			return 1;
 		})).then(LiteralArgumentBuilder.<T>literal("menu").executes(context -> {
 			Minecraft.getInstance().schedule(() -> Minecraft.getInstance().gui.setScreen(TestMenuScreen.create(Minecraft.getInstance().player)));
+			return 1;
+		})).then(LiteralArgumentBuilder.<T>literal("demo").executes(context -> {
+			Minecraft.getInstance().schedule(() -> JOID.open(new UIDemoChoice()));
 			return 1;
 		}));
 	}
