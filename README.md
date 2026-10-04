@@ -5,8 +5,8 @@
 <div align="center">
   <img align="center" src="https://img.shields.io/badge/minecraft-26.2-brightgreen">
   <img align="center" src="https://img.shields.io/badge/joid-7.0.1-blue">
-  <img align="center" src="https://img.shields.io/badge/fabric-0.19.3-dbd0b4">
-  <img align="center" src="https://img.shields.io/badge/neoforge-26.2.0.1--beta-orange">
+  <img align="center" src="https://img.shields.io/badge/fabric-0.19.5-dbd0b4">
+  <img align="center" src="https://img.shields.io/badge/neoforge-26.2.0.88-orange">
   <img align="center" src="https://img.shields.io/badge/forge-65.1.3-1e2d44">
   <img align="center" src="https://img.shields.io/badge/license-Apache 2.0-green">
 </div>
@@ -68,7 +68,7 @@ In a development environment, the `P` key opens the JOID demo chooser in game.
 
 ## Building
 
-The JOID jar in `libs/` is stored with [Git LFS](https://git-lfs.com), so install it before cloning. Then build with a JDK 25:
+The JOID jars in `libs/` are stored with [Git LFS](https://git-lfs.com), so install it before cloning. Then build with a JDK 25:
 
 ```
 ./gradlew build
@@ -80,8 +80,7 @@ Each loader writes two jars to `<loader>/build/libs`: the main jar, which embeds
 
 - Lines drawn without smoothing are one pixel wide, Blaze3D has no wide lines.
 - `TextureWrap.CLAMP_TO_BORDER` behaves like `CLAMP_TO_EDGE`, Blaze3D has no border mode.
-- The main jar weighs about 200 MB with the demo build of JOID, mostly FFmpeg natives and demo videos.
-- The font and resource loaders of JOID keep non-daemon threads alive, so Minecraft reports a shutdown watchdog crash when it closes.
+- The main jar weighs about 100 MB, mostly FFmpeg natives.
 
 ## Credits
 
