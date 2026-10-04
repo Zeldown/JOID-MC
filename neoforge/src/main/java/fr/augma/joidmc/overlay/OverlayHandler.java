@@ -1,8 +1,8 @@
 package fr.augma.joidmc.overlay;
 
-import fr.augma.joidmc.screen.data.overlay.render.ElementType;
-import fr.augma.joidmc.screen.overlay.OverlayBridge;
-import fr.augma.joidmc.screen.overlay.OverlayLayerMap;
+import fr.augma.joidmc.lib.bridge.ui.OverlayBridge;
+import fr.augma.joidmc.lib.bridge.ui.OverlayLayerMap;
+import fr.augma.joidmc.lib.ui.core.data.overlay.render.ElementType;
 
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;

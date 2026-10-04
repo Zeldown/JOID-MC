@@ -4,13 +4,13 @@ import be.zeldown.joid.demo.ui.UIDemoChoice;
 import be.zeldown.joid.internal.JOID;
 import be.zeldown.joid.lib.bridge.BridgeHandler;
 import be.zeldown.joid.lib.resource.dto.resolver.ResourceResolver;
-import fr.augma.joidmc.audio.AudioBridge;
-import fr.augma.joidmc.demo.ui.UIDemoEntity;
-import fr.augma.joidmc.demo.ui.UIDemoItem;
-import fr.augma.joidmc.render.RenderBridge;
-import fr.augma.joidmc.render.resource.MCResourceResolver;
-import fr.augma.joidmc.screen.ScreenBridge;
-import fr.augma.joidmc.screen.overlay.OverlayBridge;
+import fr.augma.joidmc.demo.ui.entity.UIDemoEntity;
+import fr.augma.joidmc.demo.ui.item.UIDemoItem;
+import fr.augma.joidmc.lib.bridge.audio.AudioBridge;
+import fr.augma.joidmc.lib.bridge.render.RenderBridge;
+import fr.augma.joidmc.lib.bridge.ui.OverlayBridge;
+import fr.augma.joidmc.lib.bridge.ui.ScreenBridge;
+import fr.augma.joidmc.lib.resource.dto.resolver.impl.MCResourceResolver;
 
 public final class JOIDMC {
 

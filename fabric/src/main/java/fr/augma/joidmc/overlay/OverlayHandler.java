@@ -5,9 +5,9 @@ import java.util.Locale;
 import java.util.Map;
 
 import fr.augma.joidmc.Constants;
-import fr.augma.joidmc.screen.data.overlay.render.ElementType;
-import fr.augma.joidmc.screen.overlay.OverlayBridge;
-import fr.augma.joidmc.screen.overlay.OverlayLayerMap;
+import fr.augma.joidmc.lib.bridge.ui.OverlayBridge;
+import fr.augma.joidmc.lib.bridge.ui.OverlayLayerMap;
+import fr.augma.joidmc.lib.ui.core.data.overlay.render.ElementType;
 
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;

@@ -1,8 +1,8 @@
 package fr.augma.joidmc;
 
-import fr.augma.joidmc.demo.key.DemoKey;
+import fr.augma.joidmc.demo.DemoKey;
+import fr.augma.joidmc.lib.resource.dto.resolver.impl.MCResourceResolver;
 import fr.augma.joidmc.overlay.OverlayHandler;
-import fr.augma.joidmc.render.resource.MCResourceResolver;
 
 import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;

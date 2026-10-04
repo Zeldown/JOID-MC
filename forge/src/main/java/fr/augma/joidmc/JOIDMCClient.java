@@ -1,8 +1,8 @@
 package fr.augma.joidmc;
 
-import fr.augma.joidmc.demo.key.DemoKey;
+import fr.augma.joidmc.demo.DemoKey;
+import fr.augma.joidmc.lib.resource.dto.resolver.impl.MCResourceResolver;
 import fr.augma.joidmc.overlay.OverlayHandler;
-import fr.augma.joidmc.render.resource.MCResourceResolver;
 
 import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
