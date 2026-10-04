@@ -13,8 +13,8 @@
 |---|---|
 | Minecraft | 26.2 |
 | Java | 25 |
-| JOID | 7.0.0 |
-| Fabric | Loader 0.19.3, Fabric API 0.152.1+26.2 |
+| JOID | 7.0.1 |
+| Fabric | Loader 0.19.3, Fabric API 0.155.2+26.2 |
 | NeoForge | 26.2.0.1-beta |
 | Forge | 65.1.3 |
 
@@ -22,11 +22,11 @@
 
 | Class | JOID bridge | Role |
 |---|---|---|
-| `render.RenderBridge` | `IRenderBridge` | Draws JOID with Blaze3D render pipelines. JOID shaders are translated to GLSL at runtime, textures and framebuffers are GPU textures, and the frame is rendered offscreen then composited into the GUI. |
-| `screen.ScreenBridge` | `IWindowBridge`, `IUIBridge` | Window size, mouse, keyboard and clipboard from Minecraft, and the host that opens JOID UIs in Minecraft screens. JOID tooltips are shown as vanilla tooltips. |
-| `audio.AudioBridge` | `IAudioBridge` | Streaming audio sources on Minecraft's OpenAL context, following the UI sound category. |
+| `lib.bridge.render.RenderBridge` | `IRenderBridge` | Draws JOID with Blaze3D render pipelines. JOID shaders are translated to GLSL at runtime, textures and framebuffers are GPU textures, and the frame is rendered offscreen then composited into the GUI. |
+| `lib.bridge.ui.ScreenBridge` | `IWindowBridge`, `IUIBridge` | Window size, mouse, keyboard and clipboard from Minecraft, and the host that opens JOID UIs in Minecraft screens. JOID tooltips are shown as vanilla tooltips. |
+| `lib.bridge.audio.AudioBridge` | `IAudioBridge` | Streaming audio sources on Minecraft's OpenAL context, following the UI sound category. |
 
-`screen.JOIDScreen` hosts JOID UIs in a regular screen, and `screen.JOIDMenuScreen` in a container screen, drawn under the slots. Every class lives in the `fr.augma.joidmc` package of the `common` project.
+`lib.screen.JOIDScreen` hosts JOID UIs in a regular screen, and `lib.screen.JOIDMenuScreen` in a container screen, drawn under the slots. Every class lives under the `fr.augma.joidmc` package of the `common` project, organised like the packages of JOID.
 
 ## Usage
 
@@ -59,7 +59,7 @@ public class MyUI extends UI {
 
 At the highest GUI scale the UI keeps its full size, and every step down shrinks it by the same ratio as a vanilla screen. Without the annotation, or with `@UIMCData(guiScale = false)`, the UI stays independent of the option.
 
-In game, the `/joid` client command opens the JOID demo chooser.
+In a development environment, the `P` key opens the JOID demo chooser in game.
 
 ## How it works
 
