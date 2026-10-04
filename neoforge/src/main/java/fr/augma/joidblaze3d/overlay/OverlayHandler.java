@@ -1,4 +1,4 @@
-package fr.augma.joidblaze3d;
+package fr.augma.joidblaze3d.overlay;
 
 import fr.augma.joidblaze3d.screen.data.overlay.render.ElementType;
 import fr.augma.joidblaze3d.screen.overlay.OverlayBridge;

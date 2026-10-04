@@ -1,9 +1,10 @@
-package fr.augma.joidblaze3d;
+package fr.augma.joidblaze3d.overlay;
 
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import fr.augma.joidblaze3d.Constants;
 import fr.augma.joidblaze3d.screen.data.overlay.render.ElementType;
 import fr.augma.joidblaze3d.screen.overlay.OverlayBridge;
 import fr.augma.joidblaze3d.screen.overlay.OverlayLayerMap;

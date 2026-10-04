@@ -1,6 +1,7 @@
 package fr.augma.joidblaze3d;
 
 import fr.augma.joidblaze3d.command.JOIDCommand;
+import fr.augma.joidblaze3d.overlay.OverlayHandler;
 import fr.augma.joidblaze3d.render.resource.MCResourceResolver;
 
 import net.fabricmc.api.ClientModInitializer;
