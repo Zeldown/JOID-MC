@@ -17,17 +17,6 @@
 
 **JOID-MC** is a backend that runs [JOID](https://github.com/Zeldown/JOID) user interfaces inside Minecraft 26.2. JOID is a pure Java UI toolkit: a retained-mode node tree, reactive signals, a composable shader pipeline and MSDF text, with no CSS, no XML and no runtime parser. It never talks to a graphics API directly and goes through bridges instead. This project implements those bridges on top of **Blaze3D**, Minecraft's rendering abstraction, so the same UIs run on both its OpenGL and Vulkan backends, on Fabric, NeoForge and Forge.
 
-## Compatibility
-
-| | Version |
-|---|---|
-| Minecraft | 26.2 |
-| Java | 25 |
-| JOID | 7.0.1 |
-| Fabric | Loader 0.19.3, Fabric API 0.155.2+26.2 |
-| NeoForge | 26.2.0.1-beta |
-| Forge | 65.1.3 |
-
 ## Bridges
 
 | Class | JOID bridge | Role |
