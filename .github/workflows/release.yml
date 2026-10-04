@@ -14,6 +14,8 @@ jobs:
       version: ${{ steps.version.outputs.version }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
 
       - name: Read the version
         id: version
@@ -26,9 +28,8 @@ jobs:
           fi
           MC_VERSION="${BASH_REMATCH[1]}"
           VERSION="${BASH_REMATCH[3]}"
-          PROJECT_MC_VERSION="$(grep '^minecraft_version=' gradle.properties | cut -d= -f2)"
-          if [[ "$MC_VERSION" != "$PROJECT_MC_VERSION" ]]; then
-            echo "::error::The release targets Minecraft $MC_VERSION but the project is built for $PROJECT_MC_VERSION"
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" "origin/version/$MC_VERSION" 2>/dev/null; then
+            echo "::error::The release targets Minecraft $MC_VERSION but its commit is not on the version/$MC_VERSION branch"
             exit 1
           fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
