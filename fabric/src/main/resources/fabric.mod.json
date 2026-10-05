@@ -16,7 +16,7 @@
     "environment": "*",
     "entrypoints": {
         "client": [
-            "fr.augma.joidmc.JOIDMCClient"
+            "dev.joid.impl.joidmc.JOIDMCClient"
         ]
     },
     "depends": {

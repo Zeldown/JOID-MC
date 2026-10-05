@@ -26,7 +26,7 @@
 | `lib.bridge.ui.ScreenBridge` | `IWindowBridge`, `IUIBridge` | Window size, mouse, keyboard and clipboard from Minecraft, and the host that opens JOID UIs in Minecraft screens. JOID tooltips are shown as vanilla tooltips. |
 | `lib.bridge.audio.AudioBridge` | `IAudioBridge` | Streaming audio sources on Minecraft's OpenAL context, following the UI sound category. |
 
-`lib.screen.JOIDScreen` hosts JOID UIs in a regular screen, and `lib.screen.JOIDMenuScreen` in a container screen, drawn under the slots. Every class lives under the `fr.augma.joidmc` package of the `common` project, organised like the packages of JOID.
+`lib.screen.JOIDScreen` hosts JOID UIs in a regular screen, and `lib.screen.JOIDMenuScreen` in a container screen, drawn under the slots. Every class lives under the `dev.joid.impl.joidmc` package of the `common` project, organised like the packages of JOID.
 
 ## Usage
 
