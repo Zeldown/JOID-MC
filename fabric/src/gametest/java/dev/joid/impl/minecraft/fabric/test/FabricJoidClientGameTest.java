@@ -1,0 +1,118 @@
+package dev.joid.impl.minecraft.fabric.test;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.junit.runner.JUnitCore;
+import org.junit.runner.Result;
+import org.lwjgl.glfw.GLFW;
+
+import dev.joid.demo.ui.UIDemoChoice;
+import dev.joid.demo.ui.font.UIDemoFont;
+import dev.joid.demo.ui.shader.UIDemoEffect;
+import dev.joid.demo.ui.shader.UIDemoShader;
+import dev.joid.impl.minecraft.snapshot.SnapshotBackend;
+import dev.joid.impl.minecraft.ui.bridge.ScreenUIBridge;
+import dev.joid.impl.minecraft.ui.screen.UIScreen;
+import dev.joid.internal.JOID;
+import dev.joid.lib.bridge.BridgeHandler;
+import dev.joid.lib.ui.core.UI;
+import dev.joid.test.snapshot.SnapshotDifference;
+import dev.joid.test.snapshot.SnapshotImage;
+import dev.joid.test.snapshot.SnapshotRunner;
+
+import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
+import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
+import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
+
+public final class FabricJoidClientGameTest implements FabricClientGameTest {
+
+	@Override
+	public void runTest(final ClientGameTestContext context) {
+		context.waitFor(_ -> BridgeHandler.UI.getBridge(ScreenUIBridge.class) != null);
+		context.getInput().resizeWindow(1920, 1080);
+		try (TestSingleplayerContext singleplayer = context.worldBuilder().create()) {
+			singleplayer.getConnection().waitForChunksRender();
+			context.getInput().pressKey(GLFW.GLFW_KEY_P);
+			context.waitForScreen(UIScreen.class);
+			context.waitTicks(40);
+			context.takeScreenshot("joid-demo-choice");
+			FabricJoidClientGameTest.guiScale(context, 2, 0.5D, "joid-demo-choice-gui-scale-2");
+			FabricJoidClientGameTest.guiScale(context, 0, 1D, "joid-demo-choice-gui-scale-auto");
+
+			FabricJoidClientGameTest.screenshot(context, new UIDemoFont(), "joid-demo-font");
+			FabricJoidClientGameTest.screenshot(context, new UIDemoShader(), "joid-demo-shader");
+			FabricJoidClientGameTest.screenshot(context, new UIDemoEffect(), "joid-demo-effect");
+			context.runOnClient(_ -> JOID.open(new UIDemoChoice()));
+			context.waitTicks(20);
+			context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
+			context.waitForScreen(null);
+		}
+
+		context.runOnClient(_ -> FabricJoidClientGameTest.verify(JUnitCore.runClasses(FabricRenderBridgeContractTest.class)));
+		context.runOnClient(_ -> FabricJoidClientGameTest.verifySnapshots(new File(System.getProperty("joid.snapshot.output", "snapshots/renders")), new File(System.getProperty("joid.snapshot.references", "snapshots/references"))));
+	}
+
+	private static void screenshot(final ClientGameTestContext context, final UI ui, final String name) {
+		context.runOnClient(_ -> JOID.open(new UIDemoChoice()));
+		context.waitTicks(20);
+		context.runOnClient(_ -> JOID.open(ui));
+		context.waitTicks(40);
+		context.takeScreenshot(name);
+	}
+
+	private static void guiScale(final ClientGameTestContext context, final int guiScale, final double interfaceScale, final String name) {
+		context.runOnClient(minecraft -> {
+			minecraft.options.guiScale().set(guiScale);
+			minecraft.resizeGui();
+		});
+		context.waitTicks(5);
+		context.takeScreenshot(name);
+		context.runOnClient(_ -> {
+			final double actual = JOID.getUI(UIDemoChoice.class).getView().getInterfaceScale();
+			if (actual != interfaceScale) {
+				throw new AssertionError("The GUI scale " + guiScale + " gives the interface scale " + actual + " instead of " + interfaceScale);
+			}
+		});
+	}
+
+	private static void verify(final Result result) {
+		if (!result.wasSuccessful()) {
+			throw new AssertionError(result.getFailureCount() + " RenderBridge contract failures:" + System.lineSeparator() + result.getFailures().stream().map(failure -> failure.getTestHeader() + ": " + failure.getMessage()).collect(Collectors.joining(System.lineSeparator())));
+		}
+	}
+
+	private static void verifySnapshots(final File output, final File references) {
+		final List<String> failures = new ArrayList<>();
+		final SnapshotRunner runner = SnapshotRunner.start(new SnapshotBackend());
+		try {
+			final File rendererReferences = new File(references, runner.getRenderer());
+			for (final String scenario : SnapshotRunner.getScenarios()) {
+				for (final Map.Entry<String, SnapshotImage> shot : runner.run(scenario).entrySet()) {
+					final File reference = new File(rendererReferences, shot.getKey() + ".png");
+					shot.getValue().write(new File(output, shot.getKey() + ".png"));
+					if (!reference.exists()) {
+						shot.getValue().write(reference);
+						System.out.println("[JOID] Recorded the snapshot reference " + reference);
+						continue;
+					}
+
+					final SnapshotDifference difference = shot.getValue().compare(SnapshotImage.read(reference), 1);
+					if (difference.getPixels() > 0) {
+						failures.add(shot.getKey() + ": " + difference.getPixels() + " pixels differ from the reference, maximum channel delta " + difference.getMaximum());
+					}
+				}
+			}
+		} finally {
+			runner.stop();
+		}
+
+		if (!failures.isEmpty()) {
+			throw new AssertionError(failures.size() + " snapshots differ from their reference:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
+		}
+	}
+
+}

@@ -1,0 +1,15 @@
+{
+    "schemaVersion": 1,
+    "id": "joid-test",
+    "version": "1.0.0",
+    "name": "JOID Test",
+    "environment": "client",
+    "entrypoints": {
+        "fabric-client-gametest": [
+            "dev.joid.impl.minecraft.fabric.test.FabricJoidClientGameTest"
+        ]
+    },
+    "depends": {
+        "joid": "*"
+    }
+}

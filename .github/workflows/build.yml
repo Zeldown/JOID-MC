@@ -46,3 +46,38 @@ jobs:
         with:
           name: reports
           path: '*/build/reports/'
+
+  client-tests:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          lfs: true
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Install Xvfb and Mesa
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb libgl1-mesa-dri libglx-mesa0 mesa-utils
+
+      - name: Client game tests
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: xvfb-run -a -s "-screen 0 1920x1080x24" ./gradlew :fabric:runClientGameTest
+
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: client-tests
+          path: |
+            fabric/build/run/clientGameTest/screenshots/
+            fabric/build/run/clientGameTest/logs/
+            fabric/build/snapshots/
+            .snapshots/references/

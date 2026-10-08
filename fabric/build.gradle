@@ -12,6 +12,23 @@ dependencies {
     implementation("net.fabricmc.fabric-api:fabric-api:${fabric_version}")
 }
 
+fabricApi {
+    configureTests {
+        createSourceSet = true
+        modId = "${mod_id}-test"
+        enableGameTests = false
+        enableClientGameTests = true
+        eula = true
+    }
+}
+
+dependencies {
+    gametestImplementation(files(rootProject.file("libs/joid-testkit-${joid_version}.jar")))
+    gametestImplementation("junit:junit:${junit_version}")
+    gametestCompileOnly("org.projectlombok:lombok:${lombok_version}")
+    gametestAnnotationProcessor("org.projectlombok:lombok:${lombok_version}")
+}
+
 loom {
     def aw = project(':common').file("src/main/resources/${mod_id}.accesswidener")
     if (aw.exists()) {
@@ -29,6 +46,13 @@ loom {
             setConfigName('Fabric Server')
             ideConfigGenerated(true)
             runDir('runs/server')
+        }
+        configureEach {
+            if (name == 'clientGameTest') {
+                vmArg("-Djoid.snapshot.output=${layout.buildDirectory.dir('snapshots/renders').get().asFile.absolutePath}")
+                vmArg("-Djoid.snapshot.references=${rootProject.file('.snapshots/references').absolutePath}")
+                vmArg("-Djoid.snapshot.cache=${rootProject.file('.snapshots/cache').absolutePath}")
+            }
         }
     }
 }

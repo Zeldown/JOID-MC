@@ -17,6 +17,7 @@ dependencies {
     compileOnly(project(':base'))
     compileOnly(files(rootProject.file("libs/joid-core-${joid_version}-dev.jar")))
     compileOnly(files(rootProject.file("libs/joid-glfw-${joid_version}.jar")))
+    compileOnly(files(rootProject.file("libs/joid-testkit-${joid_version}.jar")))
     compileOnly("javax.vecmath:vecmath:${vecmath_version}")
 }
 
