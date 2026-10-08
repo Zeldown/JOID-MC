@@ -1,6 +1,6 @@
 package dev.joid.impl.joidmc.lib.bridge.render.shader.uniform;
 
-public final class IntUniform extends ShaderUniform implements be.zeldown.joid.lib.bridge.render.shader.uniform.IntUniform {
+public final class IntUniform extends ShaderUniform implements dev.joid.lib.bridge.render.shader.uniform.IntUniform {
 
 	public IntUniform(final UniformMember member) {
 		super(member);

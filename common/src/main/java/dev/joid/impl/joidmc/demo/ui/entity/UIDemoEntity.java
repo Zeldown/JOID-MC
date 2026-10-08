@@ -1,8 +1,8 @@
 package dev.joid.impl.joidmc.demo.ui.entity;
 
-import be.zeldown.joid.demo.ui.UIDemo;
-import be.zeldown.joid.lib.ui.node.impl.structure.flex.FlexNode;
-import be.zeldown.joid.lib.utils.align.Align;
+import dev.joid.demo.ui.UIDemo;
+import dev.joid.lib.ui.node.impl.structure.flex.FlexNode;
+import dev.joid.lib.utils.align.Align;
 import dev.joid.impl.joidmc.lib.ui.node.impl.design.entity.EntityViewerNode;
 
 import net.minecraft.client.Minecraft;

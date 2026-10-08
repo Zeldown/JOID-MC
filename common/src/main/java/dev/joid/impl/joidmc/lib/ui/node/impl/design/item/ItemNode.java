@@ -2,8 +2,8 @@ package dev.joid.impl.joidmc.lib.ui.node.impl.design.item;
 
 import java.util.function.Supplier;
 
-import be.zeldown.joid.lib.color.Color;
-import be.zeldown.joid.lib.ui.node.Node;
+import dev.joid.lib.color.Color;
+import dev.joid.lib.ui.node.Node;
 import dev.joid.impl.joidmc.lib.bridge.ui.MCUIBridge;
 import dev.joid.impl.joidmc.lib.draw.MCDrawUtils;
 import lombok.Getter;

@@ -1,6 +1,6 @@
 package dev.joid.impl.joidmc.lib.render.pipeline;
 
-import be.zeldown.joid.lib.bridge.render.state.BlendState;
+import dev.joid.lib.bridge.render.state.BlendState;
 import dev.joid.impl.joidmc.lib.bridge.render.shader.Shader;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

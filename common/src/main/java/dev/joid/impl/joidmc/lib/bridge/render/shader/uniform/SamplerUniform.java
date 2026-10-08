@@ -1,14 +1,14 @@
 package dev.joid.impl.joidmc.lib.bridge.render.shader.uniform;
 
-import be.zeldown.joid.lib.bridge.render.texture.ITexture;
-import be.zeldown.joid.lib.bridge.render.texture.TextureFilter;
-import be.zeldown.joid.lib.bridge.render.texture.TextureWrap;
+import dev.joid.lib.bridge.render.texture.ITexture;
+import dev.joid.lib.bridge.render.texture.TextureFilter;
+import dev.joid.lib.bridge.render.texture.TextureWrap;
 import dev.joid.impl.joidmc.lib.bridge.render.texture.Texture;
 import lombok.Getter;
 import lombok.NonNull;
 
 @Getter
-public final class SamplerUniform implements be.zeldown.joid.lib.bridge.render.shader.uniform.SamplerUniform {
+public final class SamplerUniform implements dev.joid.lib.bridge.render.shader.uniform.SamplerUniform {
 
 	private Texture       texture;
 	private TextureFilter filter;

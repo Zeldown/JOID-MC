@@ -1,6 +1,6 @@
 package dev.joid.impl.joidmc.lib.bridge.render.shader.uniform;
 
-public final class BooleanUniform extends ShaderUniform implements be.zeldown.joid.lib.bridge.render.shader.uniform.BooleanUniform {
+public final class BooleanUniform extends ShaderUniform implements dev.joid.lib.bridge.render.shader.uniform.BooleanUniform {
 
 	public BooleanUniform(final UniformMember member) {
 		super(member);

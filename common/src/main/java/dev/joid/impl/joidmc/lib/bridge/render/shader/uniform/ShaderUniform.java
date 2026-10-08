@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public abstract class ShaderUniform implements be.zeldown.joid.lib.bridge.render.shader.uniform.ShaderUniform {
+public abstract class ShaderUniform implements dev.joid.lib.bridge.render.shader.uniform.ShaderUniform {
 
 	private final UniformMember member;
 

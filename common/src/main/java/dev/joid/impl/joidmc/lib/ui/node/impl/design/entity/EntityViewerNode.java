@@ -1,7 +1,7 @@
 package dev.joid.impl.joidmc.lib.ui.node.impl.design.entity;
 
-import be.zeldown.joid.lib.utils.click.ClickType;
-import be.zeldown.joid.lib.utils.context.InternalContext;
+import dev.joid.lib.utils.click.ClickType;
+import dev.joid.lib.utils.context.InternalContext;
 import lombok.Getter;
 import lombok.NonNull;
 

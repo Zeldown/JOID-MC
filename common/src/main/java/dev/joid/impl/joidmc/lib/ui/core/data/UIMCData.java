@@ -11,6 +11,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface UIMCData {
 
+	public boolean pause() default true;
+
 	public boolean guiScale() default true;
 
 	public int guiScaleLimit() default 0;

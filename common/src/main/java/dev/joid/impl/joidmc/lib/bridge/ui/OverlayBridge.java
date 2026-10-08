@@ -5,10 +5,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.function.Predicate;
 
-import be.zeldown.joid.lib.bridge.ui.IUIBridge;
-import be.zeldown.joid.lib.ui.core.UI;
-import be.zeldown.joid.lib.utils.click.ClickType;
-import be.zeldown.joid.lib.utils.key.Key;
+import dev.joid.lib.bridge.ui.IUIBridge;
+import dev.joid.lib.ui.core.UI;
+import dev.joid.lib.utils.click.ClickType;
+import dev.joid.lib.utils.key.Key;
 import dev.joid.impl.joidmc.lib.ui.core.data.overlay.UIMCOverlay;
 import dev.joid.impl.joidmc.lib.ui.core.data.overlay.interaction.UIMCOverlayInteraction;
 import dev.joid.impl.joidmc.lib.ui.core.data.overlay.render.ElementType;
@@ -29,7 +29,6 @@ public final class OverlayBridge extends MCUIBridge {
 	private long      frameTime;
 	private int       width;
 	private int       height;
-	private int       guiScale;
 
 	private OverlayBridge() {}
 
@@ -51,7 +50,7 @@ public final class OverlayBridge extends MCUIBridge {
 	public void add(final @NonNull UI ui) {
 		super.getUiList().add(ui);
 		final Window window = Minecraft.getInstance().getWindow();
-		ui.load(window.getWidth(), window.getHeight(), MCUIBridge.zoom(ui));
+		ui.load(window.getWidth(), window.getHeight());
 	}
 
 	@Override
@@ -72,11 +71,6 @@ public final class OverlayBridge extends MCUIBridge {
 	@Override
 	public boolean canHandle(final @NonNull UI ui) {
 		return this.canHandle(ui.getClass());
-	}
-
-	@Override
-	public @NonNull IUIBridge getInstance() {
-		return this;
 	}
 
 	public void extract(final @NonNull GuiGraphicsExtractor graphics, final @NonNull ElementType type, final boolean post, final boolean cancelled) {
@@ -169,12 +163,11 @@ public final class OverlayBridge extends MCUIBridge {
 
 		this.frameTime = frameTime;
 		final Window window = minecraft.getWindow();
-		if (window.getWidth() != this.width || window.getHeight() != this.height || window.getGuiScale() != this.guiScale) {
-			this.width    = window.getWidth();
-			this.height   = window.getHeight();
-			this.guiScale = window.getGuiScale();
+		if (window.getWidth() != this.width || window.getHeight() != this.height) {
+			this.width  = window.getWidth();
+			this.height = window.getHeight();
 			for (final UI ui : super.getUiList().copy()) {
-				ui.load(this.width, this.height, MCUIBridge.zoom(ui));
+				ui.load(this.width, this.height);
 			}
 		}
 

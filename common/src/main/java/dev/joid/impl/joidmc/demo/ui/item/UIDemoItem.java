@@ -1,7 +1,7 @@
 package dev.joid.impl.joidmc.demo.ui.item;
 
-import be.zeldown.joid.demo.ui.UIDemo;
-import be.zeldown.joid.lib.ui.node.impl.structure.flex.FlexNode;
+import dev.joid.demo.ui.UIDemo;
+import dev.joid.lib.ui.node.impl.structure.flex.FlexNode;
 import dev.joid.impl.joidmc.lib.ui.node.impl.design.item.ItemNode;
 
 import net.minecraft.core.component.DataComponents;

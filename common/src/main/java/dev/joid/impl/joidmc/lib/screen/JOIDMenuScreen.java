@@ -3,9 +3,9 @@ package dev.joid.impl.joidmc.lib.screen;
 import java.util.HashMap;
 import java.util.Map;
 
-import be.zeldown.joid.internal.JOID;
-import be.zeldown.joid.lib.ui.core.UI;
-import be.zeldown.joid.lib.ui.node.Node;
+import dev.joid.internal.JOID;
+import dev.joid.lib.ui.core.UI;
+import dev.joid.lib.ui.node.Node;
 import dev.joid.impl.joidmc.lib.bridge.ui.ScreenBridge;
 import dev.joid.impl.joidmc.lib.ui.node.impl.structure.slot.SlotNode;
 import lombok.Getter;
@@ -147,21 +147,11 @@ public abstract class JOIDMenuScreen<T extends AbstractContainerMenu> extends Ab
 	}
 
 	private double toDesignX(final double guiX) {
-		final Window window = Minecraft.getInstance().getWindow();
-		return this.ui.getRelativeX(guiX * window.getGuiScale() * this.getViewportWidth() / window.getWidth());
+		return this.ui.getView().toUiX(guiX * Minecraft.getInstance().getWindow().getGuiScale());
 	}
 
 	private double toDesignY(final double guiY) {
-		final Window window = Minecraft.getInstance().getWindow();
-		return this.ui.getRelativeY(guiY * window.getGuiScale() * this.getViewportHeight() / window.getHeight());
-	}
-
-	private double getViewportWidth() {
-		return this.ui.getScaledWidth().getOrDefault() * this.ui.getZoomLevel().getOrDefault();
-	}
-
-	private double getViewportHeight() {
-		return this.ui.getScaledHeight().getOrDefault() * this.ui.getZoomLevel().getOrDefault();
+		return this.ui.getView().toUiY(guiY * Minecraft.getInstance().getWindow().getGuiScale());
 	}
 
 	private Slot getHovered(final double mouseX, final double mouseY) {

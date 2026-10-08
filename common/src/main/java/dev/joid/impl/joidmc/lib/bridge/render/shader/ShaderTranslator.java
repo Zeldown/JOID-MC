@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import be.zeldown.joid.lib.bridge.render.shader.source.ShaderBuiltin;
-import be.zeldown.joid.lib.bridge.render.shader.source.ShaderSource;
-import be.zeldown.joid.lib.bridge.render.shader.source.ShaderVariable;
+import dev.joid.lib.bridge.render.shader.source.ShaderBuiltin;
+import dev.joid.lib.bridge.render.shader.source.ShaderSource;
+import dev.joid.lib.bridge.render.shader.source.ShaderVariable;
 import lombok.NonNull;
 
 public final class ShaderTranslator {

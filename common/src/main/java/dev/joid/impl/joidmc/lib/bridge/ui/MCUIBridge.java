@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import be.zeldown.joid.lib.bridge.BridgeHandler;
-import be.zeldown.joid.lib.bridge.ui.UIBridge;
-import be.zeldown.joid.lib.bridge.window.IWindowBridge;
-import be.zeldown.joid.lib.ui.core.UI;
+import dev.joid.lib.bridge.BridgeHandler;
+import dev.joid.lib.bridge.ui.UIBridge;
+import dev.joid.lib.bridge.window.IWindowBridge;
+import dev.joid.lib.ui.core.UI;
 import dev.joid.impl.joidmc.lib.bridge.render.RenderBridge;
 import dev.joid.impl.joidmc.lib.ui.core.data.UIMCData;
 import lombok.NonNull;
@@ -67,7 +67,13 @@ public abstract class MCUIBridge extends UIBridge {
 		}
 	}
 
-	protected static double zoom(final UI ui) {
+	public static boolean pause(final @NonNull UI ui) {
+		final UIMCData data = ui.getClass().getAnnotation(UIMCData.class);
+		return data == null || data.pause();
+	}
+
+	@Override
+	public double getInterfaceScale(final @NonNull UI ui) {
 		final UIMCData data = ui.getClass().getAnnotation(UIMCData.class);
 		if (data == null || !data.guiScale()) {
 			return 1D;

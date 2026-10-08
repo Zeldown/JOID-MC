@@ -6,12 +6,12 @@ import java.util.Map;
 
 import org.lwjgl.glfw.GLFW;
 
-import be.zeldown.joid.internal.JOID;
-import be.zeldown.joid.lib.bridge.ui.IUIBridge;
-import be.zeldown.joid.lib.bridge.window.IWindowBridge;
-import be.zeldown.joid.lib.ui.core.UI;
-import be.zeldown.joid.lib.utils.click.ClickType;
-import be.zeldown.joid.lib.utils.key.Key;
+import dev.joid.internal.JOID;
+import dev.joid.lib.bridge.ui.IUIBridge;
+import dev.joid.lib.bridge.window.IWindowBridge;
+import dev.joid.lib.ui.core.UI;
+import dev.joid.lib.utils.click.ClickType;
+import dev.joid.lib.utils.key.Key;
 import dev.joid.impl.joidmc.lib.screen.JOIDScreen;
 import lombok.Getter;
 import lombok.NonNull;
@@ -195,7 +195,7 @@ public final class ScreenBridge extends MCUIBridge implements IWindowBridge {
 	@Override
 	public void add(final @NonNull UI ui) {
 		super.getUiList().add(ui);
-		ui.load(this.getWidth(), this.getHeight(), MCUIBridge.zoom(ui));
+		ui.load(this.getWidth(), this.getHeight());
 	}
 
 	@Override
@@ -219,11 +219,6 @@ public final class ScreenBridge extends MCUIBridge implements IWindowBridge {
 	@Override
 	public boolean canHandle(final @NonNull UI ui) {
 		return !OverlayBridge.inst().canHandle(ui);
-	}
-
-	@Override
-	public @NonNull IUIBridge getInstance() {
-		return this;
 	}
 
 	@Override
@@ -331,7 +326,7 @@ public final class ScreenBridge extends MCUIBridge implements IWindowBridge {
 
 	public void reload() {
 		for (final UI ui : super.getUiList().copy()) {
-			ui.load(this.getWidth(), this.getHeight(), MCUIBridge.zoom(ui));
+			ui.load(this.getWidth(), this.getHeight());
 		}
 	}
 

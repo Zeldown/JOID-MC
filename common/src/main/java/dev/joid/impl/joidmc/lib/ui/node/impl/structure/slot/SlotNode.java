@@ -1,9 +1,9 @@
 package dev.joid.impl.joidmc.lib.ui.node.impl.structure.slot;
 
-import be.zeldown.joid.lib.color.Color;
-import be.zeldown.joid.lib.draw.DrawUtils;
-import be.zeldown.joid.lib.resource.Resource;
-import be.zeldown.joid.lib.ui.node.Node;
+import dev.joid.lib.color.Color;
+import dev.joid.lib.draw.DrawUtils;
+import dev.joid.lib.resource.Resource;
+import dev.joid.lib.ui.node.Node;
 import dev.joid.impl.joidmc.lib.bridge.ui.ScreenBridge;
 import dev.joid.impl.joidmc.lib.draw.MCDrawUtils;
 import dev.joid.impl.joidmc.lib.screen.JOIDMenuScreen;

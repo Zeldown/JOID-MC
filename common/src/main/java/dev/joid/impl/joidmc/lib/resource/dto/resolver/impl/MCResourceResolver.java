@@ -9,11 +9,11 @@ import java.util.function.Consumer;
 
 import javax.imageio.ImageIO;
 
-import be.zeldown.joid.lib.bridge.BridgeHandler;
-import be.zeldown.joid.lib.resource.Resource;
-import be.zeldown.joid.lib.resource.ResourceBuilder;
-import be.zeldown.joid.lib.resource.dto.ResourceData;
-import be.zeldown.joid.lib.resource.dto.resolver.IResourceResolver;
+import dev.joid.lib.bridge.BridgeHandler;
+import dev.joid.lib.resource.Resource;
+import dev.joid.lib.resource.ResourceBuilder;
+import dev.joid.lib.resource.dto.ResourceData;
+import dev.joid.lib.resource.dto.resolver.IResourceResolver;
 import dev.joid.impl.joidmc.lib.bridge.render.RenderBridge;
 import dev.joid.impl.joidmc.lib.bridge.render.texture.Texture;
 import dev.joid.impl.joidmc.lib.resource.dto.decoder.impl.MCAnimationDecoder;

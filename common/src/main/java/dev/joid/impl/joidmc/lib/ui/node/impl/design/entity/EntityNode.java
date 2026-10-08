@@ -2,7 +2,7 @@ package dev.joid.impl.joidmc.lib.ui.node.impl.design.entity;
 
 import java.util.function.Supplier;
 
-import be.zeldown.joid.lib.ui.node.Node;
+import dev.joid.lib.ui.node.Node;
 import dev.joid.impl.joidmc.lib.draw.MCDrawUtils;
 import lombok.Getter;
 import lombok.NonNull;

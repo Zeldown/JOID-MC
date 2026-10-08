@@ -10,23 +10,12 @@ configurations {
     commonResources {
         canBeResolved = true
     }
-    javacv {
-        transitive = false
-    }
     shade
     joidProd
     joidDev
     implementation.extendsFrom(shade)
-    compileOnly.extendsFrom(joidProd)
+    compileOnly.extendsFrom(joidDev)
     runtimeOnly.extendsFrom(joidDev)
-}
-
-def javacvJar = tasks.register('javacvJar', Jar) {
-    archiveFileName = "javacv-${javacv_version}.jar"
-    destinationDirectory = layout.buildDirectory.dir('javacv')
-    from({ zipTree(configurations.javacv.singleFile) }) {
-        exclude('module-info.class', 'META-INF/versions/*/module-info.class', 'META-INF/MANIFEST.MF')
-    }
 }
 
 dependencies {
@@ -38,18 +27,9 @@ dependencies {
     }
     commonJava(project(path: ':common', configuration: 'commonJava'))
     commonResources(project(path: ':common', configuration: 'commonResources'))
-    javacv("org.bytedeco:javacv:${javacv_version}")
     joidProd(files(rootProject.file("libs/joid-core-${joid_core_version}-prod.jar")))
     joidDev(files(rootProject.file("libs/joid-core-${joid_core_version}-dev.jar")))
     shade("javax.vecmath:vecmath:${vecmath_version}")
-    shade(files(javacvJar))
-    shade("org.bytedeco:javacpp:${javacv_version}")
-    shade("org.bytedeco:ffmpeg:${ffmpeg_version}") {
-        transitive = false
-    }
-    ['windows-x86_64', 'linux-x86_64', 'macosx-x86_64', 'macosx-arm64'].each { platform ->
-        shade("org.bytedeco:ffmpeg:${ffmpeg_version}:${platform}")
-    }
 }
 
 tasks.named('compileJava', JavaCompile) {

@@ -1,5 +1,6 @@
 package dev.joid.impl.joidmc.lib.screen;
 
+import dev.joid.impl.joidmc.lib.bridge.ui.MCUIBridge;
 import dev.joid.impl.joidmc.lib.bridge.ui.ScreenBridge;
 import lombok.NonNull;
 
@@ -55,7 +56,7 @@ public class JOIDScreen extends Screen {
 
 	@Override
 	public boolean isPauseScreen() {
-		return ScreenBridge.inst().getUiList().ordered().stream().anyMatch(ui -> ui.getData().pause());
+		return ScreenBridge.inst().getUiList().ordered().stream().anyMatch(MCUIBridge::pause);
 	}
 
 	@Override

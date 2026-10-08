@@ -1,6 +1,6 @@
 package dev.joid.impl.joidmc.lib.bridge.render.shader.uniform;
 
-public final class Float2Uniform extends ShaderUniform implements be.zeldown.joid.lib.bridge.render.shader.uniform.Float2Uniform {
+public final class Float2Uniform extends ShaderUniform implements dev.joid.lib.bridge.render.shader.uniform.Float2Uniform {
 
 	public Float2Uniform(final UniformMember member) {
 		super(member);

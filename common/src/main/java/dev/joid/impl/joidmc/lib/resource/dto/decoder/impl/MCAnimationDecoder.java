@@ -3,10 +3,10 @@ package dev.joid.impl.joidmc.lib.resource.dto.decoder.impl;
 import java.awt.image.BufferedImage;
 import java.util.List;
 
-import be.zeldown.joid.lib.bridge.BridgeHandler;
-import be.zeldown.joid.lib.bridge.render.texture.ITexture;
-import be.zeldown.joid.lib.resource.dto.ResourceData;
-import be.zeldown.joid.lib.resource.dto.decoder.IResourceDecoder;
+import dev.joid.lib.bridge.BridgeHandler;
+import dev.joid.lib.bridge.render.texture.ITexture;
+import dev.joid.lib.resource.dto.ResourceData;
+import dev.joid.lib.resource.dto.decoder.IResourceDecoder;
 import dev.joid.impl.joidmc.lib.bridge.render.RenderBridge;
 import dev.joid.impl.joidmc.lib.bridge.render.texture.Texture;
 import lombok.NonNull;

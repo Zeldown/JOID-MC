@@ -1,7 +1,7 @@
 package dev.joid.impl.joidmc.lib.bridge.audio;
 
-import be.zeldown.joid.lib.bridge.audio.IAudioBridge;
-import be.zeldown.joid.lib.bridge.audio.IAudioSource;
+import dev.joid.lib.bridge.audio.IAudioBridge;
+import dev.joid.lib.bridge.audio.IAudioSource;
 import lombok.NonNull;
 
 public final class AudioBridge implements IAudioBridge {

@@ -8,7 +8,7 @@ import java.util.List;
 import org.lwjgl.openal.AL10;
 import org.lwjgl.openal.ALC10;
 
-import be.zeldown.joid.lib.bridge.audio.IAudioSource;
+import dev.joid.lib.bridge.audio.IAudioSource;
 import lombok.NonNull;
 
 import net.minecraft.client.Minecraft;

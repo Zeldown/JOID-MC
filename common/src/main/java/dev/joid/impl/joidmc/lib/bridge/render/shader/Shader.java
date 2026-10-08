@@ -4,10 +4,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import be.zeldown.joid.lib.bridge.render.shader.IShader;
-import be.zeldown.joid.lib.bridge.render.shader.source.ShaderSource;
-import be.zeldown.joid.lib.bridge.render.shader.source.ShaderVariable;
-import be.zeldown.joid.lib.bridge.render.state.BlendState;
+import dev.joid.lib.bridge.render.shader.IShader;
+import dev.joid.lib.bridge.render.shader.source.ShaderSource;
+import dev.joid.lib.bridge.render.shader.source.ShaderVariable;
+import dev.joid.lib.bridge.render.state.BlendState;
 import dev.joid.impl.joidmc.Constants;
 import dev.joid.impl.joidmc.lib.bridge.render.RenderBridge;
 import dev.joid.impl.joidmc.lib.bridge.render.shader.uniform.BooleanUniform;

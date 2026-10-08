@@ -13,8 +13,7 @@ neoForge {
 }
 
 dependencies {
-    compileOnly(files(rootProject.file("libs/joid-core-${joid_core_version}-prod.jar")))
-    compileOnly("javax.vecmath:vecmath:${vecmath_version}")
+    compileOnly(files(rootProject.file("libs/joid-core-${joid_core_version}-dev.jar")))
 }
 
 configurations {

@@ -9,6 +9,6 @@ public class Constants {
     public static final String MOD_NAME = "JOIDMC";
     public static final Logger LOG = LoggerFactory.getLogger(MOD_NAME);
 
-    public static final String JOID_VERSION = "7.0.1";
+    public static final String JOID_VERSION = "8.0.0";
 
 }

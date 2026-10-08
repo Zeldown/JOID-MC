@@ -2,8 +2,8 @@ package dev.joid.impl.joidmc.demo;
 
 import org.lwjgl.glfw.GLFW;
 
-import be.zeldown.joid.demo.ui.UIDemoChoice;
-import be.zeldown.joid.internal.JOID;
+import dev.joid.demo.ui.UIDemoChoice;
+import dev.joid.internal.JOID;
 import dev.joid.impl.joidmc.Constants;
 
 import net.minecraft.client.KeyMapping;

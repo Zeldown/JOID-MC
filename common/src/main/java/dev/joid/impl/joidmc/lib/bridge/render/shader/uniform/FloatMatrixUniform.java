@@ -2,7 +2,7 @@ package dev.joid.impl.joidmc.lib.bridge.render.shader.uniform;
 
 import lombok.NonNull;
 
-public final class FloatMatrixUniform extends ShaderUniform implements be.zeldown.joid.lib.bridge.render.shader.uniform.FloatMatrixUniform {
+public final class FloatMatrixUniform extends ShaderUniform implements dev.joid.lib.bridge.render.shader.uniform.FloatMatrixUniform {
 
 	public FloatMatrixUniform(final UniformMember member) {
 		super(member);
