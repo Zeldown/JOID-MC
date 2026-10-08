@@ -1,9 +1,9 @@
 package dev.joid.impl.minecraft.render.composite;
 
 import dev.joid.impl.minecraft.JoidMinecraft;
-import dev.joid.impl.minecraft.render.FrameTargetPool;
 import dev.joid.impl.minecraft.render.RenderBridge;
 import dev.joid.impl.minecraft.render.RenderTarget;
+import dev.joid.impl.minecraft.render.RenderTargetPool;
 import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.bridge.render.texture.TextureFilter;
 import dev.joid.lib.bridge.render.texture.TextureWrap;
@@ -39,10 +39,10 @@ public final class GuiCompositor {
 			.withPrimitiveTopology(PrimitiveTopology.QUADS)
 			.build();
 
-	private final FrameTargetPool targetPool;
+	private final RenderTargetPool targetPool;
 
 	public static @NonNull GuiCompositor create(final @NonNull RenderBridge bridge) {
-		return new GuiCompositor(FrameTargetPool.create(bridge));
+		return new GuiCompositor(RenderTargetPool.create(bridge));
 	}
 
 	public void composite(final @NonNull GuiGraphicsExtractor graphics, final @NonNull Runnable draw) {

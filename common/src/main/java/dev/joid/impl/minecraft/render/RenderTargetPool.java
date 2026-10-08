@@ -7,7 +7,7 @@ import lombok.NonNull;
 
 import net.minecraft.client.Minecraft;
 
-public final class FrameTargetPool {
+public final class RenderTargetPool {
 
 	private final RenderBridge       bridge;
 	private final List<RenderTarget> targetList;
@@ -15,14 +15,14 @@ public final class FrameTargetPool {
 	private int  index;
 	private long frameTime;
 
-	private FrameTargetPool(final RenderBridge bridge) {
+	private RenderTargetPool(final RenderBridge bridge) {
 		this.bridge     = bridge;
 		this.targetList = new ArrayList<>();
 		this.frameTime  = -1L;
 	}
 
-	public static @NonNull FrameTargetPool create(final @NonNull RenderBridge bridge) {
-		return new FrameTargetPool(bridge);
+	public static @NonNull RenderTargetPool create(final @NonNull RenderBridge bridge) {
+		return new RenderTargetPool(bridge);
 	}
 
 	public @NonNull RenderTarget acquire(final int width, final int height) {
