@@ -1,10 +1,13 @@
 package dev.joid.impl.minecraft.demo.ui;
 
+import java.util.UUID;
+
 import dev.joid.demo.DemoFont;
 import dev.joid.demo.ui.UIDemo;
 import dev.joid.impl.minecraft.lib.font.dto.ComponentText;
 import dev.joid.impl.minecraft.lib.font.impl.minecraft.MinecraftFont;
 import dev.joid.impl.minecraft.lib.ui.node.impl.design.block.BlockNode;
+import dev.joid.impl.minecraft.lib.ui.node.impl.design.entity.EntityNode;
 import dev.joid.impl.minecraft.lib.ui.node.impl.design.item.ItemNode;
 import dev.joid.lib.color.Color;
 import dev.joid.lib.draw.text.builder.Text;
@@ -26,13 +29,19 @@ import dev.joid.lib.ui.node.impl.structure.container.ContainerNode;
 import dev.joid.lib.ui.node.property.overflow.OverflowProperty;
 import dev.joid.lib.utils.align.Align;
 
+import com.mojang.authlib.GameProfile;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.resources.model.sprite.SpriteId;
+import net.minecraft.core.ClientAsset;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.player.PlayerModelType;
+import net.minecraft.world.entity.player.PlayerSkin;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
@@ -51,6 +60,7 @@ public class UIDemoMinecraft extends UIDemo {
 		final ItemStack enchanted = new ItemStack(Items.DIAMOND_SWORD);
 		final ItemStack damaged = new ItemStack(Items.DIAMOND_PICKAXE);
 		final ItemStack pearl = new ItemStack(Items.ENDER_PEARL, 16);
+		final PlayerSkin skin = PlayerSkin.insecure(new ClientAsset.ResourceTexture(Identifier.fromNamespaceAndPath("joid", "demo/skin"), Identifier.fromNamespaceAndPath("joid", "demo/textures/skin.png")), null, null, PlayerModelType.WIDE);
 		enchanted.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
 		damaged.setDamageValue(1100);
 
@@ -267,7 +277,71 @@ public class UIDemoMinecraft extends UIDemo {
 			})
 			.attach(container);
 
-			ContainerNode.create(0, 1240, 1920, 80).attach(container);
+			RectNode
+			.create(40, 1320, 440, 240)
+			.color(UIDemoMinecraft.PLACEHOLDER)
+			.body(rect -> {
+				RectNode.create(20, 20, 400, 200).color(UIDemoMinecraft.PANEL).attach(rect);
+				EntityNode.create(40, 40, 80, 160).type(EntityTypes.ZOMBIE).attach(rect);
+				EntityNode.create(130, 40, 80, 160).type(EntityTypes.CREEPER).rotationYaw(() -> System.currentTimeMillis() % 3600L / 10D).attach(rect);
+				EntityNode.create(220, 80, 80, 80).type(EntityTypes.PIG).rotationYaw(-30D).attach(rect);
+				EntityNode.create(310, 100, 80, 80).type(EntityTypes.CHICKEN).rotationPitch(20D).attach(rect);
+				TextNode.create(220, 255).text(Text.create("Mobs", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
+			})
+			.attach(container);
+
+			RectNode
+			.create(520, 1320, 440, 240)
+			.color(UIDemoMinecraft.PLACEHOLDER)
+			.body(rect -> {
+				RectNode.create(20, 20, 400, 200).color(UIDemoMinecraft.PANEL).attach(rect);
+				EntityNode.create(80, 40, 120, 160).profile(new GameProfile(new UUID(0L, 15L), "Steve")).attach(rect);
+				EntityNode.create(240, 40, 120, 160).skin(skin).attach(rect);
+				TextNode.create(220, 255).text(Text.create("Skins", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
+			})
+			.attach(container);
+
+			RectNode
+			.create(1000, 1320, 440, 240)
+			.color(UIDemoMinecraft.PLACEHOLDER)
+			.body(rect -> {
+				RectNode.create(20, 20, 400, 200).color(UIDemoMinecraft.PANEL).attach(rect);
+				EntityNode.create(40, 40, 80, 160).entity(() -> Minecraft.getInstance().player).attach(rect);
+				RectNode
+				.create(160, 60, 120, 120)
+				.effect(CircleNodeEffect.create().scope(NodeEffectScope.CHILDREN))
+				.body(mask -> {
+					EntityNode.create(-60, 5, 240, 480).entity(() -> Minecraft.getInstance().player).attach(mask);
+				})
+				.attach(rect);
+				EntityNode
+				.create(310, 40, 80, 160)
+				.entity(() -> Minecraft.getInstance().player)
+				.self(entity -> entity.effect(TransformNodeEffect.create(new RotateOperation(30D, Rotation.ROLL, Vector.create(() -> entity.getX() + 40D, () -> entity.getY() + 80D)))))
+				.attach(rect);
+				TextNode.create(220, 255).text(Text.create("Local player", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
+			})
+			.attach(container);
+
+			RectNode
+			.create(1480, 1320, 400, 240)
+			.color(UIDemoMinecraft.PLACEHOLDER)
+			.body(rect -> {
+				RectNode.create(20, 20, 360, 200).color(UIDemoMinecraft.PANEL).attach(rect);
+				RectNode
+				.create(40, 30, 320, 180)
+				.color(UIDemoMinecraft.INK)
+				.hoveredColor(UIDemoMinecraft.PLACEHOLDER)
+				.body(slot -> {
+					EntityNode.create(60, 10, 80, 160).entity(() -> Minecraft.getInstance().player).followMouse(true).attach(slot);
+					EntityNode.create(180, 10, 80, 160).type(EntityTypes.VILLAGER).followMouse(true).attach(slot);
+				})
+				.attach(rect);
+				TextNode.create(200, 255).text(Text.create("Mouse look", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
+			})
+			.attach(container);
+
+			ContainerNode.create(0, 1560, 1920, 80).attach(container);
 		})
 		.attach(this);
 	}

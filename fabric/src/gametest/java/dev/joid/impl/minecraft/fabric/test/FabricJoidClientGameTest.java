@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -27,6 +28,7 @@ import dev.joid.demo.ui.shader.UIDemoShader;
 import dev.joid.impl.minecraft.demo.ui.UIDemoMinecraft;
 import dev.joid.impl.minecraft.lib.font.impl.minecraft.MinecraftFont;
 import dev.joid.impl.minecraft.lib.ui.node.impl.design.block.BlockNode;
+import dev.joid.impl.minecraft.lib.ui.node.impl.design.entity.EntityNode;
 import dev.joid.impl.minecraft.lib.ui.node.impl.design.item.ItemNode;
 import dev.joid.impl.minecraft.render.texture.Texture;
 import dev.joid.impl.minecraft.snapshot.SnapshotBackend;
@@ -44,6 +46,7 @@ import dev.joid.test.snapshot.SnapshotDifference;
 import dev.joid.test.snapshot.SnapshotImage;
 import dev.joid.test.snapshot.SnapshotRunner;
 
+import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
@@ -53,9 +56,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.PauseScreen;
+import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.core.ClientAsset;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FontDescription;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.player.PlayerModelType;
+import net.minecraft.world.entity.player.PlayerSkin;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
@@ -65,6 +73,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 	public void runTest(final ClientGameTestContext context) {
 		context.waitFor(_ -> BridgeHandler.UI.getBridge(ScreenUIBridge.class) != null);
 		context.getInput().resizeWindow(1920, 1080);
+		FabricJoidClientGameTest.verifyEntitiesWithoutWorld(context);
 		try (TestSingleplayerContext singleplayer = context.worldBuilder().create()) {
 			singleplayer.getConnection().waitForChunksRender();
 			context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
@@ -86,6 +95,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			FabricJoidClientGameTest.verifyResources(context);
 			FabricJoidClientGameTest.verifyReload(context);
 			FabricJoidClientGameTest.verifyItems(context);
+			FabricJoidClientGameTest.verifyEntities(context);
 			context.runOnClient(FabricJoidClientGameTest::verifyWidths);
 			context.runOnClient(_ -> JOID.open(new UIDemoChoice()));
 			context.waitTicks(20);
@@ -272,6 +282,88 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		}
 	}
 
+	private static void verifyEntitiesWithoutWorld(final ClientGameTestContext context) {
+		final PlayerSkin skin = PlayerSkin.insecure(new ClientAsset.ResourceTexture(Identifier.fromNamespaceAndPath("joid", "demo/skin"), Identifier.fromNamespaceAndPath("joid", "demo/textures/skin.png")), null, null, PlayerModelType.WIDE);
+		final EntityNode profile = EntityNode.create(200, 200, 300, 600).profile(new GameProfile(new UUID(0L, 15L), "Steve")).rotationYaw(-30D);
+		final EntityNode custom = EntityNode.create(700, 200, 300, 600).skin(skin).rotationPitch(20D);
+		final EntityNode mob = EntityNode.create(1200, 200, 300, 600).type(EntityTypes.ZOMBIE);
+		context.waitForScreen(TitleScreen.class);
+		context.runOnClient(_ -> JOID.open(new UI() {
+
+			@Override
+			public void init() {
+				profile.attach(this);
+				custom.attach(this);
+				mob.attach(this);
+			}
+
+		}));
+		context.waitForScreen(UIScreen.class);
+		context.waitTicks(40);
+		final List<int[]> entities = context.computeOnClient(_ -> List.of(FabricJoidClientGameTest.bounds(profile), FabricJoidClientGameTest.bounds(custom), FabricJoidClientGameTest.bounds(mob)));
+		final BufferedImage image = FabricJoidClientGameTest.read(context.takeScreenshot("joid-entities-title"));
+		final List<String> failures = new ArrayList<>();
+		FabricJoidClientGameTest.expectDrawn(failures, "player with a default skin without a world", image, entities.get(0));
+		FabricJoidClientGameTest.expectDrawn(failures, "player with a custom skin without a world", image, entities.get(1));
+		if (context.computeOnClient(_ -> mob.getEntity() != null)) {
+			failures.add("an entity type was created without a world");
+		}
+
+		context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
+		context.waitForScreen(TitleScreen.class);
+		if (!failures.isEmpty()) {
+			throw new AssertionError(failures.size() + " entity checks without a world failed:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
+		}
+	}
+
+	private static void verifyEntities(final ClientGameTestContext context) {
+		FabricJoidClientGameTest.scroll(context, 20);
+		final List<int[]> entities = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(EntityNode.class));
+		final int[] player = entities.get(9);
+		final int[] villager = entities.get(10);
+		context.getInput().setCursorPos(player[0] - 200D, player[1] + 20D);
+		context.waitTicks(5);
+		final BufferedImage left = FabricJoidClientGameTest.read(context.takeScreenshot("joid-demo-minecraft-entities-a"));
+		context.getInput().setCursorPos(villager[0] + villager[2] + 80D, villager[1] + 20D);
+		context.waitTicks(5);
+		final BufferedImage right = FabricJoidClientGameTest.read(context.takeScreenshot("joid-demo-minecraft-entities-b"));
+		context.getInput().setCursorPos(960D, 540D);
+		final List<String> failures = new ArrayList<>();
+		final List<String> labels = List.of("zombie", "creeper", "pig", "chicken", "default skin", "custom skin", "local player", "masked local player", "rotated local player", "local player following the mouse", "villager following the mouse");
+		for (int index = 0; index < entities.size(); index++) {
+			FabricJoidClientGameTest.expectDrawn(failures, labels.get(index), left, entities.get(index));
+		}
+
+		FabricJoidClientGameTest.expectChange(failures, "zombie", List.of(left, right), entities.get(0), true);
+		FabricJoidClientGameTest.expectChange(failures, "rotating creeper", List.of(left, right), entities.get(1), false);
+		FabricJoidClientGameTest.expectChange(failures, "player with a default skin", List.of(left, right), entities.get(4), true);
+		FabricJoidClientGameTest.expectChange(failures, "head of the player following the mouse", List.of(left, right), new int[] {player[0], player[1], player[2], player[3] / 3}, false);
+		FabricJoidClientGameTest.expectChange(failures, "head of the villager following the mouse", List.of(left, right), new int[] {villager[0], villager[1], villager[2], villager[3] / 3}, false);
+		context.runOnClient(minecraft -> {
+			minecraft.options.guiScale().set(2);
+			minecraft.resizeGui();
+		});
+		context.waitTicks(40);
+		context.takeScreenshot("joid-demo-minecraft-entities-gui-scale-2");
+		context.runOnClient(minecraft -> {
+			minecraft.options.guiScale().set(0);
+			minecraft.resizeGui();
+		});
+		context.waitTicks(5);
+		if (!failures.isEmpty()) {
+			throw new AssertionError(failures.size() + " entity checks failed:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
+		}
+	}
+
+	private static void scroll(final ClientGameTestContext context, final int notches) {
+		context.getInput().setCursorPos(960D, 540D);
+		for (int notch = 0; notch < notches; notch++) {
+			context.getInput().scroll(-1D);
+		}
+
+		context.waitTicks(40);
+	}
+
 	private static List<int[]> bounds(final Class<? extends Node> clazz) {
 		final UI ui = JOID.getUI(UIDemoMinecraft.class);
 		final List<int[]> bounds = new ArrayList<>();
@@ -281,11 +373,19 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		return bounds;
 	}
 
+	private static int[] bounds(final Node node) {
+		final UI ui = node.getUi();
+		return new int[] {(int) Math.round(ui.getView().toScreenX(node.getAbsoluteX())), (int) Math.round(ui.getView().toScreenY(node.getAbsoluteY())), (int) Math.round(ui.getView().toScreenWidth(node.getWidth())), (int) Math.round(ui.getView().toScreenHeight(node.getHeight()))};
+	}
+
 	private static void bounds(final UI ui, final Node node, final Class<? extends Node> clazz, final List<int[]> bounds) {
 		if (clazz.isInstance(node)) {
-			final int left = (int) Math.round(ui.getView().toScreenX(node.getAbsoluteX()));
-			final int top = (int) Math.round(ui.getView().toScreenY(node.getAbsoluteY()));
-			bounds.add(new int[] {left, top, (int) Math.round(ui.getView().toScreenWidth(node.getWidth())), (int) Math.round(ui.getView().toScreenHeight(node.getHeight()))});
+			final Node parent = node.getParent() != null ? node.getParent() : node;
+			final double left = Math.max(node.getAbsoluteX(), parent.getAbsoluteX());
+			final double top = Math.max(node.getAbsoluteY(), parent.getAbsoluteY());
+			final double right = Math.min(node.getAbsoluteX() + node.getWidth(), parent.getAbsoluteX() + parent.getWidth());
+			final double bottom = Math.min(node.getAbsoluteY() + node.getHeight(), parent.getAbsoluteY() + parent.getHeight());
+			bounds.add(new int[] {(int) Math.round(ui.getView().toScreenX(left)), (int) Math.round(ui.getView().toScreenY(top)), (int) Math.round(ui.getView().toScreenWidth(right - left)), (int) Math.round(ui.getView().toScreenHeight(bottom - top))});
 		}
 
 		for (final Node child : node.getChildren(Node.class)) {
