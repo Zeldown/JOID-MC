@@ -8,11 +8,14 @@ ext {
             'dev/joid/impl/glfw/demo/**',
             'dev/joid/impl/minecraft/**/demo/**',
             'dev/joid/impl/minecraft/snapshot/**',
-            'assets/joid/demo/**',
-            'META-INF/services/dev.joid.impl.minecraft.IMinecraftDemo'
+            'assets/joid/demo/**'
     ]
 
     developmentReferences = ~/dev\/joid\/(demo|impl\/minecraft\/([\w$]+\/)*(demo|snapshot))\/[\w$\/]+/
+
+    developmentCallSites = [
+            'dev/joid/impl/minecraft/JoidMinecraft.class -> dev/joid/impl/minecraft/demo/DemoLauncher'
+    ]
 
     moduleDescriptors = [
             'module-info.class',

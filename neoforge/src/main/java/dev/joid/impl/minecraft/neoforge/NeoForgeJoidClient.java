@@ -11,7 +11,6 @@ import net.neoforged.neoforge.common.NeoForge;
 public final class NeoForgeJoidClient {
 
 	public NeoForgeJoidClient(final IEventBus modBus) {
-		JoidMinecraft.bootstrap();
 		NeoForge.EVENT_BUS.addListener(NeoForgeClientTicks::tick);
 		NeoForge.EVENT_BUS.addListener(NeoForgeScreenEvents::init);
 		modBus.addListener(NeoForgeReloadListeners::register);

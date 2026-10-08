@@ -111,6 +111,7 @@ def verifyProdJar = tasks.register('verifyProdJar') {
     def archive = prodJar.flatMap { it.archiveFile }
     def patterns = developmentPatterns
     def references = developmentReferences
+    def callSites = developmentCallSites
     inputs.file(archive)
     doLast {
         def found = []
@@ -125,7 +126,10 @@ def verifyProdJar = tasks.register('verifyProdJar') {
                 def text = new String(zip.getInputStream(entry).bytes, 'ISO-8859-1')
                 def matcher = references.matcher(text)
                 while (matcher.find()) {
-                    referencing << "${entry.name} -> ${matcher.group()}"
+                    def reference = "${entry.name} -> ${matcher.group()}".toString()
+                    if (!callSites.contains(reference)) {
+                        referencing << reference
+                    }
                 }
             }
         }
@@ -160,7 +164,7 @@ def verifyDevJar = tasks.register('verifyDevJar') {
     inputs.file(archive)
     doLast {
         new ZipFile(archive.get().asFile).withCloseable { zip ->
-            ['dev/joid/demo/DemoFont.class', 'dev/joid/lib/ui/node/impl/dev/DevNode.class', 'dev/joid/impl/minecraft/demo/MinecraftDemo.class', 'META-INF/services/dev.joid.impl.minecraft.IMinecraftDemo'].each { entry ->
+            ['dev/joid/demo/DemoFont.class', 'dev/joid/lib/ui/node/impl/dev/DevNode.class', 'dev/joid/impl/minecraft/demo/DemoLauncher.class'].each { entry ->
                 if (zip.getEntry(entry) == null) {
                     throw new GradleException("The dev jar misses ${entry}")
                 }

@@ -35,6 +35,8 @@ import dev.joid.lib.bridge.render.texture.ITexture;
 import dev.joid.lib.font.dto.TextInfo;
 import dev.joid.lib.resource.Resource;
 import dev.joid.lib.ui.core.UI;
+import dev.joid.lib.ui.node.Node;
+import dev.joid.lib.ui.node.impl.design.shape.RectNode;
 import dev.joid.test.snapshot.SnapshotDifference;
 import dev.joid.test.snapshot.SnapshotImage;
 import dev.joid.test.snapshot.SnapshotRunner;
@@ -70,6 +72,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			context.takeScreenshot("joid-demo-choice");
 			FabricJoidClientGameTest.guiScale(context, 2, 0.5D, "joid-demo-choice-gui-scale-2");
 			FabricJoidClientGameTest.guiScale(context, 0, 1D, "joid-demo-choice-gui-scale-auto");
+			FabricJoidClientGameTest.clickDemo(context, UIDemoMinecraft.class, "joid-demo-choice-minecraft");
 
 			FabricJoidClientGameTest.screenshot(context, new UIDemoFont(), "joid-demo-font");
 			FabricJoidClientGameTest.screenshot(context, new UIDemoShader(), "joid-demo-shader");
@@ -93,6 +96,32 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		context.getInput().setCursorPos(center.x, center.y);
 		context.getInput().pressMouse(GLFW.GLFW_MOUSE_BUTTON_LEFT);
 		context.getInput().setCursorPos(960D, 540D);
+	}
+
+	private static void clickDemo(final ClientGameTestContext context, final Class<? extends UI> clazz, final String name) {
+		final Vector2d center = context.computeOnClient(_ -> FabricJoidClientGameTest.center(clazz));
+		context.getInput().setCursorPos(center.x, center.y);
+		context.waitTicks(2);
+		context.getInput().pressMouse(GLFW.GLFW_MOUSE_BUTTON_LEFT);
+		context.getInput().setCursorPos(960D, 540D);
+		context.waitTicks(40);
+		context.takeScreenshot(name);
+		context.runOnClient(_ -> {
+			if (JOID.getUI(clazz) == null) {
+				throw new AssertionError("Clicking the entry " + clazz.getSimpleName() + " of UIDemoChoice did not open it");
+			}
+		});
+	}
+
+	private static Vector2d center(final Class<? extends UI> clazz) {
+		final int index = new ArrayList<>(UIDemoChoice.LIST).indexOf(clazz);
+		if (index < 0) {
+			throw new AssertionError("UIDemoChoice does not list " + clazz.getName());
+		}
+
+		final UI ui = JOID.getUI(UIDemoChoice.class);
+		final Node entry = ui.getNodeList().ordered().getFirst().getChild(index, RectNode.class);
+		return new Vector2d(ui.getView().toScreenX(entry.getAbsoluteX() + entry.getWidth() / 2D), ui.getView().toScreenY(entry.getAbsoluteY() + entry.getHeight() / 2D));
 	}
 
 	private static Vector2d center(final Minecraft minecraft, final String label) {
@@ -276,6 +305,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 	private static void verifySnapshots(final File output, final File references) {
 		final List<String> failures = new ArrayList<>();
 		final SnapshotRunner runner = SnapshotRunner.start(new SnapshotBackend());
+		UIDemoChoice.LIST.remove(UIDemoMinecraft.class);
 		try {
 			final File rendererReferences = new File(references, runner.getRenderer());
 			for (final String scenario : SnapshotRunner.getScenarios()) {
@@ -295,6 +325,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 				}
 			}
 		} finally {
+			UIDemoChoice.LIST.add(UIDemoMinecraft.class);
 			runner.stop();
 		}
 
