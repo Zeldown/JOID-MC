@@ -81,3 +81,21 @@ jobs:
             fabric/build/run/clientGameTest/logs/
             fabric/build/snapshots/
             .snapshots/references/
+
+  server-tests:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          lfs: true
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Server game tests
+        run: ./gradlew :neoforge:runGameTestServer :forge:runGameTestServer

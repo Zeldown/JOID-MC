@@ -20,6 +20,7 @@ minecraft {
         register('server') {
             args('--nogui')
         }
+        register('gameTestServer')
         register('data') {
             args('--mod', mod_id, '--all', '--output', file('src/generated/resources/').absolutePath, '--existing', file('src/main/resources/').absolutePath)
         }

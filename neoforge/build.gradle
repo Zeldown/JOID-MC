@@ -28,6 +28,10 @@ neoForge {
             this.file('runs/server').createParentDirectories()
             gameDirectory = this.mkdir(this.file('runs/server'))
         }
+        gameTestServer {
+            type = 'gameTestServer'
+            gameDirectory = this.mkdir(this.file('runs/gameTestServer'))
+        }
     }
     mods {
         "${mod_id}" {
