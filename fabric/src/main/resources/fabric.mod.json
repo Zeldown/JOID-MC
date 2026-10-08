@@ -12,10 +12,10 @@
     "accessWidener": "joid.classtweaker",
     "entrypoints": {
         "main": [
-            "dev.joid.impl.minecraft.fabric.FabricJoid"
+            "dev.joid.backend.minecraft.fabric.FabricJoid"
         ],
         "client": [
-            "dev.joid.impl.minecraft.fabric.FabricJoidClient"
+            "dev.joid.backend.minecraft.fabric.FabricJoidClient"
         ]
     },
     "depends": {

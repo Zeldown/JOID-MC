@@ -6,15 +6,15 @@ ext {
             'dev/joid/internal/font/**',
             'dev/joid/lib/ui/node/impl/dev/**',
             'dev/joid/impl/glfw/demo/**',
-            'dev/joid/impl/minecraft/**/demo/**',
-            'dev/joid/impl/minecraft/snapshot/**',
+            'dev/joid/backend/minecraft/**/demo/**',
+            'dev/joid/backend/minecraft/snapshot/**',
             'assets/joid/demo/**'
     ]
 
-    developmentReferences = ~/dev\/joid\/(demo|impl\/minecraft\/([\w$]+\/)*(demo|snapshot))\/[\w$\/]+/
+    developmentReferences = ~/dev\/joid\/(demo|backend\/minecraft\/([\w$]+\/)*(demo|snapshot))\/[\w$\/]+/
 
     developmentCallSites = [
-            'dev/joid/impl/minecraft/JoidMinecraft.class -> dev/joid/impl/minecraft/demo/DemoLauncher'
+            'dev/joid/backend/minecraft/MinecraftBackend.class -> dev/joid/backend/minecraft/demo/DemoLauncher'
     ]
 
     moduleDescriptors = [

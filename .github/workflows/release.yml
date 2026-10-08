@@ -64,7 +64,7 @@ jobs:
           VERSION: ${{ needs.version.outputs.version }}
         run: |
           for KIND in dev prod; do
-            if ! ls "$LOADER"/build/libs/joid-"$LOADER"-*-"$VERSION"-"$KIND".jar > /dev/null 2>&1; then
+            if ! ls "$LOADER"/build/libs/joid-backend-minecraft-"$LOADER"-*-"$VERSION"-"$KIND".jar > /dev/null 2>&1; then
               echo "::error::The $KIND jar of $LOADER is missing"
               exit 1
             fi

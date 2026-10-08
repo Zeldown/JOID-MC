@@ -122,7 +122,7 @@ def verifyProdJar = tasks.register('verifyProdJar') {
 
         def referencing = [] as SortedSet
         new ZipFile(archive.get().asFile).withCloseable { zip ->
-            zip.entries().findAll { it.name.startsWith('dev/joid/impl/minecraft/') && it.name.endsWith('.class') }.each { entry ->
+            zip.entries().findAll { it.name.startsWith('dev/joid/backend/minecraft/') && it.name.endsWith('.class') }.each { entry ->
                 def text = new String(zip.getInputStream(entry).bytes, 'ISO-8859-1')
                 def matcher = references.matcher(text)
                 while (matcher.find()) {
@@ -164,7 +164,7 @@ def verifyDevJar = tasks.register('verifyDevJar') {
     inputs.file(archive)
     doLast {
         new ZipFile(archive.get().asFile).withCloseable { zip ->
-            ['dev/joid/demo/DemoFont.class', 'dev/joid/lib/ui/node/impl/dev/DevNode.class', 'dev/joid/impl/minecraft/demo/DemoLauncher.class'].each { entry ->
+            ['dev/joid/demo/DemoFont.class', 'dev/joid/lib/ui/node/impl/dev/DevNode.class', 'dev/joid/backend/minecraft/demo/DemoLauncher.class'].each { entry ->
                 if (zip.getEntry(entry) == null) {
                     throw new GradleException("The dev jar misses ${entry}")
                 }

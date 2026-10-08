@@ -6,7 +6,7 @@
     "environment": "client",
     "entrypoints": {
         "fabric-client-gametest": [
-            "dev.joid.impl.minecraft.fabric.test.FabricJoidClientGameTest"
+            "dev.joid.backend.minecraft.fabric.test.FabricJoidClientGameTest"
         ]
     },
     "depends": {
