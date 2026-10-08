@@ -23,7 +23,7 @@ fabricApi {
 }
 
 dependencies {
-    gametestImplementation(files(rootProject.file("libs/joid-testkit-${joid_version}.jar")))
+    gametestImplementation(files(rootProject.file("libs/joid-tool-testkit-${joid_version}.jar")))
     gametestImplementation("junit:junit:${junit_version}")
     gametestCompileOnly("org.projectlombok:lombok:${lombok_version}")
     gametestAnnotationProcessor("org.projectlombok:lombok:${lombok_version}")

@@ -19,12 +19,13 @@ configurations {
 
 dependencies {
     compileOnly(files(rootProject.file("libs/joid-core-${joid_version}-dev.jar")))
-    compileOnly(files(rootProject.file("libs/joid-glfw-${joid_version}.jar")))
-    compileOnly(files(rootProject.file("libs/joid-testkit-${joid_version}.jar")))
+    compileOnly(files(rootProject.file("libs/joid-base-glfw-${joid_version}.jar")))
+    compileOnly(files(rootProject.file("libs/joid-base-openal-${joid_version}.jar")))
+    compileOnly(files(rootProject.file("libs/joid-tool-testkit-${joid_version}.jar")))
     compileOnly("javax.vecmath:vecmath:${vecmath_version}")
 
     testImplementation(files(rootProject.file("libs/joid-core-${joid_version}-dev.jar")))
-    testImplementation(files(rootProject.file("libs/joid-testkit-${joid_version}.jar")))
+    testImplementation(files(rootProject.file("libs/joid-tool-testkit-${joid_version}.jar")))
     testImplementation("org.lwjgl:lwjgl:${shaderc_lwjgl_version}")
     testImplementation("org.lwjgl:lwjgl-shaderc:${shaderc_lwjgl_version}")
     testRuntimeOnly("org.lwjgl:lwjgl:${shaderc_lwjgl_version}:${lwjglNatives}")

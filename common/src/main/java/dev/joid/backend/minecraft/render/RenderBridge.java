@@ -6,26 +6,31 @@ import java.nio.ByteOrder;
 import org.joml.Vector4f;
 
 import dev.joid.backend.minecraft.render.framebuffer.FrameBuffer;
-import dev.joid.backend.minecraft.render.matrix.DepthRange;
 import dev.joid.backend.minecraft.render.pass.PassEncoder;
 import dev.joid.backend.minecraft.render.pipeline.PipelineCache;
 import dev.joid.backend.minecraft.render.raster.Rasterizer;
+import dev.joid.backend.minecraft.render.shader.GlslShaderTranslator;
 import dev.joid.backend.minecraft.render.shader.Shader;
 import dev.joid.backend.minecraft.render.shader.ShaderSourceProvider;
-import dev.joid.backend.minecraft.render.state.PipelineKey;
-import dev.joid.backend.minecraft.render.stencil.StencilEmulation;
+import dev.joid.backend.minecraft.render.texture.IGpuTexture;
 import dev.joid.backend.minecraft.render.texture.Texture;
 import dev.joid.lib.bridge.render.framebuffer.IFrameBuffer;
+import dev.joid.lib.bridge.render.matrix.DepthRange;
 import dev.joid.lib.bridge.render.shader.IShader;
+import dev.joid.lib.bridge.render.shader.SamplerBinding;
 import dev.joid.lib.bridge.render.shader.source.ShaderSource;
-import dev.joid.lib.bridge.render.shader.source.ShaderStage;
+import dev.joid.lib.bridge.render.shader.uniform.UniformSampler;
 import dev.joid.lib.bridge.render.state.BlendState;
+import dev.joid.lib.bridge.render.state.PipelineKey;
 import dev.joid.lib.bridge.render.state.RenderState;
+import dev.joid.lib.bridge.render.state.StencilEmulation;
 import dev.joid.lib.bridge.render.texture.ITexture;
 import dev.joid.lib.bridge.render.texture.TextureFilter;
+import dev.joid.lib.bridge.render.texture.TextureSampling;
 import dev.joid.lib.bridge.render.texture.TextureWrap;
-import dev.joid.lib.bridge.render.vertex.DrawMode;
+import dev.joid.lib.bridge.render.vertex.Primitive;
 import dev.joid.lib.bridge.render.vertex.VertexBuffer;
+import dev.joid.lib.bridge.render.vertex.VertexFill;
 import lombok.Getter;
 import lombok.NonNull;
 
@@ -48,12 +53,11 @@ public final class RenderBridge extends dev.joid.lib.bridge.render.RenderBridge 
 	private final PassEncoder          passEncoder;
 	private final PipelineCache        pipelineCache;
 	private final ShaderSourceProvider sourceProvider;
-	private final Texture              emptyTexture;
-	private final Shader               fixedShader;
 	private final Rasterizer           rasterizer;
 
 	private ByteBuffer   scratch;
 	private RenderTarget target;
+	private RenderTarget screenTarget;
 
 	public RenderBridge() {
 		this.device         = RenderSystem.getDevice();
@@ -62,29 +66,36 @@ public final class RenderBridge extends dev.joid.lib.bridge.render.RenderBridge 
 		this.sourceProvider = ShaderSourceProvider.create();
 		this.pipelineCache  = PipelineCache.create(this.device, this.sourceProvider);
 		this.scratch        = ByteBuffer.allocateDirect(1 << 16).order(ByteOrder.nativeOrder());
-		this.emptyTexture   = Texture.create(this).allocate(1, 1).upload(new int[] {0xFFFFFFFF}, 1, 1);
-		this.fixedShader    = (Shader) this.createShader(ShaderSource.read(ShaderStage.VERTEX, ShaderSource.class.getResourceAsStream("/assets/shaders/fixed/fixed.vsh")), ShaderSource.read(ShaderStage.FRAGMENT, ShaderSource.class.getResourceAsStream("/assets/shaders/fixed/fixed.fsh")), BlendState.DISABLED);
 		this.rasterizer     = Rasterizer.create(this);
 	}
 
-	public void beginFrame(final @NonNull RenderTarget target) {
+	public @NonNull RenderBridge screenTarget(final RenderTarget screenTarget) {
+		this.screenTarget = screenTarget;
+		return this;
+	}
+
+	@Override
+	public void endFrame() {
+		this.requireFrame();
+		this.passEncoder.end();
+		this.target = null;
+	}
+
+	@Override
+	public void beginFrame() {
 		if (this.target != null) {
 			throw new IllegalStateException("The JOID frame has already begun");
 		}
 
-		this.target = target;
-		this.passEncoder.encoder().clearDepthTexture(target.getDepth(), 1D);
-		if (target.getStencil() != null) {
-			this.passEncoder.encoder().clearColorTexture(target.getStencil(), new Vector4f(0F));
+		if (this.screenTarget == null) {
+			throw new IllegalStateException("A JOID frame needs a screen target, set it with screenTarget before beginFrame");
 		}
-	}
 
-	public @NonNull GpuTextureView endFrame() {
-		this.requireFrame();
-		final GpuTextureView view = this.target.getView();
-		this.passEncoder.end();
-		this.target = null;
-		return view;
+		this.target = this.screenTarget;
+		this.passEncoder.encoder().clearDepthTexture(this.target.getDepth(), 1D);
+		if (this.target.getStencil() != null) {
+			this.passEncoder.encoder().clearColorTexture(this.target.getStencil(), new Vector4f(0F));
+		}
 	}
 
 	@Override
@@ -111,41 +122,12 @@ public final class RenderBridge extends dev.joid.lib.bridge.render.RenderBridge 
 	}
 
 	@Override
-	public void draw(final @NonNull DrawMode mode, final @NonNull VertexBuffer buffer) {
-		this.requireFrame();
-		final RenderState state = super.getState();
-		final Shader shader = state.getShader() == null ? this.fixedShader : (Shader) state.getShader();
-		final boolean lines = RenderBridge.isLines(mode);
-		final RenderTarget target = this.getTarget(state);
-		if (!shader.isActive() || buffer.getCount() == 0 || !RenderBridge.isVisible(state, target)) {
-			return;
-		}
-
-		final StencilEmulation stencil = StencilEmulation.create(state, target.getStencil() != null);
-		final boolean color = state.isColorMask() || state.isDepthTest() && state.isDepthWrite();
-		if (!color && !stencil.isWrite()) {
-			return;
-		}
-
-		final GpuBufferSlice vertices = this.uploadVertices(buffer, state);
-		final GpuBufferSlice uniforms = shader.upload(state, this.getProjectionMatrix(state, target), super.getModelView(), stencil);
-		if (color) {
-			this.record(PipelineKey.create(shader, state, lines), target.getView(), target.getDepthView(), stencil.isTest() ? target.getStencilView() : this.emptyTexture.getView(), shader, vertices, uniforms, buffer.getCount());
-		}
-
-		if (stencil.isWrite()) {
-			this.passEncoder.encoder().copyTextureToTexture(target.getStencil(), target.getStencilCopy(), 0, 0, 0, 0, 0, target.getWidth(), target.getHeight());
-			this.record(PipelineKey.stencil(shader, state, lines), target.getStencilView(), null, target.getStencilCopyView(), shader, vertices, uniforms, buffer.getCount());
-		}
-	}
-
-	@Override
 	public @NonNull ITexture createTexture() {
 		return Texture.create(this);
 	}
 
 	@Override
-	public @NonNull IFrameBuffer createFrameBuffer(final int width, final int height, final @NonNull TextureFilter filter) {
+	public @NonNull IFrameBuffer createFrameBuffer(final int width, final int height) {
 		return FrameBuffer.create(this, width, height);
 	}
 
@@ -163,10 +145,38 @@ public final class RenderBridge extends dev.joid.lib.bridge.render.RenderBridge 
 		return this.scratch;
 	}
 
-	public static @NonNull GpuSampler getSampler(final @NonNull TextureFilter filter, final @NonNull TextureWrap wrap, final boolean mipmapped) {
-		final AddressMode address = wrap == TextureWrap.REPEAT ? AddressMode.REPEAT : AddressMode.CLAMP_TO_EDGE;
-		final FilterMode mode = filter == TextureFilter.LINEAR ? FilterMode.LINEAR : FilterMode.NEAREST;
-		return RenderSystem.getSamplerCache().getSampler(address, address, mode, mode, mipmapped && filter == TextureFilter.LINEAR);
+	@Override
+	protected void drawPrimitive(final @NonNull Primitive primitive, final @NonNull VertexBuffer buffer, final @NonNull IShader shader) {
+		this.requireFrame();
+		final RenderState state = super.getState();
+		final RenderTarget target = this.getTarget(state);
+		if (!RenderBridge.isVisible(state, target)) {
+			return;
+		}
+
+		final StencilEmulation stencil = StencilEmulation.create(state, target.getStencil() != null);
+		final boolean color = state.isColorMask() || state.isDepthTest() && state.isDepthWrite();
+		if (!color && !stencil.isWrite()) {
+			return;
+		}
+
+		final Shader blazeShader = (Shader) shader;
+		final GpuBufferSlice vertices = this.uploadVertices(buffer, state);
+		final GpuBufferSlice uniforms = blazeShader.upload(state, this.getProjectionMatrix(state, target), super.getModelView(), stencil);
+		if (color) {
+			this.record(PipelineKey.create(shader, state, primitive), target.getView(), target.getDepthView(), stencil.isTest() ? target.getStencilView() : ((Texture) super.getEmptyTexture()).getView(), blazeShader, vertices, uniforms, buffer.getCount());
+		}
+
+		if (stencil.isWrite()) {
+			this.passEncoder.encoder().copyTextureToTexture(target.getStencil(), target.getStencilCopy(), 0, 0, 0, 0, 0, target.getWidth(), target.getHeight());
+			this.record(PipelineKey.stencil(shader, state, primitive), target.getStencilView(), null, target.getStencilCopyView(), blazeShader, vertices, uniforms, buffer.getCount());
+		}
+	}
+
+	public static @NonNull GpuSampler getSampler(final @NonNull TextureSampling sampling) {
+		final AddressMode address = sampling.getWrap() == TextureWrap.REPEAT ? AddressMode.REPEAT : AddressMode.CLAMP_TO_EDGE;
+		final FilterMode mode = sampling.getFilter() == TextureFilter.LINEAR ? FilterMode.LINEAR : FilterMode.NEAREST;
+		return RenderSystem.getSamplerCache().getSampler(address, address, mode, mode, sampling.isMipmapFiltered());
 	}
 
 	private void requireFrame() {
@@ -188,7 +198,12 @@ public final class RenderBridge extends dev.joid.lib.bridge.render.RenderBridge 
 		final RenderState state = super.getState();
 		final RenderPass pass = this.passEncoder.begin(color, depth);
 		pass.setPipeline(pipeline);
-		shader.apply(pass, state, uniforms, stencil);
+		pass.setUniform(GlslShaderTranslator.BLOCK, uniforms);
+		for (final UniformSampler sampler : shader.getSamplerMap().values()) {
+			final SamplerBinding binding = super.resolveSampler(sampler);
+			pass.bindTexture(sampler.getName(), ((IGpuTexture) binding.getTexture()).getView(), RenderBridge.getSampler(binding.getSampling()));
+		}
+		pass.bindTexture(GlslShaderTranslator.STENCIL, stencil, RenderBridge.getSampler(TextureSampling.of(TextureFilter.NEAREST, TextureWrap.CLAMP_TO_EDGE, false)));
 		pass.setVertexBuffer(0, vertices);
 
 		final int width = color.getWidth(0);
@@ -207,27 +222,7 @@ public final class RenderBridge extends dev.joid.lib.bridge.render.RenderBridge 
 	}
 
 	private GpuBufferSlice uploadVertices(final VertexBuffer buffer, final RenderState state) {
-		final int size = buffer.getCount() * VertexBuffer.STRIDE;
-		final ByteBuffer data = this.getScratch(size);
-		data.put(0, buffer.getBuffer(), buffer.getBuffer().position(), size);
-		if (!buffer.isTexture() || !buffer.isColor() || !buffer.isNormal()) {
-			final int color = RenderBridge.toByte(state.getRed()) | RenderBridge.toByte(state.getGreen()) << 8 | RenderBridge.toByte(state.getBlue()) << 16 | RenderBridge.toByte(state.getAlpha()) << 24;
-			for (int vertex = 0; vertex < size; vertex += VertexBuffer.STRIDE) {
-				if (!buffer.isTexture()) {
-					data.putFloat(vertex + VertexBuffer.TEXTURE_OFFSET, 0F);
-					data.putFloat(vertex + VertexBuffer.TEXTURE_OFFSET + 4, 0F);
-				}
-
-				if (!buffer.isColor()) {
-					data.putInt(vertex + VertexBuffer.COLOR_OFFSET, color);
-				}
-
-				if (!buffer.isNormal()) {
-					data.putInt(vertex + VertexBuffer.NORMAL_OFFSET, 127 << 16);
-				}
-			}
-		}
-
+		final ByteBuffer data = VertexFill.complete(buffer, this.getScratch(buffer.getCount() * VertexBuffer.STRIDE), state);
 		return this.device.createCommandEncoder().transientMemory().uploadGpu(data, VertexBuffer.STRIDE, GpuBuffer.USAGE_VERTEX);
 	}
 
@@ -245,22 +240,7 @@ public final class RenderBridge extends dev.joid.lib.bridge.render.RenderBridge 
 	}
 
 	private static boolean isVisible(final RenderState state, final RenderTarget target) {
-		return state.getViewportWidth() > 0 && state.getViewportHeight() > 0 && state.getViewportX() < target.getWidth() && state.getViewportY() < target.getHeight() && state.getViewportX() + state.getViewportWidth() > 0 && state.getViewportY() + state.getViewportHeight() > 0;
-	}
-
-	private static boolean isLines(final DrawMode mode) {
-		switch (mode) {
-		case LINES:
-			return true;
-		case TRIANGLES:
-			return false;
-		default:
-			throw new IllegalArgumentException(mode + " is not supported by Blaze3D, convert it before drawing");
-		}
-	}
-
-	private static int toByte(final float value) {
-		return Math.round(Math.max(0F, Math.min(1F, value)) * 255F);
+		return state.getViewportX() < target.getWidth() && state.getViewportY() < target.getHeight() && state.getViewportX() + state.getViewportWidth() > 0 && state.getViewportY() + state.getViewportHeight() > 0;
 	}
 
 }

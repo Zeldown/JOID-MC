@@ -3,6 +3,7 @@ package dev.joid.backend.minecraft.snapshot;
 import dev.joid.backend.minecraft.render.RenderBridge;
 import dev.joid.backend.minecraft.render.RenderTarget;
 import dev.joid.lib.bridge.BridgeHandler;
+import dev.joid.lib.utils.image.PixelLayout;
 import dev.joid.test.snapshot.ISnapshotBackend;
 import dev.joid.test.snapshot.SnapshotImage;
 import lombok.NonNull;
@@ -25,23 +26,14 @@ public final class SnapshotBackend implements ISnapshotBackend {
 
 	@Override
 	public void create(final int width, final int height) {
-		this.target = RenderTarget.create((RenderBridge) BridgeHandler.RENDER.get(), width, height, true);
+		final RenderBridge render = (RenderBridge) BridgeHandler.RENDER.get();
+		this.target = RenderTarget.create(render, width, height, true);
+		render.screenTarget(this.target);
 	}
 
 	@Override
 	public void present() {
 		RenderSystem.getDevice().createCommandEncoder().submit();
-	}
-
-	@Override
-	public void frame(final @NonNull Runnable draw) {
-		final RenderBridge render = (RenderBridge) BridgeHandler.RENDER.get();
-		render.beginFrame(this.target);
-		try {
-			draw.run();
-		} finally {
-			render.endFrame();
-		}
 	}
 
 	@Override
@@ -56,7 +48,7 @@ public final class SnapshotBackend implements ISnapshotBackend {
 			}
 
 			try (GpuBufferSlice.MappedView view = buffer.map(true, false)) {
-				return SnapshotImage.fromBytes(view.data(), width, height, true, false);
+				return SnapshotImage.fromBytes(view.data(), width, height, true, PixelLayout.RGBA8);
 			}
 		} finally {
 			buffer.close();

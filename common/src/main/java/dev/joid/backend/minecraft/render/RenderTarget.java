@@ -28,10 +28,11 @@ public final class RenderTarget {
 
 	public static @NonNull RenderTarget create(final @NonNull RenderBridge bridge, final int width, final int height, final boolean stencil) {
 		final GpuDevice device = bridge.getDevice();
-		final Texture texture = Texture.create(bridge).allocate(width, height);
+		final Texture texture = Texture.create(bridge);
 		final GpuTexture depth = device.createTexture("JOID Depth", GpuTexture.USAGE_COPY_DST | GpuTexture.USAGE_RENDER_ATTACHMENT,GpuFormat.D32_FLOAT, width, height, 1, 1);
 		final GpuTexture stencilTexture = stencil ? RenderTarget.createStencil(device, "JOID Stencil", width, height) : null;
 		final GpuTexture stencilCopy = stencil ? RenderTarget.createStencil(device, "JOID Stencil Copy", width, height) : null;
+		texture.allocate(width, height);
 
 		final CommandEncoder encoder = bridge.getPassEncoder().encoder();
 		encoder.clearColorTexture(texture.getTexture(), new Vector4f(0F));

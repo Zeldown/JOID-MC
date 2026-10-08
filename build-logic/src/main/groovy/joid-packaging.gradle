@@ -5,7 +5,8 @@ ext {
             'dev/joid/demo/**',
             'dev/joid/internal/font/**',
             'dev/joid/lib/ui/node/impl/dev/**',
-            'dev/joid/impl/glfw/demo/**',
+            'dev/joid/base/glfw/demo/**',
+            'dev/joid/base/glfw/snapshot/**',
             'dev/joid/backend/minecraft/**/demo/**',
             'dev/joid/backend/minecraft/snapshot/**',
             'assets/joid/demo/**'

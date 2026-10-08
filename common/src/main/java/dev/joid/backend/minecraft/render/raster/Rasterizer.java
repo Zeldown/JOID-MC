@@ -8,7 +8,7 @@ import dev.joid.lib.bridge.render.matrix.PixelGrid;
 import dev.joid.lib.bridge.render.state.BlendState;
 import dev.joid.lib.bridge.render.texture.TextureFilter;
 import dev.joid.lib.bridge.render.texture.TextureWrap;
-import dev.joid.lib.bridge.render.vertex.DrawMode;
+import dev.joid.lib.render.tessellator.DrawMode;
 import dev.joid.lib.render.tessellator.Tessellator;
 import lombok.NonNull;
 

@@ -5,13 +5,14 @@ import java.util.Optional;
 
 import dev.joid.backend.minecraft.MinecraftBackend;
 import dev.joid.backend.minecraft.render.RenderBridge;
+import dev.joid.lib.bridge.render.texture.MipmapChain;
+import dev.joid.lib.utils.image.PixelLayout;
 import lombok.Getter;
 import lombok.NonNull;
 
 import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.PrimitiveTopology;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.systems.CommandEncoder;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.FilterMode;
@@ -23,7 +24,7 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 
 @Getter
-public final class Texture implements IGpuTexture {
+public final class Texture extends dev.joid.lib.bridge.render.texture.Texture implements IGpuTexture {
 
 	private static final RenderPipeline COPY = RenderPipeline.builder()
 			.withLocation(Identifier.fromNamespaceAndPath(MinecraftBackend.MOD_ID, "pipeline/copy"))
@@ -37,74 +38,17 @@ public final class Texture implements IGpuTexture {
 
 	private GpuTexture     texture;
 	private GpuTextureView view;
-	private int            width;
-	private int            height;
-	private int            levels;
-	private boolean        deleted;
-	private boolean        mipmapped;
 
 	private Texture(final RenderBridge bridge) {
 		this.bridge = bridge;
-		this.levels = 1;
 	}
 
 	public static @NonNull Texture create(final @NonNull RenderBridge bridge) {
 		return new Texture(bridge);
 	}
 
-	@Override
-	public @NonNull Texture mipmap(final boolean mipmap) {
-		if (this.mipmapped == mipmap) {
-			return this;
-		}
-
-		this.mipmapped = mipmap;
-		if (mipmap && this.texture != null && this.levels != Texture.levels(true, this.width, this.height)) {
-			final GpuTexture source = this.texture;
-			final GpuTextureView view = this.view;
-			this.texture = this.createTexture(this.width, this.height);
-			this.view    = this.bridge.getDevice().createTextureView(this.texture);
-			this.bridge.getPassEncoder().encoder().copyTextureToTexture(source, this.texture, 0, 0, 0, 0, 0, this.width, this.height);
-			view.close();
-			source.close();
-			this.generateLevels();
-		}
-
-		return this;
-	}
-
-	@Override
-	public @NonNull Texture allocate(final int width, final int height) {
-		if (this.texture != null && this.width == width && this.height == height && this.levels == Texture.levels(this.mipmapped, width, height)) {
-			return this;
-		}
-
-		this.release();
-		this.width   = width;
-		this.height  = height;
-		this.texture = this.createTexture(width, height);
-		this.view    = this.bridge.getDevice().createTextureView(this.texture);
-		return this;
-	}
-
-	@Override
-	public @NonNull Texture upload(final @NonNull int[] pixels, final int width, final int height) {
-		final ByteBuffer data = this.bridge.getScratch(width * height * 4);
-		for (int i = 0; i < width * height; i++) {
-			final int pixel = pixels[i];
-			data.putInt(i * 4, pixel & 0xFF00FF00 | pixel >> 16 & 0xFF | (pixel & 0xFF) << 16);
-		}
-
-		this.bridge.getPassEncoder().encoder().writeToTexture(this.texture, data, 0, 0, 0, 0, width, height);
-		if (this.mipmapped) {
-			this.generateLevels();
-		}
-
-		return this;
-	}
-
 	public @NonNull Texture copy(final @NonNull GpuTextureView source, final int x, final int y, final int width, final int height) {
-		this.allocate(width, height);
+		super.allocate(width, height);
 		final GpuTextureView target = this.bridge.getDevice().createTextureView(this.texture, 0, 1);
 		try (RenderPass pass = this.bridge.getPassEncoder().encoder().createRenderPass(() -> "JOID Copy", target, Optional.empty())) {
 			pass.setPipeline(Texture.COPY);
@@ -114,34 +58,58 @@ public final class Texture implements IGpuTexture {
 			target.close();
 		}
 
-		if (this.mipmapped) {
-			this.generateLevels();
-		}
-
+		this.generateLevels(MipmapChain.of(width, height, super.isMipmapped()));
 		return this;
 	}
 
 	@Override
-	public void delete() {
-		if (this.deleted) {
-			return;
+	protected void onAllocate(final @NonNull MipmapChain chain) {
+		this.release();
+		this.texture = this.createTexture(chain);
+		this.view    = this.bridge.getDevice().createTextureView(this.texture);
+	}
+
+	@Override
+	protected void onUpload(final @NonNull int[] pixels, final @NonNull MipmapChain chain) {
+		final ByteBuffer data = PixelLayout.RGBA8.write(pixels, this.bridge.getScratch(chain.getWidth() * chain.getHeight() * 4));
+		this.bridge.getPassEncoder().encoder().writeToTexture(this.texture, data, 0, 0, 0, 0, chain.getWidth(), chain.getHeight());
+		this.generateLevels(chain);
+	}
+
+	@Override
+	protected void onGenerateLevels(final @NonNull MipmapChain chain, final int allocatedLevels) {
+		if (this.texture.getMipLevels() != Texture.getDeviceLevels(chain)) {
+			final GpuTexture source = this.texture;
+			final GpuTextureView view = this.view;
+			this.texture = this.createTexture(chain);
+			this.view    = this.bridge.getDevice().createTextureView(this.texture);
+			this.bridge.getPassEncoder().encoder().copyTextureToTexture(source, this.texture, 0, 0, 0, 0, 0, chain.getWidth(), chain.getHeight());
+			view.close();
+			source.close();
 		}
 
+		this.generateLevels(chain);
+	}
+
+	@Override
+	protected void onDelete() {
 		this.release();
-		this.deleted = true;
 	}
 
-	private GpuTexture createTexture(final int width, final int height) {
-		this.levels = Texture.levels(this.mipmapped, width, height);
-		return this.bridge.getDevice().createTexture("JOID Texture", GpuTexture.USAGE_COPY_DST | GpuTexture.USAGE_COPY_SRC | GpuTexture.USAGE_TEXTURE_BINDING | GpuTexture.USAGE_RENDER_ATTACHMENT, GpuFormat.RGBA8_UNORM, width, height, 1, this.levels);
+	private GpuTexture createTexture(final MipmapChain chain) {
+		return this.bridge.getDevice().createTexture("JOID Texture", GpuTexture.USAGE_COPY_DST | GpuTexture.USAGE_COPY_SRC | GpuTexture.USAGE_TEXTURE_BINDING | GpuTexture.USAGE_RENDER_ATTACHMENT, GpuFormat.RGBA8_UNORM, chain.getWidth(), chain.getHeight(), 1, Texture.getDeviceLevels(chain));
 	}
 
-	private void generateLevels() {
-		final CommandEncoder encoder = this.bridge.getPassEncoder().encoder();
-		for (int level = 1; level < this.levels; level++) {
+	private void generateLevels(final MipmapChain chain) {
+		final int levels = this.texture.getMipLevels();
+		chain.forEachStep((level, _, _, _, _) -> {
+			if (level >= levels) {
+				return;
+			}
+
 			final GpuTextureView source = this.bridge.getDevice().createTextureView(this.texture, level - 1, 1);
 			final GpuTextureView target = this.bridge.getDevice().createTextureView(this.texture, level, 1);
-			try (RenderPass pass = encoder.createRenderPass(() -> "JOID Mipmap", target, Optional.empty())) {
+			try (RenderPass pass = this.bridge.getPassEncoder().encoder().createRenderPass(() -> "JOID Mipmap", target, Optional.empty())) {
 				RenderSystem.bindDefaultUniforms(pass);
 				pass.setPipeline(RenderPipelines.TRACY_BLIT);
 				pass.bindTexture("InSampler", source, RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
@@ -150,7 +118,7 @@ public final class Texture implements IGpuTexture {
 				source.close();
 				target.close();
 			}
-		}
+		});
 	}
 
 	private void release() {
@@ -163,15 +131,10 @@ public final class Texture implements IGpuTexture {
 		this.texture.close();
 		this.view    = null;
 		this.texture = null;
-		this.levels  = 1;
 	}
 
-	private static int levels(final boolean mipmapped, final int width, final int height) {
-		if (!mipmapped) {
-			return 1;
-		}
-
-		return 32 - Integer.numberOfLeadingZeros(Math.max(1, Math.min(width, height)));
+	private static int getDeviceLevels(final MipmapChain chain) {
+		return Math.min(chain.getLevels(), 32 - Integer.numberOfLeadingZeros(Math.max(1, Math.min(chain.getWidth(), chain.getHeight()))));
 	}
 
 }

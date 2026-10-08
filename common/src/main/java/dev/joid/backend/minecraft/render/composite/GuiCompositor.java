@@ -6,6 +6,7 @@ import dev.joid.backend.minecraft.render.RenderTarget;
 import dev.joid.backend.minecraft.render.RenderTargetPool;
 import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.bridge.render.texture.TextureFilter;
+import dev.joid.lib.bridge.render.texture.TextureSampling;
 import dev.joid.lib.bridge.render.texture.TextureWrap;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -49,18 +50,16 @@ public final class GuiCompositor {
 		final Window window = Minecraft.getInstance().getWindow();
 		final RenderBridge render = (RenderBridge) BridgeHandler.RENDER.get();
 		final RenderTarget target = this.targetPool.acquire(window.getWidth(), window.getHeight());
-		render.beginFrame(target);
+		render.screenTarget(target).beginFrame();
 		try {
-			render.frameBuffer(null);
-			render.viewport(0, 0, window.getWidth(), window.getHeight());
-			render.ortho(0D, window.getWidth(), window.getHeight(), 0D, 0D, 10000D);
+			render.screen(window.getWidth(), window.getHeight());
 			render.clear(0F, 0F, 0F, 0F);
 			draw.run();
 		} finally {
 			render.endFrame();
 		}
 
-		graphics.fill(GuiCompositor.PIPELINE, TextureSetup.singleTexture(target.getView(), RenderBridge.getSampler(TextureFilter.NEAREST, TextureWrap.CLAMP_TO_EDGE, false)), 0, 0, graphics.guiWidth(), graphics.guiHeight());
+		graphics.fill(GuiCompositor.PIPELINE, TextureSetup.singleTexture(target.getView(), RenderBridge.getSampler(TextureSampling.of(TextureFilter.NEAREST, TextureWrap.CLAMP_TO_EDGE, false))), 0, 0, graphics.guiWidth(), graphics.guiHeight());
 	}
 
 }

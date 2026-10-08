@@ -5,8 +5,8 @@ import java.util.List;
 
 import dev.joid.backend.minecraft.render.RenderBridge;
 import dev.joid.backend.minecraft.render.composite.GuiCompositor;
-import dev.joid.backend.minecraft.ui.screen.ScreenInputForwarder;
 import dev.joid.backend.minecraft.ui.screen.UIScreen;
+import dev.joid.base.glfw.input.GlfwInputForwarder;
 import dev.joid.internal.JOID;
 import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.bridge.ui.UIBridge;
@@ -26,14 +26,14 @@ public final class ScreenUIBridge extends UIBridge {
 	private final GuiCompositor compositor;
 
 	@Getter
-	private final ScreenInputForwarder input;
+	private final GlfwInputForwarder input;
 
 	private List<String> hoverList;
 	private ItemStack    hoverStack;
 
 	private ScreenUIBridge(final RenderBridge render) {
 		this.compositor = GuiCompositor.create(render);
-		this.input      = ScreenInputForwarder.create(this);
+		this.input      = GlfwInputForwarder.create(this);
 	}
 
 	public static @NonNull ScreenUIBridge create(final @NonNull RenderBridge render) {

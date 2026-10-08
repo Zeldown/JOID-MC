@@ -36,8 +36,9 @@ dependencies {
     commonResources(project(path: ':common', configuration: 'commonResources'))
     joidDev(files(rootProject.file("libs/joid-core-${joid_version}-dev.jar")))
     joidProd(files(rootProject.file("libs/joid-core-${joid_version}-prod.jar")))
-    compileOnly(files(rootProject.file("libs/joid-testkit-${joid_version}.jar")))
-    embed(files(rootProject.file("libs/joid-glfw-${joid_version}.jar")))
+    compileOnly(files(rootProject.file("libs/joid-tool-testkit-${joid_version}.jar")))
+    embed(files(rootProject.file("libs/joid-base-glfw-${joid_version}.jar")))
+    embed(files(rootProject.file("libs/joid-base-openal-${joid_version}.jar")))
     embed("javax.vecmath:vecmath:${vecmath_version}")
 }
 
