@@ -3,11 +3,14 @@ package dev.joid.impl.minecraft.render.texture;
 import java.nio.ByteBuffer;
 import java.util.Optional;
 
+import dev.joid.impl.minecraft.JoidMinecraft;
 import dev.joid.impl.minecraft.render.RenderBridge;
 import lombok.Getter;
 import lombok.NonNull;
 
 import com.mojang.blaze3d.GpuFormat;
+import com.mojang.blaze3d.PrimitiveTopology;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.systems.CommandEncoder;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -15,10 +18,20 @@ import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.textures.GpuTextureView;
 
+import net.minecraft.client.renderer.BindGroupLayouts;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
 
 @Getter
 public final class Texture implements IGpuTexture {
+
+	private static final RenderPipeline COPY = RenderPipeline.builder()
+			.withLocation(Identifier.fromNamespaceAndPath(JoidMinecraft.MOD_ID, "pipeline/copy"))
+			.withVertexShader(Identifier.fromNamespaceAndPath(JoidMinecraft.MOD_ID, "core/copy"))
+			.withFragmentShader(Identifier.fromNamespaceAndPath(JoidMinecraft.MOD_ID, "core/copy"))
+			.withBindGroupLayout(BindGroupLayouts.SAMPLER0)
+			.withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
+			.build();
 
 	private final RenderBridge bridge;
 
@@ -83,6 +96,24 @@ public final class Texture implements IGpuTexture {
 		}
 
 		this.bridge.getPassEncoder().encoder().writeToTexture(this.texture, data, 0, 0, 0, 0, width, height);
+		if (this.mipmapped) {
+			this.generateLevels();
+		}
+
+		return this;
+	}
+
+	public @NonNull Texture copy(final @NonNull GpuTextureView source, final int x, final int y, final int width, final int height) {
+		this.allocate(width, height);
+		final GpuTextureView target = this.bridge.getDevice().createTextureView(this.texture, 0, 1);
+		try (RenderPass pass = this.bridge.getPassEncoder().encoder().createRenderPass(() -> "JOID Copy", target, Optional.empty())) {
+			pass.setPipeline(Texture.COPY);
+			pass.bindTexture("Sampler0", source, RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST));
+			pass.draw(3, 1, (x << 14 | y) << 2, 0);
+		} finally {
+			target.close();
+		}
+
 		if (this.mipmapped) {
 			this.generateLevels();
 		}

@@ -1,19 +1,23 @@
 package dev.joid.impl.minecraft.render.texture;
 
+import java.util.function.Supplier;
+
 import lombok.AccessLevel;
-import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import com.mojang.blaze3d.textures.GpuTextureView;
 
-@Getter
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class BorrowedTexture implements IGpuTexture {
 
-	private final GpuTextureView view;
+	private final Supplier<GpuTextureView> view;
 
 	public static @NonNull BorrowedTexture of(final @NonNull GpuTextureView view) {
+		return new BorrowedTexture(() -> view);
+	}
+
+	public static @NonNull BorrowedTexture of(final @NonNull Supplier<@NonNull GpuTextureView> view) {
 		return new BorrowedTexture(view);
 	}
 
@@ -33,18 +37,23 @@ public final class BorrowedTexture implements IGpuTexture {
 	}
 
 	@Override
+	public @NonNull GpuTextureView getView() {
+		return this.view.get();
+	}
+
+	@Override
 	public int getWidth() {
-		return this.view.getWidth(0);
+		return this.getView().getWidth(0);
 	}
 
 	@Override
 	public int getHeight() {
-		return this.view.getHeight(0);
+		return this.getView().getHeight(0);
 	}
 
 	@Override
 	public boolean isMipmapped() {
-		return this.view.mipLevels() > 1;
+		return this.getView().mipLevels() > 1;
 	}
 
 	@Override
