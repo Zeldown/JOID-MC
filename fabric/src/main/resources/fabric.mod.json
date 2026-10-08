@@ -9,6 +9,7 @@
     ],
     "license": "${license}",
     "environment": "*",
+    "accessWidener": "joid.classtweaker",
     "entrypoints": {
         "main": [
             "dev.joid.impl.minecraft.fabric.FabricJoid"
