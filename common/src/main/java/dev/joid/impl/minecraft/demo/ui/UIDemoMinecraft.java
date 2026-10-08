@@ -8,12 +8,17 @@ import dev.joid.lib.color.Color;
 import dev.joid.lib.draw.text.builder.Text;
 import dev.joid.lib.draw.text.utils.TextMode;
 import dev.joid.lib.font.dto.TextInfo;
+import dev.joid.lib.resource.Resource;
+import dev.joid.lib.ui.node.impl.design.resource.ResourceNode;
 import dev.joid.lib.ui.node.impl.design.shape.RectNode;
 import dev.joid.lib.ui.node.impl.design.text.TextNode;
 import dev.joid.lib.utils.align.Align;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.resources.model.sprite.SpriteId;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 
 public class UIDemoMinecraft extends UIDemo {
 
@@ -109,6 +114,52 @@ public class UIDemoMinecraft extends UIDemo {
 		.body(rect -> {
 			TextNode.create(20, 30, 360, 0).text(Text.create("\u00A7lDark\u00A7r \u00A7otext\u00A7r \u00A7nwithout\u00A7r shadow", info.copy().color(Color.BLACK).shadow(null))).mode(TextMode.SPLIT).attach(rect);
 			TextNode.create(200, 255).text(Text.create("No shadow", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
+		})
+		.attach(this);
+
+		RectNode
+		.create(40, 680, 440, 240)
+		.color(UIDemoMinecraft.PLACEHOLDER)
+		.body(rect -> {
+			RectNode.create(20, 20, 400, 200).color(UIDemoMinecraft.PANEL).attach(rect);
+			ResourceNode.create(40, 40, 360, 0).resource(Resource.of("minecraft:textures/gui/title/minecraft.png").nearest()).attach(rect);
+			ResourceNode.create(40, 140, 64, 64).resource(Resource.of(Identifier.withDefaultNamespace("textures/block/diamond_block.png")).nearest()).attach(rect);
+			TextNode.create(220, 255).text(Text.create("Textures", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
+		})
+		.attach(this);
+
+		RectNode
+		.create(520, 680, 440, 240)
+		.color(UIDemoMinecraft.PLACEHOLDER)
+		.body(rect -> {
+			RectNode.create(20, 20, 400, 200).color(UIDemoMinecraft.PANEL).attach(rect);
+			ResourceNode.create(40, 40, 64, 64).resource(Resource.of(Sheets.ITEMS_MAPPER.defaultNamespaceApply("diamond")).nearest()).attach(rect);
+			ResourceNode.create(40, 128, 64, 64).resource(Resource.of(Sheets.BLOCKS_MAPPER.defaultNamespaceApply("stone")).nearest()).attach(rect);
+			ResourceNode.create(140, 40, 240, 48).resource(Resource.of(new SpriteId(Sheets.GUI_SHEET, Identifier.withDefaultNamespace("widget/button"))).nearest()).attach(rect);
+			ResourceNode.create(140, 120, 72, 72).resource(Resource.of(new SpriteId(Sheets.GUI_SHEET, Identifier.withDefaultNamespace("container/slot"))).nearest()).attach(rect);
+			TextNode.create(220, 255).text(Text.create("Sprites", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
+		})
+		.attach(this);
+
+		RectNode
+		.create(1000, 680, 440, 240)
+		.color(UIDemoMinecraft.PLACEHOLDER)
+		.body(rect -> {
+			RectNode.create(20, 20, 400, 200).color(UIDemoMinecraft.PANEL).attach(rect);
+			ResourceNode.create(40, 56, 128, 128).resource(Resource.of(Sheets.BLOCKS_MAPPER.defaultNamespaceApply("fire_0")).nearest()).attach(rect);
+			ResourceNode.create(240, 56, 128, 128).resource(Resource.of(Sheets.BLOCKS_MAPPER.defaultNamespaceApply("sea_lantern")).nearest()).attach(rect);
+			TextNode.create(220, 255).text(Text.create("Animated sprites", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
+		})
+		.attach(this);
+
+		RectNode
+		.create(1480, 680, 400, 240)
+		.color(UIDemoMinecraft.PLACEHOLDER)
+		.body(rect -> {
+			RectNode.create(20, 20, 360, 200).color(UIDemoMinecraft.PANEL).attach(rect);
+			ResourceNode.create(40, 56, 128, 128).resource(Resource.of("minecraft:textures/block/sea_lantern.png").nearest()).attach(rect);
+			ResourceNode.create(232, 56, 128, 128).resource(Resource.of("joid:demo/textures/pulse.png").nearest()).attach(rect);
+			TextNode.create(200, 255).text(Text.create(".mcmeta", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
 		})
 		.attach(this);
 	}

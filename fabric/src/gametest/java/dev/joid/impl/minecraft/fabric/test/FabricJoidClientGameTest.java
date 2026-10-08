@@ -1,15 +1,23 @@
 package dev.joid.impl.minecraft.fabric.test;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+
+import javax.imageio.ImageIO;
 
 import org.joml.Vector2d;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.opengl.GL11;
 
 import dev.joid.demo.ui.UIDemoChoice;
 import dev.joid.demo.ui.font.UIDemoFont;
@@ -17,16 +25,21 @@ import dev.joid.demo.ui.shader.UIDemoEffect;
 import dev.joid.demo.ui.shader.UIDemoShader;
 import dev.joid.impl.minecraft.demo.ui.UIDemoMinecraft;
 import dev.joid.impl.minecraft.lib.font.impl.minecraft.MinecraftFont;
+import dev.joid.impl.minecraft.render.texture.Texture;
 import dev.joid.impl.minecraft.snapshot.SnapshotBackend;
 import dev.joid.impl.minecraft.ui.bridge.ScreenUIBridge;
 import dev.joid.impl.minecraft.ui.screen.UIScreen;
 import dev.joid.internal.JOID;
 import dev.joid.lib.bridge.BridgeHandler;
+import dev.joid.lib.bridge.render.texture.ITexture;
 import dev.joid.lib.font.dto.TextInfo;
+import dev.joid.lib.resource.Resource;
 import dev.joid.lib.ui.core.UI;
 import dev.joid.test.snapshot.SnapshotDifference;
 import dev.joid.test.snapshot.SnapshotImage;
 import dev.joid.test.snapshot.SnapshotRunner;
+
+import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
@@ -37,6 +50,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FontDescription;
+import net.minecraft.resources.Identifier;
 
 public final class FabricJoidClientGameTest implements FabricClientGameTest {
 
@@ -61,6 +75,8 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			FabricJoidClientGameTest.screenshot(context, new UIDemoShader(), "joid-demo-shader");
 			FabricJoidClientGameTest.screenshot(context, new UIDemoEffect(), "joid-demo-effect");
 			FabricJoidClientGameTest.screenshot(context, new UIDemoMinecraft(), "joid-demo-minecraft");
+			FabricJoidClientGameTest.verifyResources(context);
+			FabricJoidClientGameTest.verifyReload(context);
 			context.runOnClient(FabricJoidClientGameTest::verifyWidths);
 			context.runOnClient(_ -> JOID.open(new UIDemoChoice()));
 			context.waitTicks(20);
@@ -111,6 +127,125 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 				throw new AssertionError("The GUI scale " + guiScale + " gives the interface scale " + actual + " instead of " + interfaceScale);
 			}
 		});
+	}
+
+	private static void verifyResources(final ClientGameTestContext context) {
+		final List<BufferedImage> captures = new ArrayList<>();
+		for (final String name : List.of("a", "b", "c")) {
+			captures.add(FabricJoidClientGameTest.read(context.takeScreenshot("joid-demo-minecraft-resources-" + name)));
+			context.waitTicks(captures.size() * 2 + 1);
+		}
+
+		final List<String> failures = new ArrayList<>();
+		FabricJoidClientGameTest.expectChange(failures, "animated sprite fire_0", captures, 1040, 736, 128, false);
+		FabricJoidClientGameTest.expectChange(failures, "interpolated sprite sea_lantern", captures, 1240, 736, 128, false);
+		FabricJoidClientGameTest.expectChange(failures, "decoded .mcmeta sea_lantern", captures, 1520, 736, 128, false);
+		FabricJoidClientGameTest.expectChange(failures, "decoded .mcmeta pulse", captures, 1712, 736, 128, false);
+		FabricJoidClientGameTest.expectChange(failures, "static sprite diamond", captures, 560, 720, 64, true);
+		FabricJoidClientGameTest.expectTexture(context, failures, "sprite item/diamond", captures.get(0), 560, 720, "textures/item/diamond.png");
+		FabricJoidClientGameTest.expectTexture(context, failures, "decoded block/diamond_block", captures.get(0), 80, 820, "textures/block/diamond_block.png");
+		if (!failures.isEmpty()) {
+			throw new AssertionError(failures.size() + " resource checks failed:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
+		}
+	}
+
+	private static void verifyReload(final ClientGameTestContext context) {
+		final boolean openGl = context.computeOnClient(_ -> RenderSystem.getDevice().getDeviceInfo().backendName().equals("OpenGL"));
+		FabricJoidClientGameTest.reload(context);
+		final ITexture decoded = context.computeOnClient(_ -> Resource.of("minecraft:textures/block/sea_lantern.png").getTexture());
+		final int textures = openGl ? context.computeOnClient(_ -> FabricJoidClientGameTest.countTextures()) : 0;
+		FabricJoidClientGameTest.reload(context);
+		FabricJoidClientGameTest.reload(context);
+		final int reloaded = openGl ? context.computeOnClient(_ -> FabricJoidClientGameTest.countTextures()) : 0;
+		final List<String> failures = new ArrayList<>();
+		if (!(decoded instanceof final Texture texture) || !texture.isDeleted()) {
+			failures.add("the texture decoded before the reloads was not deleted: " + decoded);
+		}
+
+		if (reloaded != textures) {
+			failures.add("the reloads changed the OpenGL texture count from " + textures + " to " + reloaded);
+		}
+
+		final BufferedImage image = FabricJoidClientGameTest.read(context.takeScreenshot("joid-demo-minecraft-reloaded"));
+		FabricJoidClientGameTest.expectTexture(context, failures, "sprite item/diamond after the reloads", image, 560, 720, "textures/item/diamond.png");
+		FabricJoidClientGameTest.expectTexture(context, failures, "decoded block/diamond_block after the reloads", image, 80, 820, "textures/block/diamond_block.png");
+		if (!failures.isEmpty()) {
+			throw new AssertionError(failures.size() + " reload checks failed:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
+		}
+
+		System.out.println("[JOID] " + (openGl ? textures + " OpenGL textures before and after the reloads" : "Texture count skipped outside OpenGL"));
+	}
+
+	private static void reload(final ClientGameTestContext context) {
+		final CompletableFuture<Void> future = context.computeOnClient(Minecraft::reloadResourcePacks);
+		context.waitFor(_ -> future.isDone(), 2400);
+		context.waitTicks(40);
+	}
+
+	private static int countTextures() {
+		int count = 0;
+		for (int name = 1; name < 65536; name++) {
+			if (GL11.glIsTexture(name)) {
+				count++;
+			}
+		}
+		return count;
+	}
+
+	private static void expectChange(final List<String> failures, final String label, final List<BufferedImage> captures, final int x, final int y, final int size, final boolean same) {
+		boolean changed = false;
+		for (int capture = 1; capture < captures.size(); capture++) {
+			for (int row = 0; row < size && !changed; row++) {
+				for (int column = 0; column < size && !changed; column++) {
+					changed = captures.get(capture - 1).getRGB(x + column, y + row) != captures.get(capture).getRGB(x + column, y + row);
+				}
+			}
+		}
+
+		if (changed == same) {
+			failures.add(label + (same ? " changed" : " did not change") + " between the captures");
+		}
+	}
+
+	private static void expectTexture(final ClientGameTestContext context, final List<String> failures, final String label, final BufferedImage image, final int x, final int y, final String path) {
+		final BufferedImage texture = context.computeOnClient(minecraft -> FabricJoidClientGameTest.texture(minecraft, path));
+		int different = 0;
+		for (int row = 0; row < 64; row++) {
+			for (int column = 0; column < 64; column++) {
+				final int expected = texture.getRGB(column * texture.getWidth() / 64, row * texture.getHeight() / 64);
+				if (expected >>> 24 == 255 && FabricJoidClientGameTest.delta(expected, image.getRGB(x + column, y + row)) > 1) {
+					different++;
+				}
+			}
+		}
+
+		if (different > 0) {
+			failures.add(label + ": " + different + " opaque pixels differ from " + path);
+		}
+	}
+
+	private static int delta(final int expected, final int actual) {
+		int delta = 0;
+		for (int shift = 0; shift < 24; shift += 8) {
+			delta = Math.max(delta, Math.abs((expected >> shift & 0xFF) - (actual >> shift & 0xFF)));
+		}
+		return delta;
+	}
+
+	private static BufferedImage texture(final Minecraft minecraft, final String path) {
+		try (InputStream stream = minecraft.getResourceManager().getResource(Identifier.withDefaultNamespace(path)).orElseThrow().open()) {
+			return ImageIO.read(stream);
+		} catch (final IOException exception) {
+			throw new AssertionError("Unable to read the texture " + path, exception);
+		}
+	}
+
+	private static BufferedImage read(final Path path) {
+		try {
+			return ImageIO.read(path.toFile());
+		} catch (final IOException exception) {
+			throw new AssertionError("Unable to read the capture " + path, exception);
+		}
 	}
 
 	private static void verifyWidths(final Minecraft minecraft) {
