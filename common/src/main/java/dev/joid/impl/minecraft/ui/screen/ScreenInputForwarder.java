@@ -1,51 +1,49 @@
 package dev.joid.impl.minecraft.ui.screen;
 
 import dev.joid.impl.glfw.WindowBridge;
-import dev.joid.impl.minecraft.input.KeyCharacterMerger;
-import dev.joid.impl.minecraft.input.MouseButtonTracker;
-import dev.joid.lib.bridge.BridgeHandler;
+import dev.joid.impl.glfw.input.KeyCharacterMerger;
 import dev.joid.lib.bridge.ui.UIBridge;
 import dev.joid.lib.utils.click.ClickType;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ScreenInputForwarder {
 
 	private final UIBridge           bridge;
 	private final KeyCharacterMerger merger;
-	private final MouseButtonTracker tracker;
+
+	private long      pressTime;
+	private ClickType clickType;
 
 	public static @NonNull ScreenInputForwarder create(final @NonNull UIBridge bridge) {
-		return new ScreenInputForwarder(bridge, KeyCharacterMerger.create(bridge::keyTyped), MouseButtonTracker.create());
+		return new ScreenInputForwarder(bridge, KeyCharacterMerger.create(bridge::keyTyped));
 	}
 
 	public void mousePressed(final @NonNull MouseButtonEvent event) {
-		final ClickType clickType = ClickType.from(event.button());
 		this.merger.flush();
-		this.tracker.press(clickType, BridgeHandler.CLOCK.get().currentTimeMillis());
-		this.bridge.mousePressed(clickType);
+		this.clickType = ClickType.from(event.button());
+		this.pressTime = System.currentTimeMillis();
+		this.bridge.mousePressed(this.clickType);
 	}
 
-	public void mouseReleased(final @NonNull MouseButtonEvent event) {
-		final ClickType clickType = ClickType.from(event.button());
-		if (!this.tracker.isPressed(clickType)) {
+	public void mouseReleased() {
+		if (this.clickType == null) {
 			return;
 		}
 
-		this.tracker.release(clickType);
-		this.bridge.mouseReleased(clickType);
+		this.bridge.mouseReleased(this.clickType);
+		this.clickType = null;
 	}
 
-	public void mouseDragged(final @NonNull MouseButtonEvent event) {
-		final ClickType clickType = ClickType.from(event.button());
-		if (this.tracker.isPressed(clickType)) {
-			this.bridge.mouseDragged(clickType, this.tracker.getDragTime(clickType, BridgeHandler.CLOCK.get().currentTimeMillis()));
+	public void mouseDragged() {
+		if (this.clickType != null) {
+			this.bridge.mouseDragged(this.clickType, System.currentTimeMillis() - this.pressTime);
 		}
 	}
 

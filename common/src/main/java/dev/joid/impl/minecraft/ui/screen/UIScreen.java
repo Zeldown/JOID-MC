@@ -54,13 +54,13 @@ public class UIScreen extends Screen {
 
 	@Override
 	public boolean mouseReleased(final MouseButtonEvent event) {
-		this.bridge.getInput().mouseReleased(event);
+		this.bridge.getInput().mouseReleased();
 		return true;
 	}
 
 	@Override
 	public boolean mouseDragged(final MouseButtonEvent event, final double dx, final double dy) {
-		this.bridge.getInput().mouseDragged(event);
+		this.bridge.getInput().mouseDragged();
 		return true;
 	}
 
