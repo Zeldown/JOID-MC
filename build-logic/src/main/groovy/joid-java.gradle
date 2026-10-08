@@ -40,6 +40,7 @@ tasks.withType(Jar).configureEach {
 tasks.withType(Javadoc).configureEach {
     options.encoding = 'UTF-8'
     options.addBooleanOption('Xdoclint:-missing', true)
+    options.jFlags('-Dfile.encoding=COMPAT')
 }
 
 jar {
@@ -57,6 +58,8 @@ jar {
 }
 
 processResources {
+    filteringCharset = 'UTF-8'
+
     var expandProps = [
             'version'                      : version,
             'group'                        : project.group,
