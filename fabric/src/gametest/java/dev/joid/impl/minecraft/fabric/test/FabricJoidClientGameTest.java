@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -25,6 +26,8 @@ import dev.joid.demo.ui.shader.UIDemoEffect;
 import dev.joid.demo.ui.shader.UIDemoShader;
 import dev.joid.impl.minecraft.demo.ui.UIDemoMinecraft;
 import dev.joid.impl.minecraft.lib.font.impl.minecraft.MinecraftFont;
+import dev.joid.impl.minecraft.lib.ui.node.impl.design.block.BlockNode;
+import dev.joid.impl.minecraft.lib.ui.node.impl.design.item.ItemNode;
 import dev.joid.impl.minecraft.render.texture.Texture;
 import dev.joid.impl.minecraft.snapshot.SnapshotBackend;
 import dev.joid.impl.minecraft.ui.bridge.ScreenUIBridge;
@@ -53,6 +56,8 @@ import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FontDescription;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 public final class FabricJoidClientGameTest implements FabricClientGameTest {
 
@@ -80,6 +85,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			FabricJoidClientGameTest.screenshot(context, new UIDemoMinecraft(), "joid-demo-minecraft");
 			FabricJoidClientGameTest.verifyResources(context);
 			FabricJoidClientGameTest.verifyReload(context);
+			FabricJoidClientGameTest.verifyItems(context);
 			context.runOnClient(FabricJoidClientGameTest::verifyWidths);
 			context.runOnClient(_ -> JOID.open(new UIDemoChoice()));
 			context.waitTicks(20);
@@ -205,6 +211,104 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		System.out.println("[JOID] " + (openGl ? textures + " OpenGL textures before and after the reloads" : "Texture count skipped outside OpenGL"));
 	}
 
+	private static void verifyItems(final ClientGameTestContext context) {
+		context.getInput().setCursorPos(960D, 540D);
+		for (int notch = 0; notch < 20; notch++) {
+			context.getInput().scroll(-1D);
+		}
+
+		context.waitTicks(40);
+		final List<int[]> items = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(ItemNode.class));
+		final List<int[]> blocks = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(BlockNode.class));
+		final BufferedImage first = FabricJoidClientGameTest.read(context.takeScreenshot("joid-demo-minecraft-items-a"));
+		context.waitTicks(7);
+		final BufferedImage second = FabricJoidClientGameTest.read(context.takeScreenshot("joid-demo-minecraft-items-b"));
+		final List<String> failures = new ArrayList<>();
+		for (int index = 0; index < items.size(); index++) {
+			FabricJoidClientGameTest.expectDrawn(failures, "item " + index, first, items.get(index));
+		}
+
+		for (int index = 0; index < blocks.size(); index++) {
+			FabricJoidClientGameTest.expectDrawn(failures, "block " + index, first, blocks.get(index));
+		}
+
+		FabricJoidClientGameTest.expectChange(failures, "plain apple", List.of(first, second), items.get(0), true);
+		FabricJoidClientGameTest.expectChange(failures, "glint of the enchanted sword", List.of(first, second), items.get(1), false);
+		FabricJoidClientGameTest.expectChange(failures, "rotating furnace", List.of(first, second), blocks.get(3), false);
+
+		final int[] pearl = items.get(4);
+		context.getInput().setCursorPos(pearl[0] + pearl[2] / 2D, pearl[1] + pearl[3] / 2D);
+		context.waitTicks(2);
+		context.getInput().pressMouse(GLFW.GLFW_MOUSE_BUTTON_LEFT);
+		context.waitTicks(10);
+		final BufferedImage cooldown = FabricJoidClientGameTest.read(context.takeScreenshot("joid-demo-minecraft-cooldown"));
+		if (!context.computeOnClient(minecraft -> minecraft.player.getCooldowns().isOnCooldown(new ItemStack(Items.ENDER_PEARL)))) {
+			failures.add("clicking the ender pearl did not start its cooldown");
+		}
+
+		FabricJoidClientGameTest.expectChange(failures, "cooldown overlay of the ender pearl", List.of(first, cooldown), pearl, false);
+
+		final int[] apple = items.get(5);
+		final int[] tooltip = {apple[0] + apple[2] / 2 + 12, apple[1] + apple[3] / 2 - 30, 160, 40};
+		context.getInput().setCursorPos(apple[0] + apple[2] / 2D, apple[1] + apple[3] / 2D);
+		context.waitTicks(5);
+		final BufferedImage hovered = FabricJoidClientGameTest.read(context.takeScreenshot("joid-demo-minecraft-tooltip"));
+		FabricJoidClientGameTest.expectChange(failures, "vanilla tooltip of the golden apple", List.of(cooldown, hovered), tooltip, false);
+		context.getInput().setCursorPos(960D, 540D);
+
+		context.runOnClient(minecraft -> {
+			minecraft.options.guiScale().set(2);
+			minecraft.resizeGui();
+		});
+		context.waitTicks(40);
+		context.takeScreenshot("joid-demo-minecraft-items-gui-scale-2");
+		context.runOnClient(minecraft -> {
+			minecraft.options.guiScale().set(0);
+			minecraft.resizeGui();
+		});
+		context.waitTicks(5);
+		if (!failures.isEmpty()) {
+			throw new AssertionError(failures.size() + " item checks failed:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
+		}
+	}
+
+	private static List<int[]> bounds(final Class<? extends Node> clazz) {
+		final UI ui = JOID.getUI(UIDemoMinecraft.class);
+		final List<int[]> bounds = new ArrayList<>();
+		for (final Node node : ui.getNodeList().ordered()) {
+			FabricJoidClientGameTest.bounds(ui, node, clazz, bounds);
+		}
+		return bounds;
+	}
+
+	private static void bounds(final UI ui, final Node node, final Class<? extends Node> clazz, final List<int[]> bounds) {
+		if (clazz.isInstance(node)) {
+			final int left = (int) Math.round(ui.getView().toScreenX(node.getAbsoluteX()));
+			final int top = (int) Math.round(ui.getView().toScreenY(node.getAbsoluteY()));
+			bounds.add(new int[] {left, top, (int) Math.round(ui.getView().toScreenWidth(node.getWidth())), (int) Math.round(ui.getView().toScreenHeight(node.getHeight()))});
+		}
+
+		for (final Node child : node.getChildren(Node.class)) {
+			FabricJoidClientGameTest.bounds(ui, child, clazz, bounds);
+		}
+	}
+
+	private static void expectDrawn(final List<String> failures, final String label, final BufferedImage image, final int[] bounds) {
+		final int background = image.getRGB(bounds[0], bounds[1]);
+		int drawn = 0;
+		for (int row = 0; row < bounds[3]; row++) {
+			for (int column = 0; column < bounds[2]; column++) {
+				if (image.getRGB(bounds[0] + column, bounds[1] + row) != background) {
+					drawn++;
+				}
+			}
+		}
+
+		if (drawn < bounds[2] * bounds[3] / 10) {
+			failures.add(label + " at " + Arrays.toString(bounds) + " is almost empty: " + drawn + " drawn pixels");
+		}
+	}
+
 	private static void reload(final ClientGameTestContext context) {
 		final CompletableFuture<Void> future = context.computeOnClient(Minecraft::reloadResourcePacks);
 		context.waitFor(_ -> future.isDone(), 2400);
@@ -222,10 +326,16 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 	}
 
 	private static void expectChange(final List<String> failures, final String label, final List<BufferedImage> captures, final int x, final int y, final int size, final boolean same) {
+		FabricJoidClientGameTest.expectChange(failures, label, captures, new int[] {x, y, size, size}, same);
+	}
+
+	private static void expectChange(final List<String> failures, final String label, final List<BufferedImage> captures, final int[] bounds, final boolean same) {
+		final int x = bounds[0];
+		final int y = bounds[1];
 		boolean changed = false;
 		for (int capture = 1; capture < captures.size(); capture++) {
-			for (int row = 0; row < size && !changed; row++) {
-				for (int column = 0; column < size && !changed; column++) {
+			for (int row = 0; row < bounds[3] && !changed; row++) {
+				for (int column = 0; column < bounds[2] && !changed; column++) {
 					changed = captures.get(capture - 1).getRGB(x + column, y + row) != captures.get(capture).getRGB(x + column, y + row);
 				}
 			}
