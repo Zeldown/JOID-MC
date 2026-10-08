@@ -9,6 +9,7 @@ import dev.joid.impl.minecraft.render.framebuffer.FrameBuffer;
 import dev.joid.impl.minecraft.render.matrix.DepthRange;
 import dev.joid.impl.minecraft.render.pass.PassEncoder;
 import dev.joid.impl.minecraft.render.pipeline.PipelineCache;
+import dev.joid.impl.minecraft.render.raster.Rasterizer;
 import dev.joid.impl.minecraft.render.shader.Shader;
 import dev.joid.impl.minecraft.render.shader.ShaderSourceProvider;
 import dev.joid.impl.minecraft.render.state.PipelineKey;
@@ -49,6 +50,7 @@ public final class RenderBridge extends dev.joid.lib.bridge.render.RenderBridge 
 	private final ShaderSourceProvider sourceProvider;
 	private final Texture              emptyTexture;
 	private final Shader               fixedShader;
+	private final Rasterizer           rasterizer;
 
 	private ByteBuffer   scratch;
 	private RenderTarget target;
@@ -62,6 +64,7 @@ public final class RenderBridge extends dev.joid.lib.bridge.render.RenderBridge 
 		this.scratch        = ByteBuffer.allocateDirect(1 << 16).order(ByteOrder.nativeOrder());
 		this.emptyTexture   = Texture.create(this).allocate(1, 1).upload(new int[] {0xFFFFFFFF}, 1, 1);
 		this.fixedShader    = (Shader) this.createShader(ShaderSource.read(ShaderStage.VERTEX, ShaderSource.class.getResourceAsStream("/assets/shaders/fixed/fixed.vsh")), ShaderSource.read(ShaderStage.FRAGMENT, ShaderSource.class.getResourceAsStream("/assets/shaders/fixed/fixed.fsh")), BlendState.DISABLED);
+		this.rasterizer     = Rasterizer.create(this);
 	}
 
 	public void beginFrame(final @NonNull RenderTarget target) {
