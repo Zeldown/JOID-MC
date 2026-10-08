@@ -30,7 +30,7 @@ public class UIScreen extends Screen {
 
 	@Override
 	public void removed() {
-		this.bridge.closeAll();
+		this.bridge.removed(this);
 	}
 
 	@Override

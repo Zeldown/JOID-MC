@@ -7,9 +7,7 @@ import dev.joid.backend.minecraft.render.RenderBridge;
 import dev.joid.backend.minecraft.render.composite.GuiCompositor;
 import dev.joid.backend.minecraft.ui.screen.UIScreen;
 import dev.joid.base.glfw.input.GlfwInputForwarder;
-import dev.joid.internal.JOID;
-import dev.joid.lib.bridge.BridgeHandler;
-import dev.joid.lib.bridge.ui.UIBridge;
+import dev.joid.lib.bridge.ui.StackUIBridge;
 import dev.joid.lib.ui.core.UI;
 import lombok.Getter;
 import lombok.NonNull;
@@ -21,13 +19,15 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
-public final class ScreenUIBridge extends UIBridge {
+public final class ScreenUIBridge extends StackUIBridge {
 
 	private final GuiCompositor compositor;
 
 	@Getter
 	private final GlfwInputForwarder input;
 
+	private UIScreen     screen;
+	private boolean      replacing;
 	private List<String> hoverList;
 	private ItemStack    hoverStack;
 
@@ -42,55 +42,23 @@ public final class ScreenUIBridge extends UIBridge {
 
 	@Override
 	public void open(final @NonNull UI ui) {
-		if (!ui.getPopup().active()) {
-			for (final UI currentUi : new ArrayList<>(super.getUiList().ordered())) {
-				final boolean result = currentUi.onClose();
-				if (currentUi.getTransition() != null && currentUi.getTransition().getOut() != null && currentUi.getTransition().getOut().isRunning()) {
-					currentUi.getTransition().getOut().getAnimator().setCallback(_ -> JOID.open(ui));
-					return;
-				}
-
-				if (!result) {
-					return;
-				}
-
-				this.remove(currentUi);
-			}
+		this.replacing = true;
+		try {
+			super.open(ui);
+		} finally {
+			this.replacing = false;
 		}
 
-		this.add(ui);
-		if (!(Minecraft.getInstance().gui.screen() instanceof UIScreen)) {
-			Minecraft.getInstance().gui.setScreen(UIScreen.create(this));
+		if (!super.hasScreen()) {
+			this.onLastScreenClose();
 		}
 	}
 
-	@Override
-	public void close(final @NonNull UI ui) {
-		this.remove(ui);
-		if (super.getUiList().isEmpty() && Minecraft.getInstance().gui.screen() instanceof UIScreen) {
-			Minecraft.getInstance().gui.setScreen(null);
+	public void removed(final @NonNull UIScreen screen) {
+		if (this.screen == screen) {
+			this.screen = null;
+			super.closeAll();
 		}
-	}
-
-	@Override
-	public void add(final @NonNull UI ui) {
-		super.getUiList().add(ui);
-		ui.load(BridgeHandler.WINDOW.get().getWidth(), BridgeHandler.WINDOW.get().getHeight());
-	}
-
-	@Override
-	public void remove(final @NonNull UI ui) {
-		super.getUiList().remove(ui);
-	}
-
-	@Override
-	public boolean canHandle(final @NonNull UI ui) {
-		return true;
-	}
-
-	@Override
-	public boolean canHandle(final @NonNull Class<? extends UI> clazz) {
-		return true;
 	}
 
 	@Override
@@ -127,10 +95,24 @@ public final class ScreenUIBridge extends UIBridge {
 		}
 	}
 
-	public void closeAll() {
-		for (final UI ui : new ArrayList<>(super.getUiList().ordered())) {
-			ui.properlyClose();
-			this.remove(ui);
+	@Override
+	protected void onFirstScreenOpen() {
+		if (this.screen == null) {
+			this.screen = UIScreen.create(this);
+			Minecraft.getInstance().gui.setScreen(this.screen);
+		}
+	}
+
+	@Override
+	protected void onLastScreenClose() {
+		if (this.replacing || this.screen == null) {
+			return;
+		}
+
+		final UIScreen screen = this.screen;
+		this.screen = null;
+		if (Minecraft.getInstance().gui.screen() == screen) {
+			Minecraft.getInstance().gui.setScreen(null);
 		}
 	}
 
