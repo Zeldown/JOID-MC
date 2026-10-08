@@ -6,7 +6,7 @@ import dev.joid.impl.minecraft.JoidMinecraft;
 import dev.joid.impl.minecraft.render.RenderBridge;
 import dev.joid.impl.minecraft.render.state.PipelineKey;
 import dev.joid.impl.minecraft.render.stencil.StencilEmulation;
-import dev.joid.impl.minecraft.render.texture.Texture;
+import dev.joid.impl.minecraft.render.texture.IGpuTexture;
 import dev.joid.impl.minecraft.render.vertex.VertexLayout;
 import dev.joid.lib.bridge.render.matrix.MatrixStack;
 import dev.joid.lib.bridge.render.shader.source.BlockShaderTranslator;
@@ -105,8 +105,8 @@ public final class Shader extends dev.joid.lib.bridge.render.shader.Shader {
 	public void apply(final @NonNull RenderPass pass, final @NonNull RenderState state, final @NonNull GpuBufferSlice uniforms, final @NonNull GpuTextureView stencil) {
 		pass.setUniform(BlockShaderTranslator.BLOCK, uniforms);
 		for (final UniformSampler sampler : super.getSamplerMap().values()) {
-			final Texture samplerTexture = (Texture) sampler.getTexture();
-			final Texture stateTexture = (Texture) state.getTexture();
+			final IGpuTexture samplerTexture = (IGpuTexture) sampler.getTexture();
+			final IGpuTexture stateTexture = (IGpuTexture) state.getTexture();
 			if (samplerTexture != null && samplerTexture.getView() != null) {
 				pass.bindTexture(sampler.getName(), samplerTexture.getView(), RenderBridge.getSampler(sampler.getFilter(), sampler.getWrap(), samplerTexture.isMipmapped()));
 			} else if (stateTexture != null && stateTexture.getView() != null) {

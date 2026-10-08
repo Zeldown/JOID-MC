@@ -4,7 +4,6 @@ import java.nio.ByteBuffer;
 import java.util.Optional;
 
 import dev.joid.impl.minecraft.render.RenderBridge;
-import dev.joid.lib.bridge.render.texture.ITexture;
 import lombok.Getter;
 import lombok.NonNull;
 
@@ -19,7 +18,7 @@ import com.mojang.blaze3d.textures.GpuTextureView;
 import net.minecraft.client.renderer.RenderPipelines;
 
 @Getter
-public final class Texture implements ITexture {
+public final class Texture implements IGpuTexture {
 
 	private final RenderBridge bridge;
 
