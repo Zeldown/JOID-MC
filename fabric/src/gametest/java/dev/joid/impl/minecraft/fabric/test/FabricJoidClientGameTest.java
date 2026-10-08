@@ -15,11 +15,14 @@ import dev.joid.demo.ui.UIDemoChoice;
 import dev.joid.demo.ui.font.UIDemoFont;
 import dev.joid.demo.ui.shader.UIDemoEffect;
 import dev.joid.demo.ui.shader.UIDemoShader;
+import dev.joid.impl.minecraft.demo.ui.UIDemoMinecraft;
+import dev.joid.impl.minecraft.lib.font.impl.minecraft.MinecraftFont;
 import dev.joid.impl.minecraft.snapshot.SnapshotBackend;
 import dev.joid.impl.minecraft.ui.bridge.ScreenUIBridge;
 import dev.joid.impl.minecraft.ui.screen.UIScreen;
 import dev.joid.internal.JOID;
 import dev.joid.lib.bridge.BridgeHandler;
+import dev.joid.lib.font.dto.TextInfo;
 import dev.joid.lib.ui.core.UI;
 import dev.joid.test.snapshot.SnapshotDifference;
 import dev.joid.test.snapshot.SnapshotImage;
@@ -32,6 +35,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.PauseScreen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FontDescription;
 
 public final class FabricJoidClientGameTest implements FabricClientGameTest {
 
@@ -55,6 +60,8 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			FabricJoidClientGameTest.screenshot(context, new UIDemoFont(), "joid-demo-font");
 			FabricJoidClientGameTest.screenshot(context, new UIDemoShader(), "joid-demo-shader");
 			FabricJoidClientGameTest.screenshot(context, new UIDemoEffect(), "joid-demo-effect");
+			FabricJoidClientGameTest.screenshot(context, new UIDemoMinecraft(), "joid-demo-minecraft");
+			context.runOnClient(FabricJoidClientGameTest::verifyWidths);
 			context.runOnClient(_ -> JOID.open(new UIDemoChoice()));
 			context.waitTicks(20);
 			context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
@@ -104,6 +111,25 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 				throw new AssertionError("The GUI scale " + guiScale + " gives the interface scale " + actual + " instead of " + interfaceScale);
 			}
 		});
+	}
+
+	private static void verifyWidths(final Minecraft minecraft) {
+		final List<String> texts = List.of("The quick brown fox jumps over the lazy dog", "§lBold§r and regular", "§cRed §l§oBold italic§r back", "§kSecret §nunder", "Unicode éè ★ 日本", "Trailing§", "§x§1§2§3§4§5§6Hex", "  spaces  ", "§zUnknown");
+		final List<String> failures = new ArrayList<>();
+		for (final MinecraftFont font : List.of(MinecraftFont.DEFAULT, MinecraftFont.ALT, MinecraftFont.ILLAGER, MinecraftFont.UNIFORM)) {
+			final TextInfo info = TextInfo.create(font, MinecraftFont.SIZE);
+			for (final String text : texts) {
+				final int expected = minecraft.font.width(Component.literal(text).withStyle(style -> style.withFont(new FontDescription.Resource(font.getIdentifier()))));
+				final double actual = info.getWidth(text);
+				if (Math.ceil(actual) != expected) {
+					failures.add(font + " \"" + text + "\": " + actual + " instead of " + expected);
+				}
+			}
+		}
+
+		if (!failures.isEmpty()) {
+			throw new AssertionError(failures.size() + " MinecraftFont widths differ from Font.width:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
+		}
 	}
 
 	private static void verify(final Result result) {
