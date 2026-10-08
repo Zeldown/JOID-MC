@@ -9,8 +9,8 @@ public final class FabricJoidClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		JoidMinecraft.bootstrap();
-		FabricKeyMappings.register();
 		FabricClientTicks.register();
+		FabricScreenEvents.register();
 	}
 
 }

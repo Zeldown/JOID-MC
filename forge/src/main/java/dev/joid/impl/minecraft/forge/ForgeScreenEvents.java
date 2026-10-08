@@ -4,13 +4,13 @@ import dev.joid.impl.minecraft.JoidMinecraft;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import net.minecraftforge.client.event.ScreenEvent;
+
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class ForgeJoidClient {
+public final class ForgeScreenEvents {
 
 	public static void register() {
-		JoidMinecraft.bootstrap();
-		ForgeClientTicks.register();
-		ForgeScreenEvents.register();
+		ScreenEvent.Init.Post.BUS.addListener(event -> JoidMinecraft.initScreen(event.getScreen(), event::addListener));
 	}
 
 }

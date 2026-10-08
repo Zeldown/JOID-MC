@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.joml.Vector2d;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.lwjgl.glfw.GLFW;
@@ -27,6 +28,10 @@ import dev.joid.test.snapshot.SnapshotRunner;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.screens.PauseScreen;
 
 public final class FabricJoidClientGameTest implements FabricClientGameTest {
 
@@ -36,7 +41,11 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		context.getInput().resizeWindow(1920, 1080);
 		try (TestSingleplayerContext singleplayer = context.worldBuilder().create()) {
 			singleplayer.getConnection().waitForChunksRender();
-			context.getInput().pressKey(GLFW.GLFW_KEY_P);
+			context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
+			context.waitForScreen(PauseScreen.class);
+			context.waitTicks(5);
+			context.takeScreenshot("joid-pause-menu");
+			FabricJoidClientGameTest.click(context, "JOID");
 			context.waitForScreen(UIScreen.class);
 			context.waitTicks(40);
 			context.takeScreenshot("joid-demo-choice");
@@ -54,6 +63,24 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 
 		context.runOnClient(_ -> FabricJoidClientGameTest.verify(JUnitCore.runClasses(FabricRenderBridgeContractTest.class)));
 		context.runOnClient(_ -> FabricJoidClientGameTest.verifySnapshots(new File(System.getProperty("joid.snapshot.output", "snapshots/renders")), new File(System.getProperty("joid.snapshot.references", "snapshots/references"))));
+	}
+
+	private static void click(final ClientGameTestContext context, final String label) {
+		final Vector2d center = context.computeOnClient(minecraft -> FabricJoidClientGameTest.center(minecraft, label));
+		context.getInput().setCursorPos(center.x, center.y);
+		context.getInput().pressMouse(GLFW.GLFW_MOUSE_BUTTON_LEFT);
+		context.getInput().setCursorPos(960D, 540D);
+	}
+
+	private static Vector2d center(final Minecraft minecraft, final String label) {
+		for (final GuiEventListener child : minecraft.gui.screen().children()) {
+			if (child instanceof final Button button && button.getMessage().getString().equals(label)) {
+				final int guiScale = minecraft.getWindow().getGuiScale();
+				return new Vector2d((button.getX() + button.getWidth() / 2D) * guiScale, (button.getY() + button.getHeight() / 2D) * guiScale);
+			}
+		}
+
+		throw new AssertionError("The screen " + minecraft.gui.screen().getClass().getName() + " has no button " + label);
 	}
 
 	private static void screenshot(final ClientGameTestContext context, final UI ui, final String name) {
