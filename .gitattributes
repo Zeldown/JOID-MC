@@ -15,3 +15,4 @@
 *.jks binary
 *.ogg binary
 libs/*.jar filter=lfs diff=lfs merge=lfs -text
+.snapshots/cache/* binary
