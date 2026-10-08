@@ -58,10 +58,22 @@ jobs:
           VERSION: ${{ needs.version.outputs.version }}
         run: ./gradlew ":$LOADER:build" --configure-on-demand -Pversion="$VERSION"
 
-      - name: Upload the jar
+      - name: Check the jars
+        env:
+          LOADER: ${{ matrix.loader }}
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          for KIND in dev prod; do
+            if ! ls "$LOADER"/build/libs/joid-"$LOADER"-*-"$VERSION"-"$KIND".jar > /dev/null 2>&1; then
+              echo "::error::The $KIND jar of $LOADER is missing"
+              exit 1
+            fi
+          done
+
+      - name: Upload the jars
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.event.release.tag_name }}
           LOADER: ${{ matrix.loader }}
           VERSION: ${{ needs.version.outputs.version }}
-        run: gh release upload "$TAG" "$LOADER"/build/libs/*-"$VERSION".jar --clobber
+        run: gh release upload "$TAG" "$LOADER"/build/libs/*-"$VERSION"-dev.jar "$LOADER"/build/libs/*-"$VERSION"-prod.jar --clobber

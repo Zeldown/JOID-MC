@@ -1,0 +1,48 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          lfs: true
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Build
+        run: ./gradlew build
+
+      - name: Check the jars
+        run: |
+          for LOADER in fabric neoforge forge; do
+            for KIND in dev prod; do
+              JAR=$(ls "$LOADER"/build/libs/joid-"$LOADER"-*-"$KIND".jar 2>/dev/null | head -n 1)
+              if [ -z "$JAR" ]; then
+                echo "::error::The $KIND jar of $LOADER is missing"
+                exit 1
+              fi
+            done
+          done
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: jars
+          path: |
+            */build/libs/*-dev.jar
+            */build/libs/*-prod.jar
+
+      - uses: actions/upload-artifact@v6
+        if: failure()
+        with:
+          name: reports
+          path: '*/build/reports/'
