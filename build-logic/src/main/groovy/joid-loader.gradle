@@ -159,12 +159,12 @@ def verifyProdJar = tasks.register('verifyProdJar') {
 
 def verifyDevJar = tasks.register('verifyDevJar') {
     group = 'verification'
-    description = 'Checks that the dev jar holds the demos of JOID.'
+    description = 'Checks that the dev jar holds the demos of JOID and of the mod.'
     def archive = devJar.flatMap { it.archiveFile }
     inputs.file(archive)
     doLast {
         new ZipFile(archive.get().asFile).withCloseable { zip ->
-            ['dev/joid/demo/DemoFont.class', 'dev/joid/lib/ui/node/impl/dev/DevNode.class'].each { entry ->
+            ['dev/joid/demo/DemoFont.class', 'dev/joid/lib/ui/node/impl/dev/DevNode.class', 'dev/joid/impl/minecraft/demo/MinecraftDemo.class', 'META-INF/services/dev.joid.impl.minecraft.IMinecraftDemo'].each { entry ->
                 if (zip.getEntry(entry) == null) {
                     throw new GradleException("The dev jar misses ${entry}")
                 }

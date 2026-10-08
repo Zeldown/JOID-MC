@@ -9,7 +9,7 @@ ext {
             'dev/joid/impl/minecraft/**/demo/**',
             'dev/joid/impl/minecraft/snapshot/**',
             'assets/joid/demo/**',
-            'META-INF/services/dev.joid.impl.minecraft.demo.*'
+            'META-INF/services/dev.joid.impl.minecraft.IMinecraftDemo'
     ]
 
     developmentReferences = ~/dev\/joid\/(demo|impl\/minecraft\/([\w$]+\/)*(demo|snapshot))\/[\w$\/]+/
