@@ -6,9 +6,9 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import dev.joid.impl.minecraft.render.shader.ShaderTranslator;
-import dev.joid.impl.minecraft.render.shader.uniform.UniformBlock;
 import dev.joid.lib.bridge.render.shader.source.ShaderSource;
 import dev.joid.lib.bridge.render.shader.source.ShaderStage;
+import dev.joid.lib.bridge.render.shader.uniform.UniformBlock;
 import dev.joid.lib.bridge.render.state.RenderState;
 import dev.joid.lib.bridge.render.state.StencilFunction;
 import dev.joid.lib.bridge.render.state.StencilOperation;
@@ -56,11 +56,12 @@ public class StencilEmulationTest {
 	public void writesItsUniforms() {
 		final ShaderSource vertex = ShaderSource.parse(ShaderStage.VERTEX, "void main() {\n    gl_Position = vec4(aPosition, 1.0);\n}\n");
 		final ShaderSource fragment = ShaderSource.parse(ShaderStage.FRAGMENT, "void main() {\n    fragColor = vec4(1.0);\n}\n");
-		final UniformBlock block = UniformBlock.create(ShaderTranslator.getUniforms(vertex, fragment), "");
+		final UniformBlock block = ShaderTranslator.create().createBlock(vertex, fragment);
 		final RenderState state = StencilEmulationTest.createState(true, StencilOperation.INVERT);
 		state.setStencilFunction(StencilFunction.NOT_EQUAL);
 		state.setStencilReference(3);
 		StencilEmulation.create(state, true).write(block);
+		block.pack();
 		Assert.assertEquals(1, StencilEmulationTest.read(block, "joid_StencilTest"));
 		Assert.assertEquals(6, StencilEmulationTest.read(block, "joid_StencilFunction"));
 		Assert.assertEquals(3, StencilEmulationTest.read(block, "joid_StencilReference"));

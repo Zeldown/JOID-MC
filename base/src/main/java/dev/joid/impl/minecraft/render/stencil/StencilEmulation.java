@@ -1,6 +1,7 @@
 package dev.joid.impl.minecraft.render.stencil;
 
-import dev.joid.impl.minecraft.render.shader.uniform.UniformBlock;
+import dev.joid.impl.minecraft.render.shader.ShaderTranslator;
+import dev.joid.lib.bridge.render.shader.uniform.UniformBlock;
 import dev.joid.lib.bridge.render.state.RenderState;
 import dev.joid.lib.bridge.render.state.StencilFunction;
 import dev.joid.lib.bridge.render.state.StencilOperation;
@@ -30,12 +31,13 @@ public final class StencilEmulation {
 	}
 
 	public void write(final @NonNull UniformBlock block) {
-		block.getMember("joid_StencilTest").putInt(this.test ? 1 : 0);
-		block.getMember("joid_StencilFunction").putInt(this.function.ordinal());
-		block.getMember("joid_StencilReference").putInt(this.reference);
-		block.getMember("joid_StencilMask").putInt(this.mask);
-		block.getMember("joid_StencilFail").putInt(this.fail.ordinal());
-		block.getMember("joid_StencilPass").putInt(this.pass.ordinal());
+		block
+		.value(ShaderTranslator.STENCIL_TEST, this.test)
+		.value(ShaderTranslator.STENCIL_FUNCTION, this.function.ordinal())
+		.value(ShaderTranslator.STENCIL_REFERENCE, this.reference)
+		.value(ShaderTranslator.STENCIL_MASK, this.mask)
+		.value(ShaderTranslator.STENCIL_FAIL, this.fail.ordinal())
+		.value(ShaderTranslator.STENCIL_PASS, this.pass.ordinal());
 	}
 
 }

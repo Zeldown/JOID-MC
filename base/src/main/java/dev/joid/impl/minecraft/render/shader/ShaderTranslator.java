@@ -1,32 +1,24 @@
 package dev.joid.impl.minecraft.render.shader;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import dev.joid.lib.bridge.render.shader.source.ShaderBuiltin;
+import dev.joid.lib.bridge.render.shader.source.BlockShaderTranslator;
 import dev.joid.lib.bridge.render.shader.source.ShaderSource;
 import dev.joid.lib.bridge.render.shader.source.ShaderVariable;
 import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import lombok.NonNull;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class ShaderTranslator {
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+public final class ShaderTranslator extends BlockShaderTranslator {
 
-	public static final String BLOCK   = "JoidUniforms";
-	public static final String STENCIL = "joid_Stencil";
-
-	private static final List<ShaderVariable> INTERNAL_LIST = Arrays.asList(
-			ShaderVariable.create("int", "joid_AlphaTest", "", false),
-			ShaderVariable.create("float", "joid_AlphaThreshold", "", false),
-			ShaderVariable.create("int", "joid_StencilTest", "", false),
-			ShaderVariable.create("int", "joid_StencilFunction", "", false),
-			ShaderVariable.create("int", "joid_StencilReference", "", false),
-			ShaderVariable.create("int", "joid_StencilMask", "", false),
-			ShaderVariable.create("int", "joid_StencilFail", "", false),
-			ShaderVariable.create("int", "joid_StencilPass", "", false)
-	);
+	public static final String STENCIL           = "joid_Stencil";
+	public static final String STENCIL_TEST      = "joid_StencilTest";
+	public static final String STENCIL_FUNCTION  = "joid_StencilFunction";
+	public static final String STENCIL_REFERENCE = "joid_StencilReference";
+	public static final String STENCIL_MASK      = "joid_StencilMask";
+	public static final String STENCIL_FAIL      = "joid_StencilFail";
+	public static final String STENCIL_PASS      = "joid_StencilPass";
 
 	private static final String STENCIL_FUNCTIONS = """
 
@@ -105,88 +97,33 @@ public final class ShaderTranslator {
 			}
 			""";
 
-	public static @NonNull List<@NonNull ShaderVariable> getUniforms(final @NonNull ShaderSource vertex, final @NonNull ShaderSource fragment) {
-		final List<ShaderVariable> uniformList = new ArrayList<>();
-		for (final ShaderBuiltin builtin : ShaderBuiltin.values()) {
-			if (builtin.getKind() == ShaderBuiltin.Kind.UNIFORM && (vertex.getBuiltins().contains(builtin) || fragment.getBuiltins().contains(builtin))) {
-				uniformList.add(ShaderVariable.create(builtin.getType(), builtin.getIdentifier(), "", false));
-			}
-		}
+	private final boolean stencil;
 
-		uniformList.addAll(ShaderTranslator.INTERNAL_LIST);
-		for (final ShaderSource source : new ShaderSource[] {vertex, fragment}) {
-			for (final ShaderVariable uniform : source.getUniforms()) {
-				if (uniformList.stream().noneMatch(variable -> variable.getName().equals(uniform.getName()))) {
-					uniformList.add(uniform);
-				}
-			}
-		}
-		return uniformList;
+	public static @NonNull ShaderTranslator create() {
+		return new ShaderTranslator(false);
 	}
 
-	public static @NonNull List<@NonNull String> getSamplers(final @NonNull ShaderSource vertex, final @NonNull ShaderSource fragment) {
-		final List<String> samplerList = new ArrayList<>();
-		for (final ShaderSource source : new ShaderSource[] {vertex, fragment}) {
-			for (final ShaderVariable sampler : source.getSamplers()) {
-				if (!samplerList.contains(sampler.getName())) {
-					samplerList.add(sampler.getName());
-				}
-			}
-		}
-		return samplerList;
+	public static @NonNull ShaderTranslator createStencil() {
+		return new ShaderTranslator(true);
 	}
 
-	public static @NonNull String translateVertex(final @NonNull ShaderSource vertex, final @NonNull ShaderSource fragment) {
-		final StringBuilder builder = ShaderTranslator.createHeader(vertex, fragment);
-		builder.append("in vec3 aPosition;\nin vec2 aTexCoord;\nin vec4 aColor;\nin vec3 aNormal;\n");
-		ShaderTranslator.appendSamplers(builder, vertex);
-		for (final ShaderVariable output : vertex.getOutputs()) {
-			builder.append(output.isFlat() ? "flat " : "").append("out ").append(output.getDeclaration()).append(";\n");
-		}
-		return builder.append("#line 1\n").append(vertex.getBody()).toString();
+	@Override
+	protected @NonNull String getVersion() {
+		return "#version 330";
 	}
 
-	public static @NonNull String translateFragment(final @NonNull ShaderSource vertex, final @NonNull ShaderSource fragment) {
-		return ShaderTranslator.translateFragment(vertex, fragment, ShaderTranslator.COLOR_MAIN);
+	@Override
+	protected @NonNull String getMain() {
+		return "\nuniform sampler2D " + ShaderTranslator.STENCIL + ";\n" + ShaderTranslator.STENCIL_FUNCTIONS + (this.stencil ? ShaderTranslator.STENCIL_MAIN : ShaderTranslator.COLOR_MAIN);
 	}
 
-	public static @NonNull String translateStencil(final @NonNull ShaderSource vertex, final @NonNull ShaderSource fragment) {
-		return ShaderTranslator.translateFragment(vertex, fragment, ShaderTranslator.STENCIL_MAIN);
-	}
-
-	private static String translateFragment(final ShaderSource vertex, final ShaderSource fragment, final String main) {
-		final StringBuilder builder = ShaderTranslator.createHeader(vertex, fragment);
-		ShaderTranslator.appendSamplers(builder, fragment);
-		builder.append("uniform sampler2D ").append(ShaderTranslator.STENCIL).append(";\n");
-
-		final List<String> inputNames = new ArrayList<>();
-		for (final ShaderVariable input : vertex.getOutputs()) {
-			inputNames.add(input.getName());
-			builder.append(input.isFlat() ? "flat " : "").append("in ").append(input.getDeclaration()).append(";\n");
+	@Override
+	protected @NonNull List<@NonNull ShaderVariable> getInternals(final @NonNull ShaderSource vertex, final @NonNull ShaderSource fragment) {
+		final List<ShaderVariable> internalList = super.getInternals(vertex, fragment);
+		for (final String name : new String[] {ShaderTranslator.STENCIL_TEST, ShaderTranslator.STENCIL_FUNCTION, ShaderTranslator.STENCIL_REFERENCE, ShaderTranslator.STENCIL_MASK, ShaderTranslator.STENCIL_FAIL, ShaderTranslator.STENCIL_PASS}) {
+			internalList.add(ShaderVariable.create("int", name, "", false));
 		}
-
-		for (final ShaderVariable input : fragment.getInputs()) {
-			if (!inputNames.contains(input.getName())) {
-				builder.append(input.isFlat() ? "flat " : "").append("in ").append(input.getDeclaration()).append(";\n");
-			}
-		}
-
-		builder.append("out vec4 fragColor;\n#line 1\n").append(fragment.getBody().replaceFirst("void\\s+main\\s*\\(\\s*\\)", "void joid_main()"));
-		return builder.append(ShaderTranslator.STENCIL_FUNCTIONS).append(main).toString();
-	}
-
-	private static StringBuilder createHeader(final ShaderSource vertex, final ShaderSource fragment) {
-		final StringBuilder builder = new StringBuilder("#version 330\n\nlayout(std140) uniform ").append(ShaderTranslator.BLOCK).append(" {\n");
-		for (final ShaderVariable uniform : ShaderTranslator.getUniforms(vertex, fragment)) {
-			builder.append('\t').append(uniform.getDeclaration()).append(";\n");
-		}
-		return builder.append("};\n\n");
-	}
-
-	private static void appendSamplers(final StringBuilder builder, final ShaderSource source) {
-		for (final ShaderVariable sampler : source.getSamplers()) {
-			builder.append("uniform ").append(sampler.getDeclaration()).append(";\n");
-		}
+		return internalList;
 	}
 
 }
