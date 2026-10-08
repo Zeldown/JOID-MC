@@ -3,6 +3,7 @@ package dev.joid.impl.minecraft.render.shader;
 import java.util.List;
 
 import dev.joid.lib.bridge.render.shader.source.BlockShaderTranslator;
+import dev.joid.lib.bridge.render.shader.source.ShaderBuiltin;
 import dev.joid.lib.bridge.render.shader.source.ShaderSource;
 import dev.joid.lib.bridge.render.shader.source.ShaderVariable;
 import lombok.AccessLevel;
@@ -115,6 +116,11 @@ public final class ShaderTranslator extends BlockShaderTranslator {
 	@Override
 	protected @NonNull String getMain() {
 		return "\nuniform sampler2D " + ShaderTranslator.STENCIL + ";\n" + ShaderTranslator.STENCIL_FUNCTIONS + (this.stencil ? ShaderTranslator.STENCIL_MAIN : ShaderTranslator.COLOR_MAIN);
+	}
+
+	@Override
+	protected @NonNull String declareAttribute(final @NonNull ShaderBuiltin builtin, final int location) {
+		return "in " + builtin.getType() + " " + builtin.getIdentifier() + ";\n";
 	}
 
 	@Override

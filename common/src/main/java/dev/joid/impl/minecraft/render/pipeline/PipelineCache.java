@@ -23,19 +23,11 @@ import com.mojang.blaze3d.platform.BlendFactor;
 import com.mojang.blaze3d.platform.BlendOp;
 import com.mojang.blaze3d.platform.CompareOp;
 import com.mojang.blaze3d.systems.GpuDevice;
-import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.resources.Identifier;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public final class PipelineCache {
-
-	private static final VertexFormat VERTEX_FORMAT = VertexFormat.builder(0)
-			.addAttribute("aPosition", GpuFormat.RGB32_FLOAT)
-			.addAttribute("aTexCoord", GpuFormat.RG32_FLOAT)
-			.addAttribute("aColor", GpuFormat.RGBA8_UNORM)
-			.addAttribute("aNormal", 8, GpuFormat.RGBA8_SNORM)
-			.build();
 
 	private final GpuDevice                        device;
 	private final ShaderSourceProvider             sourceProvider;
@@ -62,7 +54,7 @@ public final class PipelineCache {
 				.withVertexShader(shader.getIdentifier())
 				.withFragmentShader(key.isStencil() ? shader.getStencilIdentifier() : shader.getIdentifier())
 				.withBindGroupLayout(shader.getLayout())
-				.withVertexBinding(0, PipelineCache.VERTEX_FORMAT)
+				.withVertexBinding(0, shader.getVertexFormat())
 				.withPrimitiveTopology(key.isLines() ? PrimitiveTopology.DEBUG_LINES : PrimitiveTopology.TRIANGLES)
 				.withColorTargetState(new ColorTargetState(PipelineCache.getBlendFunction(key), key.isStencil() ? GpuFormat.R8_UNORM : GpuFormat.RGBA8_UNORM, key.isColorMask() ? ColorTargetState.WRITE_ALL : ColorTargetState.WRITE_NONE))
 				.withDepthStencilState(PipelineCache.getDepthStencilState(key))

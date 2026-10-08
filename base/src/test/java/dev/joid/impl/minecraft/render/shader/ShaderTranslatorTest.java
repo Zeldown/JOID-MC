@@ -75,9 +75,11 @@ public class ShaderTranslatorTest {
 		final ShaderSource fragment = ShaderSource.parse(ShaderStage.FRAGMENT, ShaderTranslatorTest.FRAGMENT);
 		final String translatedVertex = ShaderTranslator.create().translateVertex(vertex, fragment);
 		final String translatedFragment = ShaderTranslator.create().translateFragment(vertex, fragment);
-		Assert.assertTrue(translatedVertex.contains("layout(location = 0) in vec3 aPosition;\n"));
-		Assert.assertTrue(translatedVertex.contains("layout(location = 1) in vec2 aTexCoord;\n"));
-		Assert.assertTrue(translatedVertex.contains("layout(location = 2) in vec4 aColor;\n"));
+		Assert.assertTrue(translatedVertex.contains("in vec3 aPosition;\n"));
+		Assert.assertTrue(translatedVertex.contains("in vec2 aTexCoord;\n"));
+		Assert.assertTrue(translatedVertex.contains("in vec4 aColor;\n"));
+		Assert.assertFalse(translatedVertex.contains("aNormal"));
+		Assert.assertFalse(translatedVertex.contains("layout(location"));
 		Assert.assertTrue(translatedVertex.contains("out vec2 vTexCoord;\nflat out vec4 vColor;\n"));
 		Assert.assertTrue(translatedFragment.contains("in vec2 vTexCoord;\nflat in vec4 vColor;\n"));
 		Assert.assertTrue(translatedFragment.contains("layout(location = 0) out vec4 fragColor;\n"));
