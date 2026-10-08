@@ -1,3 +1,6 @@
+import org.gradle.plugins.ide.eclipse.model.ProjectDependency
+import org.gradle.plugins.ide.eclipse.model.SourceFolder
+
 plugins {
     id 'joid-loader'
     id 'net.minecraftforge.gradle'
@@ -35,6 +38,27 @@ dependencies {
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+def linkedFolders = [
+        'base-java'       : project(':base').file('src/main/java'),
+        'common-java'     : project(':common').file('src/main/java'),
+        'common-resources': project(':common').file('src/main/resources')
+]
+
+eclipse {
+    project {
+        linkedFolders.each { name, folder ->
+            linkedResource(name: name, type: '2', location: folder.absolutePath)
+        }
+    }
+    classpath.file.whenMerged { classpath ->
+        classpath.entries.removeAll { it instanceof ProjectDependency }
+        def output = classpath.entries.find { it instanceof SourceFolder && it.path == 'src/main/java' }?.output
+        linkedFolders.keySet().each { name ->
+            classpath.entries << new SourceFolder(name, output)
+        }
+    }
+}
 
 tasks.named('eclipse') {
     dependsOn('genEclipseRuns')
