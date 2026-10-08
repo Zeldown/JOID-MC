@@ -35,7 +35,7 @@ public class IdentifierResourceResolver implements IResourceResolver {
 	@Override
 	public @NonNull Resource resolve(final @NonNull ResourceBuilder builder, final @NonNull Object input, final Consumer<Resource> callback) {
 		final MinecraftAsset asset = MinecraftAsset.create(MinecraftAssetLocator.parse(input));
-		final Resource resource = builder.compute(asset.getUniqueId(), () -> IdentifierResourceResolver.read(asset));
+		final Resource resource = builder.compute(asset.getUniqueId(), () -> IdentifierResourceResolver.read(asset)).nearest();
 		if (callback != null) {
 			callback.accept(resource);
 		}

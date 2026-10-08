@@ -122,8 +122,8 @@ public class UIDemoMinecraft extends UIDemo {
 		.color(UIDemoMinecraft.PLACEHOLDER)
 		.body(rect -> {
 			RectNode.create(20, 20, 400, 200).color(UIDemoMinecraft.PANEL).attach(rect);
-			ResourceNode.create(40, 40, 360, 0).resource(Resource.of("minecraft:textures/gui/title/minecraft.png").nearest()).attach(rect);
-			ResourceNode.create(40, 140, 64, 64).resource(Resource.of(Identifier.withDefaultNamespace("textures/block/diamond_block.png")).nearest()).attach(rect);
+			ResourceNode.create(40, 40, 360, 0).resource(Resource.of("minecraft:textures/gui/title/minecraft.png")).attach(rect);
+			ResourceNode.create(40, 140, 64, 64).resource(Resource.of(Identifier.withDefaultNamespace("textures/block/diamond_block.png"))).attach(rect);
 			TextNode.create(220, 255).text(Text.create("Textures", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
 		})
 		.attach(this);
@@ -133,10 +133,10 @@ public class UIDemoMinecraft extends UIDemo {
 		.color(UIDemoMinecraft.PLACEHOLDER)
 		.body(rect -> {
 			RectNode.create(20, 20, 400, 200).color(UIDemoMinecraft.PANEL).attach(rect);
-			ResourceNode.create(40, 40, 64, 64).resource(Resource.of(Sheets.ITEMS_MAPPER.defaultNamespaceApply("diamond")).nearest()).attach(rect);
-			ResourceNode.create(40, 128, 64, 64).resource(Resource.of(Sheets.BLOCKS_MAPPER.defaultNamespaceApply("stone")).nearest()).attach(rect);
-			ResourceNode.create(140, 40, 240, 48).resource(Resource.of(new SpriteId(Sheets.GUI_SHEET, Identifier.withDefaultNamespace("widget/button"))).nearest()).attach(rect);
-			ResourceNode.create(140, 120, 72, 72).resource(Resource.of(new SpriteId(Sheets.GUI_SHEET, Identifier.withDefaultNamespace("container/slot"))).nearest()).attach(rect);
+			ResourceNode.create(40, 40, 64, 64).resource(Resource.of(Sheets.ITEMS_MAPPER.defaultNamespaceApply("diamond"))).attach(rect);
+			ResourceNode.create(40, 128, 64, 64).resource(Resource.of(Sheets.BLOCKS_MAPPER.defaultNamespaceApply("stone"))).attach(rect);
+			ResourceNode.create(140, 40, 240, 48).resource(Resource.of(new SpriteId(Sheets.GUI_SHEET, Identifier.withDefaultNamespace("widget/button")))).attach(rect);
+			ResourceNode.create(140, 120, 72, 72).resource(Resource.of(new SpriteId(Sheets.GUI_SHEET, Identifier.withDefaultNamespace("container/slot")))).attach(rect);
 			TextNode.create(220, 255).text(Text.create("Sprites", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
 		})
 		.attach(this);
@@ -146,8 +146,8 @@ public class UIDemoMinecraft extends UIDemo {
 		.color(UIDemoMinecraft.PLACEHOLDER)
 		.body(rect -> {
 			RectNode.create(20, 20, 400, 200).color(UIDemoMinecraft.PANEL).attach(rect);
-			ResourceNode.create(40, 56, 128, 128).resource(Resource.of(Sheets.BLOCKS_MAPPER.defaultNamespaceApply("fire_0")).nearest()).attach(rect);
-			ResourceNode.create(240, 56, 128, 128).resource(Resource.of(Sheets.BLOCKS_MAPPER.defaultNamespaceApply("sea_lantern")).nearest()).attach(rect);
+			ResourceNode.create(40, 56, 128, 128).resource(Resource.of(Sheets.BLOCKS_MAPPER.defaultNamespaceApply("fire_0"))).attach(rect);
+			ResourceNode.create(240, 56, 128, 128).resource(Resource.of(Sheets.BLOCKS_MAPPER.defaultNamespaceApply("sea_lantern"))).attach(rect);
 			TextNode.create(220, 255).text(Text.create("Animated sprites", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
 		})
 		.attach(this);
@@ -157,8 +157,8 @@ public class UIDemoMinecraft extends UIDemo {
 		.color(UIDemoMinecraft.PLACEHOLDER)
 		.body(rect -> {
 			RectNode.create(20, 20, 360, 200).color(UIDemoMinecraft.PANEL).attach(rect);
-			ResourceNode.create(40, 56, 128, 128).resource(Resource.of("minecraft:textures/block/sea_lantern.png").nearest()).attach(rect);
-			ResourceNode.create(232, 56, 128, 128).resource(Resource.of("joid:demo/textures/pulse.png").nearest()).attach(rect);
+			ResourceNode.create(40, 56, 128, 128).resource(Resource.of("minecraft:textures/block/sea_lantern.png")).attach(rect);
+			ResourceNode.create(232, 56, 128, 128).resource(Resource.of("joid:demo/textures/pulse.png")).attach(rect);
 			TextNode.create(200, 255).text(Text.create(".mcmeta", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
 		})
 		.attach(this);
