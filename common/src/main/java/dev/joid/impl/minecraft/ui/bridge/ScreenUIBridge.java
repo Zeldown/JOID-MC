@@ -19,6 +19,7 @@ import com.mojang.blaze3d.platform.Window;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 
 public final class ScreenUIBridge extends UIBridge {
 
@@ -28,6 +29,7 @@ public final class ScreenUIBridge extends UIBridge {
 	private final ScreenInputForwarder input;
 
 	private List<String> hoverList;
+	private ItemStack    hoverStack;
 
 	private ScreenUIBridge(final RenderBridge render) {
 		this.compositor = GuiCompositor.create(render);
@@ -103,6 +105,10 @@ public final class ScreenUIBridge extends UIBridge {
 		this.hoverList = new ArrayList<>(lines);
 	}
 
+	public void drawHover(final @NonNull ItemStack stack) {
+		this.hoverStack = stack;
+	}
+
 	public void extract(final @NonNull GuiGraphicsExtractor graphics, final int mouseX, final int mouseY) {
 		this.input.flush();
 		super.update();
@@ -112,6 +118,12 @@ public final class ScreenUIBridge extends UIBridge {
 		this.hoverList = null;
 		if (hoverList != null && !hoverList.isEmpty()) {
 			graphics.setComponentTooltipForNextFrame(Minecraft.getInstance().font, hoverList.stream().<Component>map(Component::literal).toList(), mouseX, mouseY);
+		}
+
+		final ItemStack hoverStack = this.hoverStack;
+		this.hoverStack = null;
+		if (hoverStack != null) {
+			graphics.setTooltipForNextFrame(Minecraft.getInstance().font, hoverStack, mouseX, mouseY);
 		}
 	}
 
