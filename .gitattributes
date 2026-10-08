@@ -1,7 +1,7 @@
 * text eol=lf
 *.bat text eol=crlf
 *.patch text eol=lf
-*.java text eol=lf
+*.java text eol=crlf
 *.gradle text eol=crlf
 *.png binary
 *.gif binary

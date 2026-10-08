@@ -1,0 +1,25 @@
+ext {
+    developmentPatterns = [
+            'assets/dev/**',
+            'assets/demo/**',
+            'dev/joid/demo/**',
+            'dev/joid/internal/font/**',
+            'dev/joid/lib/ui/node/impl/dev/**',
+            'dev/joid/impl/glfw/demo/**',
+            'dev/joid/impl/minecraft/**/demo/**',
+            'dev/joid/impl/minecraft/snapshot/**',
+            'assets/joid/demo/**',
+            'META-INF/services/dev.joid.impl.minecraft.demo.*'
+    ]
+
+    developmentReferences = ~/dev\/joid\/(demo|impl\/minecraft\/([\w$]+\/)*(demo|snapshot))\/[\w$\/]+/
+
+    moduleDescriptors = [
+            'module-info.class',
+            'META-INF/versions/*/module-info.class'
+    ]
+
+    excludeDevelopment = { task ->
+        task.exclude(developmentPatterns)
+    }
+}

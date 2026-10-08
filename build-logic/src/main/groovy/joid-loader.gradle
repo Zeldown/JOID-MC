@@ -1,0 +1,177 @@
+import java.util.zip.ZipFile
+
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
+plugins {
+    id 'joid-java'
+    id 'joid-packaging'
+    id 'com.gradleup.shadow'
+}
+
+configurations {
+    baseJava {
+        canBeResolved = true
+    }
+    commonJava {
+        canBeResolved = true
+    }
+    commonResources {
+        canBeResolved = true
+    }
+    embed {
+        transitive = false
+    }
+    joidDev
+    joidProd
+    compileOnly.extendsFrom(embed, joidDev)
+    runtimeOnly.extendsFrom(embed, joidDev)
+}
+
+def loaderAttribute = Attribute.of('io.github.mcgradleconventions.loader', String)
+
+dependencies {
+    compileOnly(project(':base'))
+    compileOnly(project(':common')) {
+        attributes {
+            attribute(loaderAttribute, 'common')
+        }
+    }
+    baseJava(project(path: ':base', configuration: 'baseJava'))
+    commonJava(project(path: ':common', configuration: 'commonJava'))
+    commonResources(project(path: ':common', configuration: 'commonResources'))
+    joidDev(files(rootProject.file("libs/joid-core-${joid_version}-dev.jar")))
+    joidProd(files(rootProject.file("libs/joid-core-${joid_version}-prod.jar")))
+    embed(files(rootProject.file("libs/joid-glfw-${joid_version}.jar")))
+    embed("javax.vecmath:vecmath:${vecmath_version}")
+}
+
+def loaderVariants = ['apiElements', 'runtimeElements', 'sourcesElements', 'javadocElements', 'includeInternal', 'modCompileClasspath', 'jarJar']
+configurations.matching { it.name in loaderVariants }.configureEach {
+    attributes {
+        attribute(loaderAttribute, project.name)
+    }
+}
+sourceSets.configureEach {
+    def classpaths = [it.compileClasspathConfigurationName, it.runtimeClasspathConfigurationName]
+    configurations.matching { it.name in classpaths }.configureEach {
+        attributes {
+            attribute(loaderAttribute, project.name)
+        }
+    }
+}
+
+tasks.named('compileJava', JavaCompile) {
+    dependsOn(configurations.baseJava, configurations.commonJava)
+    source(configurations.baseJava, configurations.commonJava)
+}
+
+processResources {
+    dependsOn(configurations.commonResources)
+    from(configurations.commonResources)
+}
+
+tasks.named('javadoc', Javadoc) {
+    dependsOn(configurations.baseJava, configurations.commonJava)
+    source(configurations.baseJava, configurations.commonJava)
+}
+
+tasks.named('sourcesJar', Jar) {
+    dependsOn(configurations.baseJava, configurations.commonJava, configurations.commonResources)
+    from(configurations.baseJava, configurations.commonJava, configurations.commonResources)
+}
+
+jar {
+    archiveClassifier = 'slim'
+}
+
+shadowJar {
+    enabled = false
+}
+
+def devJar = tasks.register('devJar', ShadowJar) {
+    group = 'build'
+    description = 'Builds the dev jar of the mod, with the demos of JOID and of the mod.'
+    archiveClassifier = 'dev'
+    from(sourceSets.main.output)
+    configurations = [project.configurations.embed, project.configurations.joidDev]
+    exclude(moduleDescriptors)
+    manifest.inheritFrom(jar.manifest)
+}
+
+def prodJar = tasks.register('prodJar', ShadowJar) {
+    group = 'build'
+    description = 'Builds the prod jar of the mod, without any code or asset of the dev and demo modes.'
+    archiveClassifier = 'prod'
+    from(sourceSets.main.output)
+    configurations = [project.configurations.embed, project.configurations.joidProd]
+    exclude(moduleDescriptors)
+    excludeDevelopment(it)
+    manifest.inheritFrom(jar.manifest)
+}
+
+def verifyProdJar = tasks.register('verifyProdJar') {
+    group = 'verification'
+    description = 'Checks that the prod jar holds no code, asset or reference of the dev and demo modes.'
+    def archive = prodJar.flatMap { it.archiveFile }
+    def patterns = developmentPatterns
+    def references = developmentReferences
+    inputs.file(archive)
+    doLast {
+        def found = []
+        zipTree(archive).matching { include(patterns) }.visit { if (!it.directory) found << it.relativePath.pathString }
+        if (!found.isEmpty()) {
+            throw new GradleException("The prod jar holds development entries: ${found.take(10)}")
+        }
+
+        def referencing = [] as SortedSet
+        new ZipFile(archive.get().asFile).withCloseable { zip ->
+            zip.entries().findAll { it.name.startsWith('dev/joid/impl/minecraft/') && it.name.endsWith('.class') }.each { entry ->
+                def text = new String(zip.getInputStream(entry).bytes, 'ISO-8859-1')
+                def matcher = references.matcher(text)
+                while (matcher.find()) {
+                    referencing << "${entry.name} -> ${matcher.group()}"
+                }
+            }
+        }
+        if (!referencing.isEmpty()) {
+            throw new GradleException("The prod jar references development classes: ${referencing.take(10)}")
+        }
+
+        def loader = new URLClassLoader([archive.get().asFile.toURI().toURL()] as URL[], ClassLoader.platformClassLoader)
+        try {
+            def joid = loader.loadClass('dev.joid.internal.JOID')
+            def instance = joid.getMethod('inst').invoke(null)
+            ['setDevMode', 'setDemoMode'].each { mode ->
+                try {
+                    joid.getMethod(mode, Boolean.TYPE).invoke(instance, true)
+                    throw new GradleException("The prod jar accepts ${mode}(true)")
+                } catch (final java.lang.reflect.InvocationTargetException e) {
+                    if (!(e.cause instanceof IllegalStateException)) {
+                        throw e
+                    }
+                }
+            }
+        } finally {
+            loader.close()
+        }
+    }
+}
+
+def verifyDevJar = tasks.register('verifyDevJar') {
+    group = 'verification'
+    description = 'Checks that the dev jar holds the demos of JOID.'
+    def archive = devJar.flatMap { it.archiveFile }
+    inputs.file(archive)
+    doLast {
+        new ZipFile(archive.get().asFile).withCloseable { zip ->
+            ['dev/joid/demo/DemoFont.class', 'dev/joid/lib/ui/node/impl/dev/DevNode.class'].each { entry ->
+                if (zip.getEntry(entry) == null) {
+                    throw new GradleException("The dev jar misses ${entry}")
+                }
+            }
+        }
+    }
+}
+
+assemble.dependsOn(devJar, prodJar)
+check.dependsOn(verifyProdJar, verifyDevJar)
