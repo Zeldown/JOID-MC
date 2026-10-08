@@ -61,7 +61,7 @@ public final class RenderBridge extends dev.joid.lib.bridge.render.RenderBridge 
 		this.pipelineCache  = PipelineCache.create(this.device, this.sourceProvider);
 		this.scratch        = ByteBuffer.allocateDirect(1 << 16).order(ByteOrder.nativeOrder());
 		this.emptyTexture   = Texture.create(this).allocate(1, 1).upload(new int[] {0xFFFFFFFF}, 1, 1);
-		this.fixedShader    = (Shader) this.createShader(ShaderSource.read(ShaderStage.VERTEX, RenderBridge.class.getResourceAsStream("/assets/shaders/fixed/fixed.vsh")), ShaderSource.read(ShaderStage.FRAGMENT, RenderBridge.class.getResourceAsStream("/assets/shaders/fixed/fixed.fsh")), BlendState.DISABLED);
+		this.fixedShader    = (Shader) this.createShader(ShaderSource.read(ShaderStage.VERTEX, ShaderSource.class.getResourceAsStream("/assets/shaders/fixed/fixed.vsh")), ShaderSource.read(ShaderStage.FRAGMENT, ShaderSource.class.getResourceAsStream("/assets/shaders/fixed/fixed.fsh")), BlendState.DISABLED);
 	}
 
 	public void beginFrame(final @NonNull RenderTarget target) {
