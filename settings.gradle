@@ -37,7 +37,6 @@ if (gradle.startParameter.taskNames.any { it.tokenize(':').last() == 'eclipse' }
 
 rootProject.name = 'JOID-MC'
 includeBuild('build-logic')
-include('base')
 include('common')
 include('fabric')
 include('neoforge')

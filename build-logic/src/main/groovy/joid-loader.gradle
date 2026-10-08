@@ -9,9 +9,6 @@ plugins {
 }
 
 configurations {
-    baseJava {
-        canBeResolved = true
-    }
     commonJava {
         canBeResolved = true
     }
@@ -30,13 +27,11 @@ configurations {
 def loaderAttribute = Attribute.of('io.github.mcgradleconventions.loader', String)
 
 dependencies {
-    compileOnly(project(':base'))
     compileOnly(project(':common')) {
         attributes {
             attribute(loaderAttribute, 'common')
         }
     }
-    baseJava(project(path: ':base', configuration: 'baseJava'))
     commonJava(project(path: ':common', configuration: 'commonJava'))
     commonResources(project(path: ':common', configuration: 'commonResources'))
     joidDev(files(rootProject.file("libs/joid-core-${joid_version}-dev.jar")))
@@ -62,8 +57,8 @@ sourceSets.configureEach {
 }
 
 tasks.named('compileJava', JavaCompile) {
-    dependsOn(configurations.baseJava, configurations.commonJava)
-    source(configurations.baseJava, configurations.commonJava)
+    dependsOn(configurations.commonJava)
+    source(configurations.commonJava)
 }
 
 processResources {
@@ -72,13 +67,13 @@ processResources {
 }
 
 tasks.named('javadoc', Javadoc) {
-    dependsOn(configurations.baseJava, configurations.commonJava)
-    source(configurations.baseJava, configurations.commonJava)
+    dependsOn(configurations.commonJava)
+    source(configurations.commonJava)
 }
 
 tasks.named('sourcesJar', Jar) {
-    dependsOn(configurations.baseJava, configurations.commonJava, configurations.commonResources)
-    from(configurations.baseJava, configurations.commonJava, configurations.commonResources)
+    dependsOn(configurations.commonJava, configurations.commonResources)
+    from(configurations.commonJava, configurations.commonResources)
 }
 
 jar {

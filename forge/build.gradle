@@ -41,7 +41,6 @@ dependencies {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 def linkedFolders = [
-        'base-java'       : project(':base').file('src/main/java'),
         'common-java'     : project(':common').file('src/main/java'),
         'common-resources': project(':common').file('src/main/resources')
 ]
