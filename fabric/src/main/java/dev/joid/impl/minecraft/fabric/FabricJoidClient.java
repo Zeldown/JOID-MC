@@ -11,6 +11,7 @@ public final class FabricJoidClient implements ClientModInitializer {
 		JoidMinecraft.bootstrap();
 		FabricClientTicks.register();
 		FabricScreenEvents.register();
+		FabricReloadListeners.register();
 	}
 
 }

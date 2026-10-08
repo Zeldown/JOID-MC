@@ -11,6 +11,7 @@ public final class ForgeJoidClient {
 		JoidMinecraft.bootstrap();
 		ForgeClientTicks.register();
 		ForgeScreenEvents.register();
+		ForgeReloadListeners.register();
 	}
 
 }
