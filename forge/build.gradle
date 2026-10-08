@@ -35,3 +35,15 @@ dependencies {
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+tasks.named('eclipse') {
+    dependsOn('genEclipseRuns')
+}
+
+tasks.named('genEclipseRuns') {
+    doLast {
+        fileTree(projectDir) { include('*.launch') }.each { launch ->
+            launch.text = launch.text.replaceAll(/\s*<listEntry value="[^"]*org\.eclipse\.buildship\.core\.gradleclasspathcontainer[^"]*"\/>/, '')
+        }
+    }
+}

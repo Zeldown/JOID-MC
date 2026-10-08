@@ -33,6 +33,20 @@ loom {
     }
 }
 
+tasks.named('eclipseClasspath') {
+    dependsOn('genSources')
+}
+
+tasks.named('genEclipseRuns') {
+    doLast {
+        fileTree(projectDir) { include('*.launch') }.each { launch ->
+            launch.text = launch.text
+                    .replace('${workspace_loc:' + eclipse.project.name + '}/' + project.name + '\\', '${workspace_loc:' + eclipse.project.name + '}/')
+                    .replaceAll(/\s*<stringAttribute key="org\.eclipse\.jdt\.launching\.CLASSPATH_PROVIDER"[^>]*\/>/, '')
+        }
+    }
+}
+
 [devJar, prodJar].each { task ->
     task.configure {
         def manifestService = JarManifestService.get(project)

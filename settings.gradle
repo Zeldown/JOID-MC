@@ -31,6 +31,10 @@ plugins {
     id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
 }
 
+if (gradle.startParameter.taskNames.any { it.tokenize(':').last() == 'eclipse' }) {
+    System.setProperty('eclipse.application', 'gradle')
+}
+
 rootProject.name = 'JOID-MC'
 includeBuild('build-logic')
 include('base')

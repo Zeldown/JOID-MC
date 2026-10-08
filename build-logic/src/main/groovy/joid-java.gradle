@@ -1,5 +1,9 @@
+import org.gradle.plugins.ide.eclipse.model.Library
+import org.gradle.plugins.ide.eclipse.model.ProjectDependency
+
 plugins {
     id 'java-library'
+    id 'eclipse'
 }
 
 base {
@@ -86,4 +90,23 @@ processResources {
     }
 
     inputs.properties(expandProps)
+}
+
+eclipse {
+    project.name = "JOID-MC-${project.name}"
+    classpath.file.whenMerged { classpath ->
+        classpath.entries.findAll { it instanceof Library && it.sourcePath == null }.each { library ->
+            def sources = new File(library.path.replaceFirst(/\.jar$/, '-sources.jar'))
+            if (sources.exists()) {
+                library.sourcePath = classpath.fileReferenceFactory.fromFile(sources)
+            }
+        }
+        def paths = classpath.entries.findAll { it instanceof ProjectDependency }.collect { it.path }
+        configurations.compileClasspath.allDependencies.withType(org.gradle.api.artifacts.ProjectDependency).each { dependency ->
+            def path = "/JOID-MC-${dependency.name}"
+            if (!paths.contains(path)) {
+                classpath.entries << new ProjectDependency(path)
+            }
+        }
+    }
 }

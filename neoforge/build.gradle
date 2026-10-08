@@ -41,3 +41,13 @@ configurations {
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+tasks.named('eclipse') {
+    dependsOn('neoForgeIdeSync')
+    doLast {
+        def folders = [':common', ':base'].collect { path -> "${mod_id}%%" + project(path).file('bin/main').absolutePath.replace('\\', '\\\\') }
+        fileTree('.eclipse/configurations') { include('*.launch') }.each { launch ->
+            launch.text = launch.text.replaceAll(/(-Dfml\.modFolders=[^ "]+)/) { all, modFolders -> ([modFolders] + folders).join(File.pathSeparator) }
+        }
+    }
+}
