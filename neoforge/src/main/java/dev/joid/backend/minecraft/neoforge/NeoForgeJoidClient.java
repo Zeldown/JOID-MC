@@ -22,6 +22,8 @@ public final class NeoForgeJoidClient {
 		NeoForge.EVENT_BUS.addListener(NeoForgeScreenEvents::mouseScrolled);
 		modBus.addListener(NeoForgeOverlayLayers::register);
 		modBus.addListener(NeoForgeReloadListeners::register);
+		modBus.addListener(NeoForgeContainerScreens::register);
+		NeoForgePayloads.registerSender();
 	}
 
 }

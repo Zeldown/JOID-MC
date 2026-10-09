@@ -9,7 +9,9 @@ public final class FabricJoidClient implements ClientModInitializer {
 		FabricClientTicks.register();
 		FabricScreenEvents.register();
 		FabricOverlayLayers.register();
+		FabricPayloads.registerSender();
 		FabricReloadListeners.register();
+		FabricContainerScreens.register();
 	}
 
 }
