@@ -23,6 +23,8 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.openal.AL10;
 import org.lwjgl.opengl.GL11;
 
+import dev.joid.backend.minecraft.demo.container.DemoContainer;
+import dev.joid.backend.minecraft.demo.ui.UIDemoContainer;
 import dev.joid.backend.minecraft.demo.ui.UIDemoMinecraft;
 import dev.joid.backend.minecraft.demo.ui.UIDemoOverlay;
 import dev.joid.backend.minecraft.lib.font.impl.minecraft.MinecraftFont;
@@ -31,11 +33,13 @@ import dev.joid.backend.minecraft.lib.ui.core.data.overlay.layer.UIDataOverlayLa
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.block.BlockNode;
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.entity.EntityNode;
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.item.ItemNode;
+import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
 import dev.joid.backend.minecraft.render.texture.Texture;
 import dev.joid.backend.minecraft.snapshot.SnapshotBackend;
 import dev.joid.backend.minecraft.ui.bridge.OverlayUIBridge;
 import dev.joid.backend.minecraft.ui.bridge.ScreenUIBridge;
 import dev.joid.backend.minecraft.ui.overlay.OverlayLayerRenderer;
+import dev.joid.backend.minecraft.ui.screen.ContainerUIScreen;
 import dev.joid.backend.minecraft.ui.screen.UIScreen;
 import dev.joid.demo.ui.UIDemoChoice;
 import dev.joid.demo.ui.font.UIDemoFont;
@@ -68,6 +72,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
+import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 import net.minecraft.client.Minecraft;
@@ -76,16 +81,21 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.sounds.SoundEventListener;
 import net.minecraft.core.ClientAsset;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FontDescription;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.player.PlayerModelType;
 import net.minecraft.world.entity.player.PlayerSkin;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
@@ -128,6 +138,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
 			context.waitForScreen(null);
 			FabricJoidClientGameTest.verifyOverlays(context);
+			FabricJoidClientGameTest.verifyContainer(context, singleplayer.getServer());
 		}
 
 		context.runOnClient(_ -> FabricJoidClientGameTest.verify(JUnitCore.runClasses(FabricRenderBridgeContractTest.class)));
@@ -394,6 +405,132 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		if (!failures.isEmpty()) {
 			throw new AssertionError(failures.size() + " overlay checks failed:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
 		}
+	}
+
+	private static void verifyContainer(final ClientGameTestContext context, final TestServerContext server) {
+		context.runOnClient(_ -> JOID.open(new UIDemoChoice()));
+		context.waitForScreen(UIScreen.class);
+		context.waitTicks(20);
+		final Vector2d entry = context.computeOnClient(_ -> FabricJoidClientGameTest.center(UIDemoContainer.class));
+		context.getInput().setCursorPos(entry.x, entry.y);
+		context.waitTicks(2);
+		context.getInput().pressMouse(GLFW.GLFW_MOUSE_BUTTON_LEFT);
+		context.waitForScreen(ContainerUIScreen.class);
+		context.waitTicks(20);
+		server.runOnServer(minecraftServer -> {
+			final DemoContainer container = (DemoContainer) FabricJoidClientGameTest.player(minecraftServer).containerMenu;
+			container.getSlot(0).set(new ItemStack(Items.DIAMOND, 10));
+			container.getSlot(1).set(new ItemStack(Items.GOLDEN_APPLE));
+		});
+		context.waitTicks(10);
+
+		final List<String> failures = new ArrayList<>();
+		final List<int[]> slots = context.computeOnClient(_ -> FabricJoidClientGameTest.slotBounds());
+		final BufferedImage opened = FabricJoidClientGameTest.read(context.takeScreenshot("joid-demo-container"));
+		FabricJoidClientGameTest.expectDrawn(failures, "diamonds in the first storage slot", opened, slots.get(0));
+		FabricJoidClientGameTest.moveTo(context, slots.get(0));
+		context.getInput().pressMouse(GLFW.GLFW_MOUSE_BUTTON_LEFT);
+		FabricJoidClientGameTest.moveTo(context, slots.get(9));
+		final BufferedImage carried = FabricJoidClientGameTest.read(context.takeScreenshot("joid-demo-container-carried"));
+		FabricJoidClientGameTest.expectChange(failures, "carried diamonds drawn under the mouse", List.of(opened, carried), slots.get(9), false);
+		FabricJoidClientGameTest.expectContainer(context, server, failures, "a left click on 10 diamonds", 10, new int[] {0, 0});
+
+		context.getInput().holdMouse(GLFW.GLFW_MOUSE_BUTTON_LEFT);
+		context.getInput().setCursorPos(slots.get(9)[0] + slots.get(9)[2] / 2D + 4D, slots.get(9)[1] + slots.get(9)[3] / 2D);
+		context.waitTicks(2);
+		FabricJoidClientGameTest.moveTo(context, slots.get(10));
+		FabricJoidClientGameTest.moveTo(context, slots.get(11));
+		context.takeScreenshot("joid-demo-container-drag");
+		context.getInput().releaseMouse(GLFW.GLFW_MOUSE_BUTTON_LEFT);
+		context.waitTicks(5);
+		FabricJoidClientGameTest.expectContainer(context, server, failures, "a left drag of 10 diamonds over three slots", 1, new int[] {9, 3}, new int[] {10, 3}, new int[] {11, 3});
+
+		FabricJoidClientGameTest.moveTo(context, slots.get(12));
+		context.getInput().pressMouse(GLFW.GLFW_MOUSE_BUTTON_LEFT);
+		context.waitTicks(5);
+		FabricJoidClientGameTest.expectContainer(context, server, failures, "a left click with 1 diamond on an empty slot", 0, new int[] {12, 1});
+
+		FabricJoidClientGameTest.moveTo(context, slots.get(9));
+		context.runOnClient(minecraft -> {
+			final double x = minecraft.mouseHandler.getScaledXPos(minecraft.getWindow());
+			final double y = minecraft.mouseHandler.getScaledYPos(minecraft.getWindow());
+			final MouseButtonEvent event = new MouseButtonEvent(x, y, new MouseButtonInfo(GLFW.GLFW_MOUSE_BUTTON_LEFT, GLFW.GLFW_MOD_SHIFT));
+			minecraft.gui.screen().mouseClicked(event, false);
+			minecraft.gui.screen().mouseReleased(event);
+		});
+		context.waitTicks(5);
+		FabricJoidClientGameTest.expectContainer(context, server, failures, "a shift-click on 3 diamonds", 0, new int[] {9, 0}, new int[] {62, 3});
+
+		FabricJoidClientGameTest.moveTo(context, slots.get(10));
+		context.getInput().pressKey(GLFW.GLFW_KEY_1);
+		context.waitTicks(5);
+		FabricJoidClientGameTest.expectContainer(context, server, failures, "the key 1 over 3 diamonds", 0, new int[] {10, 0}, new int[] {54, 3});
+
+		FabricJoidClientGameTest.moveTo(context, slots.get(13));
+		final BufferedImage unhovered = FabricJoidClientGameTest.read(context.takeScreenshot("joid-demo-container-unhovered"));
+		FabricJoidClientGameTest.moveTo(context, slots.get(1));
+		context.waitTicks(5);
+		final BufferedImage tooltip = FabricJoidClientGameTest.read(context.takeScreenshot("joid-demo-container-tooltip"));
+		final int[] apple = slots.get(1);
+		FabricJoidClientGameTest.expectChange(failures, "vanilla tooltip of the hovered golden apple", List.of(unhovered, tooltip), new int[] {apple[0] + apple[2], apple[1] - apple[3], apple[2] * 3, apple[3]}, false);
+		if (!context.computeOnClient(minecraft -> minecraft.gui.screen() instanceof final ContainerUIScreen<?> screen && screen.getHoveredSlot() != null && screen.getHoveredSlot().index == 1)) {
+			failures.add("the hovered slot of the container screen is not the golden apple");
+		}
+
+		context.getInput().pressKey(GLFW.GLFW_KEY_Q);
+		context.waitTicks(5);
+		FabricJoidClientGameTest.expectContainer(context, server, failures, "the key Q over the golden apple", 0, new int[] {1, 0});
+
+		context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
+		context.waitForScreen(null);
+		context.waitTicks(5);
+		if (!server.computeOnServer(minecraftServer -> FabricJoidClientGameTest.player(minecraftServer).containerMenu == FabricJoidClientGameTest.player(minecraftServer).inventoryMenu)) {
+			failures.add("Escape does not close the container on the server");
+		}
+
+		context.getInput().setCursorPos(960D, 540D);
+		if (!failures.isEmpty()) {
+			throw new AssertionError(failures.size() + " container checks failed:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
+		}
+	}
+
+	private static void expectContainer(final ClientGameTestContext context, final TestServerContext server, final List<String> failures, final String label, final int carried, final int[]... slots) {
+		final String expected = FabricJoidClientGameTest.describe(carried, null, slots);
+		final String client = context.computeOnClient(minecraft -> FabricJoidClientGameTest.describe(minecraft.player.containerMenu, slots));
+		final String actual = server.computeOnServer(minecraftServer -> FabricJoidClientGameTest.describe(FabricJoidClientGameTest.player(minecraftServer).containerMenu, slots));
+		if (!actual.equals(expected) || !client.equals(expected)) {
+			failures.add(label + " gives " + actual + " on the server and " + client + " on the client instead of " + expected);
+		}
+	}
+
+	private static String describe(final AbstractContainerMenu container, final int[]... slots) {
+		return FabricJoidClientGameTest.describe(container.getCarried().getCount(), container.slots.stream().map(slot -> slot.getItem().getCount()).toList(), slots);
+	}
+
+	private static String describe(final int carried, final List<Integer> counts, final int[]... slots) {
+		final StringBuilder description = new StringBuilder("carried " + carried);
+		for (final int[] slot : slots) {
+			description.append(", slot ").append(slot[0]).append(' ').append(counts == null ? slot[1] : counts.get(slot[0]));
+		}
+		return description.toString();
+	}
+
+	private static void moveTo(final ClientGameTestContext context, final int[] bounds) {
+		context.getInput().setCursorPos(bounds[0] + bounds[2] / 2D, bounds[1] + bounds[3] / 2D);
+		context.waitTicks(2);
+	}
+
+	private static List<int[]> slotBounds() {
+		final UI ui = JOID.getUI(UIDemoContainer.Storage.class);
+		final List<int[]> bounds = new ArrayList<>();
+		for (final Node node : ui.getNodeList().ordered()) {
+			FabricJoidClientGameTest.bounds(ui, node, SlotNode.class, bounds);
+		}
+		return bounds;
+	}
+
+	private static ServerPlayer player(final MinecraftServer server) {
+		return server.getPlayerList().getPlayers().getFirst();
 	}
 
 	private static void expectOverlays(final ClientGameTestContext context, final boolean open) {
@@ -892,6 +1029,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		final SnapshotRunner runner = SnapshotRunner.start(new SnapshotBackend());
 		UIDemoChoice.LIST.remove(UIDemoMinecraft.class);
 		UIDemoChoice.LIST.remove(UIDemoOverlay.class);
+		UIDemoChoice.LIST.remove(UIDemoContainer.class);
 		try {
 			final File rendererReferences = new File(references, runner.getRenderer());
 			for (final String scenario : SnapshotRunner.getScenarios()) {
@@ -913,6 +1051,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		} finally {
 			UIDemoChoice.LIST.add(UIDemoMinecraft.class);
 			UIDemoChoice.LIST.add(UIDemoOverlay.class);
+			UIDemoChoice.LIST.add(UIDemoContainer.class);
 			runner.stop();
 		}
 

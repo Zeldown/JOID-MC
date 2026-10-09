@@ -9,7 +9,8 @@ ext {
             'dev/joid/base/glfw/snapshot/**',
             'dev/joid/backend/minecraft/**/demo/**',
             'dev/joid/backend/minecraft/snapshot/**',
-            'assets/joid/demo/**'
+            'assets/joid/demo/**',
+            'data/joid/**/demo/**'
     ]
 
     developmentReferences = ~/dev\/joid\/(demo|backend\/minecraft\/([\w$]+\/)*(demo|snapshot))\/[\w$\/]+/

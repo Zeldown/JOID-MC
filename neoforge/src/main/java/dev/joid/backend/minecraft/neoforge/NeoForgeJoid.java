@@ -9,6 +9,7 @@ import net.neoforged.fml.common.Mod;
 public final class NeoForgeJoid {
 
 	public NeoForgeJoid(final IEventBus modBus) {
+		MinecraftBackend.init();
 		modBus.addListener(NeoForgePayloads::register);
 		modBus.addListener(NeoForgeTestFunctions::register);
 		modBus.addListener(NeoForgeContainerTypes::register);

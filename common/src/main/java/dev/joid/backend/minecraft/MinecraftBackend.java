@@ -19,6 +19,12 @@ public final class MinecraftBackend {
 
 	private static boolean started;
 
+	public static void init() {
+		if (MinecraftBackend.isDemo()) {
+			DemoLauncher.init();
+		}
+	}
+
 	public static void tick() {
 		if (!MinecraftBackend.started) {
 			MinecraftBackend.start();
@@ -35,11 +41,15 @@ public final class MinecraftBackend {
 		MinecraftBackend.started = true;
 		Backend.register();
 
-		final boolean demo = MinecraftBackend.class.getResource("/dev/joid/backend/minecraft/demo/DemoLauncher.class") != null;
+		final boolean demo = MinecraftBackend.isDemo();
 		JOID.inst().setConfigDir(new File(Minecraft.getInstance().gameDirectory, "config/joid")).setDevMode(demo).setDemoMode(demo).load();
 		if (demo) {
 			DemoLauncher.register();
 		}
+	}
+
+	private static boolean isDemo() {
+		return MinecraftBackend.class.getResource("/dev/joid/backend/minecraft/demo/DemoLauncher.class") != null;
 	}
 
 }

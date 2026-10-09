@@ -11,6 +11,7 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 public final class ForgeJoid {
 
 	public ForgeJoid(final FMLJavaModLoadingContext context) {
+		MinecraftBackend.init();
 		ForgePayloads.register();
 		ForgeTestFunctions.register(context.getModBusGroup());
 		ForgeContainerTypes.register(context.getModBusGroup());
