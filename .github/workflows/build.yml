@@ -70,6 +70,7 @@ jobs:
       - name: Client game tests
         env:
           LIBGL_ALWAYS_SOFTWARE: '1'
+          ALSOFT_DRIVERS: 'null'
         run: xvfb-run -a -s "-screen 0 1920x1080x24" ./gradlew :fabric:runClientGameTest
 
       - name: Report the snapshot renderer
