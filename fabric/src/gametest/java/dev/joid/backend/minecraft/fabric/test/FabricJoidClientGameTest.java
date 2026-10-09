@@ -25,6 +25,7 @@ import org.lwjgl.opengl.GL11;
 
 import dev.joid.backend.minecraft.bridge.render.texture.MinecraftTexture;
 import dev.joid.backend.minecraft.bridge.snapshot.MinecraftSnapshotBackend;
+import dev.joid.backend.minecraft.bridge.ui.container.ContainerUIBridge;
 import dev.joid.backend.minecraft.bridge.ui.container.ContainerUIScreen;
 import dev.joid.backend.minecraft.bridge.ui.overlay.OverlayLayerRenderer;
 import dev.joid.backend.minecraft.bridge.ui.overlay.OverlayUIBridge;
@@ -57,6 +58,7 @@ import dev.joid.lib.resource.dto.decoder.impl.VideoResourceDecoder;
 import dev.joid.lib.ui.core.UI;
 import dev.joid.lib.ui.core.data.UIData;
 import dev.joid.lib.ui.core.data.overlay.UIDataOverlay;
+import dev.joid.lib.ui.core.data.popup.UIDataPopup;
 import dev.joid.lib.ui.node.Node;
 import dev.joid.lib.ui.node.impl.design.resource.ResourceNode;
 import dev.joid.lib.ui.node.impl.design.resource.ResourcePlayerNode;
@@ -77,6 +79,7 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContex
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.FocusableTextWidget;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.options.controls.KeyBindsList;
@@ -499,6 +502,8 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		context.waitTicks(5);
 		FabricJoidClientGameTest.expectContainer(context, server, failures, "the key Q over the golden apple", 0, new int[] {1, 0});
 
+		FabricJoidClientGameTest.verifyContainerPopup(context, server, failures);
+
 		context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
 		context.waitForScreen(null);
 		context.waitTicks(5);
@@ -509,6 +514,68 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		context.getInput().setCursorPos(960D, 540D);
 		if (!failures.isEmpty()) {
 			throw new AssertionError(failures.size() + " container checks failed:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
+		}
+	}
+
+	private static void verifyContainerPopup(final ClientGameTestContext context, final TestServerContext server, final List<String> failures) {
+		server.runOnServer(minecraftServer -> FabricJoidClientGameTest.player(minecraftServer).containerMenu.getSlot(2).set(new ItemStack(Items.DIAMOND, 5)));
+		context.waitTicks(10);
+		final Screen screen = context.computeOnClient(minecraft -> minecraft.gui.screen());
+		final ContainerPopup popup = new ContainerPopup();
+		context.runOnClient(_ -> JOID.open(popup));
+		context.waitTicks(20);
+		final int[] button = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(popup.getNodeList().ordered().getFirst()));
+		FabricJoidClientGameTest.moveTo(context, button);
+		context.takeScreenshot("joid-demo-container-popup");
+		if (!context.computeOnClient(minecraft -> minecraft.gui.screen() == screen && JOID.isOpen(popup) && BridgeHandler.UI.getBridge(ContainerUIBridge.class).isOpened(popup))) {
+			failures.add("the popup replaced the container screen instead of opening over it");
+		}
+
+		if (context.computeOnClient(_ -> ((ContainerUIScreen<?>) screen).getHoveredSlot() != null)) {
+			failures.add("the slot under the popup is hovered");
+		}
+
+		context.getInput().pressMouse(GLFW.GLFW_MOUSE_BUTTON_LEFT);
+		context.waitTicks(5);
+		context.getInput().pressKey(GLFW.GLFW_KEY_E);
+		context.waitTicks(5);
+		if (popup.clicks != 1) {
+			failures.add("a click on the popup gives " + popup.clicks + " popup clicks instead of 1");
+		}
+
+		FabricJoidClientGameTest.expectContainer(context, server, failures, "a click on the popup over 5 diamonds", 0, new int[] {2, 5});
+		if (!context.computeOnClient(minecraft -> minecraft.gui.screen() == screen)) {
+			failures.add("the key E closed the container under the popup");
+		}
+
+		context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
+		context.waitTicks(20);
+		if (context.computeOnClient(minecraft -> JOID.isOpen(popup) || minecraft.gui.screen() != screen)) {
+			failures.add("Escape does not close the popup alone");
+		}
+
+		if (!server.computeOnServer(minecraftServer -> FabricJoidClientGameTest.player(minecraftServer).containerMenu instanceof DemoContainer)) {
+			failures.add("the container is closed on the server after the popup");
+		}
+
+		FabricJoidClientGameTest.moveTo(context, button);
+		context.getInput().pressMouse(GLFW.GLFW_MOUSE_BUTTON_LEFT);
+		context.waitTicks(5);
+		FabricJoidClientGameTest.expectContainer(context, server, failures, "a left click on 5 diamonds after the popup", 5, new int[] {2, 0});
+		context.getInput().pressMouse(GLFW.GLFW_MOUSE_BUTTON_LEFT);
+		context.waitTicks(5);
+		FabricJoidClientGameTest.expectContainer(context, server, failures, "a left click with 5 diamonds after the popup", 0, new int[] {2, 5});
+
+		context.runOnClient(_ -> JOID.open(new UIDemoChoice()));
+		context.waitTicks(20);
+		if (!context.computeOnClient(minecraft -> minecraft.gui.screen() == screen && JOID.isOpen(UIDemoChoice.class))) {
+			failures.add("UIDemoChoice replaced the container screen instead of opening over it");
+		}
+
+		context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
+		context.waitTicks(20);
+		if (context.computeOnClient(minecraft -> JOID.isOpen(UIDemoChoice.class) || minecraft.gui.screen() != screen)) {
+			failures.add("Escape does not close UIDemoChoice alone over the container");
 		}
 	}
 
@@ -1076,6 +1143,18 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		if (!failures.isEmpty()) {
 			throw new AssertionError(failures.size() + " snapshots differ from their reference:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
 		}
+	}
+
+	@UIDataPopup(active = true)
+	public static final class ContainerPopup extends UI {
+
+		private int clicks;
+
+		@Override
+		public void init() {
+			RectNode.create(760, 244, 108, 108).color(Color.WHITE).onClick((_, _, _, _) -> this.clicks++).attach(this);
+		}
+
 	}
 
 	@UIData(background = false)

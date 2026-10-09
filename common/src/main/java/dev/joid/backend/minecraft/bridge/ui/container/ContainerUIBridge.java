@@ -8,6 +8,7 @@ import dev.joid.backend.minecraft.bridge.ui.IItemHoverBridge;
 import dev.joid.backend.minecraft.bridge.ui.screen.GuiCompositor;
 import dev.joid.backend.minecraft.bridge.window.MinecraftWindowBridge;
 import dev.joid.backend.minecraft.lib.ui.core.container.ContainerUI;
+import dev.joid.internal.JOID;
 import dev.joid.lib.bridge.ui.StackUIBridge;
 import dev.joid.lib.ui.core.UI;
 import dev.joid.lib.ui.core.data.overlay.UIDataOverlayObject;
@@ -41,7 +42,31 @@ public final class ContainerUIBridge extends StackUIBridge implements IItemHover
 
 	@Override
 	public void open(final @NonNull UI ui) {
-		throw new IllegalStateException("The container UI " + ui.getClass().getSimpleName() + " opens with its container on the server (ServerPlayer.openMenu), not with JOID.open");
+		if (ui instanceof ContainerUI) {
+			throw new IllegalStateException("The container UI " + ui.getClass().getSimpleName() + " opens with its container on the server (ServerPlayer.openMenu), not with JOID.open");
+		}
+
+		if (!ui.getPopup().active()) {
+			for (final UI current : new ArrayList<>(super.getUiList().ordered())) {
+				if (current instanceof ContainerUI) {
+					continue;
+				}
+
+				final boolean result = current.onClose();
+				if (current.getTransition() != null && current.getTransition().getOut() != null && current.getTransition().getOut().isRunning()) {
+					current.getTransition().getOut().getAnimator().setCallback(_ -> JOID.open(ui));
+					return;
+				}
+
+				if (!result) {
+					return;
+				}
+
+				super.close(current);
+			}
+		}
+
+		super.add(ui);
 	}
 
 	public void added(final @NonNull ContainerUIScreen<?> screen) {
@@ -58,12 +83,12 @@ public final class ContainerUIBridge extends StackUIBridge implements IItemHover
 
 	@Override
 	public boolean canHandle(final @NonNull UI ui) {
-		return ui instanceof ContainerUI && !ui.getOverlay().active();
+		return !ui.getOverlay().active() && (ui instanceof ContainerUI || this.screen != null || super.isOpened(ui));
 	}
 
 	@Override
 	public boolean canHandle(final @NonNull Class<? extends UI> clazz) {
-		return ContainerUI.class.isAssignableFrom(clazz) && !UIDataOverlayObject.getOrDefault(clazz).active();
+		return !UIDataOverlayObject.getOrDefault(clazz).active() && (ContainerUI.class.isAssignableFrom(clazz) || this.screen != null);
 	}
 
 	@Override

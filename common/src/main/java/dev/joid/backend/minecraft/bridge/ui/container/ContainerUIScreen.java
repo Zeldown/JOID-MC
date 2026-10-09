@@ -1,7 +1,9 @@
 package dev.joid.backend.minecraft.bridge.ui.container;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -9,6 +11,7 @@ import dev.joid.backend.minecraft.lib.ui.core.container.ContainerUI;
 import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
 import dev.joid.base.glfw.input.GlfwKeys;
 import dev.joid.lib.bridge.BridgeHandler;
+import dev.joid.lib.ui.core.UI;
 import dev.joid.lib.ui.node.Node;
 import dev.joid.lib.utils.click.ClickType;
 import dev.joid.lib.utils.key.Key;
@@ -196,9 +199,25 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 
 	private Node getNode(final double x, final double y) {
 		final Window window = Minecraft.getInstance().getWindow();
-		final double uiX = this.ui.getView().toUiX(x * window.getGuiScale());
-		final double uiY = this.ui.getView().toUiY(y * window.getGuiScale());
-		for (final Node node : this.ui.getNodeList().reversed()) {
+		final List<UI> uiList = new ArrayList<>(this.bridge.getUiList().ordered());
+		for (int index = uiList.size() - 1; index >= 0; index--) {
+			final UI ui = uiList.get(index);
+			if (ui != this.ui && (!ui.getData().active() || !ui.getData().visible())) {
+				continue;
+			}
+
+			final Node hovered = ContainerUIScreen.getNode(ui, x * window.getGuiScale(), y * window.getGuiScale());
+			if (hovered != null || ui == this.ui || ui.getPopup().active()) {
+				return hovered;
+			}
+		}
+		return null;
+	}
+
+	private static Node getNode(final UI ui, final double x, final double y) {
+		final double uiX = ui.getView().toUiX(x);
+		final double uiY = ui.getView().toUiY(y);
+		for (final Node node : ui.getNodeList().reversed()) {
 			final Node hovered = node.getHoveredNode(uiX, uiY);
 			if (hovered != null) {
 				return hovered;
