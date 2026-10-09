@@ -8,7 +8,6 @@ import dev.joid.backend.minecraft.render.vertex.VertexLayout;
 import dev.joid.lib.bridge.render.matrix.MatrixStack;
 import dev.joid.lib.bridge.render.shader.source.ShaderSource;
 import dev.joid.lib.bridge.render.shader.source.ShaderVariable;
-import dev.joid.lib.bridge.render.shader.uniform.UniformBlock;
 import dev.joid.lib.bridge.render.state.BlendState;
 import dev.joid.lib.bridge.render.state.RenderState;
 import dev.joid.lib.bridge.render.state.StencilEmulation;
@@ -36,8 +35,8 @@ public final class Shader extends dev.joid.lib.bridge.render.shader.Shader {
 	private final BindGroupLayout layout;
 	private final VertexFormat    vertexFormat;
 
-	private Shader(final RenderBridge bridge, final BlendState blend, final boolean active, final UniformBlock block, final List<ShaderVariable> samplers, final Identifier identifier, final Identifier stencilIdentifier, final BindGroupLayout layout, final VertexFormat vertexFormat) {
-		super(bridge, blend, active, block, samplers);
+	private Shader(final RenderBridge bridge, final GlslShaderTranslator translator, final ShaderSource vertex, final ShaderSource fragment, final BlendState blend, final boolean active, final Identifier identifier, final Identifier stencilIdentifier, final BindGroupLayout layout, final VertexFormat vertexFormat) {
+		super(bridge, translator, vertex, fragment, blend, active);
 		this.device            = bridge.getDevice();
 		this.identifier        = identifier;
 		this.stencilIdentifier = stencilIdentifier;
@@ -50,13 +49,12 @@ public final class Shader extends dev.joid.lib.bridge.render.shader.Shader {
 		final GlslShaderTranslator stencilTranslator = GlslShaderTranslator.create().stencil(StencilEmulation.Pass.WRITE);
 		final Identifier identifier = Identifier.fromNamespaceAndPath(MinecraftBackend.MOD_ID, "shader/" + Shader.count++);
 		final Identifier stencilIdentifier = Identifier.fromNamespaceAndPath(MinecraftBackend.MOD_ID, identifier.getPath() + "_stencil");
-		final List<ShaderVariable> samplers = translator.getSamplers(vertex, fragment);
-		final BindGroupLayout layout = Shader.createLayout(samplers);
+		final BindGroupLayout layout = Shader.createLayout(translator.getSamplers(vertex, fragment));
 		final VertexFormat vertexFormat = VertexLayout.create(vertex.getBuiltins());
 		bridge.getSourceProvider().register(identifier, ShaderType.VERTEX, translator.translateVertex(vertex, fragment));
 		bridge.getSourceProvider().register(identifier, ShaderType.FRAGMENT, translator.translateFragment(vertex, fragment));
 		bridge.getSourceProvider().register(stencilIdentifier, ShaderType.FRAGMENT, stencilTranslator.translateFragment(vertex, fragment));
-		return new Shader(bridge, blend, bridge.getPipelineCache().isValid(identifier, layout, vertexFormat, blend), translator.createBlock(vertex, fragment), samplers, identifier, stencilIdentifier, layout, vertexFormat);
+		return new Shader(bridge, translator, vertex, fragment, blend, bridge.getPipelineCache().isValid(identifier, layout, vertexFormat, blend), identifier, stencilIdentifier, layout, vertexFormat);
 	}
 
 	public @NonNull GpuBufferSlice upload(final @NonNull RenderState state, final @NonNull float[] projection, final @NonNull MatrixStack modelView, final @NonNull StencilEmulation stencil) {
