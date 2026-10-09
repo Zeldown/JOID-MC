@@ -165,7 +165,7 @@ def verifyDevJar = tasks.register('verifyDevJar') {
     inputs.file(archive)
     doLast {
         new ZipFile(archive.get().asFile).withCloseable { zip ->
-            ['dev/joid/demo/DemoFont.class', 'dev/joid/lib/ui/node/impl/dev/DevNode.class', 'dev/joid/backend/minecraft/demo/DemoLauncher.class'].each { entry ->
+            ['dev/joid/demo/DemoFont.class', 'dev/joid/lib/ui/node/impl/dev/DevNode.class', 'dev/joid/backend/minecraft/demo/DemoLauncher.class', 'assets/joid/lang/en_us.json', 'assets/joid/lang/fr_fr.json'].each { entry ->
                 if (zip.getEntry(entry) == null) {
                     throw new GradleException("The dev jar misses ${entry}")
                 }

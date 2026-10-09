@@ -10,6 +10,7 @@ ext {
             'dev/joid/backend/minecraft/**/demo/**',
             'dev/joid/backend/minecraft/bridge/snapshot/**',
             'assets/joid/demo/**',
+            'assets/joid/lang/**',
             'data/joid/**/demo/**'
     ]
 

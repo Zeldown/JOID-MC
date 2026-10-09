@@ -76,10 +76,14 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.FocusableTextWidget;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.options.controls.KeyBindsList;
+import net.minecraft.client.gui.screens.options.controls.KeyBindsScreen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.MouseButtonInfo;
+import net.minecraft.client.resources.language.ClientLanguage;
 import net.minecraft.client.sounds.SoundEventListener;
 import net.minecraft.core.ClientAsset;
 import net.minecraft.network.chat.Component;
@@ -102,6 +106,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 	public void runTest(final ClientGameTestContext context) {
 		context.waitFor(_ -> BridgeHandler.UI.getBridge(ScreenUIBridge.class) != null);
 		context.getInput().resizeWindow(1920, 1080);
+		FabricJoidClientGameTest.verifyKeyBindLabels(context);
 		FabricJoidClientGameTest.verifyEntitiesWithoutWorld(context);
 		try (TestSingleplayerContext singleplayer = context.worldBuilder().create()) {
 			singleplayer.getConnection().waitForChunksRender();
@@ -141,6 +146,39 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 
 		context.runOnClient(_ -> FabricJoidClientGameTest.verify(JUnitCore.runClasses(FabricRenderBridgeContractTest.class)));
 		context.runOnClient(_ -> FabricJoidClientGameTest.verifySnapshots(new File(System.getProperty("joid.snapshot.output", "snapshots/renders")), new File(System.getProperty("joid.snapshot.references", "snapshots/references"))));
+	}
+
+	private static void verifyKeyBindLabels(final ClientGameTestContext context) {
+		context.runOnClient(minecraft -> minecraft.gui.setScreen(new KeyBindsScreen(minecraft.gui.screen(), minecraft.options)));
+		context.waitForScreen(KeyBindsScreen.class);
+		context.runOnClient(minecraft -> {
+			final KeyBindsList list = (KeyBindsList) FabricJoidClientGameTest.field(minecraft.gui.screen(), "keyBindsList");
+			list.setScrollAmount(list.maxScrollAmount());
+		});
+		context.waitTicks(5);
+		context.takeScreenshot("joid-controls");
+		final List<String> labels = context.computeOnClient(minecraft -> {
+			final List<String> entries = new ArrayList<>();
+			for (final KeyBindsList.Entry entry : ((KeyBindsList) FabricJoidClientGameTest.field(minecraft.gui.screen(), "keyBindsList")).children()) {
+				entries.add((entry instanceof KeyBindsList.CategoryEntry ? ((FocusableTextWidget) FabricJoidClientGameTest.field(entry, "categoryName")).getMessage() : (Component) FabricJoidClientGameTest.field(entry, "name")).getString());
+			}
+			return entries;
+		});
+		final List<String> french = context.computeOnClient(minecraft -> {
+			final ClientLanguage language = ClientLanguage.loadFrom(minecraft.getResourceManager(), List.of("fr_fr"), false);
+			return List.of(language.getOrDefault("key.category.joid.main"), language.getOrDefault("key.joid.demo"));
+		});
+		context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
+		context.waitForScreen(TitleScreen.class);
+
+		final int category = labels.indexOf("JOID");
+		if (category < 0 || labels.indexOf("Open JOID demos") != category + 1) {
+			throw new AssertionError("The controls screen does not list the category JOID with Open JOID demos: " + labels.subList(Math.max(0, labels.size() - 4), labels.size()));
+		}
+
+		if (!french.equals(List.of("JOID", "Ouvrir les démos JOID"))) {
+			throw new AssertionError("The French labels of the demo key are " + french);
+		}
 	}
 
 	private static void click(final ClientGameTestContext context, final int[] bounds) {
