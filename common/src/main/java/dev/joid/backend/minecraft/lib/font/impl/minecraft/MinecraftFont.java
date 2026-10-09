@@ -28,7 +28,7 @@ public final class MinecraftFont extends GlyphFont<MinecraftFontFace> {
 	private final Identifier identifier;
 
 	private MinecraftFont(final Identifier identifier) {
-		super(FontFamily.of(MinecraftFontFace.create(identifier, FontWeight.REGULAR), MinecraftFontFace.create(identifier, FontWeight.BOLD)));
+		super(FontFamily.of(MinecraftFontFace.create(identifier, FontWeight.REGULAR), MinecraftFontFace.create(identifier, FontWeight.BOLD)), 8);
 		this.identifier = identifier;
 	}
 

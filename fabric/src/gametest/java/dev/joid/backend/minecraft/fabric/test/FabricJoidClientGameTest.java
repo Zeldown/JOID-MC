@@ -40,6 +40,8 @@ import dev.joid.demo.ui.shader.UIDemoShader;
 import dev.joid.internal.JOID;
 import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.bridge.render.texture.ITexture;
+import dev.joid.lib.color.Color;
+import dev.joid.lib.draw.text.builder.Text;
 import dev.joid.lib.font.dto.TextInfo;
 import dev.joid.lib.resource.Resource;
 import dev.joid.lib.resource.dto.decoder.impl.VideoResourceDecoder;
@@ -48,6 +50,7 @@ import dev.joid.lib.ui.node.Node;
 import dev.joid.lib.ui.node.impl.design.resource.ResourceNode;
 import dev.joid.lib.ui.node.impl.design.resource.ResourcePlayerNode;
 import dev.joid.lib.ui.node.impl.design.shape.RectNode;
+import dev.joid.lib.ui.node.impl.design.text.TextNode;
 import dev.joid.test.snapshot.SnapshotDifference;
 import dev.joid.test.snapshot.SnapshotImage;
 import dev.joid.test.snapshot.SnapshotRunner;
@@ -109,6 +112,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			FabricJoidClientGameTest.verifyScale(context);
 			FabricJoidClientGameTest.verifyAudio(context);
 			context.runOnClient(FabricJoidClientGameTest::verifyWidths);
+			FabricJoidClientGameTest.verifyBitmapFont(context);
 			context.runOnClient(_ -> JOID.open(new UIDemoChoice()));
 			context.waitTicks(20);
 			context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
@@ -197,6 +201,79 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 				throw new AssertionError("The GUI scale " + guiScale + " gives the interface scale " + actual + " instead of " + interfaceScale);
 			}
 		});
+	}
+
+	private static void verifyBitmapFont(final ClientGameTestContext context) {
+		final RectNode background = RectNode.create(0, 0, 1920, 1080).color(Color.BLACK);
+		final TextNode text = TextNode.create(960, 540).text(Text.create("HH", TextInfo.create(MinecraftFont.DEFAULT, MinecraftFont.SIZE * 3, Color.WHITE)));
+		context.runOnClient(_ -> JOID.open(new UIDemoChoice()));
+		context.waitTicks(20);
+		context.runOnClient(_ -> JOID.open(new UI() {
+
+			@Override
+			public void init() {
+				background.attach(this);
+				text.attach(this);
+			}
+
+		}));
+		context.waitTicks(20);
+		final List<String> failures = new ArrayList<>();
+		for (final int[] scale : new int[][] {{1, 1}, {2, 2}, {0, 3}}) {
+			context.runOnClient(minecraft -> {
+				minecraft.options.guiScale().set(scale[0]);
+				minecraft.resizeGui();
+			});
+			context.waitTicks(5);
+			final int[] bounds = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(background));
+			final BufferedImage image = FabricJoidClientGameTest.read(context.takeScreenshot("joid-bitmap-font-gui-scale-" + scale[0]));
+			FabricJoidClientGameTest.expectCrisp(failures, "the GUI scale " + scale[0], image, bounds, scale[1]);
+		}
+
+		context.runOnClient(_ -> JOID.open(new UIDemoChoice()));
+		context.waitTicks(20);
+		context.runOnClient(_ -> JOID.open(new UIDemoMinecraft()));
+		context.runOnClient(minecraft -> {
+			minecraft.options.guiScale().set(1);
+			minecraft.resizeGui();
+		});
+		context.waitTicks(40);
+		context.takeScreenshot("joid-demo-minecraft-gui-scale-1");
+		context.runOnClient(minecraft -> {
+			minecraft.options.guiScale().set(0);
+			minecraft.resizeGui();
+		});
+		context.waitTicks(5);
+		if (!failures.isEmpty()) {
+			throw new AssertionError(failures.size() + " bitmap font checks failed:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
+		}
+	}
+
+	private static void expectCrisp(final List<String> failures, final String label, final BufferedImage image, final int[] bounds, final int texel) {
+		int left = Integer.MAX_VALUE;
+		int top = Integer.MAX_VALUE;
+		int right = Integer.MIN_VALUE;
+		int bottom = Integer.MIN_VALUE;
+		int blended = 0;
+		for (int row = 0; row < bounds[3]; row++) {
+			for (int column = 0; column < bounds[2]; column++) {
+				final int color = image.getRGB(bounds[0] + column, bounds[1] + row) & 0xFFFFFF;
+				if (color == 0xFFFFFF) {
+					left = Math.min(left, column);
+					top = Math.min(top, row);
+					right = Math.max(right, column);
+					bottom = Math.max(bottom, row);
+				} else if (color != 0) {
+					blended++;
+				}
+			}
+		}
+
+		final int width = right - left + 1;
+		final int height = bottom - top + 1;
+		if (blended > 0 || width != 11 * texel || height != 7 * texel) {
+			failures.add(label + " draws \"HH\" " + width + "x" + height + " with " + blended + " blended pixels instead of " + 11 * texel + "x" + 7 * texel + " at " + texel + " pixels per texel");
+		}
 	}
 
 	private static void verifyResources(final ClientGameTestContext context) {

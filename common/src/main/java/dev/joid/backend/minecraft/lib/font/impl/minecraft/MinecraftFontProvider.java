@@ -8,7 +8,6 @@ import dev.joid.backend.minecraft.lib.font.impl.minecraft.dto.MinecraftFontFace;
 import dev.joid.backend.minecraft.render.texture.GpuBorrowedTexture;
 import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.bridge.render.IRenderBridge;
-import dev.joid.lib.bridge.render.matrix.PixelGrid;
 import dev.joid.lib.bridge.render.shader.IShader;
 import dev.joid.lib.bridge.render.shader.source.ShaderSource;
 import dev.joid.lib.bridge.render.shader.source.ShaderStage;
@@ -43,7 +42,6 @@ public final class MinecraftFontProvider extends GlyphFontProvider<MinecraftFont
 	private Color          color;
 	private double         runX;
 	private double         runY;
-	private PixelGrid      grid;
 	private double         runWidth;
 	private double         runHeight;
 	private GpuTextureView view;
@@ -75,7 +73,6 @@ public final class MinecraftFontProvider extends GlyphFontProvider<MinecraftFont
 		this.runY = runY;
 		this.runWidth = runWidth;
 		this.runHeight = runHeight;
-		this.grid = render.getPixelGrid();
 
 		render.pushState();
 		Color.reset();
@@ -102,8 +99,8 @@ public final class MinecraftFontProvider extends GlyphFontProvider<MinecraftFont
 
 		renderable.render(MinecraftFontProvider.IDENTITY, this.capture.reset(), 0, true);
 		final double scale = glyph.getSize() / MinecraftFont.SIZE;
-		final double left = this.grid.snapX(glyph.getX()) + glyph.getOffsetX();
-		final double top = this.grid.snapY(glyph.getBaseline()) + glyph.getOffsetY() - glyph.getAscender();
+		final double left = glyph.getX() + glyph.getOffsetX();
+		final double top = glyph.getBaseline() + glyph.getOffsetY() - glyph.getAscender();
 		final Tessellator tessellator = Tessellator.inst();
 		tessellator.start(DrawMode.QUADS);
 		for (int vertex = 0; vertex < this.capture.getCount(); vertex++) {
