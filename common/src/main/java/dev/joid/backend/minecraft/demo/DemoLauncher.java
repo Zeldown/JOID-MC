@@ -10,9 +10,9 @@ import dev.joid.backend.minecraft.demo.network.OpenDemoContainerPayloadHandler;
 import dev.joid.backend.minecraft.demo.ui.UIDemoContainer;
 import dev.joid.backend.minecraft.demo.ui.UIDemoMinecraft;
 import dev.joid.backend.minecraft.demo.ui.UIDemoOverlay;
-import dev.joid.backend.minecraft.loader.network.PayloadRegistry;
-import dev.joid.backend.minecraft.loader.registry.ContainerRegistry;
-import dev.joid.backend.minecraft.loader.registry.TestFunctionRegistry;
+import dev.joid.backend.minecraft.lib.ui.core.container.ContainerUI;
+import dev.joid.backend.minecraft.loader.registry.ContainerType;
+import dev.joid.backend.minecraft.loader.registry.GameTestFunction;
 import dev.joid.demo.ui.UIDemoChoice;
 import dev.joid.internal.JOID;
 import lombok.AccessLevel;
@@ -23,15 +23,15 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class DemoLauncher {
 
 	public static void init() {
-		ContainerRegistry.register(Identifier.fromNamespaceAndPath(Backend.MOD_ID, "demo/container"), DemoContainer.TYPE, UIDemoContainer.Storage::new);
-		PayloadRegistry.register(OpenDemoContainerPayload.TYPE, OpenDemoContainerPayload.STREAM_CODEC, OpenDemoContainerPayloadHandler::handle);
-		TestFunctionRegistry.register(Identifier.fromNamespaceAndPath(Backend.MOD_ID, "demo/container"), DemoContainerGameTest::run);
+		ContainerUI.bind(DemoContainer.TYPE, UIDemoContainer.Storage::new);
+		ContainerType.create(Backend.MOD_ID + ":demo/container", DemoContainer.TYPE).register();
+		OpenDemoContainerPayload.TYPE.onServer(OpenDemoContainerPayloadHandler::handle).register();
+		GameTestFunction.create(Backend.MOD_ID + ":demo/container", DemoContainerGameTest::run).register();
 	}
 
 	public static void register() {

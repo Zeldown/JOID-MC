@@ -1,15 +1,19 @@
 package dev.joid.backend.minecraft.lib.ui.core.container;
 
+import java.util.function.Function;
+
 import dev.joid.backend.minecraft.bridge.ui.container.ContainerUIBridge;
 import dev.joid.backend.minecraft.bridge.ui.container.ContainerUIScreen;
 import dev.joid.backend.minecraft.lib.draw.item.DrawItem;
 import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
+import dev.joid.backend.minecraft.loader.registry.ContainerBinding;
 import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.ui.core.UI;
 import lombok.Getter;
 import lombok.NonNull;
 
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
 
 public abstract class ContainerUI<M extends AbstractContainerMenu> extends UI {
@@ -22,6 +26,10 @@ public abstract class ContainerUI<M extends AbstractContainerMenu> extends UI {
 	protected ContainerUI(final @NonNull M container) {
 		this.container   = container;
 		this.carriedSize = 64D;
+	}
+
+	public static <M extends AbstractContainerMenu> void bind(final @NonNull MenuType<M> type, final @NonNull Function<M, ? extends ContainerUI<M>> factory) {
+		ContainerBinding.create(type, factory).register();
 	}
 
 	@Override

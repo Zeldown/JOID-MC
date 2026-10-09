@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.function.Consumer;
 
 import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
+import dev.joid.backend.minecraft.bridge.resource.ResourceReloader;
 import dev.joid.backend.minecraft.bridge.ui.container.ContainerUIBridge;
 import dev.joid.backend.minecraft.bridge.ui.overlay.OverlayUIBridge;
 import dev.joid.backend.minecraft.bridge.ui.screen.ScreenUIBridge;
@@ -13,6 +14,7 @@ import dev.joid.backend.minecraft.lib.asset.dto.locator.impl.NamespacedAssetLoca
 import dev.joid.backend.minecraft.lib.font.dto.markup.LegacyTextMarkup;
 import dev.joid.backend.minecraft.lib.resource.dto.resolver.impl.NamespacedResourceResolver;
 import dev.joid.backend.minecraft.lib.resource.dto.resolver.impl.SpriteResourceResolver;
+import dev.joid.backend.minecraft.loader.registry.ReloadListener;
 import dev.joid.base.openal.AlAudioBridge;
 import dev.joid.base.openal.binding.Lwjgl3AlBinding;
 import dev.joid.internal.JOID;
@@ -36,6 +38,7 @@ public final class Backend {
 	private static boolean registered;
 
 	public static void init() {
+		ReloadListener.create(Backend.MOD_ID + ":resources").onReload(ResourceReloader.inst()::reload).register();
 		if (Backend.isDemo()) {
 			DemoLauncher.init();
 		}

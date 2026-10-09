@@ -1,21 +1,21 @@
 package dev.joid.backend.minecraft.demo.network;
 
 import dev.joid.backend.minecraft.Backend;
+import dev.joid.backend.minecraft.loader.network.IPayload;
+import dev.joid.backend.minecraft.loader.network.IPayloadWriter;
+import dev.joid.backend.minecraft.loader.network.PayloadType;
 
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.Identifier;
+public record OpenDemoContainerPayload() implements IPayload {
 
-public record OpenDemoContainerPayload() implements CustomPacketPayload {
-
-	public static final OpenDemoContainerPayload                                       INSTANCE     = new OpenDemoContainerPayload();
-	public static final CustomPacketPayload.Type<OpenDemoContainerPayload>             TYPE         = new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(Backend.MOD_ID, "demo/container"));
-	public static final StreamCodec<RegistryFriendlyByteBuf, OpenDemoContainerPayload> STREAM_CODEC = StreamCodec.unit(OpenDemoContainerPayload.INSTANCE);
+	public static final OpenDemoContainerPayload              INSTANCE = new OpenDemoContainerPayload();
+	public static final PayloadType<OpenDemoContainerPayload> TYPE     = PayloadType.create(Backend.MOD_ID + ":demo/container", _ -> OpenDemoContainerPayload.INSTANCE);
 
 	@Override
-	public CustomPacketPayload.Type<OpenDemoContainerPayload> type() {
+	public PayloadType<OpenDemoContainerPayload> getType() {
 		return OpenDemoContainerPayload.TYPE;
 	}
+
+	@Override
+	public void write(final IPayloadWriter writer) {}
 
 }

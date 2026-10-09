@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.WeakHashMap;
 
-import dev.joid.backend.minecraft.Backend;
 import dev.joid.backend.minecraft.lib.asset.dto.impl.NamespacedAsset;
 import dev.joid.backend.minecraft.lib.resource.dto.resolver.impl.NamespacedResourceResolver;
 import dev.joid.lib.resource.dto.ResourceData;
@@ -15,14 +14,8 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
-import net.minecraft.resources.Identifier;
-import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
-
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class ResourceReloader implements ResourceManagerReloadListener {
-
-	public static final Identifier ID = Identifier.fromNamespaceAndPath(Backend.MOD_ID, "resources");
+public final class ResourceReloader {
 
 	private static final ResourceReloader INSTANCE = new ResourceReloader();
 
@@ -32,8 +25,7 @@ public final class ResourceReloader implements ResourceManagerReloadListener {
 		return ResourceReloader.INSTANCE;
 	}
 
-	@Override
-	public void onResourceManagerReload(final ResourceManager resourceManager) {
+	public void reload() {
 		final List<Entry<ResourceData, NamespacedAsset>> entries;
 		synchronized (this.tracked) {
 			entries = new ArrayList<>(this.tracked.entrySet());

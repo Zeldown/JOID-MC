@@ -1,8 +1,9 @@
 package dev.joid.backend.minecraft.forge.network;
 
 import dev.joid.backend.minecraft.Backend;
-import dev.joid.backend.minecraft.loader.network.PayloadDeclaration;
-import dev.joid.backend.minecraft.loader.network.PayloadRegistry;
+import dev.joid.backend.minecraft.bridge.network.PayloadPacket;
+import dev.joid.backend.minecraft.loader.network.IPayload;
+import dev.joid.backend.minecraft.loader.network.PayloadType;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -20,25 +21,25 @@ public final class ForgePayloads {
 	private static Channel<CustomPacketPayload> channel;
 
 	public static void register() {
-		if (PayloadRegistry.getDeclarations().isEmpty()) {
+		if (PayloadType.getRegistered().isEmpty()) {
 			return;
 		}
 
 		PayloadFlow<RegistryFriendlyByteBuf, CustomPacketPayload> flow = ChannelBuilder.named(Identifier.fromNamespaceAndPath(Backend.MOD_ID, "main")).networkProtocolVersion(1).optional().payloadChannel().play().serverbound();
-		for (final PayloadDeclaration<?> declaration : PayloadRegistry.getDeclarations()) {
-			flow = ForgePayloads.add(flow, declaration);
+		for (final PayloadType<?> type : PayloadType.getRegistered()) {
+			flow = ForgePayloads.add(flow, type);
 		}
 		ForgePayloads.channel = flow.build();
 	}
 
 	public static void registerSender() {
 		if (ForgePayloads.channel != null) {
-			PayloadRegistry.sender(payload -> ForgePayloads.channel.send(payload, PacketDistributor.SERVER.noArg()));
+			PayloadType.sender(payload -> ForgePayloads.channel.send(new PayloadPacket<>(payload), PacketDistributor.SERVER.noArg()));
 		}
 	}
 
-	private static <T extends CustomPacketPayload> PayloadFlow<RegistryFriendlyByteBuf, CustomPacketPayload> add(final PayloadFlow<RegistryFriendlyByteBuf, CustomPacketPayload> flow, final PayloadDeclaration<T> declaration) {
-		return flow.addMain(declaration.type(), declaration.codec(), (payload, context) -> declaration.handler().accept(payload, context.getSender()));
+	private static <T extends IPayload> PayloadFlow<RegistryFriendlyByteBuf, CustomPacketPayload> add(final PayloadFlow<RegistryFriendlyByteBuf, CustomPacketPayload> flow, final PayloadType<T> type) {
+		return flow.addMain(PayloadPacket.getType(type), PayloadPacket.codec(type), (packet, context) -> type.getOnServer().accept(packet.payload(), context.getSender()));
 	}
 
 }

@@ -4,7 +4,6 @@ import dev.joid.backend.minecraft.demo.container.DemoContainer;
 import dev.joid.backend.minecraft.demo.network.OpenDemoContainerPayload;
 import dev.joid.backend.minecraft.lib.ui.core.container.ContainerUI;
 import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
-import dev.joid.backend.minecraft.loader.network.PayloadRegistry;
 import dev.joid.demo.DemoFont;
 import dev.joid.internal.JOID;
 import dev.joid.lib.color.Color;
@@ -26,7 +25,7 @@ public class UIDemoContainer extends UI {
 
 	@Override
 	public void init() {
-		PayloadRegistry.send(OpenDemoContainerPayload.INSTANCE);
+		OpenDemoContainerPayload.INSTANCE.sendToServer();
 		JOID.close(this, true);
 	}
 
