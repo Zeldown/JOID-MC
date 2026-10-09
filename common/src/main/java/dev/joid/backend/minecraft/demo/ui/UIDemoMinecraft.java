@@ -35,10 +35,12 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.resources.model.sprite.SpriteId;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.ClientAsset;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.player.PlayerModelType;
 import net.minecraft.world.entity.player.PlayerSkin;
@@ -341,7 +343,55 @@ public class UIDemoMinecraft extends UIDemo {
 			})
 			.attach(container);
 
-			ContainerNode.create(0, 1560, 1920, 80).attach(container);
+			RectNode
+			.create(40, 1640, 440, 240)
+			.color(UIDemoMinecraft.PLACEHOLDER)
+			.body(rect -> {
+				RectNode.create(20, 20, 400, 200).color(UIDemoMinecraft.PANEL).attach(rect);
+				RectNode
+				.create(170, 70, 100, 100)
+				.color(UIDemoMinecraft.INK)
+				.hoveredColor(UIDemoMinecraft.PLACEHOLDER)
+				.body(slot -> {
+					ResourceNode.create(10, 10, 80, 80).resource(Resource.of(Sheets.BLOCKS_MAPPER.defaultNamespaceApply("note_block"))).attach(slot);
+				})
+				.onClick((_, _, _, _) -> Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_PLING, 1F)))
+				.attach(rect);
+				TextNode.create(220, 255).text(Text.create("Vanilla sound", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
+			})
+			.attach(container);
+
+			RectNode
+			.create(520, 1640, 440, 240)
+			.color(UIDemoMinecraft.PLACEHOLDER)
+			.body(rect -> {
+				RectNode.create(20, 20, 400, 200).color(UIDemoMinecraft.PANEL).attach(rect);
+				TextNode.create(30, 30).text(Text.create(() -> "GUI scale " + Minecraft.getInstance().getWindow().getGuiScale(), info)).attach(rect);
+				TextNode.create(30, 60).text(Text.create(() -> String.format("Interface scale %.2f", super.getView().getInterfaceScale()), info)).attach(rect);
+				TextNode.create(30, 90).text(Text.create(() -> "Active " + super.getScale().active() + ", limited " + super.getScale().limited(), info)).attach(rect);
+				RectNode
+				.create(30, 140, 180, 60)
+				.color(UIDemoMinecraft.INK)
+				.hoveredColor(UIDemoMinecraft.PLACEHOLDER)
+				.body(toggle -> {
+					TextNode.create(90, 30).text(Text.create("Active", info, Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(toggle);
+				})
+				.onClick((_, _, _, _) -> super.getScale().setActive(!super.getScale().active()))
+				.attach(rect);
+				RectNode
+				.create(230, 140, 180, 60)
+				.color(UIDemoMinecraft.INK)
+				.hoveredColor(UIDemoMinecraft.PLACEHOLDER)
+				.body(toggle -> {
+					TextNode.create(90, 30).text(Text.create("Limit 0.75", info, Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(toggle);
+				})
+				.onClick((_, _, _, _) -> super.getScale().setLimited(!super.getScale().limited()).setLimit(0.75D))
+				.attach(rect);
+				TextNode.create(220, 255).text(Text.create("Interface scale", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
+			})
+			.attach(container);
+
+			ContainerNode.create(0, 1880, 1920, 80).attach(container);
 		})
 		.attach(this);
 	}

@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,6 +20,7 @@ import org.joml.Vector2d;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.openal.AL10;
 import org.lwjgl.opengl.GL11;
 
 import dev.joid.backend.minecraft.demo.ui.UIDemoMinecraft;
@@ -32,6 +34,7 @@ import dev.joid.backend.minecraft.ui.bridge.ScreenUIBridge;
 import dev.joid.backend.minecraft.ui.screen.UIScreen;
 import dev.joid.demo.ui.UIDemoChoice;
 import dev.joid.demo.ui.font.UIDemoFont;
+import dev.joid.demo.ui.resource.UIDemoPlayer;
 import dev.joid.demo.ui.shader.UIDemoEffect;
 import dev.joid.demo.ui.shader.UIDemoShader;
 import dev.joid.internal.JOID;
@@ -39,8 +42,11 @@ import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.bridge.render.texture.ITexture;
 import dev.joid.lib.font.dto.TextInfo;
 import dev.joid.lib.resource.Resource;
+import dev.joid.lib.resource.dto.decoder.impl.VideoResourceDecoder;
 import dev.joid.lib.ui.core.UI;
 import dev.joid.lib.ui.node.Node;
+import dev.joid.lib.ui.node.impl.design.resource.ResourceNode;
+import dev.joid.lib.ui.node.impl.design.resource.ResourcePlayerNode;
 import dev.joid.lib.ui.node.impl.design.shape.RectNode;
 import dev.joid.test.snapshot.SnapshotDifference;
 import dev.joid.test.snapshot.SnapshotImage;
@@ -57,10 +63,13 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.client.sounds.SoundEventListener;
 import net.minecraft.core.ClientAsset;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FontDescription;
 import net.minecraft.resources.Identifier;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.player.PlayerModelType;
 import net.minecraft.world.entity.player.PlayerSkin;
@@ -96,6 +105,9 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			FabricJoidClientGameTest.verifyReload(context);
 			FabricJoidClientGameTest.verifyItems(context);
 			FabricJoidClientGameTest.verifyEntities(context);
+			FabricJoidClientGameTest.verifySound(context);
+			FabricJoidClientGameTest.verifyScale(context);
+			FabricJoidClientGameTest.verifyAudio(context);
 			context.runOnClient(FabricJoidClientGameTest::verifyWidths);
 			context.runOnClient(_ -> JOID.open(new UIDemoChoice()));
 			context.waitTicks(20);
@@ -112,6 +124,19 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		context.getInput().setCursorPos(center.x, center.y);
 		context.getInput().pressMouse(GLFW.GLFW_MOUSE_BUTTON_LEFT);
 		context.getInput().setCursorPos(960D, 540D);
+	}
+
+	private static void click(final ClientGameTestContext context, final int[] bounds) {
+		context.getInput().setCursorPos(bounds[0] + bounds[2] / 2D, bounds[1] + bounds[3] / 2D);
+		context.waitTicks(2);
+		context.getInput().pressMouse(GLFW.GLFW_MOUSE_BUTTON_LEFT);
+		context.waitTicks(5);
+		context.getInput().setCursorPos(960D, 540D);
+	}
+
+	private static void clickToggle(final ClientGameTestContext context, final int fromEnd) {
+		final List<int[]> rects = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(RectNode.class));
+		FabricJoidClientGameTest.click(context, rects.get(rects.size() - fromEnd));
 	}
 
 	private static void clickDemo(final ClientGameTestContext context, final Class<? extends UI> clazz, final String name) {
@@ -353,6 +378,144 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		if (!failures.isEmpty()) {
 			throw new AssertionError(failures.size() + " entity checks failed:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
 		}
+	}
+
+	private static void verifySound(final ClientGameTestContext context) {
+		FabricJoidClientGameTest.scroll(context, 20);
+		final List<int[]> resources = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(ResourceNode.class));
+		final int[] noteBlock = resources.get(resources.size() - 1);
+		final List<Identifier> played = new ArrayList<>();
+		final SoundEventListener listener = (sound, _, _) -> played.add(sound.getIdentifier());
+		context.runOnClient(minecraft -> minecraft.getSoundManager().addListener(listener));
+		context.getInput().setCursorPos(noteBlock[0] + noteBlock[2] / 2D, noteBlock[1] + noteBlock[3] / 2D);
+		context.waitTicks(2);
+		context.getInput().pressMouse(GLFW.GLFW_MOUSE_BUTTON_LEFT);
+		context.waitTicks(5);
+		context.takeScreenshot("joid-demo-minecraft-sound");
+		context.getInput().setCursorPos(960D, 540D);
+		final List<Identifier> sounds = context.computeOnClient(minecraft -> {
+			minecraft.getSoundManager().removeListener(listener);
+			return List.copyOf(played);
+		});
+		if (!sounds.equals(List.of(SoundEvents.NOTE_BLOCK_PLING.value().location()))) {
+			throw new AssertionError("Clicking the note block played " + sounds + " instead of the note block pling alone");
+		}
+	}
+
+	private static void verifyScale(final ClientGameTestContext context) {
+		final List<String> failures = new ArrayList<>();
+		FabricJoidClientGameTest.clickToggle(context, 2);
+		FabricJoidClientGameTest.expectScale(context, failures, "clicking the active toggle", false, false, 1D);
+		FabricJoidClientGameTest.clickToggle(context, 2);
+		FabricJoidClientGameTest.clickToggle(context, 1);
+		FabricJoidClientGameTest.expectScale(context, failures, "clicking the limit toggle", true, true, 0.75D);
+		context.takeScreenshot("joid-demo-minecraft-scale-limited");
+		FabricJoidClientGameTest.clickToggle(context, 1);
+		FabricJoidClientGameTest.expectScale(context, failures, "clicking the limit toggle again", true, false, 1D);
+		for (final int guiScale : new int[] {2, 0}) {
+			for (final boolean scaled : new boolean[] {true, false}) {
+				context.runOnClient(minecraft -> {
+					JOID.getUI(UIDemoMinecraft.class).getScale().setActive(scaled);
+					minecraft.options.guiScale().set(guiScale);
+					minecraft.resizeGui();
+				});
+				context.waitTicks(20);
+				context.takeScreenshot("joid-demo-minecraft-scale-gui-" + guiScale + "-" + (scaled ? "active" : "inactive"));
+				FabricJoidClientGameTest.expectScale(context, failures, "the GUI scale " + guiScale, scaled, false, scaled && guiScale == 2 ? 0.5D : 1D);
+			}
+		}
+
+		context.runOnClient(_ -> JOID.getUI(UIDemoMinecraft.class).getScale().setActive(true));
+		context.waitTicks(5);
+		if (!failures.isEmpty()) {
+			throw new AssertionError(failures.size() + " interface scale checks failed:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
+		}
+	}
+
+	private static void expectScale(final ClientGameTestContext context, final List<String> failures, final String label, final boolean active, final boolean limited, final double interfaceScale) {
+		final String actual = context.computeOnClient(_ -> {
+			final UI ui = JOID.getUI(UIDemoMinecraft.class);
+			return ui.getScale().active() + " " + ui.getScale().limited() + " " + ui.getView().getInterfaceScale();
+		});
+		final String expected = active + " " + limited + " " + interfaceScale;
+		if (!actual.equals(expected)) {
+			failures.add(label + " gives active, limited and interface scale " + actual + " instead of " + expected);
+		}
+	}
+
+	private static void verifyAudio(final ClientGameTestContext context) {
+		final UIDemoPlayer player = new UIDemoPlayer();
+		final double master = context.computeOnClient(minecraft -> minecraft.options.getSoundSourceOptionInstance(SoundSource.MASTER).get());
+		final double interfaceVolume = context.computeOnClient(minecraft -> minecraft.options.getSoundSourceOptionInstance(SoundSource.UI).get());
+		context.runOnClient(_ -> JOID.open(new UIDemoChoice()));
+		context.waitTicks(20);
+		context.runOnClient(_ -> JOID.open(player));
+		context.waitFor(_ -> FabricJoidClientGameTest.audioSource(player) != 0, 1200);
+		final List<String> failures = new ArrayList<>();
+		for (final double[] volumes : new double[][] {{1D, 1D}, {1D, 0.25D}, {0.5D, 0.25D}, {0.8D, 0.5D}}) {
+			context.runOnClient(minecraft -> {
+				minecraft.options.getSoundSourceOptionInstance(SoundSource.MASTER).set(volumes[0]);
+				minecraft.options.getSoundSourceOptionInstance(SoundSource.UI).set(volumes[1]);
+			});
+			context.waitTicks(10);
+			final float gain = context.computeOnClient(_ -> AL10.alGetSourcef(FabricJoidClientGameTest.audioSource(player), AL10.AL_GAIN));
+			final float expected = 0.3F * (float) (volumes[0] * volumes[1]);
+			if (Math.abs(gain - expected) > 1E-4F) {
+				failures.add("master " + volumes[0] + " and interface " + volumes[1] + " give the video gain " + gain + " instead of " + expected);
+			}
+		}
+
+		context.runOnClient(minecraft -> {
+			minecraft.options.getSoundSourceOptionInstance(SoundSource.MASTER).set(master);
+			minecraft.options.getSoundSourceOptionInstance(SoundSource.UI).set(interfaceVolume);
+		});
+		context.takeScreenshot("joid-demo-player");
+		if (!failures.isEmpty()) {
+			throw new AssertionError(failures.size() + " audio checks failed:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
+		}
+	}
+
+	private static int audioSource(final UI ui) {
+		for (final Node node : ui.getNodeList().ordered()) {
+			final int source = FabricJoidClientGameTest.audioSource(node);
+			if (source != 0) {
+				return source;
+			}
+		}
+		return 0;
+	}
+
+	private static int audioSource(final Node node) {
+		if (node instanceof final ResourcePlayerNode player) {
+			final Resource resource = (Resource) FabricJoidClientGameTest.field(player, "resource");
+			final Object decoder = resource == null ? null : resource.getDecoder();
+			final Object audioPlayer = decoder instanceof VideoResourceDecoder ? FabricJoidClientGameTest.field(decoder, "audioPlayer") : null;
+			final Object source = audioPlayer == null ? null : FabricJoidClientGameTest.field(audioPlayer, "source");
+			return source == null ? 0 : (int) FabricJoidClientGameTest.field(source, "source");
+		}
+
+		for (final Node child : node.getChildren(Node.class)) {
+			final int source = FabricJoidClientGameTest.audioSource(child);
+			if (source != 0) {
+				return source;
+			}
+		}
+		return 0;
+	}
+
+	private static Object field(final Object target, final String name) {
+		for (Class<?> clazz = target.getClass(); clazz != null; clazz = clazz.getSuperclass()) {
+			try {
+				final Field field = clazz.getDeclaredField(name);
+				field.setAccessible(true);
+				return field.get(target);
+			} catch (final NoSuchFieldException exception) {
+				continue;
+			} catch (final IllegalAccessException exception) {
+				throw new AssertionError("Unable to read the field " + name + " of " + clazz.getName(), exception);
+			}
+		}
+		throw new AssertionError(target.getClass().getName() + " has no field " + name);
 	}
 
 	private static void scroll(final ClientGameTestContext context, final int notches) {
