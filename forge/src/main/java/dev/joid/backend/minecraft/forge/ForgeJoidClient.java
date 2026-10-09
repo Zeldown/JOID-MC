@@ -4,6 +4,7 @@ import dev.joid.backend.minecraft.forge.event.ForgeClientEvents;
 import dev.joid.backend.minecraft.forge.event.ForgeScreenEvents;
 import dev.joid.backend.minecraft.forge.network.ForgePayloads;
 import dev.joid.backend.minecraft.forge.registry.ForgeContainerScreens;
+import dev.joid.backend.minecraft.forge.registry.ForgeKeyBinds;
 import dev.joid.backend.minecraft.forge.registry.ForgeOverlayLayers;
 import dev.joid.backend.minecraft.forge.registry.ForgeReloadListeners;
 import lombok.AccessLevel;
@@ -15,6 +16,7 @@ import net.minecraftforge.eventbus.api.bus.BusGroup;
 public final class ForgeJoidClient {
 
 	public static void register(final BusGroup modBusGroup) {
+		ForgeKeyBinds.register();
 		ForgeClientEvents.register();
 		ForgeScreenEvents.register();
 		ForgeOverlayLayers.register();

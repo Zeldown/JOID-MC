@@ -17,7 +17,6 @@ public final class ForgeScreenEvents {
 		ScreenEvent.MouseButtonPressed.Pre.BUS.addListener(ForgeScreenEvents::mousePressed);
 		ScreenEvent.MouseButtonReleased.Pre.BUS.addListener(ForgeScreenEvents::mouseReleased);
 		ScreenEvent.Render.Post.BUS.addListener(event -> ScreenEvents.fireRender(event.getGuiGraphics()));
-		ScreenEvent.Init.Post.BUS.addListener(event -> ScreenEvents.fireInit(event.getScreen(), event::addListener));
 	}
 
 	private static boolean keyPressed(final ScreenEvent.KeyPressed.Pre event) {

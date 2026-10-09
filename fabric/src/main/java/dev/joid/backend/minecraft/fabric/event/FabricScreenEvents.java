@@ -6,14 +6,12 @@ import lombok.NoArgsConstructor;
 
 import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
-import net.fabricmc.fabric.api.client.screen.v1.Screens;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class FabricScreenEvents {
 
 	public static void register() {
 		net.fabricmc.fabric.api.client.screen.v1.ScreenEvents.AFTER_INIT.register((_, screen, _, _) -> {
-			ScreenEvents.fireInit(screen, Screens.getWidgets(screen)::add);
 			ScreenMouseEvents.allowMouseDrag(screen).register((_, _, _, _) -> !ScreenEvents.fireMouseMoved());
 			ScreenKeyboardEvents.allowKeyPress(screen).register((_, event) -> !ScreenEvents.fireKeyPressed(event.key()));
 			ScreenMouseEvents.allowMouseClick(screen).register((_, event) -> !ScreenEvents.fireMousePressed(event.button()));

@@ -4,6 +4,7 @@ import dev.joid.backend.minecraft.fabric.event.FabricClientEvents;
 import dev.joid.backend.minecraft.fabric.event.FabricScreenEvents;
 import dev.joid.backend.minecraft.fabric.network.FabricPayloads;
 import dev.joid.backend.minecraft.fabric.registry.FabricContainerScreens;
+import dev.joid.backend.minecraft.fabric.registry.FabricKeyBinds;
 import dev.joid.backend.minecraft.fabric.registry.FabricOverlayLayers;
 import dev.joid.backend.minecraft.fabric.registry.FabricReloadListeners;
 
@@ -13,6 +14,7 @@ public final class FabricJoidClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
+		FabricKeyBinds.register();
 		FabricClientEvents.register();
 		FabricScreenEvents.register();
 		FabricOverlayLayers.register();

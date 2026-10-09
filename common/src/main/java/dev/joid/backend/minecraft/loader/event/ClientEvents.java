@@ -1,6 +1,7 @@
 package dev.joid.backend.minecraft.loader.event;
 
 import dev.joid.backend.minecraft.Backend;
+import dev.joid.backend.minecraft.bridge.input.KeyBindMapping;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -9,6 +10,7 @@ public final class ClientEvents {
 
 	public static void fireTick() {
 		Backend.register();
+		KeyBindMapping.firePresses();
 	}
 
 }

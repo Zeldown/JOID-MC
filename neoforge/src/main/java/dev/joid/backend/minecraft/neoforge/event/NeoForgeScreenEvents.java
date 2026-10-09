@@ -9,10 +9,6 @@ import net.neoforged.neoforge.client.event.ScreenEvent;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class NeoForgeScreenEvents {
 
-	public static void init(final ScreenEvent.Init.Post event) {
-		ScreenEvents.fireInit(event.getScreen(), event::addListener);
-	}
-
 	public static void render(final ScreenEvent.Render.Post event) {
 		ScreenEvents.fireRender(event.getGuiGraphics());
 	}

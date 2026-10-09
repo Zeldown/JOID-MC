@@ -1,7 +1,6 @@
 package dev.joid.backend.minecraft;
 
 import java.io.File;
-import java.util.function.Consumer;
 
 import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
 import dev.joid.backend.minecraft.bridge.resource.ResourceReloader;
@@ -26,8 +25,6 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.sounds.SoundSource;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -68,12 +65,6 @@ public final class Backend {
 		JOID.inst().setConfigDir(new File(Minecraft.getInstance().gameDirectory, "config/joid")).setDevMode(demo).setDemoMode(demo).load();
 		if (demo) {
 			DemoLauncher.register();
-		}
-	}
-
-	public static void initScreen(final Screen screen, final Consumer<AbstractWidget> widgets) {
-		if (JOID.inst().isDemoMode()) {
-			DemoLauncher.initScreen(screen, widgets);
 		}
 	}
 
