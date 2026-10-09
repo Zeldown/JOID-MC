@@ -5,6 +5,7 @@ import dev.joid.backend.minecraft.lib.font.dto.markup.LegacyTextMarkup;
 import dev.joid.backend.minecraft.lib.resource.dto.resolver.impl.NamespacedResourceResolver;
 import dev.joid.backend.minecraft.lib.resource.dto.resolver.impl.SpriteResourceResolver;
 import dev.joid.backend.minecraft.render.RenderBridge;
+import dev.joid.backend.minecraft.ui.bridge.OverlayUIBridge;
 import dev.joid.backend.minecraft.ui.bridge.ScreenUIBridge;
 import dev.joid.backend.minecraft.window.WindowBridge;
 import dev.joid.base.openal.AlAudioBridge;
@@ -31,6 +32,7 @@ public final class Backend {
 		BridgeHandler.WINDOW.register(window);
 		BridgeHandler.RENDER.register(render);
 		BridgeHandler.UI.register(ScreenUIBridge.create(render, window));
+		BridgeHandler.UI.register(OverlayUIBridge.create(render, window));
 		TextMarkup.register(LegacyTextMarkup.inst());
 		AssetLocator.register(new NamespacedAssetLocator());
 		ResourceResolver.register(new SpriteResourceResolver());

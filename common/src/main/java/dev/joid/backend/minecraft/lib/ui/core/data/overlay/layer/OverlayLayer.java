@@ -1,0 +1,26 @@
+package dev.joid.backend.minecraft.lib.ui.core.data.overlay.layer;
+
+public enum OverlayLayer {
+
+	CAMERA_OVERLAYS,
+	CROSSHAIR,
+	HOTBAR,
+	ARMOR,
+	HEALTH,
+	FOOD,
+	AIR,
+	MOUNT_HEALTH,
+	CONTEXTUAL_BAR,
+	EXPERIENCE_LEVEL,
+	SELECTED_ITEM_NAME,
+	EFFECTS,
+	BOSS_BAR,
+	SLEEP,
+	SCOREBOARD,
+	ACTION_BAR,
+	TITLE,
+	CHAT,
+	PLAYER_LIST,
+	SUBTITLES;
+
+}

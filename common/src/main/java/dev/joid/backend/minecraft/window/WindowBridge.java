@@ -37,6 +37,12 @@ public final class WindowBridge implements IWindowBridge {
 		return Minecraft.getInstance().getWindow().getHeight();
 	}
 
+	public double getInterfaceScale() {
+		final Minecraft minecraft = Minecraft.getInstance();
+		final Window window = minecraft.getWindow();
+		return window.getGuiScale() / (double) window.calculateScale(0, minecraft.isEnforceUnicode());
+	}
+
 	@Override
 	public double getMouseX() {
 		final Window window = Minecraft.getInstance().getWindow();

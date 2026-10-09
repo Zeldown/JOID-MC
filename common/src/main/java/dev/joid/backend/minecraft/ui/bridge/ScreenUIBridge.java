@@ -10,10 +10,9 @@ import dev.joid.backend.minecraft.window.WindowBridge;
 import dev.joid.base.glfw.input.GlfwInputForwarder;
 import dev.joid.lib.bridge.ui.StackUIBridge;
 import dev.joid.lib.ui.core.UI;
+import dev.joid.lib.ui.core.data.overlay.UIDataOverlayObject;
 import lombok.Getter;
 import lombok.NonNull;
-
-import com.mojang.blaze3d.platform.Window;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -65,10 +64,18 @@ public final class ScreenUIBridge extends StackUIBridge {
 	}
 
 	@Override
+	public boolean canHandle(final @NonNull UI ui) {
+		return !ui.getOverlay().active();
+	}
+
+	@Override
+	public boolean canHandle(final @NonNull Class<? extends UI> clazz) {
+		return !UIDataOverlayObject.getOrDefault(clazz).active();
+	}
+
+	@Override
 	public double getInterfaceScale(final @NonNull UI ui) {
-		final Minecraft minecraft = Minecraft.getInstance();
-		final Window window = minecraft.getWindow();
-		return window.getGuiScale() / (double) window.calculateScale(0, minecraft.isEnforceUnicode());
+		return this.window.getInterfaceScale();
 	}
 
 	@Override
