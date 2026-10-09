@@ -1,0 +1,16 @@
+package dev.joid.backend.minecraft.fabric.event;
+
+import dev.joid.backend.minecraft.MinecraftBackend;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class FabricClientEvents {
+
+	public static void register() {
+		ClientTickEvents.END_CLIENT_TICK.register(_ -> MinecraftBackend.tick());
+	}
+
+}

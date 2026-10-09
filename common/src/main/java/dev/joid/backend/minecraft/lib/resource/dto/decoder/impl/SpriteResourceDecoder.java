@@ -1,7 +1,7 @@
 package dev.joid.backend.minecraft.lib.resource.dto.decoder.impl;
 
-import dev.joid.backend.minecraft.render.RenderBridge;
-import dev.joid.backend.minecraft.render.texture.Texture;
+import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
+import dev.joid.backend.minecraft.bridge.render.texture.MinecraftTexture;
 import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.resource.dto.ResourceData;
 import dev.joid.lib.resource.dto.decoder.IResourceDecoder;
@@ -20,7 +20,7 @@ public class SpriteResourceDecoder implements IResourceDecoder {
 
 	private final SpriteId spriteId;
 
-	private Texture            texture;
+	private MinecraftTexture   texture;
 	private TextureAtlasSprite sprite;
 	private long               frame;
 
@@ -38,7 +38,7 @@ public class SpriteResourceDecoder implements IResourceDecoder {
 			throw new IllegalArgumentException("No sprite " + this.spriteId.texture() + " in the atlas " + this.spriteId.atlasLocation());
 		}
 
-		this.texture = Texture.create((RenderBridge) BridgeHandler.RENDER.get());
+		this.texture = MinecraftTexture.create((MinecraftRenderBridge) BridgeHandler.RENDER.get());
 		resource.texture(this.texture).width(sprite.contents().width()).height(sprite.contents().height());
 	}
 

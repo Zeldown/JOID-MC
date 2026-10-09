@@ -2,9 +2,9 @@ package dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot;
 
 import java.util.function.Supplier;
 
+import dev.joid.backend.minecraft.bridge.ui.container.ContainerUIScreen;
 import dev.joid.backend.minecraft.lib.draw.item.DrawItem;
 import dev.joid.backend.minecraft.lib.ui.core.container.ContainerUI;
-import dev.joid.backend.minecraft.ui.screen.ContainerUIScreen;
 import dev.joid.lib.color.Color;
 import dev.joid.lib.draw.DrawUtils;
 import dev.joid.lib.resource.Resource;

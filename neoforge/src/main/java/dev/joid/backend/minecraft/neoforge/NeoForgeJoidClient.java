@@ -1,6 +1,12 @@
 package dev.joid.backend.minecraft.neoforge;
 
 import dev.joid.backend.minecraft.MinecraftBackend;
+import dev.joid.backend.minecraft.neoforge.event.NeoForgeClientEvents;
+import dev.joid.backend.minecraft.neoforge.event.NeoForgeScreenEvents;
+import dev.joid.backend.minecraft.neoforge.network.NeoForgePayloads;
+import dev.joid.backend.minecraft.neoforge.registry.NeoForgeContainerScreens;
+import dev.joid.backend.minecraft.neoforge.registry.NeoForgeOverlayLayers;
+import dev.joid.backend.minecraft.neoforge.registry.NeoForgeReloadListeners;
 
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -11,7 +17,7 @@ import net.neoforged.neoforge.common.NeoForge;
 public final class NeoForgeJoidClient {
 
 	public NeoForgeJoidClient(final IEventBus modBus) {
-		NeoForge.EVENT_BUS.addListener(NeoForgeClientTicks::tick);
+		NeoForge.EVENT_BUS.addListener(NeoForgeClientEvents::tick);
 		NeoForge.EVENT_BUS.addListener(NeoForgeScreenEvents::init);
 		NeoForge.EVENT_BUS.addListener(NeoForgeScreenEvents::render);
 		NeoForge.EVENT_BUS.addListener(NeoForgeScreenEvents::charTyped);

@@ -2,7 +2,7 @@ package dev.joid.backend.minecraft.lib.draw.entity;
 
 import org.joml.Quaternionf;
 
-import dev.joid.backend.minecraft.render.RenderBridge;
+import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
 import dev.joid.lib.bridge.BridgeHandler;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -89,7 +89,7 @@ public final class DrawEntity {
 		camera.orientation = tilt.conjugate(new Quaternionf()).rotateY((float) Math.PI);
 		final float size = (float) (unit / Math.min(width, height) / 1.5D);
 		final float center = state.boundingBoxHeight / 2F;
-		((RenderBridge) BridgeHandler.RENDER.get()).getRasterizer().draw(x - width / 4D, y - height / 4D, width * 1.5D, height * 1.5D, Lighting.Entry.ENTITY_IN_UI, (pose, collector) -> {
+		((MinecraftRenderBridge) BridgeHandler.RENDER.get()).getRasterizer().draw(x - width / 4D, y - height / 4D, width * 1.5D, height * 1.5D, Lighting.Entry.ENTITY_IN_UI, (pose, collector) -> {
 			pose.scale(size, -size, -size);
 			pose.translate(0F, center, 0F);
 			pose.mulPose(new Quaternionf().rotationZ((float) Math.PI).mul(tilt));

@@ -8,7 +8,7 @@ ext {
             'dev/joid/base/glfw/demo/**',
             'dev/joid/base/glfw/snapshot/**',
             'dev/joid/backend/minecraft/**/demo/**',
-            'dev/joid/backend/minecraft/snapshot/**',
+            'dev/joid/backend/minecraft/bridge/snapshot/**',
             'assets/joid/demo/**',
             'data/joid/**/demo/**'
     ]

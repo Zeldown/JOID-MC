@@ -3,9 +3,9 @@ package dev.joid.backend.minecraft.lib.font.impl.minecraft;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
 
+import dev.joid.backend.minecraft.bridge.render.texture.GpuBorrowedTexture;
 import dev.joid.backend.minecraft.lib.font.impl.minecraft.dto.GlyphVertexCapture;
 import dev.joid.backend.minecraft.lib.font.impl.minecraft.dto.MinecraftFontFace;
-import dev.joid.backend.minecraft.render.texture.GpuBorrowedTexture;
 import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.bridge.render.IRenderBridge;
 import dev.joid.lib.bridge.render.shader.IShader;

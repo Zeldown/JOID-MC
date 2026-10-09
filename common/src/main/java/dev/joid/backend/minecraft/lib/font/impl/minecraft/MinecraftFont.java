@@ -25,15 +25,15 @@ public final class MinecraftFont extends GlyphFont<MinecraftFontFace> {
 	public static final MinecraftFont ILLAGER = MinecraftFont.of(Identifier.withDefaultNamespace("illageralt"));
 	public static final MinecraftFont UNIFORM = MinecraftFont.of(Identifier.withDefaultNamespace("uniform"));
 
-	private final Identifier identifier;
+	private final Identifier id;
 
-	private MinecraftFont(final Identifier identifier) {
-		super(FontFamily.of(MinecraftFontFace.create(identifier, FontWeight.REGULAR), MinecraftFontFace.create(identifier, FontWeight.BOLD)), 8);
-		this.identifier = identifier;
+	private MinecraftFont(final Identifier id) {
+		super(FontFamily.of(MinecraftFontFace.create(id, FontWeight.REGULAR), MinecraftFontFace.create(id, FontWeight.BOLD)), 8);
+		this.id = id;
 	}
 
-	public static @NonNull MinecraftFont of(final @NonNull Identifier identifier) {
-		return MinecraftFont.FONTS.computeIfAbsent(identifier, MinecraftFont::new);
+	public static @NonNull MinecraftFont of(final @NonNull Identifier id) {
+		return MinecraftFont.FONTS.computeIfAbsent(id, MinecraftFont::new);
 	}
 
 	@Override
@@ -43,7 +43,7 @@ public final class MinecraftFont extends GlyphFont<MinecraftFontFace> {
 
 	@Override
 	public String toString() {
-		return this.identifier.toString();
+		return this.id.toString();
 	}
 
 }

@@ -1,9 +1,9 @@
 package dev.joid.backend.minecraft.lib.ui.core.container;
 
+import dev.joid.backend.minecraft.bridge.ui.container.ContainerUIBridge;
+import dev.joid.backend.minecraft.bridge.ui.container.ContainerUIScreen;
 import dev.joid.backend.minecraft.lib.draw.item.DrawItem;
 import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
-import dev.joid.backend.minecraft.ui.bridge.ContainerUIBridge;
-import dev.joid.backend.minecraft.ui.screen.ContainerUIScreen;
 import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.ui.core.UI;
 import lombok.Getter;

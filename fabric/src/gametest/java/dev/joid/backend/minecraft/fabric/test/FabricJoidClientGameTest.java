@@ -23,6 +23,13 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.openal.AL10;
 import org.lwjgl.opengl.GL11;
 
+import dev.joid.backend.minecraft.bridge.render.texture.MinecraftTexture;
+import dev.joid.backend.minecraft.bridge.snapshot.MinecraftSnapshotBackend;
+import dev.joid.backend.minecraft.bridge.ui.container.ContainerUIScreen;
+import dev.joid.backend.minecraft.bridge.ui.overlay.OverlayLayerRenderer;
+import dev.joid.backend.minecraft.bridge.ui.overlay.OverlayUIBridge;
+import dev.joid.backend.minecraft.bridge.ui.screen.ScreenUIBridge;
+import dev.joid.backend.minecraft.bridge.ui.screen.UIScreen;
 import dev.joid.backend.minecraft.demo.container.DemoContainer;
 import dev.joid.backend.minecraft.demo.ui.UIDemoContainer;
 import dev.joid.backend.minecraft.demo.ui.UIDemoMinecraft;
@@ -34,13 +41,6 @@ import dev.joid.backend.minecraft.lib.ui.node.impl.design.block.BlockNode;
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.entity.EntityNode;
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.item.ItemNode;
 import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
-import dev.joid.backend.minecraft.render.texture.Texture;
-import dev.joid.backend.minecraft.snapshot.SnapshotBackend;
-import dev.joid.backend.minecraft.ui.bridge.OverlayUIBridge;
-import dev.joid.backend.minecraft.ui.bridge.ScreenUIBridge;
-import dev.joid.backend.minecraft.ui.overlay.OverlayLayerRenderer;
-import dev.joid.backend.minecraft.ui.screen.ContainerUIScreen;
-import dev.joid.backend.minecraft.ui.screen.UIScreen;
 import dev.joid.demo.ui.UIDemoChoice;
 import dev.joid.demo.ui.font.UIDemoFont;
 import dev.joid.demo.ui.resource.UIDemoPlayer;
@@ -577,7 +577,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		FabricJoidClientGameTest.reload(context);
 		final int reloaded = openGl ? context.computeOnClient(_ -> FabricJoidClientGameTest.countTextures()) : 0;
 		final List<String> failures = new ArrayList<>();
-		if (!(decoded instanceof final Texture texture) || !texture.isDeleted()) {
+		if (!(decoded instanceof final MinecraftTexture texture) || !texture.isDeleted()) {
 			failures.add("the texture decoded before the reloads was not deleted: " + decoded);
 		}
 
@@ -1005,7 +1005,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		for (final MinecraftFont font : List.of(MinecraftFont.DEFAULT, MinecraftFont.ALT, MinecraftFont.ILLAGER, MinecraftFont.UNIFORM)) {
 			final TextInfo info = TextInfo.create(font, MinecraftFont.SIZE);
 			for (final String text : texts) {
-				final int expected = minecraft.font.width(Component.literal(text).withStyle(style -> style.withFont(new FontDescription.Resource(font.getIdentifier()))));
+				final int expected = minecraft.font.width(Component.literal(text).withStyle(style -> style.withFont(new FontDescription.Resource(font.getId()))));
 				final double actual = info.getWidth(text);
 				if (Math.ceil(actual) != expected) {
 					failures.add(font + " \"" + text + "\": " + actual + " instead of " + expected);
@@ -1026,7 +1026,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 
 	private static void verifySnapshots(final File output, final File references) {
 		final List<String> failures = new ArrayList<>();
-		final SnapshotRunner runner = SnapshotRunner.start(new SnapshotBackend());
+		final SnapshotRunner runner = SnapshotRunner.start(new MinecraftSnapshotBackend());
 		UIDemoChoice.LIST.remove(UIDemoMinecraft.class);
 		UIDemoChoice.LIST.remove(UIDemoOverlay.class);
 		UIDemoChoice.LIST.remove(UIDemoContainer.class);

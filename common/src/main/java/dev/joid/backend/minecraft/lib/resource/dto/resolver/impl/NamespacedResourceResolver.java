@@ -2,11 +2,11 @@ package dev.joid.backend.minecraft.lib.resource.dto.resolver.impl;
 
 import java.util.function.Consumer;
 
+import dev.joid.backend.minecraft.bridge.render.texture.GpuBorrowedTexture;
+import dev.joid.backend.minecraft.bridge.resource.ResourceReloader;
 import dev.joid.backend.minecraft.lib.asset.dto.impl.NamespacedAsset;
 import dev.joid.backend.minecraft.lib.asset.dto.locator.impl.NamespacedAssetLocator;
 import dev.joid.backend.minecraft.lib.resource.dto.animation.impl.McmetaResourceAnimationReader;
-import dev.joid.backend.minecraft.lib.resource.dto.reload.ResourceReloadListener;
-import dev.joid.backend.minecraft.render.texture.GpuBorrowedTexture;
 import dev.joid.lib.resource.Resource;
 import dev.joid.lib.resource.ResourceBuilder;
 import dev.joid.lib.resource.dto.ResourceData;
@@ -48,13 +48,13 @@ public class NamespacedResourceResolver implements IResourceResolver {
 	}
 
 	private static @NonNull ResourceData read(final @NonNull NamespacedAsset asset) {
-		final Identifier identifier = asset.getIdentifier();
+		final Identifier identifier = asset.getId();
 		if (NamespacedResourceResolver.isLoaded(identifier) && asset.getAnimation() == null) {
-			return ResourceReloadListener.inst().track(new ResourceData(asset.getUniqueId(), null).texture(GpuBorrowedTexture.create(() -> Minecraft.getInstance().getTextureManager().getTexture(identifier).getTextureView())), asset);
+			return ResourceReloader.inst().track(new ResourceData(asset.getUniqueId(), null).texture(GpuBorrowedTexture.create(() -> Minecraft.getInstance().getTextureManager().getTexture(identifier).getTextureView())), asset);
 		}
 
 		try {
-			return ResourceReloadListener.inst().track(new ResourceData(asset.getUniqueId(), NamespacedResourceResolver.decoder(asset)), asset);
+			return ResourceReloader.inst().track(new ResourceData(asset.getUniqueId(), NamespacedResourceResolver.decoder(asset)), asset);
 		} catch (final RuntimeException exception) {
 			final ResourceData data = new ResourceData(asset.getUniqueId(), null);
 			data.fail(exception);

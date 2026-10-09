@@ -16,15 +16,15 @@ import net.minecraft.server.packs.resources.Resource;
 @Getter
 public final class NamespacedAsset extends Asset {
 
-	private final Identifier identifier;
+	private final Identifier id;
 
-	private NamespacedAsset(final Identifier identifier) {
-		super(identifier.toString());
-		this.identifier = identifier;
+	private NamespacedAsset(final Identifier id) {
+		super(id.toString());
+		this.id = id;
 	}
 
-	public static @NonNull NamespacedAsset create(final @NonNull Identifier identifier) {
-		return new NamespacedAsset(identifier);
+	public static @NonNull NamespacedAsset create(final @NonNull Identifier id) {
+		return new NamespacedAsset(id);
 	}
 
 	@Override
@@ -33,7 +33,7 @@ public final class NamespacedAsset extends Asset {
 	}
 
 	public boolean exists() {
-		return Minecraft.getInstance().getResourceManager().getResource(this.identifier).isPresent();
+		return Minecraft.getInstance().getResourceManager().getResource(this.id).isPresent();
 	}
 
 	public AnimationMetadataSection getAnimation() {
@@ -45,7 +45,7 @@ public final class NamespacedAsset extends Asset {
 	}
 
 	private Resource getResource() throws IOException {
-		return Minecraft.getInstance().getResourceManager().getResource(this.identifier).orElseThrow(() -> new FileNotFoundException("No resource " + this.identifier + " in the loaded resource packs"));
+		return Minecraft.getInstance().getResourceManager().getResource(this.id).orElseThrow(() -> new FileNotFoundException("No resource " + this.id + " in the loaded resource packs"));
 	}
 
 }

@@ -2,8 +2,8 @@ package dev.joid.backend.minecraft.lib.ui.node.impl.design.item;
 
 import java.util.function.Supplier;
 
+import dev.joid.backend.minecraft.bridge.ui.IItemHoverBridge;
 import dev.joid.backend.minecraft.lib.draw.item.DrawItem;
-import dev.joid.backend.minecraft.ui.bridge.IItemHoverBridge;
 import dev.joid.lib.ui.core.UI;
 import dev.joid.lib.ui.node.Node;
 import dev.joid.lib.ui.node.hover.HoverElement;

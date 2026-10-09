@@ -1,14 +1,14 @@
 package dev.joid.backend.minecraft;
 
+import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
+import dev.joid.backend.minecraft.bridge.ui.container.ContainerUIBridge;
+import dev.joid.backend.minecraft.bridge.ui.overlay.OverlayUIBridge;
+import dev.joid.backend.minecraft.bridge.ui.screen.ScreenUIBridge;
+import dev.joid.backend.minecraft.bridge.window.MinecraftWindowBridge;
 import dev.joid.backend.minecraft.lib.asset.dto.locator.impl.NamespacedAssetLocator;
 import dev.joid.backend.minecraft.lib.font.dto.markup.LegacyTextMarkup;
 import dev.joid.backend.minecraft.lib.resource.dto.resolver.impl.NamespacedResourceResolver;
 import dev.joid.backend.minecraft.lib.resource.dto.resolver.impl.SpriteResourceResolver;
-import dev.joid.backend.minecraft.render.RenderBridge;
-import dev.joid.backend.minecraft.ui.bridge.ContainerUIBridge;
-import dev.joid.backend.minecraft.ui.bridge.OverlayUIBridge;
-import dev.joid.backend.minecraft.ui.bridge.ScreenUIBridge;
-import dev.joid.backend.minecraft.window.WindowBridge;
 import dev.joid.base.openal.AlAudioBridge;
 import dev.joid.base.openal.binding.Lwjgl3AlBinding;
 import dev.joid.internal.JOID;
@@ -26,8 +26,8 @@ import net.minecraft.sounds.SoundSource;
 public final class Backend {
 
 	public static void register() {
-		final RenderBridge render = new RenderBridge();
-		final WindowBridge window = new WindowBridge();
+		final MinecraftRenderBridge render = new MinecraftRenderBridge();
+		final MinecraftWindowBridge window = new MinecraftWindowBridge();
 		JOID.checkVersion(JOID.VERSION);
 		BridgeHandler.AUDIO.register(AlAudioBridge.create(Lwjgl3AlBinding.inst()).hostGain(gain -> gain * Minecraft.getInstance().options.getFinalSoundSourceVolume(SoundSource.UI)));
 		BridgeHandler.WINDOW.register(window);
