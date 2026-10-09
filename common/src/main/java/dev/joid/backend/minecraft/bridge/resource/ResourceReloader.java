@@ -38,8 +38,7 @@ public final class ResourceReloader {
 				continue;
 			}
 
-			data.clear();
-			data.textures(null).data(null).decoder(NamespacedResourceResolver.decoder(entry.getValue())).generated(false).loaded(false).uploaded(false);
+			data.reload(NamespacedResourceResolver.decoder(entry.getValue()));
 		}
 	}
 

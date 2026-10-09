@@ -1,8 +1,7 @@
 package dev.joid.backend.minecraft.lib.draw.item;
 
-import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
+import dev.joid.backend.minecraft.lib.draw.raster.FeatureExternalRasterDrawable;
 import dev.joid.backend.minecraft.lib.font.impl.minecraft.MinecraftFont;
-import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.color.Color;
 import dev.joid.lib.draw.DrawUtils;
 import dev.joid.lib.font.TextInfo;
@@ -40,7 +39,7 @@ public final class DrawItem {
 		final Minecraft minecraft = Minecraft.getInstance();
 		final ItemStackRenderState state = new ItemStackRenderState();
 		minecraft.getItemModelResolver().updateForTopItem(state, stack, ItemDisplayContext.GUI, minecraft.level, minecraft.player, 0);
-		((MinecraftRenderBridge) BridgeHandler.RENDER.get()).getRasterizer().draw(x, y, size, size, state.usesBlockLight() ? Lighting.Entry.ITEMS_3D : Lighting.Entry.ITEMS_FLAT, (pose, collector) -> state.submit(pose, collector, LightCoordsUtil.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0));
+		DrawUtils.RASTER.drawRaster(x, y, size, size, FeatureExternalRasterDrawable.create(state.usesBlockLight() ? Lighting.Entry.ITEMS_3D : Lighting.Entry.ITEMS_FLAT, (pose, collector) -> state.submit(pose, collector, LightCoordsUtil.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0)));
 	}
 
 	public void drawItemBar(final double x, final double y, final double size, final @NonNull ItemStack stack) {

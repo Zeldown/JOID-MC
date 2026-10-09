@@ -3,7 +3,6 @@ package dev.joid.backend.minecraft.bridge.render.texture;
 import java.nio.ByteBuffer;
 import java.util.Optional;
 
-import dev.joid.backend.minecraft.Backend;
 import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
 import dev.joid.lib.bridge.render.texture.MipmapChain;
 import dev.joid.lib.bridge.render.texture.Texture;
@@ -12,28 +11,16 @@ import lombok.Getter;
 import lombok.NonNull;
 
 import com.mojang.blaze3d.GpuFormat;
-import com.mojang.blaze3d.PrimitiveTopology;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.textures.GpuTextureView;
 
-import net.minecraft.client.renderer.BindGroupLayouts;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.resources.Identifier;
 
 @Getter
 public final class MinecraftTexture extends Texture implements IGpuTexture {
-
-	private static final RenderPipeline COPY = RenderPipeline.builder()
-			.withLocation(Identifier.fromNamespaceAndPath(Backend.MOD_ID, "pipeline/copy"))
-			.withVertexShader(Identifier.fromNamespaceAndPath(Backend.MOD_ID, "core/copy"))
-			.withFragmentShader(Identifier.fromNamespaceAndPath(Backend.MOD_ID, "core/copy"))
-			.withBindGroupLayout(BindGroupLayouts.SAMPLER0)
-			.withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
-			.build();
 
 	private final MinecraftRenderBridge bridge;
 
@@ -46,21 +33,6 @@ public final class MinecraftTexture extends Texture implements IGpuTexture {
 
 	public static @NonNull MinecraftTexture create(final @NonNull MinecraftRenderBridge bridge) {
 		return new MinecraftTexture(bridge);
-	}
-
-	public @NonNull MinecraftTexture copy(final @NonNull GpuTextureView source, final int x, final int y, final int width, final int height) {
-		super.allocate(width, height);
-		final GpuTextureView target = this.bridge.getDevice().createTextureView(this.texture, 0, 1);
-		try (RenderPass pass = this.bridge.getPassEncoder().encoder().createRenderPass(() -> "JOID Copy", target, Optional.empty())) {
-			pass.setPipeline(MinecraftTexture.COPY);
-			pass.bindTexture("Sampler0", source, RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST));
-			pass.draw(3, 1, (x << 14 | y) << 2, 0);
-		} finally {
-			target.close();
-		}
-
-		this.generateLevels(MipmapChain.of(width, height, super.isMipmapped()).limit(this.getMaxLevels(width, height)));
-		return this;
 	}
 
 	@Override

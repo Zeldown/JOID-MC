@@ -1,8 +1,6 @@
 package dev.joid.backend.minecraft.lib.resource.decoder.impl;
 
-import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
-import dev.joid.backend.minecraft.bridge.render.texture.MinecraftTexture;
-import dev.joid.lib.bridge.BridgeHandler;
+import dev.joid.backend.minecraft.bridge.render.texture.GpuBorrowedTexture;
 import dev.joid.lib.resource.ResourceData;
 import dev.joid.lib.resource.decoder.IResourceDecoder;
 import lombok.Getter;
@@ -20,9 +18,7 @@ public class SpriteResourceDecoder implements IResourceDecoder {
 
 	private final SpriteId spriteId;
 
-	private MinecraftTexture   texture;
 	private TextureAtlasSprite sprite;
-	private long               frame;
 
 	public SpriteResourceDecoder(final @NonNull SpriteId spriteId) {
 		this.spriteId = spriteId;
@@ -38,8 +34,8 @@ public class SpriteResourceDecoder implements IResourceDecoder {
 			throw new IllegalArgumentException("No sprite " + this.spriteId.texture() + " in the atlas " + this.spriteId.atlasLocation());
 		}
 
-		this.texture = MinecraftTexture.create((MinecraftRenderBridge) BridgeHandler.RENDER.get());
-		resource.texture(this.texture).width(sprite.contents().width()).height(sprite.contents().height());
+		resource.texture(GpuBorrowedTexture.create(this::getAtlas));
+		this.region(resource, sprite);
 	}
 
 	@Override
@@ -51,24 +47,24 @@ public class SpriteResourceDecoder implements IResourceDecoder {
 	@Override
 	public void update(final @NonNull ResourceData resource) {
 		final TextureAtlasSprite sprite = Minecraft.getInstance().getAtlasManager().get(this.spriteId);
-		final long frame = Minecraft.getInstance().getFrameTimeNs();
-		if (this.texture == null || sprite == this.sprite && (!sprite.isAnimated() || frame == this.frame)) {
-			return;
+		if (this.sprite != null && sprite != this.sprite) {
+			this.region(resource, sprite);
 		}
-
-		final GpuTextureView atlas = Minecraft.getInstance().getTextureManager().getTexture(sprite.atlasLocation()).getTextureView();
-		final int x = Math.round(sprite.getU0() * atlas.getWidth(0));
-		final int y = Math.round(sprite.getV0() * atlas.getHeight(0));
-		this.texture.copy(atlas, x, y, sprite.contents().width(), sprite.contents().height());
-		resource.width(sprite.contents().width()).height(sprite.contents().height());
-		this.sprite = sprite;
-		this.frame  = frame;
 	}
 
 	@Override
 	public void clear(final @NonNull ResourceData resource) {
-		this.texture = null;
-		this.sprite  = null;
+		this.sprite = null;
+	}
+
+	private void region(final ResourceData resource, final TextureAtlasSprite sprite) {
+		final GpuTextureView atlas = this.getAtlas();
+		resource.region(Math.round(sprite.getU0() * atlas.getWidth(0)), Math.round(sprite.getV0() * atlas.getHeight(0)), sprite.contents().width(), sprite.contents().height());
+		this.sprite = sprite;
+	}
+
+	private GpuTextureView getAtlas() {
+		return Minecraft.getInstance().getTextureManager().getTexture(this.spriteId.atlasLocation()).getTextureView();
 	}
 
 }

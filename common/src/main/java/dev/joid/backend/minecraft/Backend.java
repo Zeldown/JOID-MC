@@ -12,7 +12,9 @@ import dev.joid.backend.minecraft.bridge.window.MinecraftWindowBridge;
 import dev.joid.backend.minecraft.demo.DemoLauncher;
 import dev.joid.backend.minecraft.lib.asset.locator.impl.NamespacedAssetLocator;
 import dev.joid.backend.minecraft.lib.font.markup.impl.LegacyTextMarkup;
+import dev.joid.backend.minecraft.lib.resource.resolver.impl.GpuTextureResourceResolver;
 import dev.joid.backend.minecraft.lib.resource.resolver.impl.NamespacedResourceResolver;
+import dev.joid.backend.minecraft.lib.resource.resolver.impl.NativeImageResourceResolver;
 import dev.joid.backend.minecraft.lib.resource.resolver.impl.SpriteResourceResolver;
 import dev.joid.backend.minecraft.loader.registry.ReloadListener;
 import dev.joid.base.openal.AlAudioBridge;
@@ -59,7 +61,9 @@ public final class Backend {
 		TextMarkup.register(LegacyTextMarkup.inst());
 		AssetLocator.register(new NamespacedAssetLocator());
 		ResourceResolver.register(new SpriteResourceResolver());
+		ResourceResolver.register(new GpuTextureResourceResolver());
 		ResourceResolver.register(new NamespacedResourceResolver());
+		ResourceResolver.register(new NativeImageResourceResolver());
 
 		final boolean demo = Backend.isDemo();
 		JOID.inst().setConfigDir(new File(Minecraft.getInstance().gameDirectory, "config/joid")).setDevMode(demo).setDemoMode(demo).load();

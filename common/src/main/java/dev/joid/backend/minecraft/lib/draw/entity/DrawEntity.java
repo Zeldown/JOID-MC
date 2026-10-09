@@ -2,8 +2,8 @@ package dev.joid.backend.minecraft.lib.draw.entity;
 
 import org.joml.Quaternionf;
 
-import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
-import dev.joid.lib.bridge.BridgeHandler;
+import dev.joid.backend.minecraft.lib.draw.raster.FeatureExternalRasterDrawable;
+import dev.joid.lib.draw.DrawUtils;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -89,7 +89,7 @@ public final class DrawEntity {
 		camera.orientation = tilt.conjugate(new Quaternionf()).rotateY((float) Math.PI);
 		final float size = (float) (unit / Math.min(width, height) / 1.5D);
 		final float center = state.boundingBoxHeight / 2F;
-		((MinecraftRenderBridge) BridgeHandler.RENDER.get()).getRasterizer().draw(x - width / 4D, y - height / 4D, width * 1.5D, height * 1.5D, Lighting.Entry.ENTITY_IN_UI, (pose, collector) -> {
+		DrawUtils.RASTER.drawRaster(x - width / 4D, y - height / 4D, width * 1.5D, height * 1.5D, FeatureExternalRasterDrawable.create(Lighting.Entry.ENTITY_IN_UI, (pose, collector) -> {
 			pose.scale(size, -size, -size);
 			pose.translate(0F, center, 0F);
 			pose.mulPose(new Quaternionf().rotationZ((float) Math.PI).mul(tilt));
@@ -97,7 +97,7 @@ public final class DrawEntity {
 			pose.mulPose(new Quaternionf().rotationXYZ((float) Math.toRadians(-rotationPitch), (float) Math.toRadians(rotationYaw), 0F));
 			pose.translate(0F, -center, 0F);
 			Minecraft.getInstance().getEntityRenderDispatcher().submit(state, camera, 0D, 0D, 0D, pose, collector);
-		});
+		}));
 	}
 
 }

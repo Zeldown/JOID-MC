@@ -8,7 +8,6 @@ import org.joml.Vector4f;
 import dev.joid.backend.minecraft.bridge.render.framebuffer.MinecraftFrameBuffer;
 import dev.joid.backend.minecraft.bridge.render.pass.PassEncoder;
 import dev.joid.backend.minecraft.bridge.render.pipeline.PipelineCache;
-import dev.joid.backend.minecraft.bridge.render.raster.Rasterizer;
 import dev.joid.backend.minecraft.bridge.render.shader.MinecraftShader;
 import dev.joid.backend.minecraft.bridge.render.shader.MinecraftShaderTranslator;
 import dev.joid.backend.minecraft.bridge.render.shader.ShaderSourceProvider;
@@ -36,6 +35,7 @@ import lombok.Getter;
 import lombok.NonNull;
 
 import com.mojang.blaze3d.buffers.GpuBuffer;
+import com.mojang.blaze3d.ProjectionType;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.systems.GpuDevice;
@@ -46,33 +46,61 @@ import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuSampler;
 import com.mojang.blaze3d.textures.GpuTextureView;
 
+import net.minecraft.client.renderer.Projection;
+import net.minecraft.client.renderer.ProjectionMatrixBuffer;
+
 @Getter
 public final class MinecraftRenderBridge extends RenderBridge {
 
-	private final GpuDevice            device;
-	private final boolean              zeroToOne;
-	private final PassEncoder          passEncoder;
-	private final PipelineCache        pipelineCache;
-	private final ShaderSourceProvider sourceProvider;
-	private final Rasterizer           rasterizer;
+	private final GpuDevice              device;
+	private final boolean                zeroToOne;
+	private final PassEncoder            passEncoder;
+	private final PipelineCache          pipelineCache;
+	private final Projection             rasterProjection;
+	private final ShaderSourceProvider   sourceProvider;
+	private final ProjectionMatrixBuffer rasterProjectionBuffer;
 
 	private ByteBuffer            scratch;
 	private MinecraftRenderTarget target;
 	private MinecraftRenderTarget screenTarget;
 
 	public MinecraftRenderBridge() {
-		this.device         = RenderSystem.getDevice();
-		this.zeroToOne      = this.device.getDeviceInfo().isZZeroToOne();
-		this.passEncoder    = PassEncoder.create(this.device);
-		this.sourceProvider = ShaderSourceProvider.create();
-		this.pipelineCache  = PipelineCache.create(this.device, this.sourceProvider);
-		this.scratch        = ByteBuffer.allocateDirect(1 << 16).order(ByteOrder.nativeOrder());
-		this.rasterizer     = Rasterizer.create(this);
+		this.device                 = RenderSystem.getDevice();
+		this.zeroToOne              = this.device.getDeviceInfo().isZZeroToOne();
+		this.passEncoder            = PassEncoder.create(this.device);
+		this.sourceProvider         = ShaderSourceProvider.create();
+		this.pipelineCache          = PipelineCache.create(this.device, this.sourceProvider);
+		this.rasterProjection       = new Projection();
+		this.rasterProjectionBuffer = new ProjectionMatrixBuffer("JOID Raster");
+		this.scratch                = ByteBuffer.allocateDirect(1 << 16).order(ByteOrder.nativeOrder());
 	}
 
 	public @NonNull MinecraftRenderBridge screenTarget(final MinecraftRenderTarget screenTarget) {
 		this.screenTarget = screenTarget;
 		return this;
+	}
+
+	@Override
+	public void raster(final @NonNull IFrameBuffer target, final int width, final int height, final @NonNull Runnable draw) {
+		final MinecraftRenderTarget renderTarget = ((MinecraftFrameBuffer) target).getTarget();
+		final GpuTextureView color = RenderSystem.outputColorTextureOverride;
+		final GpuTextureView depth = RenderSystem.outputDepthTextureOverride;
+		final float range = Math.max(1000F, Math.max(width, height));
+		this.passEncoder.encoder().clearDepthTexture(renderTarget.getDepth(), 0D);
+		RenderSystem.outputColorTextureOverride = renderTarget.getView();
+		RenderSystem.outputDepthTextureOverride = renderTarget.getDepthView();
+		RenderSystem.backupProjectionMatrix();
+		this.rasterProjection.setupOrtho(-range, range, renderTarget.getWidth(), renderTarget.getHeight(), false);
+		RenderSystem.setProjectionMatrix(this.rasterProjectionBuffer.getBuffer(this.rasterProjection), ProjectionType.ORTHOGRAPHIC);
+		RenderSystem.enableScissorForRenderTypeDraws(0, 0, width, height);
+		try {
+			draw.run();
+		} finally {
+			RenderSystem.disableScissorForRenderTypeDraws();
+			RenderSystem.restoreProjectionMatrix();
+			RenderSystem.outputColorTextureOverride = color;
+			RenderSystem.outputDepthTextureOverride = depth;
+		}
 	}
 
 	@Override
