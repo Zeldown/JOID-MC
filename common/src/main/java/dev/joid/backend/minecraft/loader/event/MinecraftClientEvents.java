@@ -6,7 +6,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class ClientEvents {
+public final class MinecraftClientEvents {
 
 	public static void fireTick() {
 		Backend.register();

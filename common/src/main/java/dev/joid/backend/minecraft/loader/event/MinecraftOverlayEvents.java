@@ -13,7 +13,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.Identifier;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class OverlayEvents {
+public final class MinecraftOverlayEvents {
 
 	public static void fireHud(final @NonNull GuiGraphicsExtractor graphics) {
 		OverlayLayerRenderer.extract(graphics);

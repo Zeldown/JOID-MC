@@ -9,7 +9,7 @@ import lombok.NonNull;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class ScreenEvents {
+public final class MinecraftScreenEvents {
 
 	public static void fireRender(final @NonNull GuiGraphicsExtractor graphics) {
 		OverlayLayerRenderer.extractScreen(graphics);

@@ -1,6 +1,6 @@
 package dev.joid.backend.minecraft.forge.event;
 
-import dev.joid.backend.minecraft.loader.event.ScreenEvents;
+import dev.joid.backend.minecraft.loader.event.MinecraftScreenEvents;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -16,31 +16,31 @@ public final class ForgeScreenEvents {
 		ScreenEvent.MouseScrolled.Pre.BUS.addListener(ForgeScreenEvents::mouseScrolled);
 		ScreenEvent.MouseButtonPressed.Pre.BUS.addListener(ForgeScreenEvents::mousePressed);
 		ScreenEvent.MouseButtonReleased.Pre.BUS.addListener(ForgeScreenEvents::mouseReleased);
-		ScreenEvent.Render.Post.BUS.addListener(event -> ScreenEvents.fireRender(event.getGuiGraphics()));
+		ScreenEvent.Render.Post.BUS.addListener(event -> MinecraftScreenEvents.fireRender(event.getGuiGraphics()));
 	}
 
 	private static boolean keyPressed(final ScreenEvent.KeyPressed.Pre event) {
-		return ScreenEvents.fireKeyPressed(event.getInfo().key());
+		return MinecraftScreenEvents.fireKeyPressed(event.getInfo().key());
 	}
 
 	private static boolean charTyped(final ScreenEvent.CharacterTyped.Pre event) {
-		return ScreenEvents.fireCharTyped(event.getInfo().codepoint());
+		return MinecraftScreenEvents.fireCharTyped(event.getInfo().codepoint());
 	}
 
 	private static boolean mouseMoved(final ScreenEvent.MouseDragged.Pre event) {
-		return ScreenEvents.fireMouseMoved();
+		return MinecraftScreenEvents.fireMouseMoved();
 	}
 
 	private static boolean mousePressed(final ScreenEvent.MouseButtonPressed.Pre event) {
-		return ScreenEvents.fireMousePressed(event.getInfo().button());
+		return MinecraftScreenEvents.fireMousePressed(event.getInfo().button());
 	}
 
 	private static boolean mouseReleased(final ScreenEvent.MouseButtonReleased.Pre event) {
-		return ScreenEvents.fireMouseReleased(event.getButton());
+		return MinecraftScreenEvents.fireMouseReleased(event.getButton());
 	}
 
 	private static boolean mouseScrolled(final ScreenEvent.MouseScrolled.Pre event) {
-		return ScreenEvents.fireMouseScrolled(event.getDeltaY());
+		return MinecraftScreenEvents.fireMouseScrolled(event.getDeltaY());
 	}
 
 }
