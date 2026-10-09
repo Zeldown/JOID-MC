@@ -11,6 +11,7 @@ import dev.joid.lib.utils.signal.Signal;
 import lombok.Getter;
 import lombok.NonNull;
 
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 
 @Getter
@@ -24,6 +25,7 @@ public class ItemNode extends Node {
 	private boolean bar;
 	private boolean cooldown;
 	private boolean tooltip;
+	private Boolean glint;
 
 	protected ItemNode(final double x, final double y, final double width, final double height) {
 		super(x, y, width, height);
@@ -43,7 +45,7 @@ public class ItemNode extends Node {
 		final double size = Math.min(super.getWidth(), super.getHeight());
 		final double x = super.getX() + (super.getWidth() - size) / 2D;
 		final double y = super.getY() + (super.getHeight() - size) / 2D;
-		DrawItem.inst().drawItem(x, y, size, this.stack);
+		DrawItem.inst().drawItem(x, y, size, this.glint == null ? this.stack : ItemNode.withGlint(this.stack, this.glint));
 		if (this.bar) {
 			DrawItem.inst().drawItemBar(x, y, size, this.stack);
 		}
@@ -102,11 +104,25 @@ public class ItemNode extends Node {
 		});
 	}
 
+	public final <T extends ItemNode> @NonNull T glint(final boolean glint) {
+		return this.glint(Signal.from(glint));
+	}
+
+	public final <T extends ItemNode> @NonNull T glint(final @NonNull Supplier<Boolean> glint) {
+		return super.follow("glint", glint, value -> this.glint = value);
+	}
+
 	private void drawTooltip() {
 		final UI ui = super.getUi();
 		if (this.tooltip && !this.stack.isEmpty() && ui != null && ui.getBridge() instanceof final ScreenUIBridge bridge) {
 			bridge.drawHover(this.stack);
 		}
+	}
+
+	private static ItemStack withGlint(final ItemStack stack, final boolean glint) {
+		final ItemStack copy = stack.copy();
+		copy.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, glint);
+		return copy;
 	}
 
 }

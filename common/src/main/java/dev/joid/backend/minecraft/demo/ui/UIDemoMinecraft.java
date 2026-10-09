@@ -37,7 +37,6 @@ import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.resources.model.sprite.SpriteId;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.ClientAsset;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
@@ -59,11 +58,9 @@ public class UIDemoMinecraft extends UIDemo {
 		final TextInfo caption = TextInfo.create(DemoFont.MONTSERRAT, 24, UIDemoMinecraft.INK);
 		final TextInfo info = TextInfo.create(MinecraftFont.DEFAULT, MinecraftFont.SIZE * 3, Color.WHITE).shadow(new Color(63, 63, 63)).shadow(3F, 3F);
 		final Component component = Component.literal("Hex ").withColor(0x12ABCD).append(Component.translatable("menu.game").withStyle(ChatFormatting.GOLD, ChatFormatting.UNDERLINE)).append(Component.literal(" plain"));
-		final ItemStack enchanted = new ItemStack(Items.DIAMOND_SWORD);
 		final ItemStack damaged = new ItemStack(Items.DIAMOND_PICKAXE);
 		final ItemStack pearl = new ItemStack(Items.ENDER_PEARL, 16);
 		final PlayerSkin skin = PlayerSkin.insecure(new ClientAsset.ResourceTexture(Identifier.fromNamespaceAndPath("joid", "demo/skin"), Identifier.fromNamespaceAndPath("joid", "demo/textures/skin.png")), null, null, PlayerModelType.WIDE);
-		enchanted.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
 		damaged.setDamageValue(1100);
 
 		ContainerNode
@@ -207,7 +204,7 @@ public class UIDemoMinecraft extends UIDemo {
 			.body(rect -> {
 				RectNode.create(20, 20, 400, 200).color(UIDemoMinecraft.PANEL).attach(rect);
 				ItemNode.create(40, 80, 80, 80).stack(new ItemStack(Items.APPLE)).attach(rect);
-				ItemNode.create(130, 80, 80, 80).stack(enchanted).attach(rect);
+				ItemNode.create(130, 80, 80, 80).stack(new ItemStack(Items.DIAMOND_SWORD)).glint(true).attach(rect);
 				ItemNode.create(220, 80, 80, 80).stack(damaged).attach(rect);
 				ItemNode.create(310, 80, 80, 80).stack(new ItemStack(Items.COBBLESTONE, 64)).attach(rect);
 				TextNode.create(220, 255).text(Text.create("Items", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
