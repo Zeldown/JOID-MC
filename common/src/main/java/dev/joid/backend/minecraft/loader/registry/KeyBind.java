@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import dev.joid.backend.minecraft.Backend;
-import dev.joid.lib.utils.key.Key;
+import dev.joid.lib.input.key.Key;
 import lombok.Getter;
 import lombok.NonNull;
 

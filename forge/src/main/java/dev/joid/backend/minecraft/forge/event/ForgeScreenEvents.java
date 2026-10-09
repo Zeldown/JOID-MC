@@ -40,7 +40,7 @@ public final class ForgeScreenEvents {
 	}
 
 	private static boolean mouseScrolled(final ScreenEvent.MouseScrolled.Pre event) {
-		return MinecraftScreenEvents.fireMouseScrolled(event.getDeltaY());
+		return MinecraftScreenEvents.fireMouseScrolled(event.getDeltaX(), event.getDeltaY());
 	}
 
 }

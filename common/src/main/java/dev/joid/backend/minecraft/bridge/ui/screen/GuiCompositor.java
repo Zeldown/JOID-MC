@@ -53,7 +53,7 @@ public final class GuiCompositor {
 		render.screenTarget(target).beginFrame();
 		try {
 			render.screen(window.getWidth(), window.getHeight());
-			render.clear(0F, 0F, 0F, 0F);
+			render.clearColor(0F, 0F, 0F, 0F);
 			draw.run();
 		} finally {
 			render.endFrame();

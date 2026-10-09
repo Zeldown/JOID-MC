@@ -25,37 +25,43 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.resources.Identifier;
 
-@Getter
 public final class MinecraftShader extends Shader {
 
 	private static int count;
 
-	private final GpuDevice       device;
-	private final Identifier      identifier;
-	private final Identifier      stencilIdentifier;
-	private final BindGroupLayout layout;
-	private final VertexFormat    vertexFormat;
+	private final GpuDevice device;
 
-	private MinecraftShader(final MinecraftRenderBridge bridge, final MinecraftShaderTranslator translator, final ShaderSource vertex, final ShaderSource fragment, final BlendState blend, final boolean active, final Identifier identifier, final Identifier stencilIdentifier, final BindGroupLayout layout, final VertexFormat vertexFormat) {
-		super(bridge, translator, vertex, fragment, blend, active);
+	@Getter private final Identifier      identifier;
+	@Getter private final Identifier      stencilIdentifier;
+	@Getter private final BindGroupLayout layout;
+	@Getter private final VertexFormat    vertexFormat;
+
+	private Boolean active;
+
+	private MinecraftShader(final MinecraftRenderBridge bridge, final MinecraftShaderTranslator translator, final ShaderSource vertex, final ShaderSource fragment, final BlendState blend) {
+		super(bridge, translator, vertex, fragment, blend);
+		final MinecraftShaderTranslator stencilTranslator = MinecraftShaderTranslator.create().stencil(StencilEmulation.Pass.WRITE).clampToBorder(translator.isClampToBorder());
 		this.device            = bridge.getDevice();
-		this.identifier        = identifier;
-		this.stencilIdentifier = stencilIdentifier;
-		this.layout            = layout;
-		this.vertexFormat      = vertexFormat;
+		this.identifier        = Identifier.fromNamespaceAndPath(Backend.MOD_ID, "shader/" + MinecraftShader.count++);
+		this.stencilIdentifier = Identifier.fromNamespaceAndPath(Backend.MOD_ID, this.identifier.getPath() + "_stencil");
+		this.layout            = MinecraftShader.createLayout(translator.getSamplers(vertex, fragment));
+		this.vertexFormat      = VertexLayout.create(vertex.getBuiltins());
+		bridge.getSourceProvider().register(this.identifier, ShaderType.VERTEX, translator.translateVertex(vertex, fragment));
+		bridge.getSourceProvider().register(this.identifier, ShaderType.FRAGMENT, translator.translateFragment(vertex, fragment));
+		bridge.getSourceProvider().register(this.stencilIdentifier, ShaderType.FRAGMENT, stencilTranslator.translateFragment(vertex, fragment));
 	}
 
 	public static @NonNull MinecraftShader create(final @NonNull MinecraftRenderBridge bridge, final @NonNull ShaderSource vertex, final @NonNull ShaderSource fragment, final @NonNull BlendState blend) {
-		final MinecraftShaderTranslator translator = MinecraftShaderTranslator.create().stencil(StencilEmulation.Pass.TEST);
-		final MinecraftShaderTranslator stencilTranslator = MinecraftShaderTranslator.create().stencil(StencilEmulation.Pass.WRITE);
-		final Identifier identifier = Identifier.fromNamespaceAndPath(Backend.MOD_ID, "shader/" + MinecraftShader.count++);
-		final Identifier stencilIdentifier = Identifier.fromNamespaceAndPath(Backend.MOD_ID, identifier.getPath() + "_stencil");
-		final BindGroupLayout layout = MinecraftShader.createLayout(translator.getSamplers(vertex, fragment));
-		final VertexFormat vertexFormat = VertexLayout.create(vertex.getBuiltins());
-		bridge.getSourceProvider().register(identifier, ShaderType.VERTEX, translator.translateVertex(vertex, fragment));
-		bridge.getSourceProvider().register(identifier, ShaderType.FRAGMENT, translator.translateFragment(vertex, fragment));
-		bridge.getSourceProvider().register(stencilIdentifier, ShaderType.FRAGMENT, stencilTranslator.translateFragment(vertex, fragment));
-		return new MinecraftShader(bridge, translator, vertex, fragment, blend, bridge.getPipelineCache().isValid(identifier, layout, vertexFormat, blend), identifier, stencilIdentifier, layout, vertexFormat);
+		return new MinecraftShader(bridge, MinecraftShaderTranslator.create().stencil(StencilEmulation.Pass.TEST), vertex, fragment, blend);
+	}
+
+	@Override
+	public boolean isActive() {
+		if (this.active == null) {
+			this.active = ((MinecraftRenderBridge) super.getBridge()).getPipelineCache().isValid(this.identifier, this.layout, this.vertexFormat, super.getBlend());
+		}
+
+		return this.active;
 	}
 
 	public @NonNull GpuBufferSlice upload(final @NonNull RenderState state, final @NonNull float[] projection, final @NonNull MatrixStack modelView, final @NonNull StencilEmulation stencil) {

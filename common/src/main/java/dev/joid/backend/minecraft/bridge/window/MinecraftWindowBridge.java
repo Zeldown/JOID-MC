@@ -5,8 +5,8 @@ import org.lwjgl.glfw.GLFW;
 import dev.joid.base.glfw.GlfwWindows;
 import dev.joid.base.glfw.input.GlfwKeys;
 import dev.joid.lib.bridge.window.IWindowBridge;
-import dev.joid.lib.utils.cursor.Cursor;
-import dev.joid.lib.utils.key.Key;
+import dev.joid.lib.input.cursor.Cursor;
+import dev.joid.lib.input.key.Key;
 import lombok.Getter;
 import lombok.NonNull;
 
@@ -45,12 +45,20 @@ public final class MinecraftWindowBridge implements IWindowBridge {
 
 	@Override
 	public double getMouseX() {
+		if (this.isMouseGrabbed()) {
+			return -1D;
+		}
+
 		final Window window = Minecraft.getInstance().getWindow();
 		return GlfwWindows.toFramebuffer(Minecraft.getInstance().mouseHandler.xpos(), window.getScreenWidth(), window.getWidth());
 	}
 
 	@Override
 	public double getMouseY() {
+		if (this.isMouseGrabbed()) {
+			return -1D;
+		}
+
 		final Window window = Minecraft.getInstance().getWindow();
 		return GlfwWindows.toFramebuffer(Minecraft.getInstance().mouseHandler.ypos(), window.getScreenHeight(), window.getHeight());
 	}

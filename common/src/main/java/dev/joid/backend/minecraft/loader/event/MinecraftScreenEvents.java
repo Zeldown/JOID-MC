@@ -35,8 +35,8 @@ public final class MinecraftScreenEvents {
 		return OverlayInputForwarder.mouseReleased(button);
 	}
 
-	public static boolean fireMouseScrolled(final double notches) {
-		return OverlayInputForwarder.mouseScrolled(notches);
+	public static boolean fireMouseScrolled(final double notchesX, final double notchesY) {
+		return OverlayInputForwarder.mouseScrolled(notchesX, notchesY);
 	}
 
 }

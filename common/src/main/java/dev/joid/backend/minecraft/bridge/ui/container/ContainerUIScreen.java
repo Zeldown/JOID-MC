@@ -11,10 +11,9 @@ import dev.joid.backend.minecraft.lib.ui.core.container.ContainerUI;
 import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
 import dev.joid.base.glfw.input.GlfwKeys;
 import dev.joid.lib.bridge.BridgeHandler;
+import dev.joid.lib.input.mouse.MouseButton;
 import dev.joid.lib.ui.core.UI;
 import dev.joid.lib.ui.node.Node;
-import dev.joid.lib.utils.click.ClickType;
-import dev.joid.lib.utils.key.Key;
 import lombok.Getter;
 import lombok.NonNull;
 
@@ -78,6 +77,10 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 
 	@Override
 	public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
+		if (!this.ui.getNodeList().contains(this.ui.getCarriedNode())) {
+			this.ui.getCarriedNode().attach(this.ui);
+		}
+
 		this.updateQuickCraft();
 		final Slot previous = super.hoveredSlot;
 		super.hoveredSlot = this.getHoveredSlot(mouseX, mouseY);
@@ -101,7 +104,7 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 
 	@Override
 	public boolean mouseClicked(final MouseButtonEvent event, final boolean doubleClick) {
-		if (this.bridge.mousePressed(ClickType.from(event.button()))) {
+		if (this.bridge.mousePressed(MouseButton.from(event.button()))) {
 			this.consumedButtons.add(event.button());
 			return true;
 		}
@@ -115,7 +118,7 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 
 	@Override
 	public boolean mouseReleased(final MouseButtonEvent event) {
-		final boolean consumed = this.bridge.mouseReleased(ClickType.from(event.button()));
+		final boolean consumed = this.bridge.mouseReleased(MouseButton.from(event.button()));
 		if (this.consumedButtons.remove(event.button())) {
 			return true;
 		}
@@ -124,21 +127,17 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 
 	@Override
 	public boolean mouseScrolled(final double x, final double y, final double scrollX, final double scrollY) {
-		return this.bridge.mouseScroll(scrollY) || super.mouseScrolled(x, y, scrollX, scrollY);
+		return this.bridge.mouseScroll(scrollX, scrollY) || super.mouseScrolled(x, y, scrollX, scrollY);
 	}
 
 	@Override
 	public boolean keyPressed(final KeyEvent event) {
-		return this.bridge.keyTyped((char) 0, GlfwKeys.getKey(event.key())) || super.keyPressed(event);
+		return this.bridge.keyPressed(GlfwKeys.getKey(event.key())) || super.keyPressed(event);
 	}
 
 	@Override
 	public boolean charTyped(final CharacterEvent event) {
-		boolean consumed = false;
-		for (final char c : Character.toChars(event.codepoint())) {
-			consumed |= this.bridge.keyTyped(c, Key.UNKNOWN);
-		}
-		return consumed;
+		return this.bridge.charTyped(event.codepoint()) || super.charTyped(event);
 	}
 
 	public boolean isQuickCrafting() {
@@ -174,7 +173,7 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 
 	@Override
 	protected boolean hasClickedOutside(final double x, final double y, final int left, final int top) {
-		return this.getNode(x, y) == null;
+		return this.getNodeList(x, y).isEmpty();
 	}
 
 	private void updateQuickCraft() {
@@ -189,7 +188,7 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 	}
 
 	private SlotNode getSlotNode(final double x, final double y) {
-		for (Node node = this.getNode(x, y); node != null; node = node.getParent()) {
+		for (final Node node : this.getNodeList(x, y)) {
 			if (node instanceof final SlotNode slotNode) {
 				return slotNode;
 			}
@@ -197,7 +196,7 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 		return null;
 	}
 
-	private Node getNode(final double x, final double y) {
+	private List<Node> getNodeList(final double x, final double y) {
 		final Window window = Minecraft.getInstance().getWindow();
 		final List<UI> uiList = new ArrayList<>(this.bridge.getUiList().ordered());
 		for (int index = uiList.size() - 1; index >= 0; index--) {
@@ -206,24 +205,17 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 				continue;
 			}
 
-			final Node hovered = ContainerUIScreen.getNode(ui, x * window.getGuiScale(), y * window.getGuiScale());
-			if (hovered != null || ui == this.ui || ui.getPopup().active()) {
-				return hovered;
+			final double uiX = ui.getView().toUiX(x * window.getGuiScale());
+			final double uiY = ui.getView().toUiY(y * window.getGuiScale());
+			if (ui == this.ui) {
+				return ui.getNodeListAt(uiX, uiY);
 			}
-		}
-		return null;
-	}
 
-	private static Node getNode(final UI ui, final double x, final double y) {
-		final double uiX = ui.getView().toUiX(x);
-		final double uiY = ui.getView().toUiY(y);
-		for (final Node node : ui.getNodeList().reversed()) {
-			final Node hovered = node.getHoveredNode(uiX, uiY);
-			if (hovered != null) {
-				return hovered;
+			if (ui.getNodeAt(uiX, uiY) != null || ui.getPopup().active()) {
+				return Collections.emptyList();
 			}
 		}
-		return null;
+		return Collections.emptyList();
 	}
 
 }

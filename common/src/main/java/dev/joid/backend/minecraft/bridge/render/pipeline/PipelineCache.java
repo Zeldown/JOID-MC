@@ -76,7 +76,7 @@ public final class PipelineCache {
 				.withBindGroupLayout(shader.getLayout())
 				.withVertexBinding(0, shader.getVertexFormat())
 				.withPrimitiveTopology(key.getPrimitive() == Primitive.LINES ? PrimitiveTopology.DEBUG_LINES : PrimitiveTopology.TRIANGLES)
-				.withColorTargetState(new ColorTargetState(PipelineCache.getBlendFunction(key.getBlend()), key.isStencil() ? GpuFormat.R8_UNORM : GpuFormat.RGBA8_UNORM, key.isColorMask() ? ColorTargetState.WRITE_ALL : ColorTargetState.WRITE_NONE))
+				.withColorTargetState(new ColorTargetState(PipelineCache.getBlendFunction(key.getBlend()), key.isStencil() ? GpuFormat.R8_UNORM : GpuFormat.RGBA8_UNORM, key.isColorWrite() ? ColorTargetState.WRITE_ALL : ColorTargetState.WRITE_NONE))
 				.withDepthStencilState(PipelineCache.getDepthStencilState(key))
 				.withCull(key.isCull())
 				.build();

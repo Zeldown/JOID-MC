@@ -2,6 +2,7 @@ package dev.joid.backend.minecraft;
 
 import java.io.File;
 
+import dev.joid.backend.minecraft.bridge.audio.MinecraftAudioGain;
 import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
 import dev.joid.backend.minecraft.bridge.resource.ResourceReloader;
 import dev.joid.backend.minecraft.bridge.ui.container.ContainerUIBridge;
@@ -9,23 +10,22 @@ import dev.joid.backend.minecraft.bridge.ui.overlay.OverlayUIBridge;
 import dev.joid.backend.minecraft.bridge.ui.screen.ScreenUIBridge;
 import dev.joid.backend.minecraft.bridge.window.MinecraftWindowBridge;
 import dev.joid.backend.minecraft.demo.DemoLauncher;
-import dev.joid.backend.minecraft.lib.asset.dto.locator.impl.NamespacedAssetLocator;
-import dev.joid.backend.minecraft.lib.font.dto.markup.LegacyTextMarkup;
-import dev.joid.backend.minecraft.lib.resource.dto.resolver.impl.NamespacedResourceResolver;
-import dev.joid.backend.minecraft.lib.resource.dto.resolver.impl.SpriteResourceResolver;
+import dev.joid.backend.minecraft.lib.asset.locator.impl.NamespacedAssetLocator;
+import dev.joid.backend.minecraft.lib.font.markup.impl.LegacyTextMarkup;
+import dev.joid.backend.minecraft.lib.resource.resolver.impl.NamespacedResourceResolver;
+import dev.joid.backend.minecraft.lib.resource.resolver.impl.SpriteResourceResolver;
 import dev.joid.backend.minecraft.loader.registry.ReloadListener;
 import dev.joid.base.openal.AlAudioBridge;
 import dev.joid.base.openal.binding.Lwjgl3AlBinding;
 import dev.joid.internal.JOID;
-import dev.joid.lib.asset.dto.locator.AssetLocator;
+import dev.joid.lib.asset.locator.AssetLocator;
 import dev.joid.lib.bridge.BridgeHandler;
-import dev.joid.lib.font.dto.markup.TextMarkup;
-import dev.joid.lib.resource.dto.resolver.ResourceResolver;
+import dev.joid.lib.font.markup.TextMarkup;
+import dev.joid.lib.resource.resolver.ResourceResolver;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.sounds.SoundSource;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Backend {
@@ -50,7 +50,7 @@ public final class Backend {
 		final MinecraftRenderBridge render = new MinecraftRenderBridge();
 		final MinecraftWindowBridge window = new MinecraftWindowBridge();
 		JOID.checkVersion(JOID.VERSION);
-		BridgeHandler.AUDIO.register(AlAudioBridge.create(Lwjgl3AlBinding.inst()).hostGain(gain -> gain * Minecraft.getInstance().options.getFinalSoundSourceVolume(SoundSource.UI)));
+		BridgeHandler.AUDIO.register(AlAudioBridge.create(Lwjgl3AlBinding.inst()).ownContext(false).gain(MinecraftAudioGain.inst()));
 		BridgeHandler.WINDOW.register(window);
 		BridgeHandler.RENDER.register(render);
 		BridgeHandler.UI.register(ScreenUIBridge.create(render, window));

@@ -44,7 +44,7 @@ public final class NeoForgeScreenEvents {
 	}
 
 	public static void mouseScrolled(final ScreenEvent.MouseScrolled.Pre event) {
-		if (MinecraftScreenEvents.fireMouseScrolled(event.getScrollDeltaY())) {
+		if (MinecraftScreenEvents.fireMouseScrolled(event.getScrollDeltaX(), event.getScrollDeltaY())) {
 			event.setCanceled(true);
 		}
 	}

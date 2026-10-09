@@ -70,8 +70,7 @@ public final class Rasterizer {
 
 		final float u = (float) pixelWidth / textureWidth;
 		final float v = 1F - (float) pixelHeight / textureHeight;
-		this.bridge.blend(BlendState.PREMULTIPLIED);
-		this.bridge.texture(this.texture, grid.isAligned() ? TextureFilter.NEAREST : TextureFilter.LINEAR, TextureWrap.CLAMP_TO_EDGE);
+		this.bridge.getState().blend(BlendState.PREMULTIPLIED).texture(this.texture).textureFilter(grid.isAligned() ? TextureFilter.NEAREST : TextureFilter.LINEAR).textureWrap(TextureWrap.CLAMP_TO_EDGE);
 		try {
 			final Tessellator tess = Tessellator.inst();
 			tess.start(DrawMode.QUADS);
@@ -81,8 +80,7 @@ public final class Rasterizer {
 			tess.addVertexWithUV(left, top, 0D, 0D, 1D);
 			tess.draw();
 		} finally {
-			this.bridge.resetTexture();
-			this.bridge.blend(BlendState.DISABLED);
+			this.bridge.getState().texture(null).blend(BlendState.DISABLED);
 		}
 	}
 

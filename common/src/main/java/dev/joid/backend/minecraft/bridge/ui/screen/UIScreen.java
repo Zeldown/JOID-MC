@@ -62,19 +62,17 @@ public class UIScreen extends Screen {
 
 	@Override
 	public boolean mouseScrolled(final double x, final double y, final double scrollX, final double scrollY) {
-		return this.bridge.getInput().mouseScrolled(scrollY);
+		return this.bridge.getInput().mouseScrolled(scrollX, scrollY);
 	}
 
 	@Override
 	public boolean keyPressed(final KeyEvent event) {
-		this.bridge.getInput().keyPressed(event.key(), event.modifiers());
-		return true;
+		return this.bridge.getInput().keyPressed(event.key());
 	}
 
 	@Override
 	public boolean charTyped(final CharacterEvent event) {
-		this.bridge.getInput().charTyped(event.codepoint());
-		return true;
+		return this.bridge.getInput().charTyped(event.codepoint());
 	}
 
 }

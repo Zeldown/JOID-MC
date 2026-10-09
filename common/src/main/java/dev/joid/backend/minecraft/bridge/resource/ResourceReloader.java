@@ -7,9 +7,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.WeakHashMap;
 
-import dev.joid.backend.minecraft.lib.asset.dto.impl.NamespacedAsset;
-import dev.joid.backend.minecraft.lib.resource.dto.resolver.impl.NamespacedResourceResolver;
-import dev.joid.lib.resource.dto.ResourceData;
+import dev.joid.backend.minecraft.lib.asset.impl.NamespacedAsset;
+import dev.joid.backend.minecraft.lib.resource.resolver.impl.NamespacedResourceResolver;
+import dev.joid.lib.resource.ResourceData;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;

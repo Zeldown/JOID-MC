@@ -76,50 +76,8 @@ public final class MinecraftRenderBridge extends RenderBridge {
 	}
 
 	@Override
-	public void endFrame() {
-		this.requireFrame();
-		this.passEncoder.end();
-		this.target = null;
-	}
-
-	@Override
-	public void beginFrame() {
-		if (this.target != null) {
-			throw new IllegalStateException("The JOID frame has already begun");
-		}
-
-		if (this.screenTarget == null) {
-			throw new IllegalStateException("A JOID frame needs a screen target, set it with screenTarget before beginFrame");
-		}
-
-		this.target = this.screenTarget;
-		this.passEncoder.encoder().clearDepthTexture(this.target.getDepth(), 1D);
-		if (this.target.getStencil() != null) {
-			this.passEncoder.encoder().clearColorTexture(this.target.getStencil(), new Vector4f(0F));
-		}
-	}
-
-	@Override
-	public void clear(final float red, final float green, final float blue, final float alpha) {
-		this.requireFrame();
-		if (super.getState().isColorMask()) {
-			this.passEncoder.encoder().clearColorTexture(this.getTarget(super.getState()).getTexture().getTexture(), new Vector4f(red, green, blue, alpha));
-		}
-	}
-
-	@Override
-	public void clearDepth() {
-		this.requireFrame();
-		this.passEncoder.encoder().clearDepthTexture(this.getTarget(super.getState()).getDepth(), 1D);
-	}
-
-	@Override
-	public void clearStencil() {
-		this.requireFrame();
-		final MinecraftRenderTarget target = this.getTarget(super.getState());
-		if (target.getStencil() != null) {
-			this.passEncoder.encoder().clearColorTexture(target.getStencil(), new Vector4f(0F));
-		}
+	public boolean canWrap(final @NonNull TextureWrap wrap) {
+		return wrap != TextureWrap.CLAMP_TO_BORDER;
 	}
 
 	@Override
@@ -147,8 +105,48 @@ public final class MinecraftRenderBridge extends RenderBridge {
 	}
 
 	@Override
+	protected void beginFrameCommands() {
+		if (this.screenTarget == null) {
+			throw new IllegalStateException("A JOID frame needs a screen target, set it with screenTarget before beginFrame");
+		}
+
+		this.target = this.screenTarget;
+		this.passEncoder.encoder().clearDepthTexture(this.target.getDepth(), 1D);
+		if (this.target.getStencil() != null) {
+			this.passEncoder.encoder().clearColorTexture(this.target.getStencil(), new Vector4f(0F));
+		}
+	}
+
+	@Override
+	protected void submitFrameCommands() {
+		this.passEncoder.end();
+		this.target = null;
+	}
+
+	@Override
+	protected void clearDepthBuffer() {
+		super.requireFrame();
+		this.passEncoder.encoder().clearDepthTexture(this.getTarget(super.getState()).getDepth(), 1D);
+	}
+
+	@Override
+	protected void clearStencilBuffer() {
+		super.requireFrame();
+		final MinecraftRenderTarget target = this.getTarget(super.getState());
+		if (target.getStencil() != null) {
+			this.passEncoder.encoder().clearColorTexture(target.getStencil(), new Vector4f(0F));
+		}
+	}
+
+	@Override
+	protected void clearColorBuffer(final float red, final float green, final float blue, final float alpha) {
+		super.requireFrame();
+		this.passEncoder.encoder().clearColorTexture(this.getTarget(super.getState()).getTexture().getTexture(), new Vector4f(red, green, blue, alpha));
+	}
+
+	@Override
 	protected void drawPrimitive(final @NonNull Primitive primitive, final @NonNull VertexBuffer buffer, final @NonNull IShader shader) {
-		this.requireFrame();
+		super.requireFrame();
 		final RenderState state = super.getState();
 		final MinecraftRenderTarget target = this.getTarget(state);
 		if (!MinecraftRenderBridge.isVisible(state, target)) {
@@ -156,7 +154,7 @@ public final class MinecraftRenderBridge extends RenderBridge {
 		}
 
 		final StencilEmulation stencil = StencilEmulation.create(state, target.getStencil() != null);
-		final boolean color = state.isColorMask() || state.isDepthTest() && state.isDepthWrite();
+		final boolean color = state.isColorWrite() || state.isDepthTest() && state.isDepthWrite();
 		if (!color && !stencil.isWrite()) {
 			return;
 		}
@@ -178,12 +176,6 @@ public final class MinecraftRenderBridge extends RenderBridge {
 		final AddressMode address = sampling.getWrap() == TextureWrap.REPEAT ? AddressMode.REPEAT : AddressMode.CLAMP_TO_EDGE;
 		final FilterMode mode = sampling.getFilter() == TextureFilter.LINEAR ? FilterMode.LINEAR : FilterMode.NEAREST;
 		return RenderSystem.getSamplerCache().getSampler(address, address, mode, mode, sampling.isMipmapFiltered());
-	}
-
-	private void requireFrame() {
-		if (this.target == null) {
-			throw new IllegalStateException("JOID rendering must happen between beginFrame and endFrame");
-		}
 	}
 
 	private MinecraftRenderTarget getTarget(final RenderState state) {

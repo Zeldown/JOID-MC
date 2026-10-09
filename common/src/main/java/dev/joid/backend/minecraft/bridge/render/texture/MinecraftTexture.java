@@ -59,27 +59,27 @@ public final class MinecraftTexture extends Texture implements IGpuTexture {
 			target.close();
 		}
 
-		this.generateLevels(MipmapChain.of(width, height, super.isMipmapped()));
+		this.generateLevels(MipmapChain.of(width, height, super.isMipmapped()).limit(this.getMaxLevels(width, height)));
 		return this;
 	}
 
 	@Override
-	protected void onAllocate(final @NonNull MipmapChain chain) {
+	protected void allocateStorage(final @NonNull MipmapChain chain) {
 		this.release();
 		this.texture = this.createTexture(chain);
 		this.view    = this.bridge.getDevice().createTextureView(this.texture);
 	}
 
 	@Override
-	protected void onUpload(final @NonNull int[] pixels, final @NonNull MipmapChain chain) {
+	protected void uploadPixels(final @NonNull int[] pixels, final @NonNull MipmapChain chain) {
 		final ByteBuffer data = PixelLayout.RGBA8.write(pixels, this.bridge.getScratch(chain.getWidth() * chain.getHeight() * 4));
 		this.bridge.getPassEncoder().encoder().writeToTexture(this.texture, data, 0, 0, 0, 0, chain.getWidth(), chain.getHeight());
 		this.generateLevels(chain);
 	}
 
 	@Override
-	protected void onGenerateLevels(final @NonNull MipmapChain chain, final int allocatedLevels) {
-		if (this.texture.getMipLevels() != MinecraftTexture.getDeviceLevels(chain)) {
+	protected void generateMipmapLevels(final @NonNull MipmapChain chain, final int allocatedLevels) {
+		if (allocatedLevels != chain.getLevels()) {
 			final GpuTexture source = this.texture;
 			final GpuTextureView view = this.view;
 			this.texture = this.createTexture(chain);
@@ -93,21 +93,21 @@ public final class MinecraftTexture extends Texture implements IGpuTexture {
 	}
 
 	@Override
-	protected void onDelete() {
+	protected int getMaxLevels(final int width, final int height) {
+		return 32 - Integer.numberOfLeadingZeros(Math.max(1, Math.min(width, height)));
+	}
+
+	@Override
+	protected void deleteStorage() {
 		this.release();
 	}
 
 	private GpuTexture createTexture(final MipmapChain chain) {
-		return this.bridge.getDevice().createTexture("JOID Texture", GpuTexture.USAGE_COPY_DST | GpuTexture.USAGE_COPY_SRC | GpuTexture.USAGE_TEXTURE_BINDING | GpuTexture.USAGE_RENDER_ATTACHMENT, GpuFormat.RGBA8_UNORM, chain.getWidth(), chain.getHeight(), 1, MinecraftTexture.getDeviceLevels(chain));
+		return this.bridge.getDevice().createTexture("JOID Texture", GpuTexture.USAGE_COPY_DST | GpuTexture.USAGE_COPY_SRC | GpuTexture.USAGE_TEXTURE_BINDING | GpuTexture.USAGE_RENDER_ATTACHMENT, GpuFormat.RGBA8_UNORM, chain.getWidth(), chain.getHeight(), 1, chain.getLevels());
 	}
 
 	private void generateLevels(final MipmapChain chain) {
-		final int levels = this.texture.getMipLevels();
 		chain.forEachStep((level, _, _, _, _) -> {
-			if (level >= levels) {
-				return;
-			}
-
 			final GpuTextureView source = this.bridge.getDevice().createTextureView(this.texture, level - 1, 1);
 			final GpuTextureView target = this.bridge.getDevice().createTextureView(this.texture, level, 1);
 			try (RenderPass pass = this.bridge.getPassEncoder().encoder().createRenderPass(() -> "JOID Mipmap", target, Optional.empty())) {
@@ -132,10 +132,6 @@ public final class MinecraftTexture extends Texture implements IGpuTexture {
 		this.texture.close();
 		this.view    = null;
 		this.texture = null;
-	}
-
-	private static int getDeviceLevels(final MipmapChain chain) {
-		return Math.min(chain.getLevels(), 32 - Integer.numberOfLeadingZeros(Math.max(1, Math.min(chain.getWidth(), chain.getHeight()))));
 	}
 
 }

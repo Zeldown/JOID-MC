@@ -3,8 +3,8 @@ package dev.joid.backend.minecraft.lib.ui.node.impl.design.entity;
 import java.util.function.Supplier;
 
 import dev.joid.backend.minecraft.lib.draw.entity.DrawEntity;
+import dev.joid.lib.signal.Signal;
 import dev.joid.lib.ui.node.Node;
-import dev.joid.lib.utils.signal.Signal;
 import lombok.Getter;
 import lombok.NonNull;
 

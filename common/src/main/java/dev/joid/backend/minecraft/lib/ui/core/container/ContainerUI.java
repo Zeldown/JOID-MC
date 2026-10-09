@@ -9,6 +9,8 @@ import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
 import dev.joid.backend.minecraft.loader.registry.ContainerBinding;
 import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.ui.core.UI;
+import dev.joid.lib.ui.node.Node;
+import dev.joid.lib.ui.node.impl.structure.container.ContainerNode;
 import lombok.Getter;
 import lombok.NonNull;
 
@@ -21,19 +23,32 @@ public abstract class ContainerUI<M extends AbstractContainerMenu> extends UI {
 	@Getter
 	private final M container;
 
+	@Getter
+	private final Node carriedNode;
+
 	private double carriedSize;
 
 	protected ContainerUI(final @NonNull M container) {
 		this.container   = container;
 		this.carriedSize = 64D;
+		this.carriedNode = ContainerNode.create(0, 0, 0, 0).zindex(Integer.MAX_VALUE).interactive(false).onDraw((_, mouseX, mouseY) -> this.drawCarried(mouseX, mouseY));
 	}
 
 	public static <M extends AbstractContainerMenu> void bind(final @NonNull MenuType<M> type, final @NonNull Function<M, ? extends ContainerUI<M>> factory) {
 		ContainerBinding.create(type, factory).register();
 	}
 
-	@Override
-	public void postDraw(final double mouseX, final double mouseY) {
+	public @NonNull ItemStack getCarried() {
+		return this.container.getCarried();
+	}
+
+	public ContainerUIScreen<?> getScreen() {
+		final ContainerUIBridge bridge = BridgeHandler.UI.getBridge(ContainerUIBridge.class);
+		final ContainerUIScreen<?> screen = bridge != null ? bridge.getScreen() : null;
+		return screen != null && screen.getMenu() == this.container ? screen : null;
+	}
+
+	private void drawCarried(final double mouseX, final double mouseY) {
 		final ContainerUIScreen<?> screen = this.getScreen();
 		final ItemStack carried = this.container.getCarried();
 		if (screen == null || carried.isEmpty()) {
@@ -52,16 +67,6 @@ public abstract class ContainerUI<M extends AbstractContainerMenu> extends UI {
 		DrawItem.inst().drawItemBar(x, y, this.carriedSize, stack);
 		DrawItem.inst().drawItemCooldown(x, y, this.carriedSize, stack);
 		DrawItem.inst().drawItemCount(x, y, this.carriedSize, stack);
-	}
-
-	public @NonNull ItemStack getCarried() {
-		return this.container.getCarried();
-	}
-
-	public ContainerUIScreen<?> getScreen() {
-		final ContainerUIBridge bridge = BridgeHandler.UI.getBridge(ContainerUIBridge.class);
-		final ContainerUIScreen<?> screen = bridge != null ? bridge.getScreen() : null;
-		return screen != null && screen.getMenu() == this.container ? screen : null;
 	}
 
 }

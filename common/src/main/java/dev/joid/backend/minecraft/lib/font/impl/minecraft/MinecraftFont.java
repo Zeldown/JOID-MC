@@ -3,18 +3,17 @@ package dev.joid.backend.minecraft.lib.font.impl.minecraft;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import dev.joid.backend.minecraft.lib.font.impl.minecraft.dto.MinecraftFontFace;
 import dev.joid.lib.font.FontWeight;
-import dev.joid.lib.font.IFontProvider;
-import dev.joid.lib.font.impl.glyph.GlyphFont;
-import dev.joid.lib.font.impl.glyph.dto.FontFamily;
+import dev.joid.lib.font.ITextRenderer;
+import dev.joid.lib.font.impl.bitmap.BitmapFont;
+import dev.joid.lib.font.impl.glyph.FontFamily;
 import lombok.Getter;
 import lombok.NonNull;
 
 import net.minecraft.resources.Identifier;
 
 @Getter
-public final class MinecraftFont extends GlyphFont<MinecraftFontFace> {
+public final class MinecraftFont extends BitmapFont<MinecraftFontFace> {
 
 	public static final float SIZE = 8F;
 
@@ -37,8 +36,8 @@ public final class MinecraftFont extends GlyphFont<MinecraftFontFace> {
 	}
 
 	@Override
-	public @NonNull IFontProvider getFontProvider() {
-		return MinecraftFontProvider.inst();
+	public @NonNull ITextRenderer getTextRenderer() {
+		return MinecraftTextRenderer.inst();
 	}
 
 	@Override

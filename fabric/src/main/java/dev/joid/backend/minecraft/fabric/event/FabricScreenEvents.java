@@ -18,7 +18,7 @@ public final class FabricScreenEvents {
 			ScreenMouseEvents.allowMouseClick(screen).register((_, event) -> !MinecraftScreenEvents.fireMousePressed(event.button()));
 			ScreenKeyboardEvents.allowCharType(screen).register((_, event) -> !MinecraftScreenEvents.fireCharTyped(event.codepoint()));
 			ScreenMouseEvents.allowMouseRelease(screen).register((_, event) -> !MinecraftScreenEvents.fireMouseReleased(event.button()));
-			ScreenMouseEvents.allowMouseScroll(screen).register((_, _, _, _, notches) -> !MinecraftScreenEvents.fireMouseScrolled(notches));
+			ScreenMouseEvents.allowMouseScroll(screen).register((_, _, _, notchesX, notchesY) -> !MinecraftScreenEvents.fireMouseScrolled(notchesX, notchesY));
 			ScreenEvents.afterExtract(screen).register((_, graphics, _, _, _) -> MinecraftScreenEvents.fireRender(graphics));
 		});
 	}

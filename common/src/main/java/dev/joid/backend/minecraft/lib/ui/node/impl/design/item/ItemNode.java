@@ -2,12 +2,11 @@ package dev.joid.backend.minecraft.lib.ui.node.impl.design.item;
 
 import java.util.function.Supplier;
 
-import dev.joid.backend.minecraft.bridge.ui.IItemHoverBridge;
 import dev.joid.backend.minecraft.lib.draw.item.DrawItem;
+import dev.joid.lib.signal.Signal;
 import dev.joid.lib.ui.core.UI;
 import dev.joid.lib.ui.node.Node;
-import dev.joid.lib.ui.node.hover.HoverElement;
-import dev.joid.lib.utils.signal.Signal;
+import dev.joid.lib.ui.node.hover.IHoverElement;
 import lombok.Getter;
 import lombok.NonNull;
 
@@ -17,7 +16,7 @@ import net.minecraft.world.item.ItemStack;
 @Getter
 public class ItemNode extends Node {
 
-	private static final HoverElement TOOLTIP = (node, _, _) -> ((ItemNode) node).drawTooltip();
+	private static final IHoverElement TOOLTIP = (node, mouseX, mouseY) -> ((ItemNode) node).drawTooltip(mouseX, mouseY);
 
 	private ItemStack stack;
 
@@ -98,7 +97,8 @@ public class ItemNode extends Node {
 	public final <T extends ItemNode> @NonNull T tooltip(final @NonNull Supplier<Boolean> tooltip) {
 		return super.follow("tooltip", tooltip, value -> {
 			this.tooltip = value;
-			if (value && !super.getHoverElementList().contains(ItemNode.TOOLTIP)) {
+			super.removeHover(ItemNode.TOOLTIP);
+			if (value) {
 				super.hover(ItemNode.TOOLTIP);
 			}
 		});
@@ -112,10 +112,10 @@ public class ItemNode extends Node {
 		return super.follow("glint", glint, value -> this.glint = value);
 	}
 
-	private void drawTooltip() {
+	private void drawTooltip(final double mouseX, final double mouseY) {
 		final UI ui = super.getUi();
-		if (this.tooltip && !this.stack.isEmpty() && ui != null && ui.getBridge() instanceof final IItemHoverBridge bridge) {
-			bridge.drawHover(this.stack);
+		if (!this.stack.isEmpty() && ui != null) {
+			ui.drawHover(this.stack, mouseX, mouseY);
 		}
 	}
 

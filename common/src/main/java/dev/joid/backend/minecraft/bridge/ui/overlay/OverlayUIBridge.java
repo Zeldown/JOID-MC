@@ -1,46 +1,39 @@
 package dev.joid.backend.minecraft.bridge.ui.overlay;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 import java.util.function.Predicate;
 
 import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
+import dev.joid.backend.minecraft.bridge.ui.TooltipQueue;
 import dev.joid.backend.minecraft.bridge.ui.screen.GuiCompositor;
 import dev.joid.backend.minecraft.bridge.window.MinecraftWindowBridge;
 import dev.joid.backend.minecraft.lib.ui.core.data.overlay.layer.OverlayLayer;
 import dev.joid.backend.minecraft.lib.ui.core.data.overlay.layer.UIDataOverlayLayer;
-import dev.joid.lib.bridge.BridgeHandler;
-import dev.joid.lib.bridge.render.IRenderBridge;
 import dev.joid.lib.bridge.ui.UIBridge;
-import dev.joid.lib.resource.dto.ResourceData;
-import dev.joid.lib.shader.pipeline.ShaderPipeline;
 import dev.joid.lib.ui.core.UI;
 import dev.joid.lib.ui.core.data.overlay.UIDataOverlayObject;
 import dev.joid.lib.ui.core.data.overlay.render.UIDataOverlayRenderObject;
-import dev.joid.lib.ui.node.Node;
 import lombok.NonNull;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.network.chat.Component;
 
 public final class OverlayUIBridge extends UIBridge {
 
 	private final GuiCompositor         compositor;
+	private final TooltipQueue          tooltipQueue;
 	private final MinecraftWindowBridge window;
 
-	private int          width;
-	private int          height;
-	private long         frameTime;
-	private List<String> hoverList;
+	private int  width;
+	private int  height;
+	private long frameTime;
 
 	private OverlayUIBridge(final MinecraftRenderBridge render, final MinecraftWindowBridge window) {
-		this.window     = window;
-		this.compositor = GuiCompositor.create(render);
-		this.width      = window.getWidth();
-		this.height     = window.getHeight();
-		this.frameTime  = -1L;
+		this.window       = window;
+		this.compositor   = GuiCompositor.create(render);
+		this.tooltipQueue = TooltipQueue.create();
+		this.width        = window.getWidth();
+		this.height       = window.getHeight();
+		this.frameTime    = -1L;
 	}
 
 	public static @NonNull OverlayUIBridge create(final @NonNull MinecraftRenderBridge render, final @NonNull MinecraftWindowBridge window) {
@@ -94,8 +87,8 @@ public final class OverlayUIBridge extends UIBridge {
 	}
 
 	@Override
-	public void drawHover(final @NonNull UI ui, final @NonNull List<@NonNull String> lines, final double mouseX, final double mouseY) {
-		this.hoverList = new ArrayList<>(lines);
+	public void drawHover(final @NonNull UI ui, final @NonNull Object content, final double mouseX, final double mouseY) {
+		this.tooltipQueue.push(content);
 	}
 
 	public void extract(final @NonNull GuiGraphicsExtractor graphics) {
@@ -113,7 +106,7 @@ public final class OverlayUIBridge extends UIBridge {
 	public void extractScreen(final @NonNull GuiGraphicsExtractor graphics) {
 		if (this.isScreenOpen()) {
 			this.extract(graphics, _ -> true);
-			this.requestCursor(graphics);
+			this.window.requestCursor(graphics, this.window.getCursor());
 		}
 	}
 
@@ -127,28 +120,17 @@ public final class OverlayUIBridge extends UIBridge {
 	}
 
 	private void extract(final GuiGraphicsExtractor graphics, final Predicate<UI> filter) {
-		this.frame();
-		final List<UI> drawList = new ArrayList<>();
-		for (final UI ui : this.getDrawList()) {
-			if (filter.test(ui) && this.isShown(ui)) {
-				drawList.add(ui);
-			}
-		}
-
-		if (drawList.isEmpty()) {
+		this.prepareFrame();
+		if (super.getUiList().ordered().stream().noneMatch(ui -> filter.test(ui) && this.isShown(ui))) {
 			return;
 		}
 
-		this.compositor.composite(graphics, () -> this.draw(drawList));
-		final List<String> hoverList = this.hoverList;
-		this.hoverList = null;
-		if (hoverList != null && !hoverList.isEmpty()) {
-			final Minecraft minecraft = Minecraft.getInstance();
-			graphics.setComponentTooltipForNextFrame(minecraft.font, hoverList.stream().<Component>map(Component::literal).toList(), (int) minecraft.mouseHandler.getScaledXPos(minecraft.getWindow()), (int) minecraft.mouseHandler.getScaledYPos(minecraft.getWindow()));
-		}
+		final Minecraft minecraft = Minecraft.getInstance();
+		this.compositor.composite(graphics, () -> super.draw(filter));
+		this.tooltipQueue.flush(graphics, (int) minecraft.mouseHandler.getScaledXPos(minecraft.getWindow()), (int) minecraft.mouseHandler.getScaledYPos(minecraft.getWindow()));
 	}
 
-	private void frame() {
+	private void prepareFrame() {
 		final long frameTime = Minecraft.getInstance().getFrameTimeNs();
 		if (frameTime == this.frameTime || super.getUiList().isEmpty()) {
 			return;
@@ -162,59 +144,11 @@ public final class OverlayUIBridge extends UIBridge {
 		}
 
 		super.update();
-		ResourceData.releaseCollected();
-		ShaderPipeline.releaseUnused();
-	}
-
-	private void draw(final List<UI> drawList) {
-		final IRenderBridge render = BridgeHandler.RENDER.get();
-		final boolean grabbed = this.window.isMouseGrabbed();
-		final double mouseX = grabbed ? -1D : this.window.getMouseX();
-		final double mouseY = grabbed ? -1D : this.window.getMouseY();
-
-		double renderPipeline = 0D;
-		render.pushMatrix();
-		try {
-			render.translate(0D, 0D, -2000D);
-			for (final UI ui : drawList) {
-				renderPipeline += ui.getData().zlevel();
-				render.translate(0D, 0D, renderPipeline);
-				ui.draw(mouseX, mouseY);
-				renderPipeline = ui.getRenderPipelineLevel() + 10D;
-			}
-		} catch (final Exception exception) {
-			exception.printStackTrace();
-		} finally {
-			render.popMatrix();
-		}
-	}
-
-	private void requestCursor(final GuiGraphicsExtractor graphics) {
-		final List<UI> drawList = this.getDrawList();
-		for (int i = drawList.size() - 1; i >= 0; i--) {
-			final UI ui = drawList.get(i);
-			if (!ui.getData().active() || !ui.getOverlay().interaction().active() || !this.isShown(ui)) {
-				continue;
-			}
-
-			final Node hovered = ui.getHoveredNode();
-			if (hovered != null) {
-				this.window.requestCursor(graphics, hovered.getResolvedCursor());
-				return;
-			}
-		}
 	}
 
 	private boolean isShown(final UI ui) {
 		final UIDataOverlayRenderObject render = ui.getOverlay().render();
 		return ui.getData().visible() && (render.always() || !this.isOverlayHidden()) && (render.screens() || !this.isScreenOpen());
-	}
-
-	private List<UI> getDrawList() {
-		super.getUiList().sort();
-		final List<UI> drawList = new ArrayList<>(super.getUiList().ordered());
-		drawList.sort(Comparator.comparingInt(ui -> ui.getOverlay().render().zindex()));
-		return drawList;
 	}
 
 	private static boolean isLayer(final UI ui, final OverlayLayer layer) {

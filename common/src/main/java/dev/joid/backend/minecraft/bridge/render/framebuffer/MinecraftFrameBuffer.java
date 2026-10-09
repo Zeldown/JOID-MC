@@ -22,7 +22,7 @@ public final class MinecraftFrameBuffer extends FrameBufferHandle<MinecraftTextu
 	}
 
 	@Override
-	protected void onDelete() {
+	protected void deleteHandle() {
 		this.target.delete();
 	}
 

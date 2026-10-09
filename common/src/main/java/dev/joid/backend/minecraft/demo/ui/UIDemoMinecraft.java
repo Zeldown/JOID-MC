@@ -2,7 +2,7 @@ package dev.joid.backend.minecraft.demo.ui;
 
 import java.util.UUID;
 
-import dev.joid.backend.minecraft.lib.font.dto.ChatTextConverter;
+import dev.joid.backend.minecraft.lib.font.converter.impl.ChatTextConverter;
 import dev.joid.backend.minecraft.lib.font.impl.minecraft.MinecraftFont;
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.block.BlockNode;
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.entity.EntityNode;
@@ -10,14 +10,14 @@ import dev.joid.backend.minecraft.lib.ui.node.impl.design.item.ItemNode;
 import dev.joid.demo.DemoFont;
 import dev.joid.demo.ui.UIDemo;
 import dev.joid.lib.color.Color;
+import dev.joid.lib.draw.text.TextMode;
 import dev.joid.lib.draw.text.builder.Text;
-import dev.joid.lib.draw.text.utils.TextMode;
-import dev.joid.lib.font.dto.TextInfo;
-import dev.joid.lib.render.modifier.Rotation;
-import dev.joid.lib.render.modifier.Scale;
-import dev.joid.lib.render.modifier.Vector;
-import dev.joid.lib.render.transform.operation.RotateOperation;
-import dev.joid.lib.render.transform.operation.ScaleOperation;
+import dev.joid.lib.font.TextInfo;
+import dev.joid.lib.render.transform.Rotation;
+import dev.joid.lib.render.transform.Scale;
+import dev.joid.lib.render.transform.Vector;
+import dev.joid.lib.render.transform.operation.RotateTransformOperation;
+import dev.joid.lib.render.transform.operation.ScaleTransformOperation;
 import dev.joid.lib.resource.Resource;
 import dev.joid.lib.ui.node.effect.NodeEffect.NodeEffectScope;
 import dev.joid.lib.ui.node.effect.impl.CircleNodeEffect;
@@ -265,12 +265,12 @@ public class UIDemoMinecraft extends UIDemo {
 				ItemNode
 				.create(160, 80, 80, 80)
 				.stack(new ItemStack(Items.GOLDEN_CARROT, 32))
-				.self(item -> item.effect(TransformNodeEffect.create(new RotateOperation(30D, Rotation.ROLL, Vector.create(() -> item.getX() + 40D, () -> item.getY() + 40D)))))
+				.self(item -> item.effect(TransformNodeEffect.create(new RotateTransformOperation(30D, Rotation.ROLL, Vector.create(() -> item.getX() + 40D, () -> item.getY() + 40D)))))
 				.attach(rect);
 				ItemNode
 				.create(300, 100, 40, 40)
 				.stack(damaged)
-				.self(item -> item.effect(TransformNodeEffect.create(new ScaleOperation(Scale.create(2.5D, 2.5D, 1D), Vector.create(() -> item.getX() + 20D, () -> item.getY() + 20D)))))
+				.self(item -> item.effect(TransformNodeEffect.create(new ScaleTransformOperation(Scale.create(2.5D, 2.5D, 1D), Vector.create(() -> item.getX() + 20D, () -> item.getY() + 20D)))))
 				.attach(rect);
 				TextNode.create(200, 255).text(Text.create("Transforms", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
 			})
@@ -316,7 +316,7 @@ public class UIDemoMinecraft extends UIDemo {
 				EntityNode
 				.create(310, 40, 80, 160)
 				.entity(() -> Minecraft.getInstance().player)
-				.self(entity -> entity.effect(TransformNodeEffect.create(new RotateOperation(30D, Rotation.ROLL, Vector.create(() -> entity.getX() + 40D, () -> entity.getY() + 80D)))))
+				.self(entity -> entity.effect(TransformNodeEffect.create(new RotateTransformOperation(30D, Rotation.ROLL, Vector.create(() -> entity.getX() + 40D, () -> entity.getY() + 80D)))))
 				.attach(rect);
 				TextNode.create(220, 255).text(Text.create("Local player", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
 			})

@@ -5,7 +5,7 @@ import dev.joid.backend.minecraft.lib.font.impl.minecraft.MinecraftFont;
 import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.color.Color;
 import dev.joid.lib.draw.DrawUtils;
-import dev.joid.lib.font.dto.TextInfo;
+import dev.joid.lib.font.TextInfo;
 import dev.joid.lib.utils.align.Align;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
