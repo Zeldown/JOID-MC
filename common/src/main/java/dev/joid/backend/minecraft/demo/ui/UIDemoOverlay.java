@@ -1,9 +1,11 @@
 package dev.joid.backend.minecraft.demo.ui;
 
+import java.util.ArrayList;
+
 import dev.joid.backend.minecraft.lib.ui.core.data.overlay.layer.OverlayLayer;
 import dev.joid.backend.minecraft.lib.ui.core.data.overlay.layer.UIDataOverlayLayer;
 import dev.joid.demo.DemoFont;
-import dev.joid.demo.ui.UIDemo;
+import dev.joid.demo.ui.UIDemoChoice;
 import dev.joid.internal.JOID;
 import dev.joid.lib.color.Color;
 import dev.joid.lib.draw.text.builder.Text;
@@ -13,6 +15,7 @@ import dev.joid.lib.ui.core.data.UIData;
 import dev.joid.lib.ui.core.data.overlay.UIDataOverlay;
 import dev.joid.lib.ui.core.data.overlay.interaction.UIDataOverlayInteraction;
 import dev.joid.lib.ui.core.data.overlay.render.UIDataOverlayRender;
+import dev.joid.lib.ui.node.Node;
 import dev.joid.lib.ui.node.impl.design.shape.RectNode;
 import dev.joid.lib.ui.node.impl.design.text.TextNode;
 import dev.joid.lib.utils.align.Align;
@@ -20,7 +23,9 @@ import dev.joid.lib.utils.cursor.Cursor;
 
 import net.minecraft.client.Minecraft;
 
-public class UIDemoOverlay extends UIDemo {
+@UIData(background = false)
+@UIDataOverlay(active = true, render = @UIDataOverlayRender(screens = true))
+public class UIDemoOverlay extends UI {
 
 	private static final Color INK         = new Color(153, 153, 153);
 	private static final Color PANEL       = new Color(48, 48, 48);
@@ -28,83 +33,42 @@ public class UIDemoOverlay extends UIDemo {
 
 	@Override
 	public void init() {
-		final TextInfo caption = TextInfo.create(DemoFont.MONTSERRAT, 24, UIDemoOverlay.INK);
-		final TextInfo info = TextInfo.create(DemoFont.MONTSERRAT, 24, UIDemoOverlay.PANEL);
+		final TextInfo info = TextInfo.create(DemoFont.MONTSERRAT, 24, UIDemoOverlay.INK);
+
+		for (final UI ui : new ArrayList<>(super.getBridge().getUiList().ordered())) {
+			if (ui != this && ui instanceof UIDemoOverlay) {
+				JOID.close(ui, true);
+			}
+		}
+
+		if (JOID.isOpen(Hotbar.class)) {
+			JOID.close(JOID.getUI(Hotbar.class));
+			JOID.close(JOID.getUI(Experience.class));
+			JOID.close(JOID.getUI(Interactive.class));
+		} else {
+			JOID.open(new Hotbar());
+			JOID.open(new Experience());
+			JOID.open(new Interactive());
+		}
 
 		RectNode
-		.create(460, 420, 440, 240)
+		.create(0, 0, 80, 40)
 		.color(UIDemoOverlay.PLACEHOLDER)
+		.x(() -> UIDemoOverlay.getEntry() != null ? UIDemoOverlay.getEntry().getAbsoluteX() + UIDemoOverlay.getEntry().getWidth() - 95D : 0D)
+		.y(() -> UIDemoOverlay.getEntry() != null ? UIDemoOverlay.getEntry().getAbsoluteY() + 15D : 0D)
+		.visible(() -> UIDemoOverlay.getEntry() != null)
 		.body(rect -> {
-			RectNode.create(20, 20, 400, 200).color(UIDemoOverlay.PANEL).attach(rect);
-			RectNode
-			.create(130, 90, 180, 60)
-			.color(UIDemoOverlay.INK)
-			.hoveredColor(UIDemoOverlay.PLACEHOLDER)
-			.cursor(Cursor.POINTER)
-			.body(toggle -> {
-				TextNode.create(90, 30).text(Text.create(() -> JOID.isOpen(Hotbar.class) ? "Hide" : "Show", info, Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(toggle);
-			})
-			.onClick((_, _, _, _) -> {
-				if (JOID.isOpen(Hotbar.class)) {
-					JOID.close(JOID.getUI(Hotbar.class));
-				} else {
-					JOID.open(new Hotbar());
-				}
-			})
-			.attach(rect);
-			TextNode.create(220, 255).text(Text.create("Above the hotbar", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
+			TextNode.create(40, 20).text(Text.create(() -> JOID.isOpen(Hotbar.class) ? "On" : "Off", info, Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(rect);
 		})
 		.attach(this);
+	}
 
-		RectNode
-		.create(940, 420, 440, 240)
-		.color(UIDemoOverlay.PLACEHOLDER)
-		.body(rect -> {
-			RectNode.create(20, 20, 400, 200).color(UIDemoOverlay.PANEL).attach(rect);
-			RectNode
-			.create(130, 90, 180, 60)
-			.color(UIDemoOverlay.INK)
-			.hoveredColor(UIDemoOverlay.PLACEHOLDER)
-			.cursor(Cursor.POINTER)
-			.body(toggle -> {
-				TextNode.create(90, 30).text(Text.create(() -> JOID.isOpen(Experience.class) ? "Hide" : "Show", info, Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(toggle);
-			})
-			.onClick((_, _, _, _) -> {
-				if (JOID.isOpen(Experience.class)) {
-					JOID.close(JOID.getUI(Experience.class));
-				} else {
-					JOID.open(new Experience());
-				}
-			})
-			.attach(rect);
-			TextNode.create(220, 255).text(Text.create("Experience bar", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
-		})
-		.attach(this);
-
-		RectNode
-		.create(1420, 420, 440, 240)
-		.color(UIDemoOverlay.PLACEHOLDER)
-		.body(rect -> {
-			RectNode.create(20, 20, 400, 200).color(UIDemoOverlay.PANEL).attach(rect);
-			RectNode
-			.create(130, 90, 180, 60)
-			.color(UIDemoOverlay.INK)
-			.hoveredColor(UIDemoOverlay.PLACEHOLDER)
-			.cursor(Cursor.POINTER)
-			.body(toggle -> {
-				TextNode.create(90, 30).text(Text.create(() -> JOID.isOpen(Interactive.class) ? "Hide" : "Show", info, Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(toggle);
-			})
-			.onClick((_, _, _, _) -> {
-				if (JOID.isOpen(Interactive.class)) {
-					JOID.close(JOID.getUI(Interactive.class));
-				} else {
-					JOID.open(new Interactive());
-				}
-			})
-			.attach(rect);
-			TextNode.create(220, 255).text(Text.create("Interactive", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
-		})
-		.attach(this);
+	private static Node getEntry() {
+		final UIDemoChoice choice = JOID.getUI(UIDemoChoice.class);
+		if (choice == null || choice.getNodeList().isEmpty()) {
+			return null;
+		}
+		return choice.getNodeList().ordered().getFirst().getChild(new ArrayList<>(UIDemoChoice.LIST).indexOf(UIDemoOverlay.class), RectNode.class);
 	}
 
 	@UIDataOverlay(active = true)

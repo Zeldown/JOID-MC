@@ -291,17 +291,8 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		context.runOnClient(_ -> JOID.open(new UIDemoChoice()));
 		context.waitForScreen(UIScreen.class);
 		context.waitTicks(20);
-		FabricJoidClientGameTest.clickDemo(context, UIDemoOverlay.class, "joid-demo-choice-overlay");
-		for (int index = 0; index < 3; index++) {
-			final int card = index;
-			final int[] toggle = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUI(UIDemoOverlay.class).getNodeList().ordered().get(card).getChild(1, RectNode.class)));
-			FabricJoidClientGameTest.click(context, toggle);
-		}
-
-		context.takeScreenshot("joid-demo-overlay");
-		context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
-		context.waitFor(_ -> JOID.getUI(UIDemoChoice.class) != null && JOID.getUI(UIDemoOverlay.class) == null);
-		context.waitTicks(20);
+		FabricJoidClientGameTest.clickDemo(context, UIDemoOverlay.class, "joid-demo-choice-overlay-on");
+		FabricJoidClientGameTest.expectOverlays(context, true);
 		context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
 		context.waitForScreen(null);
 		context.waitTicks(10);
@@ -386,14 +377,31 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		context.runOnClient(minecraft -> {
 			minecraft.options.guiScale().set(0);
 			minecraft.resizeGui();
-			JOID.close(JOID.getUI(UIDemoOverlay.Hotbar.class));
-			JOID.close(JOID.getUI(UIDemoOverlay.Experience.class));
-			JOID.close(JOID.getUI(UIDemoOverlay.Interactive.class));
 		});
 		context.waitTicks(5);
+		context.runOnClient(_ -> JOID.open(new UIDemoChoice()));
+		context.waitForScreen(UIScreen.class);
+		context.waitTicks(20);
+		FabricJoidClientGameTest.clickDemo(context, UIDemoOverlay.class, "joid-demo-choice-overlay-off");
+		FabricJoidClientGameTest.expectOverlays(context, false);
+		context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
+		context.waitForScreen(null);
+		context.waitTicks(10);
+		final BufferedImage off = FabricJoidClientGameTest.read(context.takeScreenshot("joid-overlay-off"));
+		FabricJoidClientGameTest.expectColor(failures, "overlay above the hotbar toggled off", off, hotbar, 0xDDDDDD, false);
+		FabricJoidClientGameTest.expectColor(failures, "interactive overlay toggled off", off, interactive, 0xDDDDDD, false);
+		context.runOnClient(_ -> JOID.close(JOID.getUI(UIDemoOverlay.class)));
 		if (!failures.isEmpty()) {
 			throw new AssertionError(failures.size() + " overlay checks failed:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
 		}
+	}
+
+	private static void expectOverlays(final ClientGameTestContext context, final boolean open) {
+		context.runOnClient(_ -> {
+			if (JOID.isOpen(UIDemoOverlay.Hotbar.class) != open || JOID.isOpen(UIDemoOverlay.Experience.class) != open || JOID.isOpen(UIDemoOverlay.Interactive.class) != open) {
+				throw new AssertionError("The overlay entry of UIDemoChoice did not toggle the demo overlays " + (open ? "on" : "off"));
+			}
+		});
 	}
 
 	private static void expectColor(final List<String> failures, final String label, final BufferedImage image, final int[] bounds, final int color, final boolean same) {
