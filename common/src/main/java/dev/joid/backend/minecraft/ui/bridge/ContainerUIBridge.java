@@ -3,11 +3,11 @@ package dev.joid.backend.minecraft.ui.bridge;
 import java.util.ArrayList;
 import java.util.List;
 
+import dev.joid.backend.minecraft.lib.ui.core.container.ContainerUI;
 import dev.joid.backend.minecraft.render.RenderBridge;
 import dev.joid.backend.minecraft.render.composite.GuiCompositor;
-import dev.joid.backend.minecraft.ui.screen.UIScreen;
+import dev.joid.backend.minecraft.ui.screen.ContainerUIScreen;
 import dev.joid.backend.minecraft.window.WindowBridge;
-import dev.joid.base.glfw.input.GlfwInputForwarder;
 import dev.joid.lib.bridge.ui.StackUIBridge;
 import dev.joid.lib.ui.core.UI;
 import dev.joid.lib.ui.core.data.overlay.UIDataOverlayObject;
@@ -19,44 +19,37 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
-public final class ScreenUIBridge extends StackUIBridge implements IItemHoverBridge {
+public final class ContainerUIBridge extends StackUIBridge implements IItemHoverBridge {
 
 	private final WindowBridge  window;
 	private final GuiCompositor compositor;
 
 	@Getter
-	private final GlfwInputForwarder input;
+	private ContainerUIScreen<?> screen;
 
-	private UIScreen     screen;
-	private boolean      replacing;
 	private List<String> hoverList;
 	private ItemStack    hoverStack;
 
-	private ScreenUIBridge(final RenderBridge render, final WindowBridge window) {
+	private ContainerUIBridge(final RenderBridge render, final WindowBridge window) {
 		this.window     = window;
 		this.compositor = GuiCompositor.create(render);
-		this.input      = GlfwInputForwarder.create(this);
 	}
 
-	public static @NonNull ScreenUIBridge create(final @NonNull RenderBridge render, final @NonNull WindowBridge window) {
-		return new ScreenUIBridge(render, window);
+	public static @NonNull ContainerUIBridge create(final @NonNull RenderBridge render, final @NonNull WindowBridge window) {
+		return new ContainerUIBridge(render, window);
 	}
 
 	@Override
 	public void open(final @NonNull UI ui) {
-		this.replacing = true;
-		try {
-			super.open(ui);
-		} finally {
-			this.replacing = false;
-		}
-
-		if (!super.hasScreen()) {
-			this.onLastScreenClose();
-		}
+		throw new IllegalStateException("The container UI " + ui.getClass().getSimpleName() + " opens with its container on the server (ServerPlayer.openMenu), not with JOID.open");
 	}
 
-	public void removed(final @NonNull UIScreen screen) {
+	public void added(final @NonNull ContainerUIScreen<?> screen) {
+		this.screen = screen;
+		super.add(screen.getUi());
+	}
+
+	public void removed(final @NonNull ContainerUIScreen<?> screen) {
 		if (this.screen == screen) {
 			this.screen = null;
 			super.closeAll();
@@ -65,12 +58,12 @@ public final class ScreenUIBridge extends StackUIBridge implements IItemHoverBri
 
 	@Override
 	public boolean canHandle(final @NonNull UI ui) {
-		return !ui.getOverlay().active();
+		return ui instanceof ContainerUI && !ui.getOverlay().active();
 	}
 
 	@Override
 	public boolean canHandle(final @NonNull Class<? extends UI> clazz) {
-		return !UIDataOverlayObject.getOrDefault(clazz).active();
+		return ContainerUI.class.isAssignableFrom(clazz) && !UIDataOverlayObject.getOrDefault(clazz).active();
 	}
 
 	@Override
@@ -89,7 +82,6 @@ public final class ScreenUIBridge extends StackUIBridge implements IItemHoverBri
 	}
 
 	public void extract(final @NonNull GuiGraphicsExtractor graphics, final int mouseX, final int mouseY) {
-		this.input.flush();
 		super.update();
 		this.compositor.composite(graphics, super::draw);
 		this.window.requestCursor(graphics, this.window.getCursor());
@@ -108,23 +100,11 @@ public final class ScreenUIBridge extends StackUIBridge implements IItemHoverBri
 	}
 
 	@Override
-	protected void onFirstScreenOpen() {
-		if (this.screen == null) {
-			this.screen = UIScreen.create(this);
-			Minecraft.getInstance().gui.setScreen(this.screen);
-		}
-	}
-
-	@Override
 	protected void onLastScreenClose() {
-		if (this.replacing || this.screen == null) {
-			return;
-		}
-
-		final UIScreen screen = this.screen;
-		this.screen = null;
-		if (Minecraft.getInstance().gui.screen() == screen) {
-			Minecraft.getInstance().gui.setScreen(null);
+		final Minecraft minecraft = Minecraft.getInstance();
+		if (this.screen != null && minecraft.gui.screen() == this.screen && minecraft.player != null) {
+			this.screen = null;
+			minecraft.player.closeContainer();
 		}
 	}
 

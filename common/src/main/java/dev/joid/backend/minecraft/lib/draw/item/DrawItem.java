@@ -70,12 +70,17 @@ public final class DrawItem {
 	}
 
 	public void drawItemCount(final double x, final double y, final double size, final @NonNull ItemStack stack) {
-		if (stack.isEmpty() || stack.getCount() == 1) {
+		if (stack.getCount() != 1) {
+			this.drawItemCount(x, y, size, stack, String.valueOf(stack.getCount()));
+		}
+	}
+
+	public void drawItemCount(final double x, final double y, final double size, final @NonNull ItemStack stack, final @NonNull String count) {
+		if (stack.isEmpty()) {
 			return;
 		}
 
 		final double unit = size / 16D;
-		final String count = String.valueOf(stack.getCount());
 		final TextInfo info = TextInfo.create(MinecraftFont.DEFAULT, (float) (MinecraftFont.SIZE * unit), Color.WHITE).shadow(DrawItem.SHADOW).shadow((float) unit, (float) unit);
 		DrawUtils.TEXT.drawText(x + 17D * unit - info.getWidth(count), y + 9D * unit, count, info, Align.START, Align.START);
 	}

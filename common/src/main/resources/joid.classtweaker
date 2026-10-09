@@ -1,3 +1,11 @@
 classTweaker	v1	official
 accessible	field	net/minecraft/client/gui/Font	provider	Lnet/minecraft/client/gui/Font$Provider;
 accessible	field	net/minecraft/client/renderer/texture/TextureManager	byPath	Ljava/util/Map;
+extendable	method	net/minecraft/client/gui/screens/inventory/AbstractContainerScreen	getHoveredSlot	(DD)Lnet/minecraft/world/inventory/Slot;
+accessible	method	net/minecraft/client/gui/screens/inventory/AbstractContainerScreen	onStopHovering	(Lnet/minecraft/world/inventory/Slot;)V
+accessible	method	net/minecraft/client/gui/screens/inventory/AbstractContainerScreen	recalculateQuickCraftRemaining	()V
+accessible	field	net/minecraft/client/gui/screens/inventory/AbstractContainerScreen	quickCraftingType	I
+accessible	field	net/minecraft/client/gui/screens/inventory/AbstractContainerScreen	quickCraftingRemainder	I
+accessible	class	net/minecraft/world/inventory/MenuType$MenuSupplier
+accessible	method	net/minecraft/world/inventory/MenuType	<init>	(Lnet/minecraft/world/inventory/MenuType$MenuSupplier;Lnet/minecraft/world/flag/FeatureFlagSet;)V
+accessible	class	net/minecraft/client/gui/screens/MenuScreens$ScreenConstructor
