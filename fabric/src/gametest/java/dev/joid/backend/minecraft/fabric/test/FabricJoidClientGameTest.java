@@ -24,13 +24,18 @@ import org.lwjgl.openal.AL10;
 import org.lwjgl.opengl.GL11;
 
 import dev.joid.backend.minecraft.demo.ui.UIDemoMinecraft;
+import dev.joid.backend.minecraft.demo.ui.UIDemoOverlay;
 import dev.joid.backend.minecraft.lib.font.impl.minecraft.MinecraftFont;
+import dev.joid.backend.minecraft.lib.ui.core.data.overlay.layer.OverlayLayer;
+import dev.joid.backend.minecraft.lib.ui.core.data.overlay.layer.UIDataOverlayLayer;
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.block.BlockNode;
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.entity.EntityNode;
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.item.ItemNode;
 import dev.joid.backend.minecraft.render.texture.Texture;
 import dev.joid.backend.minecraft.snapshot.SnapshotBackend;
+import dev.joid.backend.minecraft.ui.bridge.OverlayUIBridge;
 import dev.joid.backend.minecraft.ui.bridge.ScreenUIBridge;
+import dev.joid.backend.minecraft.ui.overlay.OverlayLayerRenderer;
 import dev.joid.backend.minecraft.ui.screen.UIScreen;
 import dev.joid.demo.ui.UIDemoChoice;
 import dev.joid.demo.ui.font.UIDemoFont;
@@ -46,6 +51,8 @@ import dev.joid.lib.font.dto.TextInfo;
 import dev.joid.lib.resource.Resource;
 import dev.joid.lib.resource.dto.decoder.impl.VideoResourceDecoder;
 import dev.joid.lib.ui.core.UI;
+import dev.joid.lib.ui.core.data.UIData;
+import dev.joid.lib.ui.core.data.overlay.UIDataOverlay;
 import dev.joid.lib.ui.node.Node;
 import dev.joid.lib.ui.node.impl.design.resource.ResourceNode;
 import dev.joid.lib.ui.node.impl.design.resource.ResourcePlayerNode;
@@ -56,16 +63,19 @@ import dev.joid.test.snapshot.SnapshotImage;
 import dev.joid.test.snapshot.SnapshotRunner;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.sounds.SoundEventListener;
 import net.minecraft.core.ClientAsset;
 import net.minecraft.network.chat.Component;
@@ -117,6 +127,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			context.waitTicks(20);
 			context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
 			context.waitForScreen(null);
+			FabricJoidClientGameTest.verifyOverlays(context);
 		}
 
 		context.runOnClient(_ -> FabricJoidClientGameTest.verify(JUnitCore.runClasses(FabricRenderBridgeContractTest.class)));
@@ -273,6 +284,122 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		final int height = bottom - top + 1;
 		if (blended > 0 || width != 11 * texel || height != 7 * texel) {
 			failures.add(label + " draws \"HH\" " + width + "x" + height + " with " + blended + " blended pixels instead of " + 11 * texel + "x" + 7 * texel + " at " + texel + " pixels per texel");
+		}
+	}
+
+	private static void verifyOverlays(final ClientGameTestContext context) {
+		context.runOnClient(_ -> JOID.open(new UIDemoChoice()));
+		context.waitForScreen(UIScreen.class);
+		context.waitTicks(20);
+		FabricJoidClientGameTest.clickDemo(context, UIDemoOverlay.class, "joid-demo-choice-overlay");
+		for (int index = 0; index < 3; index++) {
+			final int card = index;
+			final int[] toggle = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUI(UIDemoOverlay.class).getNodeList().ordered().get(card).getChild(1, RectNode.class)));
+			FabricJoidClientGameTest.click(context, toggle);
+		}
+
+		context.takeScreenshot("joid-demo-overlay");
+		context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
+		context.waitFor(_ -> JOID.getUI(UIDemoChoice.class) != null && JOID.getUI(UIDemoOverlay.class) == null);
+		context.waitTicks(20);
+		context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
+		context.waitForScreen(null);
+		context.waitTicks(10);
+
+		final List<String> failures = new ArrayList<>();
+		final int[] hotbar = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUI(UIDemoOverlay.Hotbar.class).getNodeList().ordered().getFirst()));
+		final int[] experience = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUI(UIDemoOverlay.Experience.class).getNodeList().ordered().getFirst()));
+		final int[] interactive = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUI(UIDemoOverlay.Interactive.class).getNodeList().ordered().getFirst()));
+		final int[] button = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUI(UIDemoOverlay.Interactive.class).getNodeList().ordered().getFirst().getChild(0, RectNode.class)));
+		final int[] vanillaHotbar = context.computeOnClient(minecraft -> {
+			final int guiScale = minecraft.getWindow().getGuiScale();
+			return new int[] {(minecraft.getWindow().getGuiScaledWidth() / 2 - 91) * guiScale, (minecraft.getWindow().getGuiScaledHeight() - 22) * guiScale, 182 * guiScale, 22 * guiScale};
+		});
+		final BufferedImage hud = FabricJoidClientGameTest.read(context.takeScreenshot("joid-overlay-hud"));
+		FabricJoidClientGameTest.expectColor(failures, "overlay above the hotbar", hud, hotbar, 0xDDDDDD, true);
+		FabricJoidClientGameTest.expectColor(failures, "overlay replacing the experience bar", hud, new int[] {experience[0] + experience[2] - 8, experience[1], 8, experience[3]}, 0xDDDDDD, true);
+		FabricJoidClientGameTest.expectColor(failures, "interactive overlay in game", hud, interactive, 0xDDDDDD, true);
+		if (!context.computeOnClient(_ -> OverlayLayerRenderer.isCancelled(OverlayLayer.CONTEXTUAL_BAR))) {
+			failures.add("the overlay replacing the experience bar does not cancel the contextual bar");
+		}
+
+		context.runOnClient(_ -> JOID.open(new HiddenHotbar()));
+		context.waitTicks(5);
+		final BufferedImage hidden = FabricJoidClientGameTest.read(context.takeScreenshot("joid-overlay-hotbar-hidden"));
+		FabricJoidClientGameTest.expectChange(failures, "vanilla hotbar cancelled by an overlay", List.of(hud, hidden), vanillaHotbar, false);
+		context.runOnClient(_ -> JOID.close(JOID.getUI(HiddenHotbar.class)));
+		context.waitTicks(5);
+		final BufferedImage restored = FabricJoidClientGameTest.read(context.takeScreenshot("joid-overlay-hotbar-restored"));
+		FabricJoidClientGameTest.expectChange(failures, "vanilla hotbar after closing the cancelling overlay", List.of(hidden, restored), vanillaHotbar, false);
+
+		context.getInput().pressKey(GLFW.GLFW_KEY_F1);
+		context.waitTicks(5);
+		final BufferedImage hiddenGui = FabricJoidClientGameTest.read(context.takeScreenshot("joid-overlay-hidden-gui"));
+		FabricJoidClientGameTest.expectColor(failures, "overlay above the hotbar with the GUI hidden", hiddenGui, hotbar, 0xDDDDDD, false);
+		FabricJoidClientGameTest.expectColor(failures, "interactive overlay with the GUI hidden", hiddenGui, interactive, 0xDDDDDD, false);
+		if (!context.computeOnClient(_ -> BridgeHandler.UI.getBridge(OverlayUIBridge.class).isOverlayHidden())) {
+			failures.add("F1 does not hide the overlays");
+		}
+
+		context.getInput().pressKey(GLFW.GLFW_KEY_F1);
+		context.waitTicks(5);
+		context.getInput().pressKey(GLFW.GLFW_KEY_E);
+		context.waitFor(minecraft -> minecraft.gui.screen() instanceof AbstractContainerScreen);
+		context.waitTicks(10);
+		final int[] vanillaClicks = new int[1];
+		context.runOnClient(minecraft -> ScreenMouseEvents.beforeMouseClick(minecraft.gui.screen()).register((_, _) -> vanillaClicks[0]++));
+		final BufferedImage inventory = FabricJoidClientGameTest.read(context.takeScreenshot("joid-overlay-inventory"));
+		FabricJoidClientGameTest.expectColor(failures, "interactive overlay over the inventory", inventory, interactive, 0xDDDDDD, true);
+		FabricJoidClientGameTest.expectColor(failures, "overlay above the hotbar over the inventory", inventory, hotbar, 0xDDDDDD, false);
+		context.getInput().setCursorPos(button[0] + button[2] / 2D, button[1] + button[3] / 2D);
+		context.waitTicks(5);
+		context.takeScreenshot("joid-overlay-inventory-hover");
+		if (context.computeOnClient(minecraft -> FabricJoidClientGameTest.field(minecraft.getWindow(), "currentCursor")) != CursorTypes.POINTING_HAND) {
+			failures.add("hovering the interactive overlay does not show the pointing hand cursor");
+		}
+
+		context.getInput().pressMouse(GLFW.GLFW_MOUSE_BUTTON_LEFT);
+		context.waitTicks(5);
+		context.getInput().setCursorPos(960D, 40D);
+		context.waitTicks(5);
+		context.getInput().pressMouse(GLFW.GLFW_MOUSE_BUTTON_LEFT);
+		context.waitTicks(5);
+		final int clicks = context.computeOnClient(_ -> (int) FabricJoidClientGameTest.field(JOID.getUI(UIDemoOverlay.Interactive.class), "clicks"));
+		if (clicks != 1 || vanillaClicks[0] != 1) {
+			failures.add("a click on the interactive overlay then one beside it give " + clicks + " overlay clicks and " + vanillaClicks[0] + " inventory clicks instead of 1 and 1");
+		}
+
+		context.takeScreenshot("joid-overlay-inventory-clicked");
+		context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
+		context.waitForScreen(null);
+		context.runOnClient(minecraft -> {
+			minecraft.options.guiScale().set(2);
+			minecraft.resizeGui();
+		});
+		context.waitTicks(10);
+		context.takeScreenshot("joid-overlay-gui-scale-2");
+		final double interfaceScale = context.computeOnClient(_ -> JOID.getUI(UIDemoOverlay.Hotbar.class).getView().getInterfaceScale());
+		if (interfaceScale != 0.5D) {
+			failures.add("the GUI scale 2 gives the overlays the interface scale " + interfaceScale + " instead of 0.5");
+		}
+
+		context.runOnClient(minecraft -> {
+			minecraft.options.guiScale().set(0);
+			minecraft.resizeGui();
+			JOID.close(JOID.getUI(UIDemoOverlay.Hotbar.class));
+			JOID.close(JOID.getUI(UIDemoOverlay.Experience.class));
+			JOID.close(JOID.getUI(UIDemoOverlay.Interactive.class));
+		});
+		context.waitTicks(5);
+		if (!failures.isEmpty()) {
+			throw new AssertionError(failures.size() + " overlay checks failed:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
+		}
+	}
+
+	private static void expectColor(final List<String> failures, final String label, final BufferedImage image, final int[] bounds, final int color, final boolean same) {
+		final int actual = image.getRGB(bounds[0] + 4, bounds[1] + 4) & 0xFFFFFF;
+		if (actual == color != same) {
+			failures.add(label + " at " + Arrays.toString(bounds) + " is " + Integer.toHexString(actual) + (same ? " instead of " : " like ") + Integer.toHexString(color));
 		}
 	}
 
@@ -756,6 +883,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		final List<String> failures = new ArrayList<>();
 		final SnapshotRunner runner = SnapshotRunner.start(new SnapshotBackend());
 		UIDemoChoice.LIST.remove(UIDemoMinecraft.class);
+		UIDemoChoice.LIST.remove(UIDemoOverlay.class);
 		try {
 			final File rendererReferences = new File(references, runner.getRenderer());
 			for (final String scenario : SnapshotRunner.getScenarios()) {
@@ -776,12 +904,23 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			}
 		} finally {
 			UIDemoChoice.LIST.add(UIDemoMinecraft.class);
+			UIDemoChoice.LIST.add(UIDemoOverlay.class);
 			runner.stop();
 		}
 
 		if (!failures.isEmpty()) {
 			throw new AssertionError(failures.size() + " snapshots differ from their reference:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
 		}
+	}
+
+	@UIData(background = false)
+	@UIDataOverlay(active = true)
+	@UIDataOverlayLayer(layer = OverlayLayer.HOTBAR, cancel = true)
+	public static final class HiddenHotbar extends UI {
+
+		@Override
+		public void init() {}
+
 	}
 
 }
