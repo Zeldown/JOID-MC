@@ -6,6 +6,7 @@ import java.util.List;
 import dev.joid.backend.minecraft.render.RenderBridge;
 import dev.joid.backend.minecraft.render.composite.GuiCompositor;
 import dev.joid.backend.minecraft.ui.screen.UIScreen;
+import dev.joid.backend.minecraft.window.WindowBridge;
 import dev.joid.base.glfw.input.GlfwInputForwarder;
 import dev.joid.lib.bridge.ui.StackUIBridge;
 import dev.joid.lib.ui.core.UI;
@@ -21,6 +22,7 @@ import net.minecraft.world.item.ItemStack;
 
 public final class ScreenUIBridge extends StackUIBridge {
 
+	private final WindowBridge  window;
 	private final GuiCompositor compositor;
 
 	@Getter
@@ -31,13 +33,14 @@ public final class ScreenUIBridge extends StackUIBridge {
 	private List<String> hoverList;
 	private ItemStack    hoverStack;
 
-	private ScreenUIBridge(final RenderBridge render) {
+	private ScreenUIBridge(final RenderBridge render, final WindowBridge window) {
+		this.window     = window;
 		this.compositor = GuiCompositor.create(render);
 		this.input      = GlfwInputForwarder.create(this);
 	}
 
-	public static @NonNull ScreenUIBridge create(final @NonNull RenderBridge render) {
-		return new ScreenUIBridge(render);
+	public static @NonNull ScreenUIBridge create(final @NonNull RenderBridge render, final @NonNull WindowBridge window) {
+		return new ScreenUIBridge(render, window);
 	}
 
 	@Override
@@ -81,6 +84,7 @@ public final class ScreenUIBridge extends StackUIBridge {
 		this.input.flush();
 		super.update();
 		this.compositor.composite(graphics, super::draw);
+		this.window.requestCursor(graphics, this.window.getCursor());
 
 		final List<String> hoverList = this.hoverList;
 		this.hoverList = null;

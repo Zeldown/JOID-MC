@@ -25,11 +25,12 @@ public final class Backend {
 
 	public static void register() {
 		final RenderBridge render = new RenderBridge();
+		final WindowBridge window = new WindowBridge();
 		JOID.checkVersion(JOID.VERSION);
 		BridgeHandler.AUDIO.register(AlAudioBridge.create(Lwjgl3AlBinding.inst()).hostGain(gain -> gain * Minecraft.getInstance().options.getFinalSoundSourceVolume(SoundSource.UI)));
-		BridgeHandler.WINDOW.register(new WindowBridge());
+		BridgeHandler.WINDOW.register(window);
 		BridgeHandler.RENDER.register(render);
-		BridgeHandler.UI.register(ScreenUIBridge.create(render));
+		BridgeHandler.UI.register(ScreenUIBridge.create(render, window));
 		TextMarkup.register(LegacyTextMarkup.inst());
 		AssetLocator.register(new NamespacedAssetLocator());
 		ResourceResolver.register(new SpriteResourceResolver());
