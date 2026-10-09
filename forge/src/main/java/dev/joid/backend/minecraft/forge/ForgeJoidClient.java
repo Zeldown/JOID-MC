@@ -9,6 +9,7 @@ public final class ForgeJoidClient {
 	public static void register() {
 		ForgeClientTicks.register();
 		ForgeScreenEvents.register();
+		ForgeOverlayLayers.register();
 		ForgeReloadListeners.register();
 	}
 

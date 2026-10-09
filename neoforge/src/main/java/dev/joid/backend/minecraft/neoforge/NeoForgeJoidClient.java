@@ -13,6 +13,14 @@ public final class NeoForgeJoidClient {
 	public NeoForgeJoidClient(final IEventBus modBus) {
 		NeoForge.EVENT_BUS.addListener(NeoForgeClientTicks::tick);
 		NeoForge.EVENT_BUS.addListener(NeoForgeScreenEvents::init);
+		NeoForge.EVENT_BUS.addListener(NeoForgeScreenEvents::render);
+		NeoForge.EVENT_BUS.addListener(NeoForgeScreenEvents::charTyped);
+		NeoForge.EVENT_BUS.addListener(NeoForgeScreenEvents::keyPressed);
+		NeoForge.EVENT_BUS.addListener(NeoForgeScreenEvents::mouseMoved);
+		NeoForge.EVENT_BUS.addListener(NeoForgeScreenEvents::mousePressed);
+		NeoForge.EVENT_BUS.addListener(NeoForgeScreenEvents::mouseReleased);
+		NeoForge.EVENT_BUS.addListener(NeoForgeScreenEvents::mouseScrolled);
+		modBus.addListener(NeoForgeOverlayLayers::register);
 		modBus.addListener(NeoForgeReloadListeners::register);
 	}
 
