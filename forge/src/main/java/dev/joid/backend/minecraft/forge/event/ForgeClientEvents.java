@@ -1,6 +1,6 @@
 package dev.joid.backend.minecraft.forge.event;
 
-import dev.joid.backend.minecraft.MinecraftBackend;
+import dev.joid.backend.minecraft.loader.event.ClientEvents;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -10,7 +10,7 @@ import net.minecraftforge.event.TickEvent;
 public final class ForgeClientEvents {
 
 	public static void register() {
-		TickEvent.ClientTickEvent.Post.BUS.addListener(_ -> MinecraftBackend.tick());
+		TickEvent.ClientTickEvent.Post.BUS.addListener(_ -> ClientEvents.fireTick());
 	}
 
 }

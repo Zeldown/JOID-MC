@@ -3,7 +3,7 @@ package dev.joid.backend.minecraft.bridge.render.texture;
 import java.nio.ByteBuffer;
 import java.util.Optional;
 
-import dev.joid.backend.minecraft.MinecraftBackend;
+import dev.joid.backend.minecraft.Backend;
 import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
 import dev.joid.lib.bridge.render.texture.MipmapChain;
 import dev.joid.lib.bridge.render.texture.Texture;
@@ -28,9 +28,9 @@ import net.minecraft.resources.Identifier;
 public final class MinecraftTexture extends Texture implements IGpuTexture {
 
 	private static final RenderPipeline COPY = RenderPipeline.builder()
-			.withLocation(Identifier.fromNamespaceAndPath(MinecraftBackend.MOD_ID, "pipeline/copy"))
-			.withVertexShader(Identifier.fromNamespaceAndPath(MinecraftBackend.MOD_ID, "core/copy"))
-			.withFragmentShader(Identifier.fromNamespaceAndPath(MinecraftBackend.MOD_ID, "core/copy"))
+			.withLocation(Identifier.fromNamespaceAndPath(Backend.MOD_ID, "pipeline/copy"))
+			.withVertexShader(Identifier.fromNamespaceAndPath(Backend.MOD_ID, "core/copy"))
+			.withFragmentShader(Identifier.fromNamespaceAndPath(Backend.MOD_ID, "core/copy"))
 			.withBindGroupLayout(BindGroupLayouts.SAMPLER0)
 			.withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
 			.build();

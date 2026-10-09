@@ -2,7 +2,7 @@ package dev.joid.backend.minecraft.bridge.render.shader;
 
 import java.util.List;
 
-import dev.joid.backend.minecraft.MinecraftBackend;
+import dev.joid.backend.minecraft.Backend;
 import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
 import dev.joid.backend.minecraft.bridge.render.vertex.VertexLayout;
 import dev.joid.lib.bridge.render.matrix.MatrixStack;
@@ -48,8 +48,8 @@ public final class MinecraftShader extends Shader {
 	public static @NonNull MinecraftShader create(final @NonNull MinecraftRenderBridge bridge, final @NonNull ShaderSource vertex, final @NonNull ShaderSource fragment, final @NonNull BlendState blend) {
 		final MinecraftShaderTranslator translator = MinecraftShaderTranslator.create().stencil(StencilEmulation.Pass.TEST);
 		final MinecraftShaderTranslator stencilTranslator = MinecraftShaderTranslator.create().stencil(StencilEmulation.Pass.WRITE);
-		final Identifier identifier = Identifier.fromNamespaceAndPath(MinecraftBackend.MOD_ID, "shader/" + MinecraftShader.count++);
-		final Identifier stencilIdentifier = Identifier.fromNamespaceAndPath(MinecraftBackend.MOD_ID, identifier.getPath() + "_stencil");
+		final Identifier identifier = Identifier.fromNamespaceAndPath(Backend.MOD_ID, "shader/" + MinecraftShader.count++);
+		final Identifier stencilIdentifier = Identifier.fromNamespaceAndPath(Backend.MOD_ID, identifier.getPath() + "_stencil");
 		final BindGroupLayout layout = MinecraftShader.createLayout(translator.getSamplers(vertex, fragment));
 		final VertexFormat vertexFormat = VertexLayout.create(vertex.getBuiltins());
 		bridge.getSourceProvider().register(identifier, ShaderType.VERTEX, translator.translateVertex(vertex, fragment));

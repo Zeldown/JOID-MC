@@ -2,8 +2,8 @@ package dev.joid.backend.minecraft.forge.registry;
 
 import java.util.List;
 
-import dev.joid.backend.minecraft.bridge.ui.overlay.OverlayLayerRenderer;
 import dev.joid.backend.minecraft.lib.ui.core.data.overlay.layer.OverlayLayer;
+import dev.joid.backend.minecraft.loader.event.OverlayEvents;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -23,19 +23,19 @@ public final class ForgeOverlayLayers {
 		for (final OverlayLayer layer : OverlayLayer.values()) {
 			final Identifier stack = ForgeOverlayLayers.getStack(layer);
 			final List<Identifier> layers = ForgeOverlayLayers.getLayers(layer);
-			draw.addBelow(stack, OverlayLayerRenderer.getIdentifier(layer, false), layers.getFirst(), (graphics, _) -> OverlayLayerRenderer.extract(graphics, layer, false));
-			draw.addAbove(stack, OverlayLayerRenderer.getIdentifier(layer, true), layers.getLast(), (graphics, _) -> OverlayLayerRenderer.extract(graphics, layer, true));
+			draw.addBelow(stack, OverlayEvents.getId(layer, false), layers.getFirst(), (graphics, _) -> OverlayEvents.fireLayer(graphics, layer, false));
+			draw.addAbove(stack, OverlayEvents.getId(layer, true), layers.getLast(), (graphics, _) -> OverlayEvents.fireLayer(graphics, layer, true));
 			for (final Identifier vanillaLayer : layers) {
 				final ForgeLayer vanilla = draw.locateStack(stack).orElseThrow().getLayer(vanillaLayer);
 				draw.replace(stack, vanillaLayer, (graphics, deltaTracker) -> {
-					if (!OverlayLayerRenderer.isCancelled(layer)) {
+					if (!OverlayEvents.isCancelled(layer)) {
 						vanilla.extract(graphics, deltaTracker);
 					}
 				});
 			}
 		}
 
-		draw.add(OverlayLayerRenderer.getIdentifier(), (graphics, _) -> OverlayLayerRenderer.extract(graphics));
+		draw.add(OverlayEvents.getId(), (graphics, _) -> OverlayEvents.fireHud(graphics));
 	}
 
 	private static Identifier getStack(final OverlayLayer layer) {

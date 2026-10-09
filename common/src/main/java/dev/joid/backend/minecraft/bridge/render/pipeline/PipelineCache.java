@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import dev.joid.backend.minecraft.MinecraftBackend;
+import dev.joid.backend.minecraft.Backend;
 import dev.joid.backend.minecraft.bridge.render.shader.MinecraftShader;
 import dev.joid.backend.minecraft.bridge.render.shader.ShaderSourceProvider;
 import dev.joid.lib.bridge.render.state.BlendState;
@@ -70,7 +70,7 @@ public final class PipelineCache {
 	private static RenderPipeline build(final PipelineKey key, final int index) {
 		final MinecraftShader shader = (MinecraftShader) key.getShader();
 		return RenderPipeline.builder()
-				.withLocation(Identifier.fromNamespaceAndPath(MinecraftBackend.MOD_ID, "pipeline/" + index))
+				.withLocation(Identifier.fromNamespaceAndPath(Backend.MOD_ID, "pipeline/" + index))
 				.withVertexShader(shader.getIdentifier())
 				.withFragmentShader(key.isStencil() ? shader.getStencilIdentifier() : shader.getIdentifier())
 				.withBindGroupLayout(shader.getLayout())

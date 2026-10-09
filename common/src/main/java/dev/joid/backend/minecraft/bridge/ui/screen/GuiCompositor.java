@@ -1,6 +1,6 @@
 package dev.joid.backend.minecraft.bridge.ui.screen;
 
-import dev.joid.backend.minecraft.MinecraftBackend;
+import dev.joid.backend.minecraft.Backend;
 import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
 import dev.joid.backend.minecraft.bridge.render.MinecraftRenderTarget;
 import dev.joid.backend.minecraft.bridge.render.MinecraftRenderTargetPool;
@@ -29,9 +29,9 @@ import net.minecraft.resources.Identifier;
 public final class GuiCompositor {
 
 	private static final RenderPipeline PIPELINE = RenderPipeline.builder()
-			.withLocation(Identifier.fromNamespaceAndPath(MinecraftBackend.MOD_ID, "pipeline/composite"))
-			.withVertexShader(Identifier.fromNamespaceAndPath(MinecraftBackend.MOD_ID, "core/composite"))
-			.withFragmentShader(Identifier.fromNamespaceAndPath(MinecraftBackend.MOD_ID, "core/composite"))
+			.withLocation(Identifier.fromNamespaceAndPath(Backend.MOD_ID, "pipeline/composite"))
+			.withVertexShader(Identifier.fromNamespaceAndPath(Backend.MOD_ID, "core/composite"))
+			.withFragmentShader(Identifier.fromNamespaceAndPath(Backend.MOD_ID, "core/composite"))
 			.withBindGroupLayout(BindGroupLayouts.GLOBALS)
 			.withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION)
 			.withBindGroupLayout(BindGroupLayouts.SAMPLER0)

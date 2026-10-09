@@ -16,7 +16,7 @@ ext {
     developmentReferences = ~/dev\/joid\/(demo|backend\/minecraft\/([\w$]+\/)*(demo|snapshot))\/[\w$\/]+/
 
     developmentCallSites = [
-            'dev/joid/backend/minecraft/MinecraftBackend.class -> dev/joid/backend/minecraft/demo/DemoLauncher'
+            'dev/joid/backend/minecraft/Backend.class -> dev/joid/backend/minecraft/demo/DemoLauncher'
     ]
 
     moduleDescriptors = [

@@ -2,8 +2,8 @@ package dev.joid.backend.minecraft.neoforge.registry;
 
 import java.util.List;
 
-import dev.joid.backend.minecraft.bridge.ui.overlay.OverlayLayerRenderer;
 import dev.joid.backend.minecraft.lib.ui.core.data.overlay.layer.OverlayLayer;
+import dev.joid.backend.minecraft.loader.event.OverlayEvents;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -17,18 +17,18 @@ public final class NeoForgeOverlayLayers {
 	public static void register(final RegisterGuiLayersEvent event) {
 		for (final OverlayLayer layer : OverlayLayer.values()) {
 			final List<Identifier> layers = NeoForgeOverlayLayers.getLayers(layer);
-			event.registerBelow(layers.getFirst(), OverlayLayerRenderer.getIdentifier(layer, false), (graphics, _) -> OverlayLayerRenderer.extract(graphics, layer, false));
-			event.registerAbove(layers.getLast(), OverlayLayerRenderer.getIdentifier(layer, true), (graphics, _) -> OverlayLayerRenderer.extract(graphics, layer, true));
+			event.registerBelow(layers.getFirst(), OverlayEvents.getId(layer, false), (graphics, _) -> OverlayEvents.fireLayer(graphics, layer, false));
+			event.registerAbove(layers.getLast(), OverlayEvents.getId(layer, true), (graphics, _) -> OverlayEvents.fireLayer(graphics, layer, true));
 			for (final Identifier vanillaLayer : layers) {
 				event.wrapLayer(vanillaLayer, vanilla -> (graphics, deltaTracker) -> {
-					if (!OverlayLayerRenderer.isCancelled(layer)) {
+					if (!OverlayEvents.isCancelled(layer)) {
 						vanilla.render(graphics, deltaTracker);
 					}
 				});
 			}
 		}
 
-		event.registerAboveAll(OverlayLayerRenderer.getIdentifier(), (graphics, _) -> OverlayLayerRenderer.extract(graphics));
+		event.registerAboveAll(OverlayEvents.getId(), (graphics, _) -> OverlayEvents.fireHud(graphics));
 	}
 
 	private static List<Identifier> getLayers(final OverlayLayer layer) {

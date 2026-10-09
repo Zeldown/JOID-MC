@@ -2,7 +2,7 @@ package dev.joid.backend.minecraft.demo;
 
 import java.util.function.Consumer;
 
-import dev.joid.backend.minecraft.MinecraftBackend;
+import dev.joid.backend.minecraft.Backend;
 import dev.joid.backend.minecraft.demo.container.DemoContainer;
 import dev.joid.backend.minecraft.demo.container.DemoContainerGameTest;
 import dev.joid.backend.minecraft.demo.network.OpenDemoContainerPayload;
@@ -29,9 +29,9 @@ import net.minecraft.resources.Identifier;
 public final class DemoLauncher {
 
 	public static void init() {
-		ContainerRegistry.register(Identifier.fromNamespaceAndPath(MinecraftBackend.MOD_ID, "demo/container"), DemoContainer.TYPE, UIDemoContainer.Storage::new);
+		ContainerRegistry.register(Identifier.fromNamespaceAndPath(Backend.MOD_ID, "demo/container"), DemoContainer.TYPE, UIDemoContainer.Storage::new);
 		PayloadRegistry.register(OpenDemoContainerPayload.TYPE, OpenDemoContainerPayload.STREAM_CODEC, OpenDemoContainerPayloadHandler::handle);
-		TestFunctionRegistry.register(Identifier.fromNamespaceAndPath(MinecraftBackend.MOD_ID, "demo/container"), DemoContainerGameTest::run);
+		TestFunctionRegistry.register(Identifier.fromNamespaceAndPath(Backend.MOD_ID, "demo/container"), DemoContainerGameTest::run);
 	}
 
 	public static void register() {

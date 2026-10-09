@@ -1,6 +1,6 @@
 package dev.joid.backend.minecraft.forge.network;
 
-import dev.joid.backend.minecraft.MinecraftBackend;
+import dev.joid.backend.minecraft.Backend;
 import dev.joid.backend.minecraft.loader.network.PayloadDeclaration;
 import dev.joid.backend.minecraft.loader.network.PayloadRegistry;
 import lombok.AccessLevel;
@@ -24,7 +24,7 @@ public final class ForgePayloads {
 			return;
 		}
 
-		PayloadFlow<RegistryFriendlyByteBuf, CustomPacketPayload> flow = ChannelBuilder.named(Identifier.fromNamespaceAndPath(MinecraftBackend.MOD_ID, "main")).networkProtocolVersion(1).optional().payloadChannel().play().serverbound();
+		PayloadFlow<RegistryFriendlyByteBuf, CustomPacketPayload> flow = ChannelBuilder.named(Identifier.fromNamespaceAndPath(Backend.MOD_ID, "main")).networkProtocolVersion(1).optional().payloadChannel().play().serverbound();
 		for (final PayloadDeclaration<?> declaration : PayloadRegistry.getDeclarations()) {
 			flow = ForgePayloads.add(flow, declaration);
 		}

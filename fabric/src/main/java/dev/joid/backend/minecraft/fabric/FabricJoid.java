@@ -1,6 +1,6 @@
 package dev.joid.backend.minecraft.fabric;
 
-import dev.joid.backend.minecraft.MinecraftBackend;
+import dev.joid.backend.minecraft.Backend;
 import dev.joid.backend.minecraft.fabric.network.FabricPayloads;
 import dev.joid.backend.minecraft.fabric.registry.FabricContainerTypes;
 import dev.joid.backend.minecraft.fabric.registry.FabricGameTests;
@@ -11,7 +11,7 @@ public final class FabricJoid implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		MinecraftBackend.init();
+		Backend.init();
 		FabricPayloads.register();
 		FabricGameTests.register();
 		FabricContainerTypes.register();

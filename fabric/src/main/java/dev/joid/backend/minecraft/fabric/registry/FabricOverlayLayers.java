@@ -1,7 +1,7 @@
 package dev.joid.backend.minecraft.fabric.registry;
 
-import dev.joid.backend.minecraft.bridge.ui.overlay.OverlayLayerRenderer;
 import dev.joid.backend.minecraft.lib.ui.core.data.overlay.layer.OverlayLayer;
+import dev.joid.backend.minecraft.loader.event.OverlayEvents;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -15,16 +15,16 @@ public final class FabricOverlayLayers {
 	public static void register() {
 		for (final OverlayLayer layer : OverlayLayer.values()) {
 			final Identifier element = FabricOverlayLayers.getElement(layer);
-			HudElementRegistry.attachElementBefore(element, OverlayLayerRenderer.getIdentifier(layer, false), (graphics, _) -> OverlayLayerRenderer.extract(graphics, layer, false));
-			HudElementRegistry.attachElementAfter(element, OverlayLayerRenderer.getIdentifier(layer, true), (graphics, _) -> OverlayLayerRenderer.extract(graphics, layer, true));
+			HudElementRegistry.attachElementBefore(element, OverlayEvents.getId(layer, false), (graphics, _) -> OverlayEvents.fireLayer(graphics, layer, false));
+			HudElementRegistry.attachElementAfter(element, OverlayEvents.getId(layer, true), (graphics, _) -> OverlayEvents.fireLayer(graphics, layer, true));
 			HudElementRegistry.replaceElement(element, vanilla -> (graphics, deltaTracker) -> {
-				if (!OverlayLayerRenderer.isCancelled(layer)) {
+				if (!OverlayEvents.isCancelled(layer)) {
 					vanilla.extractRenderState(graphics, deltaTracker);
 				}
 			});
 		}
 
-		HudElementRegistry.addLast(OverlayLayerRenderer.getIdentifier(), (graphics, _) -> OverlayLayerRenderer.extract(graphics));
+		HudElementRegistry.addLast(OverlayEvents.getId(), (graphics, _) -> OverlayEvents.fireHud(graphics));
 	}
 
 	private static Identifier getElement(final OverlayLayer layer) {
