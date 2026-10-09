@@ -8,8 +8,8 @@ import java.util.Map.Entry;
 import java.util.WeakHashMap;
 
 import dev.joid.backend.minecraft.MinecraftBackend;
-import dev.joid.backend.minecraft.lib.asset.dto.impl.IdentifierAsset;
-import dev.joid.backend.minecraft.lib.resource.dto.resolver.impl.IdentifierResourceResolver;
+import dev.joid.backend.minecraft.lib.asset.dto.impl.NamespacedAsset;
+import dev.joid.backend.minecraft.lib.resource.dto.resolver.impl.NamespacedResourceResolver;
 import dev.joid.lib.resource.dto.ResourceData;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -26,7 +26,7 @@ public final class ResourceReloadListener implements ResourceManagerReloadListen
 
 	private static final ResourceReloadListener INSTANCE = new ResourceReloadListener();
 
-	private final Map<ResourceData, IdentifierAsset> tracked = Collections.synchronizedMap(new WeakHashMap<>());
+	private final Map<ResourceData, NamespacedAsset> tracked = Collections.synchronizedMap(new WeakHashMap<>());
 
 	public static @NonNull ResourceReloadListener inst() {
 		return ResourceReloadListener.INSTANCE;
@@ -34,12 +34,12 @@ public final class ResourceReloadListener implements ResourceManagerReloadListen
 
 	@Override
 	public void onResourceManagerReload(final ResourceManager resourceManager) {
-		final List<Entry<ResourceData, IdentifierAsset>> entries;
+		final List<Entry<ResourceData, NamespacedAsset>> entries;
 		synchronized (this.tracked) {
 			entries = new ArrayList<>(this.tracked.entrySet());
 		}
 
-		for (final Entry<ResourceData, IdentifierAsset> entry : entries) {
+		for (final Entry<ResourceData, NamespacedAsset> entry : entries) {
 			final ResourceData data = entry.getKey();
 			if (data.getDecoder() == null) {
 				data.generated(false);
@@ -47,11 +47,11 @@ public final class ResourceReloadListener implements ResourceManagerReloadListen
 			}
 
 			data.clear();
-			data.textures(null).data(null).decoder(IdentifierResourceResolver.decoder(entry.getValue())).generated(false).loaded(false).uploaded(false);
+			data.textures(null).data(null).decoder(NamespacedResourceResolver.decoder(entry.getValue())).generated(false).loaded(false).uploaded(false);
 		}
 	}
 
-	public @NonNull ResourceData track(final @NonNull ResourceData data, final @NonNull IdentifierAsset asset) {
+	public @NonNull ResourceData track(final @NonNull ResourceData data, final @NonNull NamespacedAsset asset) {
 		this.tracked.put(data, asset);
 		return data;
 	}

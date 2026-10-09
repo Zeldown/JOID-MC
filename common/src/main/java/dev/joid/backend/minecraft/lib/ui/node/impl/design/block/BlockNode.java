@@ -14,7 +14,7 @@ import net.minecraft.world.level.block.state.BlockState;
 @Getter
 public class BlockNode extends Node {
 
-	private BlockState state;
+	private BlockState block;
 
 	private double rotationYaw;
 	private double rotationPitch;
@@ -22,7 +22,7 @@ public class BlockNode extends Node {
 	protected BlockNode(final double x, final double y, final double width, final double height) {
 		super(x, y, width, height);
 
-		this.state         = Blocks.AIR.defaultBlockState();
+		this.block         = Blocks.AIR.defaultBlockState();
 		this.rotationYaw   = 225D;
 		this.rotationPitch = 30D;
 	}
@@ -34,15 +34,15 @@ public class BlockNode extends Node {
 	@Override
 	public void draw(final double mouseX, final double mouseY) {
 		final double size = Math.min(super.getWidth(), super.getHeight());
-		DrawBlock.inst().drawBlock(super.getX() + (super.getWidth() - size) / 2D, super.getY() + (super.getHeight() - size) / 2D, size, this.state, this.rotationYaw, this.rotationPitch);
+		DrawBlock.inst().drawBlock(super.getX() + (super.getWidth() - size) / 2D, super.getY() + (super.getHeight() - size) / 2D, size, this.block, this.rotationYaw, this.rotationPitch);
 	}
 
-	public final <T extends BlockNode> @NonNull T state(final @NonNull BlockState state) {
-		return this.state(Signal.from(state));
+	public final <T extends BlockNode> @NonNull T block(final @NonNull BlockState block) {
+		return this.block(Signal.from(block));
 	}
 
-	public final <T extends BlockNode> @NonNull T state(final @NonNull Supplier<@NonNull BlockState> state) {
-		return super.follow("state", state, value -> this.state = value);
+	public final <T extends BlockNode> @NonNull T block(final @NonNull Supplier<@NonNull BlockState> block) {
+		return super.follow("block", block, value -> this.block = value);
 	}
 
 	public final <T extends BlockNode> @NonNull T rotationYaw(final double rotationYaw) {

@@ -2,7 +2,7 @@ package dev.joid.backend.minecraft.demo.ui;
 
 import java.util.UUID;
 
-import dev.joid.backend.minecraft.lib.font.dto.ComponentTextConverter;
+import dev.joid.backend.minecraft.lib.font.dto.ChatTextConverter;
 import dev.joid.backend.minecraft.lib.font.impl.minecraft.MinecraftFont;
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.block.BlockNode;
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.entity.EntityNode;
@@ -108,8 +108,8 @@ public class UIDemoMinecraft extends UIDemo {
 			.color(UIDemoMinecraft.PLACEHOLDER)
 			.body(rect -> {
 				RectNode.create(20, 20, 360, 200).color(UIDemoMinecraft.PANEL).attach(rect);
-				TextNode.create(30, 30, 340, 0).text(Text.create(ComponentTextConverter.of(component), info)).mode(TextMode.SPLIT).attach(rect);
-				TextNode.create(200, 255).text(Text.create("Component", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
+				TextNode.create(30, 30, 340, 0).text(Text.create(ChatTextConverter.of(component), info)).mode(TextMode.SPLIT).attach(rect);
+				TextNode.create(200, 255).text(Text.create("Chat text", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
 			})
 			.attach(container);
 
@@ -245,10 +245,10 @@ public class UIDemoMinecraft extends UIDemo {
 			.color(UIDemoMinecraft.PLACEHOLDER)
 			.body(rect -> {
 				RectNode.create(20, 20, 400, 200).color(UIDemoMinecraft.PANEL).attach(rect);
-				BlockNode.create(40, 80, 80, 80).state(Blocks.GRASS_BLOCK.defaultBlockState()).attach(rect);
-				BlockNode.create(130, 80, 80, 80).state(Blocks.CHEST.defaultBlockState()).attach(rect);
-				BlockNode.create(220, 80, 80, 80).state(Blocks.GLASS.defaultBlockState()).attach(rect);
-				BlockNode.create(310, 80, 80, 80).state(Blocks.FURNACE.defaultBlockState()).rotationYaw(() -> System.currentTimeMillis() % 3600L / 10D).attach(rect);
+				BlockNode.create(40, 80, 80, 80).block(Blocks.GRASS_BLOCK.defaultBlockState()).attach(rect);
+				BlockNode.create(130, 80, 80, 80).block(Blocks.CHEST.defaultBlockState()).attach(rect);
+				BlockNode.create(220, 80, 80, 80).block(Blocks.GLASS.defaultBlockState()).attach(rect);
+				BlockNode.create(310, 80, 80, 80).block(Blocks.FURNACE.defaultBlockState()).rotationYaw(() -> System.currentTimeMillis() % 3600L / 10D).attach(rect);
 				TextNode.create(220, 255).text(Text.create("Blocks", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
 			})
 			.attach(container);

@@ -14,17 +14,17 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 
 @Getter
-public final class IdentifierAsset extends Asset {
+public final class NamespacedAsset extends Asset {
 
 	private final Identifier identifier;
 
-	private IdentifierAsset(final Identifier identifier) {
+	private NamespacedAsset(final Identifier identifier) {
 		super(identifier.toString());
 		this.identifier = identifier;
 	}
 
-	public static @NonNull IdentifierAsset create(final @NonNull Identifier identifier) {
-		return new IdentifierAsset(identifier);
+	public static @NonNull NamespacedAsset create(final @NonNull Identifier identifier) {
+		return new NamespacedAsset(identifier);
 	}
 
 	@Override

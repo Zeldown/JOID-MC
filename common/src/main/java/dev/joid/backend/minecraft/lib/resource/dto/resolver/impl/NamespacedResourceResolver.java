@@ -2,8 +2,8 @@ package dev.joid.backend.minecraft.lib.resource.dto.resolver.impl;
 
 import java.util.function.Consumer;
 
-import dev.joid.backend.minecraft.lib.asset.dto.impl.IdentifierAsset;
-import dev.joid.backend.minecraft.lib.asset.dto.locator.impl.IdentifierAssetLocator;
+import dev.joid.backend.minecraft.lib.asset.dto.impl.NamespacedAsset;
+import dev.joid.backend.minecraft.lib.asset.dto.locator.impl.NamespacedAssetLocator;
 import dev.joid.backend.minecraft.lib.resource.dto.animation.impl.McmetaResourceAnimationReader;
 import dev.joid.backend.minecraft.lib.resource.dto.reload.ResourceReloadListener;
 import dev.joid.backend.minecraft.render.texture.BorrowedTexture;
@@ -20,7 +20,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
 import net.minecraft.resources.Identifier;
 
-public class IdentifierResourceResolver implements IResourceResolver {
+public class NamespacedResourceResolver implements IResourceResolver {
 
 	@Override
 	public boolean supports(final @NonNull Object input) {
@@ -28,33 +28,33 @@ public class IdentifierResourceResolver implements IResourceResolver {
 			return true;
 		}
 
-		final Identifier identifier = IdentifierAssetLocator.parse(input);
-		return identifier != null && (IdentifierResourceResolver.isLoaded(identifier) || IdentifierAsset.create(identifier).exists());
+		final Identifier identifier = NamespacedAssetLocator.parse(input);
+		return identifier != null && (NamespacedResourceResolver.isLoaded(identifier) || NamespacedAsset.create(identifier).exists());
 	}
 
 	@Override
 	public @NonNull Resource resolve(final @NonNull ResourceBuilder builder, final @NonNull Object input, final Consumer<Resource> callback) {
-		final IdentifierAsset asset = IdentifierAsset.create(IdentifierAssetLocator.parse(input));
-		final Resource resource = builder.compute(asset.getUniqueId(), () -> IdentifierResourceResolver.read(asset)).nearest();
+		final NamespacedAsset asset = NamespacedAsset.create(NamespacedAssetLocator.parse(input));
+		final Resource resource = builder.compute(asset.getUniqueId(), () -> NamespacedResourceResolver.read(asset)).nearest();
 		if (callback != null) {
 			callback.accept(resource);
 		}
 		return resource;
 	}
 
-	public static @NonNull IResourceDecoder decoder(final @NonNull IdentifierAsset asset) {
+	public static @NonNull IResourceDecoder decoder(final @NonNull NamespacedAsset asset) {
 		final AnimationMetadataSection animation = asset.getAnimation();
 		return animation == null ? ResourceFormat.decoder(asset) : new AnimatedResourceDecoder(asset, McmetaResourceAnimationReader.create(animation));
 	}
 
-	private static @NonNull ResourceData read(final @NonNull IdentifierAsset asset) {
+	private static @NonNull ResourceData read(final @NonNull NamespacedAsset asset) {
 		final Identifier identifier = asset.getIdentifier();
-		if (IdentifierResourceResolver.isLoaded(identifier) && asset.getAnimation() == null) {
+		if (NamespacedResourceResolver.isLoaded(identifier) && asset.getAnimation() == null) {
 			return ResourceReloadListener.inst().track(new ResourceData(asset.getUniqueId(), null).texture(BorrowedTexture.of(() -> Minecraft.getInstance().getTextureManager().getTexture(identifier).getTextureView())), asset);
 		}
 
 		try {
-			return ResourceReloadListener.inst().track(new ResourceData(asset.getUniqueId(), IdentifierResourceResolver.decoder(asset)), asset);
+			return ResourceReloadListener.inst().track(new ResourceData(asset.getUniqueId(), NamespacedResourceResolver.decoder(asset)), asset);
 		} catch (final RuntimeException exception) {
 			final ResourceData data = new ResourceData(asset.getUniqueId(), null);
 			data.fail(exception);

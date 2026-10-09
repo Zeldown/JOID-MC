@@ -13,13 +13,13 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class ComponentTextConverter {
+public final class ChatTextConverter {
 
 	public static @NonNull String of(final @NonNull Component component) {
 		final StringBuilder text = new StringBuilder();
 		final StringBuilder codes = new StringBuilder();
 		component.visit((style, content) -> {
-			final String next = ComponentTextConverter.codes(style);
+			final String next = ChatTextConverter.codes(style);
 			if (!next.contentEquals(codes)) {
 				text.append(LegacyTextMarkup.PREFIX).append('r').append(next);
 				codes.setLength(0);
@@ -47,11 +47,11 @@ public final class ComponentTextConverter {
 			}
 		}
 
-		ComponentTextConverter.append(codes, style.isObfuscated(), 'k');
-		ComponentTextConverter.append(codes, style.isBold(), 'l');
-		ComponentTextConverter.append(codes, style.isStrikethrough(), 'm');
-		ComponentTextConverter.append(codes, style.isUnderlined(), 'n');
-		ComponentTextConverter.append(codes, style.isItalic(), 'o');
+		ChatTextConverter.append(codes, style.isObfuscated(), 'k');
+		ChatTextConverter.append(codes, style.isBold(), 'l');
+		ChatTextConverter.append(codes, style.isStrikethrough(), 'm');
+		ChatTextConverter.append(codes, style.isUnderlined(), 'n');
+		ChatTextConverter.append(codes, style.isItalic(), 'o');
 		return codes.toString();
 	}
 

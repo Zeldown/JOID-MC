@@ -1,13 +1,13 @@
 package dev.joid.backend.minecraft.lib.asset.dto.locator.impl;
 
-import dev.joid.backend.minecraft.lib.asset.dto.impl.IdentifierAsset;
+import dev.joid.backend.minecraft.lib.asset.dto.impl.NamespacedAsset;
 import dev.joid.lib.asset.Asset;
 import dev.joid.lib.asset.dto.locator.IAssetLocator;
 import lombok.NonNull;
 
 import net.minecraft.resources.Identifier;
 
-public class IdentifierAssetLocator implements IAssetLocator {
+public class NamespacedAssetLocator implements IAssetLocator {
 
 	@Override
 	public boolean supports(final @NonNull Object handle) {
@@ -15,13 +15,13 @@ public class IdentifierAssetLocator implements IAssetLocator {
 			return true;
 		}
 
-		final Identifier identifier = IdentifierAssetLocator.parse(handle);
-		return identifier != null && IdentifierAsset.create(identifier).exists();
+		final Identifier identifier = NamespacedAssetLocator.parse(handle);
+		return identifier != null && NamespacedAsset.create(identifier).exists();
 	}
 
 	@Override
 	public @NonNull Asset locate(final @NonNull Object handle) {
-		return IdentifierAsset.create(IdentifierAssetLocator.parse(handle));
+		return NamespacedAsset.create(NamespacedAssetLocator.parse(handle));
 	}
 
 	public static Identifier parse(final @NonNull Object handle) {

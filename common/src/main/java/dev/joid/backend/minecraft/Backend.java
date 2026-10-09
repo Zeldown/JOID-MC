@@ -1,8 +1,8 @@
 package dev.joid.backend.minecraft;
 
-import dev.joid.backend.minecraft.lib.asset.dto.locator.impl.IdentifierAssetLocator;
+import dev.joid.backend.minecraft.lib.asset.dto.locator.impl.NamespacedAssetLocator;
 import dev.joid.backend.minecraft.lib.font.dto.markup.LegacyTextMarkup;
-import dev.joid.backend.minecraft.lib.resource.dto.resolver.impl.IdentifierResourceResolver;
+import dev.joid.backend.minecraft.lib.resource.dto.resolver.impl.NamespacedResourceResolver;
 import dev.joid.backend.minecraft.lib.resource.dto.resolver.impl.SpriteResourceResolver;
 import dev.joid.backend.minecraft.render.RenderBridge;
 import dev.joid.backend.minecraft.ui.bridge.ScreenUIBridge;
@@ -31,9 +31,9 @@ public final class Backend {
 		BridgeHandler.RENDER.register(render);
 		BridgeHandler.UI.register(ScreenUIBridge.create(render));
 		TextMarkup.register(LegacyTextMarkup.inst());
-		AssetLocator.register(new IdentifierAssetLocator());
+		AssetLocator.register(new NamespacedAssetLocator());
 		ResourceResolver.register(new SpriteResourceResolver());
-		ResourceResolver.register(new IdentifierResourceResolver());
+		ResourceResolver.register(new NamespacedResourceResolver());
 	}
 
 }
