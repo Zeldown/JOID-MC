@@ -5,7 +5,7 @@ import org.joml.Matrix4fc;
 
 import dev.joid.backend.minecraft.lib.font.impl.minecraft.dto.GlyphVertexCapture;
 import dev.joid.backend.minecraft.lib.font.impl.minecraft.dto.MinecraftFontFace;
-import dev.joid.backend.minecraft.render.texture.BorrowedTexture;
+import dev.joid.backend.minecraft.render.texture.GpuBorrowedTexture;
 import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.bridge.render.IRenderBridge;
 import dev.joid.lib.bridge.render.matrix.PixelGrid;
@@ -114,7 +114,7 @@ public final class MinecraftFontProvider extends GlyphFontProvider<MinecraftFont
 
 	private void bindView(final @NonNull GpuTextureView view) {
 		this.view = view;
-		BridgeHandler.RENDER.get().texture(BorrowedTexture.of(view), TextureFilter.NEAREST, TextureWrap.CLAMP_TO_EDGE);
+		BridgeHandler.RENDER.get().texture(GpuBorrowedTexture.create(view), TextureFilter.NEAREST, TextureWrap.CLAMP_TO_EDGE);
 		GlyphShader.SHADER.uniform("grayscale", view.texture().getFormat() == GpuFormat.R8_UNORM);
 	}
 
