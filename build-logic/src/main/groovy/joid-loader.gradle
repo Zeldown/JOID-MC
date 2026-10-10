@@ -116,7 +116,6 @@ def verifyProdJar = tasks.register('verifyProdJar') {
     def references = developmentReferences
     def callSites = developmentCallSites
     def words = developmentWords
-    def declarations = developmentDeclarations
     inputs.file(archive)
     doLast {
         def found = []
@@ -148,7 +147,7 @@ def verifyProdJar = tasks.register('verifyProdJar') {
         def split = { String text -> text.split(/[^A-Za-z0-9]+|(?<=[a-z0-9])(?=[A-Z])/)*.toLowerCase() }
         new ZipFile(archive.get().asFile).withCloseable { zip ->
             zip.entries().findAll { !it.directory }.each { entry ->
-                if (split(entry.name).any { it in words } && !(entry.name ==~ declarations)) {
+                if (split(entry.name).any { it in words }) {
                     named << entry.name
                 }
 

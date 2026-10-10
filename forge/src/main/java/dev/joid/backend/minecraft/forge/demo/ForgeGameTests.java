@@ -1,6 +1,6 @@
-package dev.joid.backend.minecraft.forge.registry;
+package dev.joid.backend.minecraft.forge.demo;
 
-import dev.joid.backend.minecraft.loader.registry.GameTestFunction;
+import dev.joid.backend.minecraft.demo.registry.GameTestFunction;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 

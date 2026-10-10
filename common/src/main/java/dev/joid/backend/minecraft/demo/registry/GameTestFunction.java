@@ -1,4 +1,4 @@
-package dev.joid.backend.minecraft.loader.registry;
+package dev.joid.backend.minecraft.demo.registry;
 
 import java.util.ArrayList;
 import java.util.Collections;

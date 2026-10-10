@@ -80,7 +80,7 @@ public final class Backend {
 		}
 	}
 
-	private static boolean isDemo() {
+	public static boolean isDemo() {
 		return Backend.class.getResource("/dev/joid/backend/minecraft/demo/DemoLauncher.class") != null;
 	}
 
