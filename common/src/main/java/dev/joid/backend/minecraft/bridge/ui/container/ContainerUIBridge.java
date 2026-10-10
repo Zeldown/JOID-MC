@@ -88,6 +88,7 @@ public final class ContainerUIBridge extends StackUIBridge {
 
 	@Override
 	protected void detachScreen() {
+		super.draw(_ -> false);
 		final Minecraft minecraft = Minecraft.getInstance();
 		if (this.screen != null && minecraft.gui.screen() == this.screen && minecraft.player != null) {
 			this.screen = null;

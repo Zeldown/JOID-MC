@@ -50,6 +50,7 @@ import dev.joid.backend.minecraft.lib.ui.node.impl.design.item.ItemNode;
 import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
 import dev.joid.demo.ui.DemoEntry;
 import dev.joid.demo.ui.UIDemoChoice;
+import dev.joid.demo.ui.cursor.UIDemoCursor;
 import dev.joid.demo.ui.font.UIDemoFont;
 import dev.joid.demo.ui.resource.UIDemoPlayer;
 import dev.joid.demo.ui.shader.UIDemoEffect;
@@ -85,6 +86,7 @@ import dev.joid.test.snapshot.SnapshotImage;
 import dev.joid.test.snapshot.SnapshotRunner;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.blaze3d.platform.cursor.CursorType;
 import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -175,6 +177,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			FabricJoidClientGameTest.verifyOverlays(context);
 			FabricJoidClientGameTest.verifyContainer(context, singleplayer.getServer());
 			FabricJoidClientGameTest.verifyBlockLighting(context, singleplayer.getServer());
+			FabricJoidClientGameTest.verifyCursor(context);
 		}
 
 		context.runOnClient(_ -> FabricJoidClientGameTest.verify(JUnitCore.runClasses(FabricRenderBridgeContractTest.class)));
@@ -707,6 +710,48 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		FabricJoidClientGameTest.expectColor(failures, "overlay always shown toggled off", off, always, 0xDDDDDD, false);
 		if (!failures.isEmpty()) {
 			throw new AssertionError(failures.size() + " overlay checks failed:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
+		}
+	}
+
+	private static void verifyCursor(final ClientGameTestContext context) {
+		context.runOnClient(_ -> JOID.open(new UIDemoChoice()));
+		context.waitForScreen(UIScreen.class);
+		context.waitTicks(20);
+		FabricJoidClientGameTest.clickDemo(context, "UIDemoContainer", "joid-cursor-container");
+		context.waitForScreen(ContainerUIScreen.class);
+		final List<String> failures = new ArrayList<>();
+		final int[] popup = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoContainer.class).getNodeList().ordered().getFirst().getChild(0, RectNode.class)));
+		FabricJoidClientGameTest.expectCursor(context, failures, "Popup button of the container", popup, CursorTypes.POINTING_HAND);
+		context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
+		context.waitForScreen(null);
+		context.runOnClient(_ -> JOID.open(new UIDemoChoice()));
+		context.waitForScreen(UIScreen.class);
+		context.waitTicks(20);
+		FabricJoidClientGameTest.clickDemo(context, "UIDemoCursor", "joid-cursor-demo");
+		final List<int[]> cells = context.computeOnClient(_ -> {
+			final UI ui = JOID.getUi(UIDemoCursor.class);
+			final List<Node> nodes = ui.getNodeList().ordered();
+			return List.of(FabricJoidClientGameTest.bounds(nodes.get(1).getChild(0, RectNode.class)), FabricJoidClientGameTest.bounds(nodes.get(2).getChild(0, RectNode.class)), new int[] {(int) ui.getView().toScreenX(410D), (int) ui.getView().toScreenY(240D), 20, 20});
+		});
+		FabricJoidClientGameTest.expectCursor(context, failures, "Pointer cell of UIDemoCursor after the container", cells.get(0), CursorTypes.POINTING_HAND);
+		FabricJoidClientGameTest.expectCursor(context, failures, "Text cell of UIDemoCursor after the container", cells.get(1), CursorTypes.IBEAM);
+		FabricJoidClientGameTest.expectCursor(context, failures, "gap between the cells of UIDemoCursor after the container", cells.get(2), CursorType.DEFAULT);
+		context.getInput().setCursorPos(960D, 540D);
+		context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
+		context.waitTicks(20);
+		context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
+		context.waitForScreen(null);
+		if (!failures.isEmpty()) {
+			throw new AssertionError(failures.size() + " cursor checks failed:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
+		}
+	}
+
+	private static void expectCursor(final ClientGameTestContext context, final List<String> failures, final String label, final int[] bounds, final CursorType expected) {
+		FabricJoidClientGameTest.moveTo(context, bounds);
+		context.waitTicks(3);
+		final Object actual = context.computeOnClient(minecraft -> FabricJoidClientGameTest.field(minecraft.getWindow(), "currentCursor"));
+		if (actual != expected) {
+			failures.add(label + " at " + Arrays.toString(bounds) + " shows the cursor " + actual + " instead of " + expected);
 		}
 	}
 
