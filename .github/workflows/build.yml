@@ -166,17 +166,15 @@ jobs:
           sudo apt-get install -y xvfb libgl1-mesa-dri libglx-mesa0 mesa-utils
 
       - name: Client smoke test
+        shell: bash
         env:
           LOADER: ${{ matrix.loader }}
           LIBGL_ALWAYS_SOFTWARE: '1'
           ALSOFT_DRIVERS: 'null'
-        run: xvfb-run -a -s "-screen 0 1920x1080x24" ./gradlew ":$LOADER:runClient" -Pjoid.smoke
-
-      - name: Check the smoke test result
-        env:
-          LOADER: ${{ matrix.loader }}
         run: |
-          if ! grep -q "Client smoke test passed" "$LOADER"/runs/client/logs/latest.log; then
+          mkdir -p "$LOADER"/runs
+          xvfb-run -a -s "-screen 0 1920x1080x24" ./gradlew ":$LOADER:runClient" -Pjoid.smoke 2>&1 | tee "$LOADER"/runs/smoke.log
+          if ! grep -q "\[JOID\] Client smoke test passed" "$LOADER"/runs/smoke.log; then
             echo "::error::The client smoke test of $LOADER did not pass"
             exit 1
           fi
@@ -186,6 +184,7 @@ jobs:
         with:
           name: client-smoke-tests-${{ matrix.loader }}
           path: |
+            ${{ matrix.loader }}/runs/smoke.log
             ${{ matrix.loader }}/runs/client/screenshots/
             ${{ matrix.loader }}/runs/client/logs/
             ${{ matrix.loader }}/runs/client/crash-reports/
