@@ -783,6 +783,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		FabricJoidClientGameTest.expectContainer(context, server, failures, "the key Q over the golden apple", 0, new int[] {1, 0});
 
 		FabricJoidClientGameTest.verifyContainerPopup(context, server, failures);
+		FabricJoidClientGameTest.verifyContainerPopupButton(context, server, failures);
 		FabricJoidClientGameTest.verifyContainerBounds(context, server, failures);
 		FabricJoidClientGameTest.verifyContainerDepth(context, failures);
 
@@ -893,6 +894,51 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		if (context.computeOnClient(minecraft -> JOID.isOpen(UIDemoChoice.class) || minecraft.gui.screen() != screen)) {
 			failures.add("Escape does not close UIDemoChoice alone over the container");
 		}
+	}
+
+	private static void verifyContainerPopupButton(final ClientGameTestContext context, final TestServerContext server, final List<String> failures) {
+		final Screen screen = context.computeOnClient(minecraft -> minecraft.gui.screen());
+		final int[] button = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoContainer.class).getNodeList().ordered().getFirst().getChild(0, RectNode.class)));
+		FabricJoidClientGameTest.moveTo(context, button);
+		context.getInput().pressMouse(GLFW.GLFW_MOUSE_BUTTON_LEFT);
+		context.waitTicks(20);
+		if (!context.computeOnClient(minecraft -> minecraft.gui.screen() == screen && JOID.isOpen(UIDemoContainer.Popup.class) && BridgeHandler.UI.getBridge(ContainerUIBridge.class).isOpen(JOID.getUi(UIDemoContainer.Popup.class)))) {
+			failures.add("the Popup button did not open UIDemoContainer.Popup over the container screen");
+			return;
+		}
+
+		final int[] panel = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoContainer.Popup.class).getNodeList().ordered().getFirst()));
+		final int[] close = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoContainer.Popup.class).getNodeList().ordered().getFirst().getChild(0, RectNode.class)));
+		final List<int[]> slots = context.computeOnClient(_ -> FabricJoidClientGameTest.slotBounds());
+		final int[] covered = slots.stream().filter(slot -> slot[0] > panel[0] && slot[1] > panel[1] && slot[0] + slot[2] < panel[0] + panel[2] && slot[1] + slot[3] < panel[1] + panel[3]).findFirst().orElseThrow();
+		FabricJoidClientGameTest.moveTo(context, covered);
+		final BufferedImage opened = FabricJoidClientGameTest.read(context.takeScreenshot("joid-demo-container-popup-button"));
+		FabricJoidClientGameTest.expectColor(failures, "Close button of the popup over the container", opened, close, 0x999999, true);
+		if (context.computeOnClient(_ -> ((ContainerUIScreen<?>) screen).getHoveredSlot() != null)) {
+			failures.add("the slot under UIDemoContainer.Popup is hovered");
+		}
+
+		FabricJoidClientGameTest.moveTo(context, close);
+		context.getInput().pressMouse(GLFW.GLFW_MOUSE_BUTTON_LEFT);
+		context.waitTicks(20);
+		final BufferedImage closed = FabricJoidClientGameTest.read(context.takeScreenshot("joid-demo-container-popup-closed"));
+		FabricJoidClientGameTest.expectColor(failures, "container under the closed popup", closed, close, 0x999999, false);
+		if (context.computeOnClient(minecraft -> JOID.isOpen(UIDemoContainer.Popup.class) || minecraft.gui.screen() != screen || !JOID.isOpen(UIDemoContainer.class))) {
+			failures.add("the Close button of UIDemoContainer.Popup does not close the popup alone");
+		}
+
+		if (!server.computeOnServer(minecraftServer -> FabricJoidClientGameTest.player(minecraftServer).containerMenu instanceof DemoContainer)) {
+			failures.add("the container is closed on the server after UIDemoContainer.Popup");
+		}
+
+		FabricJoidClientGameTest.expectContainer(context, server, failures, "the container after UIDemoContainer.Popup", 0, new int[] {2, 5});
+		FabricJoidClientGameTest.moveTo(context, slots.get(2));
+		context.getInput().pressMouse(GLFW.GLFW_MOUSE_BUTTON_LEFT);
+		context.waitTicks(5);
+		FabricJoidClientGameTest.expectContainer(context, server, failures, "a left click on 5 diamonds after UIDemoContainer.Popup", 5, new int[] {2, 0});
+		context.getInput().pressMouse(GLFW.GLFW_MOUSE_BUTTON_LEFT);
+		context.waitTicks(5);
+		FabricJoidClientGameTest.expectContainer(context, server, failures, "a left click with 5 diamonds after UIDemoContainer.Popup", 0, new int[] {2, 5});
 	}
 
 	private static void expectContainer(final ClientGameTestContext context, final TestServerContext server, final List<String> failures, final String label, final int carried, final int[]... slots) {
