@@ -32,6 +32,13 @@ public final class OverlayLayerRenderer {
 		}
 	}
 
+	public static void extractHiddenHud(final @NonNull GuiGraphicsExtractor graphics) {
+		final OverlayUIBridge bridge = BridgeHandler.UI.getBridge(OverlayUIBridge.class);
+		if (bridge != null) {
+			bridge.extractHiddenHud(graphics);
+		}
+	}
+
 	public static boolean isCancelled(final @NonNull OverlayLayer layer) {
 		final OverlayUIBridge bridge = BridgeHandler.UI.getBridge(OverlayUIBridge.class);
 		return bridge != null && bridge.isCancelled(layer);

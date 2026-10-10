@@ -29,6 +29,7 @@ public final class NeoForgeOverlayLayers {
 		}
 
 		event.registerAboveAll(MinecraftOverlayEvents.getId(), (graphics, _) -> MinecraftOverlayEvents.fireHud(graphics));
+		event.registerAboveAll(MinecraftOverlayEvents.getHiddenHudId(), (graphics, _) -> MinecraftOverlayEvents.fireHiddenHud(graphics));
 	}
 
 	private static List<Identifier> getLayers(final OverlayLayer layer) {

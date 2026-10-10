@@ -34,11 +34,13 @@ public final class UIDemoOverlayLayer {
 			JOID.close(JOID.getUi(Experience.class));
 			JOID.close(JOID.getUi(Crosshair.class));
 			JOID.close(JOID.getUi(Interactive.class));
+			JOID.close(JOID.getUi(Always.class));
 		} else {
 			JOID.open(new Hotbar());
 			JOID.open(new Experience());
 			JOID.open(new Crosshair());
 			JOID.open(new Interactive());
+			JOID.open(new Always());
 		}
 	}
 
@@ -122,6 +124,26 @@ public final class UIDemoOverlayLayer {
 				.onClick((_, _, _, _) -> this.clicks++)
 				.attach(rect);
 				TextNode.create(160, 200).text(Text.create("Interactive", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
+			})
+			.attach(this);
+		}
+
+	}
+
+	@UIData(background = false)
+	@UIDataOverlay(active = true, render = @UIDataOverlayRender(always = true))
+	public static class Always extends UI {
+
+		@Override
+		public void init() {
+			final TextInfo caption = TextInfo.create(DemoFont.MONTSERRAT, 24, UIDemoOverlayLayer.INK);
+
+			RectNode
+			.create(1520, 420, 320, 240)
+			.color(UIDemoOverlayLayer.PLACEHOLDER)
+			.body(rect -> {
+				TextNode.create(160, 100).text(Text.create("F1", caption, Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(rect);
+				TextNode.create(160, 200).text(Text.create("Always", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
 			})
 			.attach(this);
 		}

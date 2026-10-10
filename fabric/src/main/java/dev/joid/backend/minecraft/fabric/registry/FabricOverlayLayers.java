@@ -25,6 +25,7 @@ public final class FabricOverlayLayers {
 		}
 
 		HudElementRegistry.addLast(MinecraftOverlayEvents.getId(), (graphics, _) -> MinecraftOverlayEvents.fireHud(graphics));
+		HudElementRegistry.attachElementAfter(VanillaHudElements.SLEEP, MinecraftOverlayEvents.getHiddenHudId(), (graphics, _) -> MinecraftOverlayEvents.fireHiddenHud(graphics));
 	}
 
 	private static Identifier getElement(final OverlayLayer layer) {

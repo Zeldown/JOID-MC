@@ -19,6 +19,10 @@ public final class MinecraftOverlayEvents {
 		OverlayLayerRenderer.extract(graphics);
 	}
 
+	public static void fireHiddenHud(final @NonNull GuiGraphicsExtractor graphics) {
+		OverlayLayerRenderer.extractHiddenHud(graphics);
+	}
+
 	public static void fireLayer(final @NonNull GuiGraphicsExtractor graphics, final @NonNull OverlayLayer layer, final boolean post) {
 		OverlayLayerRenderer.extract(graphics, layer, post);
 	}
@@ -33,6 +37,10 @@ public final class MinecraftOverlayEvents {
 
 	public static @NonNull Identifier getId(final @NonNull OverlayLayer layer, final boolean post) {
 		return Identifier.fromNamespaceAndPath(Backend.MOD_ID, "overlay/" + layer.name().toLowerCase(Locale.ROOT) + (post ? "_post" : "_pre"));
+	}
+
+	public static @NonNull Identifier getHiddenHudId() {
+		return Identifier.fromNamespaceAndPath(Backend.MOD_ID, "overlay/hidden_hud");
 	}
 
 }

@@ -36,6 +36,7 @@ public final class ForgeOverlayLayers {
 		}
 
 		draw.add(MinecraftOverlayEvents.getId(), (graphics, _) -> MinecraftOverlayEvents.fireHud(graphics));
+		draw.add(MinecraftOverlayEvents.getHiddenHudId(), (graphics, _) -> MinecraftOverlayEvents.fireHiddenHud(graphics));
 	}
 
 	private static Identifier getStack(final OverlayLayer layer) {

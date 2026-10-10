@@ -92,13 +92,13 @@ public final class OverlayUIBridge extends UIBridge {
 	}
 
 	public void extract(final @NonNull GuiGraphicsExtractor graphics) {
-		if (!this.isScreenOpen()) {
+		if (!this.isScreenOpen() && !this.isOverlayHidden()) {
 			this.extract(graphics, ui -> OverlayUIBridge.getLayer(ui) == null);
 		}
 	}
 
 	public void extract(final @NonNull GuiGraphicsExtractor graphics, final @NonNull OverlayLayer layer, final boolean post) {
-		if (!this.isScreenOpen()) {
+		if (!this.isScreenOpen() && !this.isOverlayHidden()) {
 			this.extract(graphics, ui -> OverlayUIBridge.isLayer(ui, layer) && OverlayUIBridge.getLayer(ui).post() == post);
 		}
 	}
@@ -107,6 +107,12 @@ public final class OverlayUIBridge extends UIBridge {
 		if (this.isScreenOpen()) {
 			this.extract(graphics, _ -> true);
 			this.window.requestCursor(graphics, this.window.getCursor());
+		}
+	}
+
+	public void extractHiddenHud(final @NonNull GuiGraphicsExtractor graphics) {
+		if (!this.isScreenOpen() && this.isOverlayHidden()) {
+			this.extract(graphics, _ -> true);
 		}
 	}
 
