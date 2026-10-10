@@ -5,6 +5,7 @@ import dev.joid.backend.minecraft.demo.container.DemoContainer;
 import dev.joid.backend.minecraft.demo.container.DemoContainerGameTest;
 import dev.joid.backend.minecraft.demo.network.OpenDemoContainerPayload;
 import dev.joid.backend.minecraft.demo.network.OpenDemoContainerPayloadHandler;
+import dev.joid.backend.minecraft.demo.smoke.ClientSmokeTest;
 import dev.joid.backend.minecraft.demo.ui.UIDemoContainer;
 import dev.joid.backend.minecraft.demo.ui.UIDemoMinecraft;
 import dev.joid.backend.minecraft.demo.ui.UIDemoOverlayLayer;
@@ -34,6 +35,9 @@ public final class DemoLauncher {
 		UIDemoChoice.LIST.add(DemoEntry.create(UIDemoMinecraft.class));
 		UIDemoChoice.LIST.add(DemoEntry.create("UIDemoOverlayLayer", UIDemoOverlayLayer::toggle).state(UIDemoOverlayLayer::isOpen).hover(UIDemoOverlayLayer.class.getName()));
 		UIDemoChoice.LIST.add(DemoEntry.create("UIDemoContainer", OpenDemoContainerPayload.INSTANCE::sendToServer).hover(UIDemoContainer.class.getName()));
+		if (Boolean.getBoolean("joid.smoke")) {
+			ClientSmokeTest.start();
+		}
 	}
 
 }

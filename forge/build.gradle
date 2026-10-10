@@ -16,7 +16,12 @@ minecraft {
             workingDir = layout.projectDirectory.dir("runs/${it.name}")
             systemProperty('forge.enabledGameTestNamespaces', mod_id)
         }
-        register('client')
+        register('client') {
+            if (project.hasProperty('joid.smoke')) {
+                systemProperty('joid.smoke', 'true')
+                args('--quickPlaySingleplayer', 'joid-smoke', '--width', '1920', '--height', '1080')
+            }
+        }
         register('server') {
             args('--nogui')
         }

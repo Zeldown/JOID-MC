@@ -17,6 +17,10 @@ neoForge {
         client {
             client()
             gameDirectory = this.mkdir(this.file('runs/client'))
+            if (project.hasProperty('joid.smoke')) {
+                systemProperty('joid.smoke', 'true')
+                programArguments.addAll '--quickPlaySingleplayer', 'joid-smoke', '--width', '1920', '--height', '1080'
+            }
         }
         data {
             clientData()
