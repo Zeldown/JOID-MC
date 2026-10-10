@@ -108,6 +108,7 @@ import net.minecraft.world.entity.player.PlayerSkin;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Blocks;
 
 public final class FabricJoidClientGameTest implements FabricClientGameTest {
 
@@ -152,6 +153,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			FabricJoidClientGameTest.verifyAudio(context);
 			context.runOnClient(FabricJoidClientGameTest::verifyWidths);
 			FabricJoidClientGameTest.verifyBitmapFont(context);
+			FabricJoidClientGameTest.verifyDepth(context);
 			context.runOnClient(_ -> JOID.open(new UIDemoChoice()));
 			context.waitTicks(20);
 			context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
@@ -331,6 +333,79 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		if (!failures.isEmpty()) {
 			throw new AssertionError(failures.size() + " bitmap font checks failed:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
 		}
+	}
+
+	private static void verifyDepth(final ClientGameTestContext context) {
+		final String[] labels = {"item", "enchanted item", "block", "translucent block", "entity", "player"};
+		final Color cover = new Color(221, 221, 221);
+		final List<RectNode> covers = new ArrayList<>();
+		final UI ui = new UI() {
+
+			@Override
+			public void init() {
+				RectNode.create(0, 0, 1920, 1080).color(Color.BLACK).zindex(-10).attach(this);
+				for (int row = 0; row < labels.length; row++) {
+					for (int column = 0; column < 4; column++) {
+						final double x = 300D + column * 300D;
+						final double y = 40D + row * 170D;
+						final RectNode rect = RectNode.create(x, y, 160, 160).color(cover).zindex(column == 1 ? 1 : column == 3 ? -1 : 0);
+						if (column > 0) {
+							rect.attach(this);
+						}
+
+						FabricJoidClientGameTest.depthNode(row, x, y).attach(this);
+						if (column == 0) {
+							rect.attach(this);
+						}
+						covers.add(rect);
+					}
+				}
+			}
+
+		};
+		context.runOnClient(_ -> JOID.open(new UIDemoChoice()));
+		context.waitTicks(20);
+		context.runOnClient(_ -> JOID.open(ui));
+		context.waitTicks(40);
+		final BufferedImage image = FabricJoidClientGameTest.read(context.takeScreenshot("joid-depth"));
+		final List<int[]> bounds = context.computeOnClient(_ -> covers.stream().map(FabricJoidClientGameTest::bounds).toList());
+		final List<String> failures = new ArrayList<>();
+		final String[] cases = {"under a node added after it at the same zindex", "under a node of a higher zindex", "over a node added before it at the same zindex", "over a node of a lower zindex"};
+		for (int index = 0; index < bounds.size(); index++) {
+			final int[] rect = bounds.get(index);
+			int drawn = 0;
+			for (int row = 2; row < rect[3] - 2; row++) {
+				for (int column = 2; column < rect[2] - 2; column++) {
+					if ((image.getRGB(rect[0] + column, rect[1] + row) & 0xFFFFFF) != 0xDDDDDD) {
+						drawn++;
+					}
+				}
+			}
+
+			final String label = labels[index / 4] + " " + cases[index % 4];
+			if (index % 4 < 2 && drawn > 0) {
+				failures.add(label + " shows " + drawn + " pixels through the node");
+			} else if (index % 4 >= 2 && drawn < 100) {
+				failures.add(label + " is hidden: " + drawn + " pixels drawn");
+			}
+		}
+
+		context.runOnClient(_ -> JOID.close(ui));
+		context.waitTicks(10);
+		if (!failures.isEmpty()) {
+			throw new AssertionError(failures.size() + " depth checks failed:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
+		}
+	}
+
+	private static Node depthNode(final int row, final double x, final double y) {
+		return switch (row) {
+			case 0 -> ItemNode.create(x, y, 160, 160).stack(new ItemStack(Items.DIAMOND));
+			case 1 -> ItemNode.create(x, y, 160, 160).stack(new ItemStack(Items.DIAMOND_SWORD)).glint(true);
+			case 2 -> BlockNode.create(x, y, 160, 160).block(Blocks.STONE.defaultBlockState());
+			case 3 -> BlockNode.create(x, y, 160, 160).block(Blocks.ICE.defaultBlockState());
+			case 4 -> EntityNode.create(x, y, 160, 160).type(EntityTypes.ZOMBIE);
+			default -> EntityNode.create(x, y, 160, 160).profile(new GameProfile(new UUID(0L, 15L), "Steve"));
+		};
 	}
 
 	private static void expectCrisp(final List<String> failures, final String label, final BufferedImage image, final int[] bounds, final int texel) {
