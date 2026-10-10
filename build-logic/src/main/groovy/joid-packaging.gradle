@@ -14,7 +14,11 @@ ext {
             'data/joid/**/demo/**'
     ]
 
-    developmentReferences = ~/dev\/joid\/(demo|backend\/minecraft\/([\w$]+\/)*(demo|snapshot))\/[\w$\/]+/
+    developmentReferences = ~/dev\/joid\/(demo|test|backend\/minecraft\/([\w$]+\/)*(demo|snapshot))\/[\w$\/]+/
+
+    developmentWords = ['demo', 'demos', 'test', 'tests', 'gametest', 'gametests', 'snapshot', 'snapshots', 'testkit']
+
+    developmentDeclarations = ~/dev\/joid\/backend\/minecraft\/(loader\/registry\/GameTestFunction|\w+\/registry\/\w+GameTests)(\$[\w$]+)?\.class/
 
     developmentCallSites = [
             'dev/joid/backend/minecraft/Backend.class -> dev/joid/backend/minecraft/demo/DemoLauncher'

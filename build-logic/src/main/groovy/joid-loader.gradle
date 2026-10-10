@@ -1,5 +1,7 @@
 import java.util.zip.ZipFile
 
+import groovy.json.JsonSlurper
+
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
@@ -113,6 +115,8 @@ def verifyProdJar = tasks.register('verifyProdJar') {
     def patterns = developmentPatterns
     def references = developmentReferences
     def callSites = developmentCallSites
+    def words = developmentWords
+    def declarations = developmentDeclarations
     inputs.file(archive)
     doLast {
         def found = []
@@ -136,6 +140,40 @@ def verifyProdJar = tasks.register('verifyProdJar') {
         }
         if (!referencing.isEmpty()) {
             throw new GradleException("The prod jar references development classes: ${referencing.take(10)}")
+        }
+
+        def named = [] as SortedSet
+        def translated = [] as SortedSet
+        def described = [] as SortedSet
+        def split = { String text -> text.split(/[^A-Za-z0-9]+|(?<=[a-z0-9])(?=[A-Z])/)*.toLowerCase() }
+        new ZipFile(archive.get().asFile).withCloseable { zip ->
+            zip.entries().findAll { !it.directory }.each { entry ->
+                if (split(entry.name).any { it in words } && !(entry.name ==~ declarations)) {
+                    named << entry.name
+                }
+
+                if (entry.name ==~ /assets\/[^\/]+\/lang\/[^\/]+\.json/) {
+                    new JsonSlurper().parse(zip.getInputStream(entry)).keySet().findAll { key -> split(key).any { it in words } }.each { key -> translated << "${entry.name} -> ${key}".toString() }
+                }
+
+                if (entry.name ==~ /[^\/]+\.(json|mcmeta|cfg|classtweaker)|META-INF\/[^\/]+\.(toml|cfg)|(assets|data)\/.+\.(json|mcmeta)/) {
+                    def lines = new String(zip.getInputStream(entry).bytes, 'UTF-8').readLines().collect { it.replaceAll(/#.*/, '') }
+                    if (lines.any { line -> split(line).any { it in words } }) {
+                        described << entry.name
+                    }
+                }
+            }
+        }
+        if (!named.isEmpty()) {
+            throw new GradleException("The prod jar holds demo or test entries: ${named.take(10)}")
+        }
+
+        if (!translated.isEmpty()) {
+            throw new GradleException("The prod jar holds demo or test translations: ${translated.take(10)}")
+        }
+
+        if (!described.isEmpty()) {
+            throw new GradleException("The prod jar declares demo or test content in: ${described.take(10)}")
         }
 
         def loader = new URLClassLoader([archive.get().asFile.toURI().toURL()] as URL[], ClassLoader.platformClassLoader)
