@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
@@ -66,10 +67,16 @@ import dev.joid.lib.ui.core.data.UIData;
 import dev.joid.lib.ui.core.data.overlay.UIDataOverlay;
 import dev.joid.lib.ui.core.data.popup.UIDataPopup;
 import dev.joid.lib.ui.node.Node;
+import dev.joid.lib.ui.node.effect.NodeEffect;
+import dev.joid.lib.ui.node.effect.NodeEffect.NodeEffectScope;
+import dev.joid.lib.ui.node.effect.impl.BlurNodeEffect;
+import dev.joid.lib.ui.node.effect.impl.CircleNodeEffect;
+import dev.joid.lib.ui.node.effect.impl.RoundedNodeEffect;
 import dev.joid.lib.ui.node.impl.design.resource.ResourceNode;
 import dev.joid.lib.ui.node.impl.design.resource.ResourcePlayerNode;
 import dev.joid.lib.ui.node.impl.design.shape.RectNode;
 import dev.joid.lib.ui.node.impl.design.text.TextNode;
+import dev.joid.lib.ui.node.impl.structure.container.ContainerNode;
 import dev.joid.test.snapshot.SnapshotDifference;
 import dev.joid.test.snapshot.SnapshotImage;
 import dev.joid.test.snapshot.SnapshotRunner;
@@ -383,30 +390,24 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 	}
 
 	private static void verifyDepth(final ClientGameTestContext context) {
-		final String[] labels = {"item", "enchanted item", "block", "translucent block", "entity", "player"};
-		final Color cover = new Color(221, 221, 221);
+		final List<String> failures = new ArrayList<>();
+		FabricJoidClientGameTest.verifyDepth(context, failures, "joid-depth", null, 2);
+		FabricJoidClientGameTest.verifyDepth(context, failures, "joid-depth-rounded", () -> RoundedNodeEffect.create(24F), 2);
+		FabricJoidClientGameTest.verifyDepth(context, failures, "joid-depth-circle", CircleNodeEffect::create, 2);
+		FabricJoidClientGameTest.verifyDepth(context, failures, "joid-depth-blur", () -> BlurNodeEffect.create(2F), 12);
+		if (!failures.isEmpty()) {
+			throw new AssertionError(failures.size() + " depth checks failed:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
+		}
+	}
+
+	private static void verifyDepth(final ClientGameTestContext context, final List<String> failures, final String name, final Supplier<NodeEffect<Node>> effect, final int inset) {
 		final List<RectNode> covers = new ArrayList<>();
+		final Node grid = FabricJoidClientGameTest.depthGrid(covers, effect);
 		final UI ui = new UI() {
 
 			@Override
 			public void init() {
-				RectNode.create(0, 0, 1920, 1080).color(Color.BLACK).zindex(-10).attach(this);
-				for (int row = 0; row < labels.length; row++) {
-					for (int column = 0; column < 4; column++) {
-						final double x = 300D + column * 300D;
-						final double y = 40D + row * 170D;
-						final RectNode rect = RectNode.create(x, y, 160, 160).color(cover).zindex(column == 1 ? 1 : column == 3 ? -1 : 0);
-						if (column > 0) {
-							rect.attach(this);
-						}
-
-						FabricJoidClientGameTest.depthNode(row, x, y).attach(this);
-						if (column == 0) {
-							rect.attach(this);
-						}
-						covers.add(rect);
-					}
-				}
+				grid.attach(this);
 			}
 
 		};
@@ -414,45 +415,96 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		context.waitTicks(20);
 		context.runOnClient(_ -> JOID.open(ui));
 		context.waitTicks(40);
-		final BufferedImage image = FabricJoidClientGameTest.read(context.takeScreenshot("joid-depth"));
+		final BufferedImage image = FabricJoidClientGameTest.read(context.takeScreenshot(name));
 		final List<int[]> bounds = context.computeOnClient(_ -> covers.stream().map(FabricJoidClientGameTest::bounds).toList());
-		final List<String> failures = new ArrayList<>();
+		FabricJoidClientGameTest.expectDepth(failures, name, image, bounds, inset);
+		context.runOnClient(_ -> JOID.close(ui));
+		context.waitTicks(10);
+	}
+
+	private static void verifyContainerDepth(final ClientGameTestContext context, final List<String> failures) {
+		final UI ui = context.computeOnClient(_ -> JOID.getUi(UIDemoContainer.class));
+		final Node root = ContainerNode.create(0, 0, 1920, 1080).zindex(20);
+		context.runOnClient(_ -> root.attach(ui));
+		context.getInput().setCursorPos(4D, 4D);
+		for (final String name : List.of("joid-depth-container", "joid-depth-container-circle")) {
+			final Supplier<NodeEffect<Node>> effect = name.endsWith("circle") ? CircleNodeEffect::create : null;
+			final List<RectNode> covers = new ArrayList<>();
+			final Node grid = FabricJoidClientGameTest.depthGrid(covers, effect);
+			context.runOnClient(_ -> grid.attach(root));
+			context.waitTicks(40);
+			final BufferedImage image = FabricJoidClientGameTest.read(context.takeScreenshot(name));
+			final List<int[]> bounds = context.computeOnClient(_ -> covers.stream().map(FabricJoidClientGameTest::bounds).toList());
+			FabricJoidClientGameTest.expectDepth(failures, name, image, bounds, 2);
+			context.runOnClient(_ -> root.remove(grid));
+			context.waitTicks(10);
+		}
+	}
+
+	private static Node depthGrid(final List<RectNode> covers, final Supplier<NodeEffect<Node>> effect) {
+		final Color cover = new Color(221, 221, 221);
+		final double size = effect == null ? 160D : 100D;
+		final double margin = effect == null ? 0D : 25D;
+		final Node grid = ContainerNode.create(0, 0, 1920, 1080);
+		RectNode.create(0, 0, 1920, 1080).color(Color.BLACK).zindex(-10).attach(grid);
+		for (int row = 0; row < 6; row++) {
+			for (int column = 0; column < 4; column++) {
+				final double x = 300D + column * 300D;
+				final double y = 40D + row * 170D;
+				Node parent = grid;
+				if (effect != null) {
+					parent = ContainerNode.create(x - margin, y - margin, size + margin * 2D, size + margin * 2D).effect(effect.get().scope(NodeEffectScope.CHILDREN)).attach(grid);
+				}
+
+				final double left = effect == null ? x : margin;
+				final double top = effect == null ? y : margin;
+				final RectNode rect = RectNode.create(left, top, size, size).color(cover).zindex(column == 1 ? 1 : column == 3 ? -1 : 0);
+				if (column > 0) {
+					rect.attach(parent);
+				}
+
+				FabricJoidClientGameTest.depthNode(row, left, top, size).attach(parent);
+				if (column == 0) {
+					rect.attach(parent);
+				}
+				covers.add(rect);
+			}
+		}
+		return grid;
+	}
+
+	private static Node depthNode(final int row, final double x, final double y, final double size) {
+		return switch (row) {
+			case 0 -> ItemNode.create(x, y, size, size).stack(new ItemStack(Items.DIAMOND));
+			case 1 -> ItemNode.create(x, y, size, size).stack(new ItemStack(Items.DIAMOND_SWORD)).glint(true);
+			case 2 -> BlockNode.create(x, y, size, size).block(Blocks.STONE.defaultBlockState());
+			case 3 -> BlockNode.create(x, y, size, size).block(Blocks.ICE.defaultBlockState());
+			case 4 -> EntityNode.create(x, y, size, size).type(EntityTypes.ZOMBIE);
+			default -> EntityNode.create(x, y, size, size).profile(new GameProfile(new UUID(0L, 15L), "Steve"));
+		};
+	}
+
+	private static void expectDepth(final List<String> failures, final String name, final BufferedImage image, final List<int[]> bounds, final int inset) {
+		final String[] labels = {"item", "enchanted item", "block", "translucent block", "entity", "player"};
 		final String[] cases = {"under a node added after it at the same zindex", "under a node of a higher zindex", "over a node added before it at the same zindex", "over a node of a lower zindex"};
 		for (int index = 0; index < bounds.size(); index++) {
 			final int[] rect = bounds.get(index);
 			int drawn = 0;
-			for (int row = 2; row < rect[3] - 2; row++) {
-				for (int column = 2; column < rect[2] - 2; column++) {
+			for (int row = inset; row < rect[3] - inset; row++) {
+				for (int column = inset; column < rect[2] - inset; column++) {
 					if ((image.getRGB(rect[0] + column, rect[1] + row) & 0xFFFFFF) != 0xDDDDDD) {
 						drawn++;
 					}
 				}
 			}
 
-			final String label = labels[index / 4] + " " + cases[index % 4];
+			final String label = name + ": " + labels[index / 4] + " " + cases[index % 4];
 			if (index % 4 < 2 && drawn > 0) {
 				failures.add(label + " shows " + drawn + " pixels through the node");
 			} else if (index % 4 >= 2 && drawn < 100) {
 				failures.add(label + " is hidden: " + drawn + " pixels drawn");
 			}
 		}
-
-		context.runOnClient(_ -> JOID.close(ui));
-		context.waitTicks(10);
-		if (!failures.isEmpty()) {
-			throw new AssertionError(failures.size() + " depth checks failed:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
-		}
-	}
-
-	private static Node depthNode(final int row, final double x, final double y) {
-		return switch (row) {
-			case 0 -> ItemNode.create(x, y, 160, 160).stack(new ItemStack(Items.DIAMOND));
-			case 1 -> ItemNode.create(x, y, 160, 160).stack(new ItemStack(Items.DIAMOND_SWORD)).glint(true);
-			case 2 -> BlockNode.create(x, y, 160, 160).block(Blocks.STONE.defaultBlockState());
-			case 3 -> BlockNode.create(x, y, 160, 160).block(Blocks.ICE.defaultBlockState());
-			case 4 -> EntityNode.create(x, y, 160, 160).type(EntityTypes.ZOMBIE);
-			default -> EntityNode.create(x, y, 160, 160).profile(new GameProfile(new UUID(0L, 15L), "Steve"));
-		};
 	}
 
 	private static void expectCrisp(final List<String> failures, final String label, final BufferedImage image, final int[] bounds, final int texel) {
@@ -666,6 +718,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 
 		FabricJoidClientGameTest.verifyContainerPopup(context, server, failures);
 		FabricJoidClientGameTest.verifyContainerBounds(context, server, failures);
+		FabricJoidClientGameTest.verifyContainerDepth(context, failures);
 
 		context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
 		context.waitForScreen(null);
