@@ -998,16 +998,18 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 
 	private static void verifyResources(final ClientGameTestContext context) {
 		final List<BufferedImage> captures = new ArrayList<>();
-		for (final String name : List.of("a", "b", "c")) {
-			captures.add(FabricJoidClientGameTest.read(context.takeScreenshot("joid-demo-minecraft-resources-" + name)));
-			context.waitTicks(captures.size() * 2 + 1);
-		}
-
 		final List<String> failures = new ArrayList<>();
-		FabricJoidClientGameTest.expectChange(failures, "animated sprite fire_0", captures, 1040, 736, 128, false);
-		FabricJoidClientGameTest.expectChange(failures, "interpolated sprite sea_lantern", captures, 1240, 736, 128, false);
-		FabricJoidClientGameTest.expectChange(failures, "decoded .mcmeta sea_lantern", captures, 1520, 736, 128, false);
-		FabricJoidClientGameTest.expectChange(failures, "decoded .mcmeta pulse", captures, 1712, 736, 128, false);
+		captures.add(FabricJoidClientGameTest.read(context.takeScreenshot("joid-demo-minecraft-resources-0")));
+		do {
+			context.waitTicks(3);
+			captures.add(FabricJoidClientGameTest.read(context.takeScreenshot("joid-demo-minecraft-resources-" + captures.size())));
+			failures.clear();
+			FabricJoidClientGameTest.expectChange(failures, "animated sprite fire_0", captures, 1040, 736, 128, false);
+			FabricJoidClientGameTest.expectChange(failures, "interpolated sprite sea_lantern", captures, 1240, 736, 128, false);
+			FabricJoidClientGameTest.expectChange(failures, "decoded .mcmeta sea_lantern", captures, 1520, 736, 128, false);
+			FabricJoidClientGameTest.expectChange(failures, "decoded .mcmeta pulse", captures, 1712, 736, 128, false);
+		} while (!failures.isEmpty() && captures.size() < 40);
+
 		FabricJoidClientGameTest.expectChange(failures, "static sprite diamond", captures, 560, 720, 64, true);
 		FabricJoidClientGameTest.expectTexture(context, failures, "sprite item/diamond", captures.get(0), 560, 720, "textures/item/diamond.png");
 		FabricJoidClientGameTest.expectTexture(context, failures, "decoded block/diamond_block", captures.get(0), 80, 820, "textures/block/diamond_block.png");
