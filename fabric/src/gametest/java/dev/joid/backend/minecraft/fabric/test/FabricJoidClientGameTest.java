@@ -174,6 +174,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			FabricJoidClientGameTest.verifyDemos(context);
 			FabricJoidClientGameTest.verifyOverlays(context);
 			FabricJoidClientGameTest.verifyContainer(context, singleplayer.getServer());
+			FabricJoidClientGameTest.verifyBlockLighting(context, singleplayer.getServer());
 		}
 
 		context.runOnClient(_ -> FabricJoidClientGameTest.verify(JUnitCore.runClasses(FabricRenderBridgeContractTest.class)));
@@ -1177,6 +1178,71 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		if (!failures.isEmpty()) {
 			throw new AssertionError(failures.size() + " entity checks failed:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
 		}
+	}
+
+	private static void verifyBlockLighting(final ClientGameTestContext context, final TestServerContext server) {
+		server.runOnServer(minecraftServer -> FabricJoidClientGameTest.player(minecraftServer).getInventory().setItem(0, new ItemStack(Items.SNOW_BLOCK)));
+		context.waitTicks(10);
+		final int[] slot = context.computeOnClient(minecraft -> {
+			final int guiScale = minecraft.getWindow().getGuiScale();
+			return new int[] {(minecraft.getWindow().getGuiScaledWidth() / 2 - 88) * guiScale, (minecraft.getWindow().getGuiScaledHeight() - 19) * guiScale, 16 * guiScale, 16 * guiScale};
+		});
+		final int[] vanilla = FabricJoidClientGameTest.faces(FabricJoidClientGameTest.read(context.takeScreenshot("joid-lighting-vanilla")), slot);
+		final ItemNode item = ItemNode.create(200, 200, 256, 256).stack(new ItemStack(Items.SNOW_BLOCK));
+		final BlockNode block = BlockNode.create(600, 200, 256, 256).block(Blocks.SNOW_BLOCK.defaultBlockState());
+		final ItemNode furnace = ItemNode.create(1000, 200, 256, 256).stack(new ItemStack(Items.FURNACE));
+		context.runOnClient(_ -> JOID.open(new UI() {
+
+			@Override
+			public void init() {
+				item.attach(this);
+				block.attach(this);
+				furnace.attach(this);
+			}
+
+		}));
+		context.waitForScreen(UIScreen.class);
+		context.waitTicks(20);
+		final List<int[]> nodes = context.computeOnClient(_ -> List.of(FabricJoidClientGameTest.bounds(item), FabricJoidClientGameTest.bounds(block)));
+		final BufferedImage image = FabricJoidClientGameTest.read(context.takeScreenshot("joid-lighting"));
+		final List<String> failures = new ArrayList<>();
+		if (vanilla[0] <= vanilla[1] || vanilla[1] <= vanilla[2]) {
+			failures.add("the vanilla hotbar block " + Arrays.toString(vanilla) + " is not lit top, left then right");
+		}
+
+		final List<String> labels = List.of("block item", "block");
+		for (int index = 0; index < nodes.size(); index++) {
+			final int[] faces = FabricJoidClientGameTest.faces(image, nodes.get(index));
+			for (int face = 0; face < 3; face++) {
+				if (Math.abs(faces[face] - vanilla[face]) > 4) {
+					failures.add("the faces of the " + labels.get(index) + " " + Arrays.toString(faces) + " differ from the vanilla hotbar block " + Arrays.toString(vanilla));
+					break;
+				}
+			}
+		}
+
+		context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
+		context.waitForScreen(null);
+		if (!failures.isEmpty()) {
+			throw new AssertionError(failures.size() + " block lighting checks failed:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
+		}
+	}
+
+	private static int[] faces(final BufferedImage image, final int[] bounds) {
+		final double[][] points = {{0.5D, 0.25D}, {0.28D, 0.62D}, {0.72D, 0.62D}};
+		final int[] faces = new int[points.length];
+		for (int face = 0; face < points.length; face++) {
+			final int x = (int) (bounds[0] + bounds[2] * points[face][0]);
+			final int y = (int) (bounds[1] + bounds[3] * points[face][1]);
+			int sum = 0;
+			for (int row = -1; row <= 1; row++) {
+				for (int column = -1; column <= 1; column++) {
+					sum += image.getRGB(x + column, y + row) >> 8 & 0xFF;
+				}
+			}
+			faces[face] = sum / 9;
+		}
+		return faces;
 	}
 
 	private static void verifySound(final ClientGameTestContext context) {

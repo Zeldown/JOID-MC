@@ -3,6 +3,7 @@ package dev.joid.backend.minecraft.bridge.render;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import org.joml.Matrix4f;
 import org.joml.Vector4f;
 
 import dev.joid.backend.minecraft.bridge.render.framebuffer.MinecraftFrameBuffer;
@@ -46,7 +47,6 @@ import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuSampler;
 import com.mojang.blaze3d.textures.GpuTextureView;
 
-import net.minecraft.client.renderer.Projection;
 import net.minecraft.client.renderer.ProjectionMatrixBuffer;
 
 @Getter
@@ -55,8 +55,8 @@ public final class MinecraftRenderBridge extends RenderBridge {
 	private final GpuDevice              device;
 	private final boolean                zeroToOne;
 	private final PassEncoder            passEncoder;
+	private final Matrix4f               rasterProjection;
 	private final PipelineCache          pipelineCache;
-	private final Projection             rasterProjection;
 	private final ShaderSourceProvider   sourceProvider;
 	private final ProjectionMatrixBuffer rasterProjectionBuffer;
 
@@ -70,7 +70,7 @@ public final class MinecraftRenderBridge extends RenderBridge {
 		this.passEncoder            = PassEncoder.create(this.device);
 		this.sourceProvider         = ShaderSourceProvider.create();
 		this.pipelineCache          = PipelineCache.create(this.device, this.sourceProvider);
-		this.rasterProjection       = new Projection();
+		this.rasterProjection       = new Matrix4f();
 		this.rasterProjectionBuffer = new ProjectionMatrixBuffer("JOID Raster");
 		this.scratch                = ByteBuffer.allocateDirect(1 << 16).order(ByteOrder.nativeOrder());
 	}
@@ -90,7 +90,7 @@ public final class MinecraftRenderBridge extends RenderBridge {
 		RenderSystem.outputColorTextureOverride = renderTarget.getView();
 		RenderSystem.outputDepthTextureOverride = renderTarget.getDepthView();
 		RenderSystem.backupProjectionMatrix();
-		this.rasterProjection.setupOrtho(-range, range, renderTarget.getWidth(), renderTarget.getHeight(), false);
+		this.rasterProjection.setOrtho(0F, renderTarget.getWidth(), height, height - renderTarget.getHeight(), range, -range, this.zeroToOne);
 		RenderSystem.setProjectionMatrix(this.rasterProjectionBuffer.getBuffer(this.rasterProjection), ProjectionType.ORTHOGRAPHIC);
 		RenderSystem.enableScissorForRenderTypeDraws(0, 0, width, height);
 		try {

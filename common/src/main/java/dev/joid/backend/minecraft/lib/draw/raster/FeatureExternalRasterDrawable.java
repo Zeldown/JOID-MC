@@ -35,7 +35,7 @@ public final class FeatureExternalRasterDrawable implements IExternalRasterDrawa
 		FeatureExternalRasterDrawable.POSE.pushPose();
 		try {
 			FeatureExternalRasterDrawable.POSE.translate(width / 2F, height / 2F, 0F);
-			FeatureExternalRasterDrawable.POSE.scale(size, size, size);
+			FeatureExternalRasterDrawable.POSE.scale(size, -size, size);
 			this.submit.accept(FeatureExternalRasterDrawable.POSE, FeatureExternalRasterDrawable.STORAGE);
 			minecraft.gameRenderer.featureRenderDispatcher().renderAllFeatures(FeatureExternalRasterDrawable.STORAGE);
 		} finally {
