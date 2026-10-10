@@ -23,8 +23,8 @@ public enum LegacyTextColor {
 	YELLOW('e', 0xFFFF55),
 	WHITE('f', 0xFFFFFF);
 
-	private final char  code;
 	private final int   rgb;
+	private final char  code;
 	private final Color color;
 
 	private LegacyTextColor(final char code, final int rgb) {

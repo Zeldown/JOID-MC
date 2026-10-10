@@ -24,13 +24,13 @@ public final class MinecraftFontFace implements IFontFace {
 		return new MinecraftFontFace(new FontDescription.Resource(identifier), weight);
 	}
 
+	public boolean isBold() {
+		return this.weight == FontWeight.BOLD;
+	}
+
 	@Override
 	public boolean isItalic() {
 		return false;
-	}
-
-	public boolean isBold() {
-		return this.weight == FontWeight.BOLD;
 	}
 
 	@Override

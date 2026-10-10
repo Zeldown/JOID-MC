@@ -82,14 +82,6 @@ public final class PipelineCache {
 				.build();
 	}
 
-	private static Optional<DepthStencilState> getDepthStencilState(final PipelineKey key) {
-		if (!key.isDepthTest()) {
-			return Optional.empty();
-		}
-
-		return Optional.of(new DepthStencilState(CompareOp.LESS_THAN, key.isDepthWrite()));
-	}
-
 	private static Optional<BlendFunction> getBlendFunction(final BlendState blend) {
 		if (!blend.isEnabled()) {
 			return Optional.empty();
@@ -97,6 +89,14 @@ public final class PipelineCache {
 
 		final BlendOp operation = BlendOp.valueOf(blend.getEquation().name());
 		return Optional.of(new BlendFunction(new BlendEquation(BlendFactor.valueOf(blend.getSourceColor().name()), BlendFactor.valueOf(blend.getDestinationColor().name()), operation), new BlendEquation(BlendFactor.valueOf(blend.getSourceAlpha().name()), BlendFactor.valueOf(blend.getDestinationAlpha().name()), operation)));
+	}
+
+	private static Optional<DepthStencilState> getDepthStencilState(final PipelineKey key) {
+		if (!key.isDepthTest()) {
+			return Optional.empty();
+		}
+
+		return Optional.of(new DepthStencilState(CompareOp.LESS_THAN, key.isDepthWrite()));
 	}
 
 }

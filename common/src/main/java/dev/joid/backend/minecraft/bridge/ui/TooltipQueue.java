@@ -39,6 +39,10 @@ public final class TooltipQueue {
 		}
 	}
 
+	private static Component getLine(final Object line) {
+		return line instanceof final Component component ? component : Component.literal(TextConverter.convert(line));
+	}
+
 	private static List<Component> getLines(final Object content) {
 		final List<Component> lines = new ArrayList<>();
 		if (content instanceof final Iterable<?> iterable) {
@@ -49,10 +53,6 @@ public final class TooltipQueue {
 			lines.add(TooltipQueue.getLine(content));
 		}
 		return lines;
-	}
-
-	private static Component getLine(final Object line) {
-		return line instanceof final Component component ? component : Component.literal(TextConverter.convert(line));
 	}
 
 }

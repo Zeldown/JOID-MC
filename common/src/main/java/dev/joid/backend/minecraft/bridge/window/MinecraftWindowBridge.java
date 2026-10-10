@@ -85,13 +85,13 @@ public final class MinecraftWindowBridge implements IWindowBridge {
 	}
 
 	@Override
-	public void setClipboard(final @NonNull String text) {
-		Minecraft.getInstance().keyboardHandler.setClipboard(text);
+	public void setCursor(final @NonNull Cursor cursor) {
+		this.cursor = cursor;
 	}
 
 	@Override
-	public void setCursor(final @NonNull Cursor cursor) {
-		this.cursor = cursor;
+	public void setClipboard(final @NonNull String text) {
+		Minecraft.getInstance().keyboardHandler.setClipboard(text);
 	}
 
 	public void requestCursor(final @NonNull GuiGraphicsExtractor graphics, final @NonNull Cursor cursor) {

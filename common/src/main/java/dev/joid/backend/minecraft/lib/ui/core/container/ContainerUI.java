@@ -28,9 +28,9 @@ public abstract class ContainerUI<M extends AbstractContainerMenu> extends UI {
 	@Getter
 	private final Node carriedNode;
 
-	private double   carriedSize;
 	private Node     boundsNode;
 	private double[] bounds;
+	private double   carriedSize;
 	private boolean  boundsWarned;
 
 	protected ContainerUI(final @NonNull M container) {

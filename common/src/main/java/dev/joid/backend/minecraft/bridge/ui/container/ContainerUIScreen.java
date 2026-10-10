@@ -106,14 +106,14 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 	}
 
 	@Override
-	public boolean isPauseScreen() {
-		final UIDataMinecraft data = this.getMinecraftData();
-		return data == null ? super.isPauseScreen() : data.pause();
+	public boolean isInGameUi() {
+		return this.getBackground() != MinecraftBackground.BLUR;
 	}
 
 	@Override
-	public boolean isInGameUi() {
-		return this.getBackground() != MinecraftBackground.BLUR;
+	public boolean isPauseScreen() {
+		final UIDataMinecraft data = this.getMinecraftData();
+		return data == null ? super.isPauseScreen() : data.pause();
 	}
 
 	@Override

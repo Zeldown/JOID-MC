@@ -46,12 +46,12 @@ public final class KeyBind {
 		return this;
 	}
 
-	public static @NonNull List<KeyBind> getRegistered() {
-		return Collections.unmodifiableList(KeyBind.REGISTERED);
-	}
-
 	public static @NonNull List<String> getCategories() {
 		return KeyBind.REGISTERED.stream().map(KeyBind::getCategory).distinct().toList();
+	}
+
+	public static @NonNull List<KeyBind> getRegistered() {
+		return Collections.unmodifiableList(KeyBind.REGISTERED);
 	}
 
 }

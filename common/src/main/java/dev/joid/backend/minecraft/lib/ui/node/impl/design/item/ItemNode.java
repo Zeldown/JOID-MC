@@ -20,11 +20,11 @@ public class ItemNode extends Node {
 
 	private ItemStack stack;
 
-	private boolean count;
 	private boolean bar;
-	private boolean cooldown;
-	private boolean tooltip;
+	private boolean count;
 	private Boolean glint;
+	private boolean tooltip;
+	private boolean cooldown;
 
 	protected ItemNode(final double x, final double y, final double width, final double height) {
 		super(x, y, width, height);

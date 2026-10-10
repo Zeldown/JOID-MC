@@ -32,9 +32,9 @@ public final class MinecraftShader extends Shader {
 	private final GpuDevice device;
 
 	@Getter private final Identifier      identifier;
-	@Getter private final Identifier      stencilIdentifier;
 	@Getter private final BindGroupLayout layout;
 	@Getter private final VertexFormat    vertexFormat;
+	@Getter private final Identifier      stencilIdentifier;
 
 	private Boolean active;
 

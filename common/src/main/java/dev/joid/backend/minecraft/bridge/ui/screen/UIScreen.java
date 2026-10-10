@@ -52,14 +52,14 @@ public class UIScreen extends Screen {
 	}
 
 	@Override
-	public boolean isPauseScreen() {
-		final UIDataMinecraft data = this.bridge.getMinecraftData();
-		return data == null || data.pause();
+	public boolean isInGameUi() {
+		return this.getBackground() != MinecraftBackground.BLUR;
 	}
 
 	@Override
-	public boolean isInGameUi() {
-		return this.getBackground() != MinecraftBackground.BLUR;
+	public boolean isPauseScreen() {
+		final UIDataMinecraft data = this.bridge.getMinecraftData();
+		return data == null || data.pause();
 	}
 
 	@Override
