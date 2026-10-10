@@ -2,6 +2,9 @@ package dev.joid.backend.minecraft.demo.ui;
 
 import java.util.UUID;
 
+import dev.joid.backend.minecraft.lib.draw.block.DrawBlock;
+import dev.joid.backend.minecraft.lib.draw.entity.DrawEntity;
+import dev.joid.backend.minecraft.lib.draw.item.DrawItem;
 import dev.joid.backend.minecraft.lib.font.impl.minecraft.MinecraftFont;
 import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.block.BlockNode;
@@ -14,6 +17,7 @@ import dev.joid.lib.color.Color;
 import dev.joid.lib.draw.text.TextMode;
 import dev.joid.lib.draw.text.builder.Text;
 import dev.joid.lib.font.TextInfo;
+import dev.joid.lib.input.key.resolver.KeyResolver;
 import dev.joid.lib.render.transform.Rotation;
 import dev.joid.lib.render.transform.Scale;
 import dev.joid.lib.render.transform.Vector;
@@ -32,6 +36,7 @@ import dev.joid.lib.ui.node.property.overflow.OverflowProperty;
 import dev.joid.lib.utils.align.Align;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.blaze3d.platform.NativeImage;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -39,6 +44,7 @@ import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.resources.model.sprite.SpriteId;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.ClientAsset;
+import net.minecraft.data.AtlasIds;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
@@ -57,6 +63,15 @@ public class UIDemoMinecraft extends UIDemo {
 	private static final Color PANEL       = new Color(48, 48, 48);
 	private static final Color PLACEHOLDER = new Color(221, 221, 221);
 
+	private static final NativeImage CHECKER = new NativeImage(2, 2, false);
+
+	static {
+		UIDemoMinecraft.CHECKER.setPixel(0, 0, UIDemoMinecraft.PLACEHOLDER.getRGB());
+		UIDemoMinecraft.CHECKER.setPixel(1, 0, UIDemoMinecraft.INK.getRGB());
+		UIDemoMinecraft.CHECKER.setPixel(0, 1, UIDemoMinecraft.INK.getRGB());
+		UIDemoMinecraft.CHECKER.setPixel(1, 1, UIDemoMinecraft.PLACEHOLDER.getRGB());
+	}
+
 	@Override
 	public void init() {
 		final TextInfo caption = TextInfo.create(DemoFont.MONTSERRAT, 24, UIDemoMinecraft.INK);
@@ -64,6 +79,7 @@ public class UIDemoMinecraft extends UIDemo {
 		final Component component = Component.literal("Hex ").withColor(0x12ABCD).append(Component.translatable("menu.game").withStyle(ChatFormatting.GOLD, ChatFormatting.UNDERLINE)).append(Component.literal(" plain"));
 		final ItemStack damaged = new ItemStack(Items.DIAMOND_PICKAXE);
 		final ItemStack pearl = new ItemStack(Items.ENDER_PEARL, 16);
+		final ItemStack totem = new ItemStack(Items.TOTEM_OF_UNDYING);
 		final PlayerSkin skin = PlayerSkin.insecure(new ClientAsset.ResourceTexture(Identifier.fromNamespaceAndPath("joid", "demo/skin"), Identifier.fromNamespaceAndPath("joid", "demo/textures/skin.png")), null, null, PlayerModelType.WIDE);
 		damaged.setDamageValue(1100);
 
@@ -163,6 +179,8 @@ public class UIDemoMinecraft extends UIDemo {
 				RectNode.create(20, 20, 400, 200).color(UIDemoMinecraft.PANEL).attach(rect);
 				ResourceNode.create(40, 40, 360, 0).resource(Resource.of("minecraft:textures/gui/title/minecraft.png")).attach(rect);
 				ResourceNode.create(40, 140, 64, 64).resource(Resource.of(Identifier.withDefaultNamespace("textures/block/diamond_block.png"))).attach(rect);
+				ResourceNode.create(140, 140, 64, 64).resource(Resource.of(Minecraft.getInstance().getAtlasManager().getAtlasOrThrow(AtlasIds.BLOCKS))).attach(rect);
+				ResourceNode.create(240, 140, 64, 64).resource(Resource.of(UIDemoMinecraft.CHECKER)).attach(rect);
 				TextNode.create(220, 255).text(Text.create("Textures", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
 			})
 			.attach(container);
@@ -392,7 +410,48 @@ public class UIDemoMinecraft extends UIDemo {
 			})
 			.attach(container);
 
-			ContainerNode.create(0, 1880, 1920, 80).attach(container);
+			RectNode
+			.create(1000, 1640, 440, 240)
+			.color(UIDemoMinecraft.PLACEHOLDER)
+			.body(rect -> {
+				RectNode.create(20, 20, 400, 200).color(UIDemoMinecraft.PANEL).attach(rect);
+				TextNode.create(30, 30, 380, 0).text(Text.create(() -> Component.translatable("joid.demo.minecraft.keybind", Minecraft.getInstance().options.keyInventory.getTranslatedKeyMessage()), info)).mode(TextMode.SPLIT).attach(rect);
+				TextNode.create(30, 150).text(Text.create(() -> "JOID key " + KeyResolver.resolve(Minecraft.getInstance().options.keyInventory), info)).attach(rect);
+				TextNode.create(220, 255).text(Text.create("Key bind", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
+			})
+			.attach(container);
+
+			RectNode
+			.create(1480, 1640, 400, 240)
+			.color(UIDemoMinecraft.PLACEHOLDER)
+			.body(rect -> {
+				RectNode.create(20, 20, 360, 200).color(UIDemoMinecraft.PANEL).attach(rect);
+				TextNode.create(30, 30).text(Text.create(() -> Minecraft.getInstance().gui.screen() != null ? Minecraft.getInstance().gui.screen().getTitle() : Component.empty(), info)).attach(rect);
+				TextNode.create(30, 80).text(Text.create(() -> "Pause screen " + (Minecraft.getInstance().gui.screen() != null && Minecraft.getInstance().gui.screen().isPauseScreen()), info)).attach(rect);
+				TextNode.create(30, 130).text(Text.create(() -> "Game paused " + Minecraft.getInstance().isPaused(), info)).attach(rect);
+				TextNode.create(200, 255).text(Text.create("Screen data", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
+			})
+			.attach(container);
+
+			RectNode
+			.create(40, 1960, 440, 240)
+			.color(UIDemoMinecraft.PLACEHOLDER)
+			.body(rect -> {
+				RectNode
+				.create(20, 20, 400, 200)
+				.color(UIDemoMinecraft.PANEL)
+				.onDraw((panel, _, _) -> {
+					DrawItem.inst().drawItem(panel.getX() + 20D, panel.getY() + 60D, 80D, totem);
+					DrawItem.inst().drawItemCount(panel.getX() + 20D, panel.getY() + 60D, 80D, totem, "x3");
+					DrawBlock.inst().drawBlock(panel.getX() + 140D, panel.getY() + 60D, 80D, Blocks.BOOKSHELF.defaultBlockState(), 30D, 20D);
+					DrawEntity.inst().drawPlayer(panel.getX() + 280D, panel.getY() + 20D, 80D, 160D, skin, -30D, 0D);
+				})
+				.attach(rect);
+				TextNode.create(220, 255).text(Text.create("Draw calls", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
+			})
+			.attach(container);
+
+			ContainerNode.create(0, 2200, 1920, 80).attach(container);
 		})
 		.attach(this);
 

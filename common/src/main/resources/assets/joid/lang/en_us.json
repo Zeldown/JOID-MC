@@ -1,5 +1,6 @@
 {
   "key.joid.demo": "Open JOID demos",
   "key.category.joid.main": "JOID",
-  "joid.demo.minecraft": "Minecraft demo"
+  "joid.demo.minecraft": "Minecraft demo",
+  "joid.demo.minecraft.keybind": "%s closes this page"
 }

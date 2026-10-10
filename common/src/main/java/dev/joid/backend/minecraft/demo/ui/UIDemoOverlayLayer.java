@@ -32,10 +32,12 @@ public final class UIDemoOverlayLayer {
 		if (UIDemoOverlayLayer.isOpen()) {
 			JOID.close(JOID.getUi(Hotbar.class));
 			JOID.close(JOID.getUi(Experience.class));
+			JOID.close(JOID.getUi(Crosshair.class));
 			JOID.close(JOID.getUi(Interactive.class));
 		} else {
 			JOID.open(new Hotbar());
 			JOID.open(new Experience());
+			JOID.open(new Crosshair());
 			JOID.open(new Interactive());
 		}
 	}
@@ -78,6 +80,18 @@ public final class UIDemoOverlayLayer {
 				RectNode.create(0, 0, 0, 20).color(UIDemoOverlayLayer.INK).width(() -> Minecraft.getInstance().player != null ? 728D * Minecraft.getInstance().player.experienceProgress : 0D).attach(rect);
 			})
 			.attach(this);
+		}
+
+	}
+
+	@UIData(background = false)
+	@UIDataOverlay(active = true)
+	@UIDataOverlayLayer(layer = OverlayLayer.CROSSHAIR)
+	public static class Crosshair extends UI {
+
+		@Override
+		public void init() {
+			RectNode.create(928, 508, 64, 64).color(UIDemoOverlayLayer.PLACEHOLDER).attach(this);
 		}
 
 	}

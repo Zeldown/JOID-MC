@@ -1,9 +1,11 @@
 package dev.joid.backend.minecraft.fabric.test;
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -168,6 +170,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
 			context.waitForScreen(null);
 			FabricJoidClientGameTest.verifyBackground(context);
+			FabricJoidClientGameTest.verifyDemos(context);
 			FabricJoidClientGameTest.verifyOverlays(context);
 			FabricJoidClientGameTest.verifyContainer(context, singleplayer.getServer());
 		}
@@ -252,6 +255,60 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		return image;
 	}
 
+	private static void verifyDemos(final ClientGameTestContext context) {
+		final List<String> failures = new ArrayList<>();
+		final List<DemoEntry> entries = context.computeOnClient(_ -> UIDemoChoice.LIST.stream().filter(entry -> !entry.getLabel().endsWith("Store")).toList());
+		final PrintStream err = System.err;
+		for (final DemoEntry entry : entries) {
+			context.runOnClient(_ -> JOID.open(new UIDemoChoice()));
+			context.waitForScreen(UIScreen.class);
+			context.waitTicks(10);
+			final ByteArrayOutputStream output = new ByteArrayOutputStream();
+			System.setErr(new PrintStream(output, true));
+			try {
+				context.runOnClient(_ -> entry.getAction().run());
+				context.waitTicks(40);
+				context.takeScreenshot("joid-demos-" + entry.getLabel());
+				if (!context.computeOnClient(_ -> FabricJoidClientGameTest.isShown(entry))) {
+					failures.add(entry.getLabel() + " is not shown");
+				}
+			} finally {
+				System.setErr(err);
+			}
+
+			final List<String> errors = output.toString().lines().filter(line -> line.contains("Exception") || line.contains("Error") || line.startsWith("	at ")).toList();
+			if (!errors.isEmpty()) {
+				failures.add(entry.getLabel() + " printed errors: " + String.join(System.lineSeparator(), errors));
+			}
+
+			if (entry.getState() != null) {
+				context.runOnClient(_ -> entry.getAction().run());
+			}
+
+			for (int attempt = 0; attempt < 6 && context.computeOnClient(minecraft -> minecraft.gui.screen() != null); attempt++) {
+				context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
+				context.waitTicks(20);
+			}
+		}
+
+		context.waitForScreen(null);
+		if (!failures.isEmpty()) {
+			throw new AssertionError(failures.size() + " demo checks failed:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
+		}
+	}
+
+	private static boolean isShown(final DemoEntry entry) {
+		if (entry.getState() != null) {
+			return entry.isActive();
+		}
+
+		try {
+			return JOID.isOpen(Class.forName(entry.getHover()).asSubclass(UI.class));
+		} catch (final ClassNotFoundException exception) {
+			throw new AssertionError("The demo entry " + entry.getLabel() + " names the missing class " + entry.getHover(), exception);
+		}
+	}
+
 	private static void verifyKeyBindLabels(final ClientGameTestContext context) {
 		context.runOnClient(minecraft -> minecraft.gui.setScreen(new KeyBindsScreen(minecraft.gui.screen(), minecraft.options)));
 		context.waitForScreen(KeyBindsScreen.class);
@@ -295,7 +352,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 
 	private static void clickToggle(final ClientGameTestContext context, final int fromEnd) {
 		final List<int[]> rects = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(RectNode.class));
-		FabricJoidClientGameTest.click(context, rects.get(rects.size() - fromEnd));
+		FabricJoidClientGameTest.click(context, rects.get(rects.size() - 6 - fromEnd));
 	}
 
 	private static void clickDemo(final ClientGameTestContext context, final String label, final String name) {
@@ -548,6 +605,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		final int[] hotbar = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoOverlayLayer.Hotbar.class).getNodeList().ordered().getFirst()));
 		final int[] experience = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoOverlayLayer.Experience.class).getNodeList().ordered().getFirst()));
 		final int[] interactive = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoOverlayLayer.Interactive.class).getNodeList().ordered().getFirst()));
+		final int[] crosshair = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoOverlayLayer.Crosshair.class).getNodeList().ordered().getFirst()));
 		final int[] button = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoOverlayLayer.Interactive.class).getNodeList().ordered().getFirst().getChild(0, RectNode.class)));
 		final int[] vanillaHotbar = context.computeOnClient(minecraft -> {
 			final int guiScale = minecraft.getWindow().getGuiScale();
@@ -557,6 +615,8 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		FabricJoidClientGameTest.expectColor(failures, "overlay above the hotbar", hud, hotbar, 0xDDDDDD, true);
 		FabricJoidClientGameTest.expectColor(failures, "overlay replacing the experience bar", hud, new int[] {experience[0] + experience[2] - 8, experience[1], 8, experience[3]}, 0xDDDDDD, true);
 		FabricJoidClientGameTest.expectColor(failures, "interactive overlay in game", hud, interactive, 0xDDDDDD, true);
+		FabricJoidClientGameTest.expectColor(failures, "overlay under the crosshair", hud, crosshair, 0xDDDDDD, true);
+		FabricJoidClientGameTest.expectColor(failures, "vanilla crosshair over the overlay", hud, new int[] {954, 534, 8, 8}, 0xDDDDDD, false);
 		if (!context.computeOnClient(_ -> OverlayLayerRenderer.isCancelled(OverlayLayer.CONTEXTUAL_BAR))) {
 			failures.add("the overlay replacing the experience bar does not cancel the contextual bar");
 		}
@@ -575,6 +635,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		final BufferedImage hiddenGui = FabricJoidClientGameTest.read(context.takeScreenshot("joid-overlay-hidden-gui"));
 		FabricJoidClientGameTest.expectColor(failures, "overlay above the hotbar with the GUI hidden", hiddenGui, hotbar, 0xDDDDDD, false);
 		FabricJoidClientGameTest.expectColor(failures, "interactive overlay with the GUI hidden", hiddenGui, interactive, 0xDDDDDD, false);
+		FabricJoidClientGameTest.expectColor(failures, "overlay under the crosshair with the GUI hidden", hiddenGui, crosshair, 0xDDDDDD, false);
 		if (!context.computeOnClient(_ -> BridgeHandler.UI.getBridge(OverlayUIBridge.class).isOverlayHidden())) {
 			failures.add("F1 does not hide the overlays");
 		}
@@ -870,7 +931,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 
 	private static void expectOverlays(final ClientGameTestContext context, final boolean open) {
 		context.runOnClient(_ -> {
-			if (JOID.isOpen(UIDemoOverlayLayer.Hotbar.class) != open || JOID.isOpen(UIDemoOverlayLayer.Experience.class) != open || JOID.isOpen(UIDemoOverlayLayer.Interactive.class) != open) {
+			if (JOID.isOpen(UIDemoOverlayLayer.Hotbar.class) != open || JOID.isOpen(UIDemoOverlayLayer.Experience.class) != open || JOID.isOpen(UIDemoOverlayLayer.Crosshair.class) != open || JOID.isOpen(UIDemoOverlayLayer.Interactive.class) != open) {
 				throw new AssertionError("The overlay entry of UIDemoChoice did not toggle the demo overlays " + (open ? "on" : "off"));
 			}
 		});
