@@ -37,6 +37,7 @@ import dev.joid.backend.minecraft.demo.ui.UIDemoContainer;
 import dev.joid.backend.minecraft.demo.ui.UIDemoMinecraft;
 import dev.joid.backend.minecraft.demo.ui.UIDemoOverlayLayer;
 import dev.joid.backend.minecraft.lib.font.impl.minecraft.MinecraftFont;
+import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
 import dev.joid.backend.minecraft.lib.ui.core.data.overlay.layer.OverlayLayer;
 import dev.joid.backend.minecraft.lib.ui.core.data.overlay.layer.UIDataOverlayLayer;
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.block.BlockNode;
@@ -93,6 +94,7 @@ import net.minecraft.client.gui.screens.options.controls.KeyBindsScreen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.resources.language.ClientLanguage;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundEventListener;
 import net.minecraft.core.ClientAsset;
 import net.minecraft.network.chat.Component;
@@ -158,6 +160,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			context.waitTicks(20);
 			context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
 			context.waitForScreen(null);
+			FabricJoidClientGameTest.verifyBackground(context);
 			FabricJoidClientGameTest.verifyOverlays(context);
 			FabricJoidClientGameTest.verifyContainer(context, singleplayer.getServer());
 		}
@@ -196,6 +199,50 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 				throw new AssertionError("The screen of UIDemoMinecraft does not follow its UIDataMinecraft: pause " + screen.isPauseScreen() + ", in game " + screen.isInGameUi() + ", title " + screen.getTitle().getString());
 			}
 		});
+	}
+
+	private static void verifyBackground(final ClientGameTestContext context) {
+		final List<String> failures = new ArrayList<>();
+		context.runOnClient(minecraft -> minecraft.options.showSubtitles().set(true));
+		context.waitTicks(5);
+		final BufferedImage world = FabricJoidClientGameTest.read(context.takeScreenshot("joid-background-world"));
+		final BufferedImage vanilla = FabricJoidClientGameTest.verifyBackground(context, failures, new VanillaBackground(), "joid-background-vanilla");
+		final BufferedImage none = FabricJoidClientGameTest.verifyBackground(context, failures, new NoBackground(), "joid-background-none");
+		context.runOnClient(minecraft -> minecraft.options.showSubtitles().set(false));
+		final double darkened = FabricJoidClientGameTest.difference(world, vanilla);
+		final double unchanged = FabricJoidClientGameTest.difference(world, none);
+		if (darkened < 20D) {
+			failures.add("the default background differs from the world by " + darkened + " levels on average, the vanilla menu background is missing");
+		}
+
+		if (unchanged > 4D) {
+			failures.add("the background disabled by UIDataMinecraft differs from the world by " + unchanged + " levels on average");
+		}
+
+		System.out.println("[JOID] Background: vanilla " + darkened + ", none " + unchanged + " levels from the world");
+		if (!failures.isEmpty()) {
+			throw new AssertionError(failures.size() + " background checks failed:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
+		}
+	}
+
+	private static BufferedImage verifyBackground(final ClientGameTestContext context, final List<String> failures, final UI ui, final String name) {
+		final int[] subtitles = {1400, 640, 520, 440};
+		context.runOnClient(_ -> JOID.open(ui));
+		context.waitForScreen(UIScreen.class);
+		context.waitTicks(20);
+		if (context.computeOnClient(minecraft -> !minecraft.gui.screen().isPauseScreen() || !minecraft.gui.screen().getTitle().getString().isEmpty())) {
+			failures.add(name + " does not pause the game with an empty title like an absent UIDataMinecraft");
+		}
+
+		final BufferedImage image = FabricJoidClientGameTest.read(context.takeScreenshot(name));
+		context.runOnClient(minecraft -> minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_PLING, 1F)));
+		context.waitTicks(5);
+		final BufferedImage subtitled = FabricJoidClientGameTest.read(context.takeScreenshot(name + "-subtitles"));
+		FabricJoidClientGameTest.expectChange(failures, "subtitles of " + name, List.of(image, subtitled), subtitles, false);
+		context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
+		context.waitForScreen(null);
+		context.waitTicks(40);
+		return image;
 	}
 
 	private static void verifyKeyBindLabels(final ClientGameTestContext context) {
@@ -635,7 +682,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 
 	private static void verifyContainerBounds(final ClientGameTestContext context, final TestServerContext server, final List<String> failures) {
 		if (context.computeOnClient(minecraft -> minecraft.gui.screen().isPauseScreen() || !minecraft.gui.screen().isInGameUi())) {
-			failures.add("the container screen does not follow the UIDataMinecraft of UIDemoContainer");
+			failures.add("the container screen pauses the game or is not an in-game screen");
 		}
 
 		final int[] panel = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoContainer.class).getNodeList().ordered().getFirst()));
@@ -1210,6 +1257,18 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		}
 	}
 
+	private static double difference(final BufferedImage first, final BufferedImage second) {
+		long difference = 0L;
+		for (int y = 0; y < first.getHeight(); y++) {
+			for (int x = 0; x < first.getWidth(); x++) {
+				for (int shift = 0; shift < 24; shift += 8) {
+					difference += Math.abs((first.getRGB(x, y) >> shift & 0xFF) - (second.getRGB(x, y) >> shift & 0xFF));
+				}
+			}
+		}
+		return difference / (first.getWidth() * first.getHeight() * 3D);
+	}
+
 	private static int delta(final int expected, final int actual) {
 		int delta = 0;
 		for (int shift = 0; shift < 24; shift += 8) {
@@ -1309,6 +1368,23 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 	@UIDataOverlay(active = true)
 	@UIDataOverlayLayer(layer = OverlayLayer.HOTBAR, cancel = true)
 	public static final class HiddenHotbar extends UI {
+
+		@Override
+		public void init() {}
+
+	}
+
+	@UIData(background = false)
+	public static final class VanillaBackground extends UI {
+
+		@Override
+		public void init() {}
+
+	}
+
+	@UIData(background = false)
+	@UIDataMinecraft(background = false)
+	public static final class NoBackground extends UI {
 
 		@Override
 		public void init() {}

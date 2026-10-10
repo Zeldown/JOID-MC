@@ -11,8 +11,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface UIDataMinecraft {
 
-	public String              title()      default "";
-	public boolean             pause()      default true;
-	public MinecraftBackground background() default MinecraftBackground.NONE;
+	public String  title()      default "";
+	public boolean pause()      default true;
+	public boolean background() default true;
 
 }

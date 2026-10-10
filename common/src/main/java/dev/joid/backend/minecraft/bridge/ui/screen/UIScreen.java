@@ -1,6 +1,5 @@
 package dev.joid.backend.minecraft.bridge.ui.screen;
 
-import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.MinecraftBackground;
 import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
 import lombok.NonNull;
 
@@ -41,7 +40,7 @@ public class UIScreen extends Screen {
 
 	@Override
 	public void extractTransparentBackground(final GuiGraphicsExtractor graphics) {
-		if (this.getBackground() == MinecraftBackground.DIM) {
+		if (this.hasBackground()) {
 			super.extractTransparentBackground(graphics);
 		}
 	}
@@ -53,7 +52,7 @@ public class UIScreen extends Screen {
 
 	@Override
 	public boolean isInGameUi() {
-		return this.getBackground() != MinecraftBackground.BLUR;
+		return !this.hasBackground() || super.isInGameUi();
 	}
 
 	@Override
@@ -98,9 +97,9 @@ public class UIScreen extends Screen {
 		return this.bridge.getInput().charTyped(event.codepoint());
 	}
 
-	private MinecraftBackground getBackground() {
+	private boolean hasBackground() {
 		final UIDataMinecraft data = this.bridge.getMinecraftData();
-		return data == null ? MinecraftBackground.NONE : data.background();
+		return data == null || data.background();
 	}
 
 }

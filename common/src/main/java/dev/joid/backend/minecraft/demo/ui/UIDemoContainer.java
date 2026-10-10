@@ -2,18 +2,17 @@ package dev.joid.backend.minecraft.demo.ui;
 
 import dev.joid.backend.minecraft.demo.container.DemoContainer;
 import dev.joid.backend.minecraft.lib.ui.core.container.ContainerUI;
-import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.MinecraftBackground;
-import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
 import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
 import dev.joid.demo.DemoFont;
 import dev.joid.lib.color.Color;
 import dev.joid.lib.draw.text.builder.Text;
 import dev.joid.lib.font.TextInfo;
+import dev.joid.lib.ui.core.data.UIData;
 import dev.joid.lib.ui.node.impl.design.shape.RectNode;
 import dev.joid.lib.ui.node.impl.design.text.TextNode;
 import dev.joid.lib.utils.align.Align;
 
-@UIDataMinecraft(pause = false, background = MinecraftBackground.DIM)
+@UIData(background = false)
 public class UIDemoContainer extends ContainerUI<DemoContainer> {
 
 	private static final Color INK         = new Color(153, 153, 153);

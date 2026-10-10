@@ -8,7 +8,6 @@ import java.util.Set;
 import java.util.function.Function;
 
 import dev.joid.backend.minecraft.lib.ui.core.container.ContainerUI;
-import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.MinecraftBackground;
 import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
 import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
 import dev.joid.base.glfw.input.GlfwKeys;
@@ -95,7 +94,7 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 
 	@Override
 	public void extractTransparentBackground(final GuiGraphicsExtractor graphics) {
-		if (this.getBackground() == MinecraftBackground.DIM) {
+		if (this.hasBackground()) {
 			super.extractTransparentBackground(graphics);
 		}
 	}
@@ -103,17 +102,6 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 	@Override
 	public boolean shouldCloseOnEsc() {
 		return false;
-	}
-
-	@Override
-	public boolean isInGameUi() {
-		return this.getBackground() != MinecraftBackground.BLUR;
-	}
-
-	@Override
-	public boolean isPauseScreen() {
-		final UIDataMinecraft data = this.getMinecraftData();
-		return data == null ? super.isPauseScreen() : data.pause();
 	}
 
 	@Override
@@ -200,9 +188,9 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 		return this.ui.getClass().getAnnotation(UIDataMinecraft.class);
 	}
 
-	private MinecraftBackground getBackground() {
+	private boolean hasBackground() {
 		final UIDataMinecraft data = this.getMinecraftData();
-		return data == null ? MinecraftBackground.NONE : data.background();
+		return data == null || data.background();
 	}
 
 	private void updateBounds() {
