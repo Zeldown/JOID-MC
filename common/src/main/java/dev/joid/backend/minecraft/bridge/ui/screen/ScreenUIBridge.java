@@ -89,7 +89,6 @@ public final class ScreenUIBridge extends StackUIBridge {
 
 	@Override
 	protected void detachScreen() {
-		super.draw(_ -> false);
 		if (this.screen == null) {
 			return;
 		}
