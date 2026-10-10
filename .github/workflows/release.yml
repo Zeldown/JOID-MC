@@ -3,6 +3,15 @@ name: Release
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag of the release, v{mcversion}-X.X.X'
+        required: true
+      upload:
+        description: 'Attach the jars to the release of this tag, a draft included (otherwise the jars stay workflow artifacts)'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -20,7 +29,7 @@ jobs:
       - name: Read the version
         id: version
         env:
-          RELEASE_NAME: ${{ github.event.release.name || github.event.release.tag_name }}
+          RELEASE_NAME: ${{ github.event.release.name || github.event.release.tag_name || inputs.tag }}
         run: |
           if [[ ! "$RELEASE_NAME" =~ ^v([0-9]+(\.[0-9]+)+)-([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
             echo "::error::The release name must follow the v{mcversion}-X.X.X format, got '$RELEASE_NAME'"
@@ -28,6 +37,10 @@ jobs:
           fi
           MC_VERSION="${BASH_REMATCH[1]}"
           VERSION="${BASH_REMATCH[3]}"
+          if ! grep -qx "minecraft_version=$MC_VERSION" gradle.properties; then
+            echo "::error::The release targets Minecraft $MC_VERSION but the commit builds $(grep '^minecraft_version=' gradle.properties)"
+            exit 1
+          fi
           if ! git merge-base --is-ancestor "$GITHUB_SHA" "origin/version/$MC_VERSION" 2>/dev/null; then
             echo "::error::The release targets Minecraft $MC_VERSION but its commit is not on the version/$MC_VERSION branch"
             exit 1
@@ -63,17 +76,36 @@ jobs:
           LOADER: ${{ matrix.loader }}
           VERSION: ${{ needs.version.outputs.version }}
         run: |
+          case "$LOADER" in
+            fabric) METADATA=fabric.mod.json; PATTERN="\"version\": \"$VERSION\"" ;;
+            neoforge) METADATA=META-INF/neoforge.mods.toml; PATTERN="version = \"$VERSION\"" ;;
+            forge) METADATA=META-INF/mods.toml; PATTERN="version = \"$VERSION\"" ;;
+          esac
           for KIND in dev prod; do
-            if ! ls "$LOADER"/build/libs/joid-backend-minecraft-"$LOADER"-*-"$VERSION"-"$KIND".jar > /dev/null 2>&1; then
-              echo "::error::The $KIND jar of $LOADER is missing"
+            JAR="$LOADER/build/libs/joid-backend-minecraft-$LOADER-$(grep '^minecraft_version=' gradle.properties | cut -d= -f2)-$VERSION-$KIND.jar"
+            if [ ! -f "$JAR" ]; then
+              echo "::error::The $KIND jar of $LOADER is missing: $JAR"
               exit 1
             fi
+            if ! unzip -p "$JAR" "$METADATA" | grep -qF "$PATTERN"; then
+              echo "::error::$JAR does not declare the version $VERSION in $METADATA"
+              exit 1
+            fi
+            echo "::notice::$(basename "$JAR"), $(du -h "$JAR" | cut -f1)"
           done
 
+      - uses: actions/upload-artifact@v6
+        with:
+          name: jars-${{ matrix.loader }}
+          path: |
+            ${{ matrix.loader }}/build/libs/*-${{ needs.version.outputs.version }}-dev.jar
+            ${{ matrix.loader }}/build/libs/*-${{ needs.version.outputs.version }}-prod.jar
+
       - name: Upload the jars
+        if: github.event_name == 'release' || inputs.upload
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.event.release.tag_name }}
+          TAG: ${{ github.event.release.tag_name || inputs.tag }}
           LOADER: ${{ matrix.loader }}
           VERSION: ${{ needs.version.outputs.version }}
         run: gh release upload "$TAG" "$LOADER"/build/libs/*-"$VERSION"-dev.jar "$LOADER"/build/libs/*-"$VERSION"-prod.jar --clobber
