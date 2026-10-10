@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -1489,7 +1490,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		final List<DemoEntry> entries = new ArrayList<>(UIDemoChoice.LIST);
 		UIDemoChoice.LIST.removeIf(entry -> entry.getHover() != null && entry.getHover().startsWith("dev.joid.backend.minecraft."));
 		try {
-			final File rendererReferences = new File(references, runner.getRenderer());
+			final File rendererReferences = new File(new File(references, RenderSystem.getDevice().getDeviceInfo().backendName().toLowerCase(Locale.ROOT)), runner.getRenderer());
 			for (final String scenario : SnapshotRunner.getScenarios()) {
 				for (final Map.Entry<String, SnapshotImage> shot : runner.run(scenario).entrySet()) {
 					final File reference = new File(rendererReferences, shot.getKey() + ".png");

@@ -52,6 +52,9 @@ loom {
                 vmArg("-Djoid.snapshot.output=${layout.buildDirectory.dir('snapshots/renders').get().asFile.absolutePath}")
                 vmArg("-Djoid.snapshot.references=${rootProject.file('.snapshots/references').absolutePath}")
                 vmArg("-Djoid.snapshot.cache=${rootProject.file('.snapshots/cache').absolutePath}")
+                if (project.hasProperty('joid.graphicsBackend')) {
+                    programArgs('--graphicsBackend', project.property('joid.graphicsBackend').toString())
+                }
             }
         }
     }

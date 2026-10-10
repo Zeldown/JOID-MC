@@ -76,8 +76,8 @@ jobs:
       - name: Report the snapshot renderer
         if: always()
         run: |
-          RECORDED=$(git status --porcelain --untracked-files=all .snapshots/references | wc -l)
-          echo "::notice::Snapshot renderers: $(ls .snapshots/references | xargs), $RECORDED references recorded by this run"
+          RECORDED=$(git status --porcelain --untracked-files=all .snapshots/references/opengl | wc -l)
+          echo "::notice::OpenGL snapshot renderers: $(ls .snapshots/references/opengl | xargs), $RECORDED references recorded by this run"
 
       - uses: actions/upload-artifact@v6
         if: always()
@@ -87,7 +87,58 @@ jobs:
             fabric/build/run/clientGameTest/screenshots/
             fabric/build/run/clientGameTest/logs/
             fabric/build/snapshots/
-            .snapshots/references/
+            .snapshots/references/opengl/
+
+  client-tests-vulkan:
+    needs: build
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          lfs: true
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Install Xvfb and lavapipe
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb libgl1-mesa-dri libglx-mesa0 mesa-vulkan-drivers libvulkan1 vulkan-tools
+
+      - name: Report the Vulkan device
+        run: vulkaninfo --summary | grep -E "deviceName|driverName|driverInfo" || true
+
+      - name: Client game tests
+        env:
+          ALSOFT_DRIVERS: 'null'
+        run: xvfb-run -a -s "-screen 0 1920x1080x24" ./gradlew :fabric:runClientGameTest -Pjoid.graphicsBackend=vulkan
+
+      - name: Check the graphics backend
+        run: |
+          if ! grep -q "Using graphics backend Vulkan" fabric/build/run/clientGameTest/logs/latest.log; then
+            echo "::error::Minecraft did not run on Vulkan: $(grep -m 1 'Using graphics backend' fabric/build/run/clientGameTest/logs/latest.log)"
+            exit 1
+          fi
+
+      - name: Report the snapshot renderer
+        if: always()
+        run: |
+          RECORDED=$(git status --porcelain --untracked-files=all .snapshots/references/vulkan | wc -l)
+          echo "::notice::Vulkan snapshot renderers: $(ls .snapshots/references/vulkan | xargs), $RECORDED references recorded by this run"
+
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: client-tests-vulkan
+          path: |
+            fabric/build/run/clientGameTest/screenshots/
+            fabric/build/run/clientGameTest/logs/
+            fabric/build/snapshots/
+            .snapshots/references/vulkan/
 
   server-tests:
     needs: build
