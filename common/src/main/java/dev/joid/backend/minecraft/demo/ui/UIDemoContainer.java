@@ -2,6 +2,8 @@ package dev.joid.backend.minecraft.demo.ui;
 
 import dev.joid.backend.minecraft.demo.container.DemoContainer;
 import dev.joid.backend.minecraft.lib.ui.core.container.ContainerUI;
+import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.MinecraftBackground;
+import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
 import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
 import dev.joid.demo.DemoFont;
 import dev.joid.lib.color.Color;
@@ -11,6 +13,7 @@ import dev.joid.lib.ui.node.impl.design.shape.RectNode;
 import dev.joid.lib.ui.node.impl.design.text.TextNode;
 import dev.joid.lib.utils.align.Align;
 
+@UIDataMinecraft(pause = false, background = MinecraftBackground.DIM)
 public class UIDemoContainer extends ContainerUI<DemoContainer> {
 
 	private static final Color INK         = new Color(153, 153, 153);
@@ -28,6 +31,7 @@ public class UIDemoContainer extends ContainerUI<DemoContainer> {
 		RectNode
 		.create(588, 168, 744, 744)
 		.color(UIDemoContainer.PLACEHOLDER)
+		.self(super::bounds)
 		.body(rect -> {
 			TextNode.create(48, 48).text(Text.create("Demo storage", title)).anchorY(Align.CENTER).attach(rect);
 			for (int index = 0; index < 27; index++) {

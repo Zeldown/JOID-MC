@@ -1,5 +1,7 @@
 package dev.joid.backend.minecraft.bridge.ui.screen;
 
+import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.MinecraftBackground;
+import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
 import lombok.NonNull;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -33,16 +35,37 @@ public class UIScreen extends Screen {
 	}
 
 	@Override
-	public void extractBackground(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {}
-
-	@Override
 	public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
 		this.bridge.frame(graphics, mouseX, mouseY);
 	}
 
 	@Override
+	public void extractTransparentBackground(final GuiGraphicsExtractor graphics) {
+		if (this.getBackground() == MinecraftBackground.DIM) {
+			super.extractTransparentBackground(graphics);
+		}
+	}
+
+	@Override
 	public boolean shouldCloseOnEsc() {
 		return false;
+	}
+
+	@Override
+	public boolean isPauseScreen() {
+		final UIDataMinecraft data = this.bridge.getMinecraftData();
+		return data == null || data.pause();
+	}
+
+	@Override
+	public boolean isInGameUi() {
+		return this.getBackground() != MinecraftBackground.BLUR;
+	}
+
+	@Override
+	public @NonNull Component getTitle() {
+		final UIDataMinecraft data = this.bridge.getMinecraftData();
+		return data == null || data.title().isEmpty() ? super.getTitle() : Component.translatable(data.title());
 	}
 
 	@Override
@@ -73,6 +96,11 @@ public class UIScreen extends Screen {
 	@Override
 	public boolean charTyped(final CharacterEvent event) {
 		return this.bridge.getInput().charTyped(event.codepoint());
+	}
+
+	private MinecraftBackground getBackground() {
+		final UIDataMinecraft data = this.bridge.getMinecraftData();
+		return data == null ? MinecraftBackground.NONE : data.background();
 	}
 
 }

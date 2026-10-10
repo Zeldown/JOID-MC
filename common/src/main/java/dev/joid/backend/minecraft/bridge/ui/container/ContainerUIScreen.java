@@ -8,6 +8,8 @@ import java.util.Set;
 import java.util.function.Function;
 
 import dev.joid.backend.minecraft.lib.ui.core.container.ContainerUI;
+import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.MinecraftBackground;
+import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
 import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
 import dev.joid.base.glfw.input.GlfwKeys;
 import dev.joid.lib.bridge.BridgeHandler;
@@ -70,10 +72,8 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 	protected void init() {
 		super.init();
 		this.bridge.load();
+		this.updateBounds();
 	}
-
-	@Override
-	public void extractBackground(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {}
 
 	@Override
 	public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
@@ -81,6 +81,7 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 			this.ui.getCarriedNode().attach(this.ui);
 		}
 
+		this.updateBounds();
 		this.updateQuickCraft();
 		final Slot previous = super.hoveredSlot;
 		super.hoveredSlot = this.getHoveredSlot(mouseX, mouseY);
@@ -93,8 +94,32 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 	}
 
 	@Override
+	public void extractTransparentBackground(final GuiGraphicsExtractor graphics) {
+		if (this.getBackground() == MinecraftBackground.DIM) {
+			super.extractTransparentBackground(graphics);
+		}
+	}
+
+	@Override
 	public boolean shouldCloseOnEsc() {
 		return false;
+	}
+
+	@Override
+	public boolean isPauseScreen() {
+		final UIDataMinecraft data = this.getMinecraftData();
+		return data == null ? super.isPauseScreen() : data.pause();
+	}
+
+	@Override
+	public boolean isInGameUi() {
+		return this.getBackground() != MinecraftBackground.BLUR;
+	}
+
+	@Override
+	public @NonNull Component getTitle() {
+		final UIDataMinecraft data = this.getMinecraftData();
+		return data == null || data.title().isEmpty() ? super.getTitle() : Component.translatable(data.title());
 	}
 
 	@Override
@@ -171,9 +196,24 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 		return node != null && node.getSlot() != null && node.getSlot().isActive() ? node.getSlot() : null;
 	}
 
-	@Override
-	protected boolean hasClickedOutside(final double x, final double y, final int left, final int top) {
-		return this.getNodeList(x, y).isEmpty();
+	private UIDataMinecraft getMinecraftData() {
+		return this.ui.getClass().getAnnotation(UIDataMinecraft.class);
+	}
+
+	private MinecraftBackground getBackground() {
+		final UIDataMinecraft data = this.getMinecraftData();
+		return data == null ? MinecraftBackground.NONE : data.background();
+	}
+
+	private void updateBounds() {
+		final double[] bounds = this.ui.getBounds();
+		final double scale = Minecraft.getInstance().getWindow().getGuiScale();
+		final int left = (int) Math.floor(this.ui.getView().toScreenX(bounds[0]) / scale);
+		final int top = (int) Math.floor(this.ui.getView().toScreenY(bounds[1]) / scale);
+		super.leftPos     = left;
+		super.topPos      = top;
+		super.imageWidth  = (int) Math.ceil(this.ui.getView().toScreenX(bounds[0] + bounds[2]) / scale) - left;
+		super.imageHeight = (int) Math.ceil(this.ui.getView().toScreenY(bounds[1] + bounds[3]) / scale) - top;
 	}
 
 	private void updateQuickCraft() {

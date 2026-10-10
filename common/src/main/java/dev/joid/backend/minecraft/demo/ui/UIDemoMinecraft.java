@@ -3,6 +3,8 @@ package dev.joid.backend.minecraft.demo.ui;
 import java.util.UUID;
 
 import dev.joid.backend.minecraft.lib.font.impl.minecraft.MinecraftFont;
+import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.MinecraftBackground;
+import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.block.BlockNode;
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.entity.EntityNode;
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.item.ItemNode;
@@ -47,6 +49,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 
+@UIDataMinecraft(pause = false, background = MinecraftBackground.BLUR, title = "joid.demo.minecraft")
 public class UIDemoMinecraft extends UIDemo {
 
 	private static final Color INK         = new Color(153, 153, 153);

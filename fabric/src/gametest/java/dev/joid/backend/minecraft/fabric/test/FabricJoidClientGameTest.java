@@ -142,6 +142,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			FabricJoidClientGameTest.screenshot(context, new UIDemoShader(), "joid-demo-shader");
 			FabricJoidClientGameTest.screenshot(context, new UIDemoEffect(), "joid-demo-effect");
 			FabricJoidClientGameTest.screenshot(context, new UIDemoMinecraft(), "joid-demo-minecraft");
+			FabricJoidClientGameTest.verifyMinecraftData(context);
 			FabricJoidClientGameTest.verifyResources(context);
 			FabricJoidClientGameTest.verifyReload(context);
 			FabricJoidClientGameTest.verifyItems(context);
@@ -182,6 +183,15 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 
 			if (!(BridgeHandler.THREAD.get() instanceof MinecraftThreadBridge) || !BridgeHandler.THREAD.get().isRenderThread()) {
 				throw new AssertionError("The thread bridge is " + BridgeHandler.THREAD.get());
+			}
+		});
+	}
+
+	private static void verifyMinecraftData(final ClientGameTestContext context) {
+		context.runOnClient(minecraft -> {
+			final Screen screen = minecraft.gui.screen();
+			if (screen.isPauseScreen() || screen.isInGameUi() || !screen.getTitle().getString().equals("Minecraft demo")) {
+				throw new AssertionError("The screen of UIDemoMinecraft does not follow its UIDataMinecraft: pause " + screen.isPauseScreen() + ", in game " + screen.isInGameUi() + ", title " + screen.getTitle().getString());
 			}
 		});
 	}
@@ -533,6 +543,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		FabricJoidClientGameTest.expectContainer(context, server, failures, "the key Q over the golden apple", 0, new int[] {1, 0});
 
 		FabricJoidClientGameTest.verifyContainerPopup(context, server, failures);
+		FabricJoidClientGameTest.verifyContainerBounds(context, server, failures);
 
 		context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
 		context.waitForScreen(null);
@@ -545,6 +556,40 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		if (!failures.isEmpty()) {
 			throw new AssertionError(failures.size() + " container checks failed:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
 		}
+	}
+
+	private static void verifyContainerBounds(final ClientGameTestContext context, final TestServerContext server, final List<String> failures) {
+		if (context.computeOnClient(minecraft -> minecraft.gui.screen().isPauseScreen() || !minecraft.gui.screen().isInGameUi())) {
+			failures.add("the container screen does not follow the UIDataMinecraft of UIDemoContainer");
+		}
+
+		final int[] panel = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoContainer.class).getNodeList().ordered().getFirst()));
+		final int[] image = context.computeOnClient(minecraft -> {
+			final int scale = minecraft.getWindow().getGuiScale();
+			final Screen screen = minecraft.gui.screen();
+			return new int[] {(int) FabricJoidClientGameTest.field(screen, "leftPos") * scale, (int) FabricJoidClientGameTest.field(screen, "topPos") * scale, (int) FabricJoidClientGameTest.field(screen, "imageWidth") * scale, (int) FabricJoidClientGameTest.field(screen, "imageHeight") * scale, scale};
+		});
+		for (int i = 0; i < 4; i++) {
+			if (Math.abs(image[i] - panel[i]) >= image[4] * 2) {
+				failures.add("the container screen bounds " + Arrays.toString(image) + " do not follow the panel " + Arrays.toString(panel));
+				break;
+			}
+		}
+
+		server.runOnServer(minecraftServer -> FabricJoidClientGameTest.player(minecraftServer).containerMenu.getSlot(3).set(new ItemStack(Items.DIAMOND, 7)));
+		context.waitTicks(10);
+		final List<int[]> slots = context.computeOnClient(_ -> FabricJoidClientGameTest.slotBounds());
+		FabricJoidClientGameTest.moveTo(context, slots.get(3));
+		context.getInput().pressMouse(GLFW.GLFW_MOUSE_BUTTON_LEFT);
+		context.waitTicks(5);
+		FabricJoidClientGameTest.moveTo(context, new int[] {panel[0] + 10, panel[1] + 10, 2, 2});
+		context.getInput().pressMouse(GLFW.GLFW_MOUSE_BUTTON_LEFT);
+		context.waitTicks(5);
+		FabricJoidClientGameTest.expectContainer(context, server, failures, "a click in a hole of the panel with 7 diamonds", 7, new int[] {3, 0});
+		FabricJoidClientGameTest.moveTo(context, new int[] {panel[0] - 60, panel[1] + panel[3] / 2, 2, 2});
+		context.getInput().pressMouse(GLFW.GLFW_MOUSE_BUTTON_LEFT);
+		context.waitTicks(5);
+		FabricJoidClientGameTest.expectContainer(context, server, failures, "a click outside the panel with 7 diamonds", 0, new int[] {3, 0});
 	}
 
 	private static void verifyContainerPopup(final ClientGameTestContext context, final TestServerContext server, final List<String> failures) {

@@ -3,6 +3,7 @@ package dev.joid.backend.minecraft.bridge.ui.screen;
 import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
 import dev.joid.backend.minecraft.bridge.ui.TooltipQueue;
 import dev.joid.backend.minecraft.bridge.window.MinecraftWindowBridge;
+import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
 import dev.joid.base.glfw.input.GlfwInputForwarder;
 import dev.joid.lib.bridge.ui.StackUIBridge;
 import dev.joid.lib.ui.core.UI;
@@ -50,6 +51,15 @@ public final class ScreenUIBridge extends StackUIBridge {
 	@Override
 	public boolean canHandle(final @NonNull Class<? extends UI> clazz) {
 		return !UIDataOverlayObject.getOrDefault(clazz).active();
+	}
+
+	public UIDataMinecraft getMinecraftData() {
+		for (final UI ui : super.getUiList().ordered()) {
+			if (!ui.getOverlay().active()) {
+				return ui.getClass().getAnnotation(UIDataMinecraft.class);
+			}
+		}
+		return null;
 	}
 
 	@Override
