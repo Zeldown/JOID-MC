@@ -55,9 +55,12 @@ eclipse {
         linkedFolders.each { name, folder ->
             linkedResource(name: name, type: '2', location: folder.absolutePath)
         }
+        file.whenMerged { description ->
+            description.linkedResources.removeAll { link -> linkedFolders[link.name] != file(link.location) }
+        }
     }
     classpath.file.whenMerged { classpath ->
-        classpath.entries.removeAll { it instanceof ProjectDependency }
+        classpath.entries.removeAll { it instanceof ProjectDependency || it instanceof SourceFolder && !it.path.startsWith('src/') }
         def output = classpath.entries.find { it instanceof SourceFolder && it.path == 'src/main/java' }?.output
         linkedFolders.keySet().each { name ->
             classpath.entries << new SourceFolder(name, output)
