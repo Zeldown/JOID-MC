@@ -24,7 +24,6 @@ public final class DrawItem {
 
 	private static final DrawItem INSTANCE = new DrawItem();
 
-	private static final Color SHADOW   = new Color(0xFF3F3F3F);
 	private static final Color COOLDOWN = new Color(0x7FFFFFFF);
 
 	public static @NonNull DrawItem inst() {
@@ -80,7 +79,7 @@ public final class DrawItem {
 		}
 
 		final double unit = size / 16D;
-		final TextInfo info = TextInfo.create(MinecraftFont.DEFAULT, (float) (MinecraftFont.SIZE * unit), Color.WHITE).shadow(DrawItem.SHADOW).shadow((float) unit, (float) unit);
+		final TextInfo info = TextInfo.create(MinecraftFont.DEFAULT, (float) (MinecraftFont.SIZE * unit), Color.WHITE).shadowTint(0.25F).shadow((float) unit, (float) unit);
 		DrawUtils.TEXT.drawText(x + 17D * unit - info.getWidth(count), y + 9D * unit, count, info, Align.START, Align.START);
 	}
 

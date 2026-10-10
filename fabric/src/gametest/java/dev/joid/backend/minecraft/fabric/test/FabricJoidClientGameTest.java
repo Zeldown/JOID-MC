@@ -25,6 +25,7 @@ import org.lwjgl.opengl.GL11;
 
 import dev.joid.backend.minecraft.bridge.render.texture.MinecraftTexture;
 import dev.joid.backend.minecraft.bridge.snapshot.MinecraftSnapshotBackend;
+import dev.joid.backend.minecraft.bridge.thread.MinecraftThreadBridge;
 import dev.joid.backend.minecraft.bridge.ui.container.ContainerUIBridge;
 import dev.joid.backend.minecraft.bridge.ui.container.ContainerUIScreen;
 import dev.joid.backend.minecraft.bridge.ui.overlay.OverlayLayerRenderer;
@@ -54,6 +55,9 @@ import dev.joid.lib.bridge.render.texture.ITexture;
 import dev.joid.lib.color.Color;
 import dev.joid.lib.draw.text.builder.Text;
 import dev.joid.lib.font.TextInfo;
+import dev.joid.lib.font.converter.TextConverter;
+import dev.joid.lib.input.key.Key;
+import dev.joid.lib.input.key.resolver.KeyResolver;
 import dev.joid.lib.resource.Resource;
 import dev.joid.lib.resource.decoder.impl.VideoResourceDecoder;
 import dev.joid.lib.ui.core.UI;
@@ -78,6 +82,7 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.FocusableTextWidget;
 import net.minecraft.client.gui.screens.Screen;
@@ -131,6 +136,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 					throw new AssertionError("Clicking the entry UIDemoMinecraft of UIDemoChoice did not open it");
 				}
 			});
+			FabricJoidClientGameTest.verifyHostBindings(context);
 
 			FabricJoidClientGameTest.screenshot(context, new UIDemoFont(), "joid-demo-font");
 			FabricJoidClientGameTest.screenshot(context, new UIDemoShader(), "joid-demo-shader");
@@ -155,6 +161,29 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 
 		context.runOnClient(_ -> FabricJoidClientGameTest.verify(JUnitCore.runClasses(FabricRenderBridgeContractTest.class)));
 		context.runOnClient(_ -> FabricJoidClientGameTest.verifySnapshots(new File(System.getProperty("joid.snapshot.output", "snapshots/renders")), new File(System.getProperty("joid.snapshot.references", "snapshots/references"))));
+	}
+
+	private static void verifyHostBindings(final ClientGameTestContext context) {
+		context.getInput().pressKey(GLFW.GLFW_KEY_E);
+		context.waitTicks(40);
+		context.runOnClient(minecraft -> {
+			if (JOID.isOpen(UIDemoMinecraft.class) || !JOID.isOpen(UIDemoChoice.class)) {
+				throw new AssertionError("The inventory key bound by UIDemoMinecraft did not close it back to UIDemoChoice");
+			}
+
+			if (KeyResolver.resolve(minecraft.options.keyInventory) != Key.E) {
+				throw new AssertionError("The inventory key mapping resolves to " + KeyResolver.resolve(minecraft.options.keyInventory) + " instead of E");
+			}
+
+			final String converted = TextConverter.convert(Component.literal("A").withStyle(ChatFormatting.RED));
+			if (!converted.equals("\u00A7r\u00A7cA")) {
+				throw new AssertionError("A red chat component converts to " + converted);
+			}
+
+			if (!(BridgeHandler.THREAD.get() instanceof MinecraftThreadBridge) || !BridgeHandler.THREAD.get().isRenderThread()) {
+				throw new AssertionError("The thread bridge is " + BridgeHandler.THREAD.get());
+			}
+		});
 	}
 
 	private static void verifyKeyBindLabels(final ClientGameTestContext context) {

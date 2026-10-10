@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import dev.joid.backend.minecraft.lib.font.markup.LegacyTextColor;
 import dev.joid.backend.minecraft.lib.font.markup.impl.LegacyTextMarkup;
+import dev.joid.lib.font.converter.ITextConverter;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -13,23 +14,35 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class ChatTextConverter {
+public final class ChatTextConverter implements ITextConverter {
 
-	public static @NonNull String of(final @NonNull Component component) {
-		final StringBuilder text = new StringBuilder();
+	private static final ChatTextConverter INSTANCE = new ChatTextConverter();
+
+	public static @NonNull ChatTextConverter inst() {
+		return ChatTextConverter.INSTANCE;
+	}
+
+	@Override
+	public boolean supports(final @NonNull Object text) {
+		return text instanceof Component;
+	}
+
+	@Override
+	public @NonNull String convert(final @NonNull Object text) {
+		final StringBuilder converted = new StringBuilder();
 		final StringBuilder codes = new StringBuilder();
-		component.visit((style, content) -> {
+		((Component) text).visit((style, content) -> {
 			final String next = ChatTextConverter.codes(style);
 			if (!next.contentEquals(codes)) {
-				text.append(LegacyTextMarkup.PREFIX).append('r').append(next);
+				converted.append(LegacyTextMarkup.PREFIX).append('r').append(next);
 				codes.setLength(0);
 				codes.append(next);
 			}
 
-			text.append(content);
+			converted.append(content);
 			return Optional.empty();
 		}, Style.EMPTY);
-		return text.toString();
+		return converted.toString();
 	}
 
 	private static @NonNull String codes(final @NonNull Style style) {

@@ -53,8 +53,8 @@ public class EntityNode extends Node {
 		}
 
 		final boolean follow = this.followMouse && super.getUi().isOnTop();
-		final double lookX = super.getX() + (follow ? mouseX - super.getAbsoluteX() : super.getWidth() / 2D);
-		final double lookY = super.getY() + (follow ? mouseY - super.getAbsoluteY() : super.getHeight() / 2D);
+		final double lookX = follow ? super.toDrawX(mouseX) : super.getX() + super.getWidth() / 2D;
+		final double lookY = follow ? super.toDrawY(mouseY) : super.getY() + super.getHeight() / 2D;
 		if (this.entity != null) {
 			DrawEntity.inst().drawEntity(super.getX(), super.getY(), super.getWidth(), super.getHeight(), this.entity, this.scale, this.rotationYaw, this.rotationPitch, lookX, lookY);
 		} else if (this.profile != null || this.skin != null) {

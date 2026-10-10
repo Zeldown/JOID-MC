@@ -2,13 +2,13 @@ package dev.joid.backend.minecraft.demo.ui;
 
 import java.util.UUID;
 
-import dev.joid.backend.minecraft.lib.font.converter.impl.ChatTextConverter;
 import dev.joid.backend.minecraft.lib.font.impl.minecraft.MinecraftFont;
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.block.BlockNode;
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.entity.EntityNode;
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.item.ItemNode;
 import dev.joid.demo.DemoFont;
 import dev.joid.demo.ui.UIDemo;
+import dev.joid.internal.JOID;
 import dev.joid.lib.color.Color;
 import dev.joid.lib.draw.text.TextMode;
 import dev.joid.lib.draw.text.builder.Text;
@@ -56,7 +56,7 @@ public class UIDemoMinecraft extends UIDemo {
 	@Override
 	public void init() {
 		final TextInfo caption = TextInfo.create(DemoFont.MONTSERRAT, 24, UIDemoMinecraft.INK);
-		final TextInfo info = TextInfo.create(MinecraftFont.DEFAULT, MinecraftFont.SIZE * 3, Color.WHITE).shadow(new Color(63, 63, 63)).shadow(3F, 3F);
+		final TextInfo info = TextInfo.create(MinecraftFont.DEFAULT, MinecraftFont.SIZE * 3, Color.WHITE).shadowTint(0.25F).shadow(3F, 3F);
 		final Component component = Component.literal("Hex ").withColor(0x12ABCD).append(Component.translatable("menu.game").withStyle(ChatFormatting.GOLD, ChatFormatting.UNDERLINE)).append(Component.literal(" plain"));
 		final ItemStack damaged = new ItemStack(Items.DIAMOND_PICKAXE);
 		final ItemStack pearl = new ItemStack(Items.ENDER_PEARL, 16);
@@ -105,7 +105,7 @@ public class UIDemoMinecraft extends UIDemo {
 			.color(UIDemoMinecraft.PLACEHOLDER)
 			.body(rect -> {
 				RectNode.create(20, 20, 360, 200).color(UIDemoMinecraft.PANEL).attach(rect);
-				TextNode.create(30, 30, 340, 0).text(Text.create(ChatTextConverter.of(component), info)).mode(TextMode.SPLIT).attach(rect);
+				TextNode.create(30, 30, 340, 0).text(Text.create(component, info)).mode(TextMode.SPLIT).attach(rect);
 				TextNode.create(200, 255).text(Text.create("Chat text", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
 			})
 			.attach(container);
@@ -147,7 +147,7 @@ public class UIDemoMinecraft extends UIDemo {
 			.create(1480, 360, 400, 240)
 			.color(UIDemoMinecraft.PLACEHOLDER)
 			.body(rect -> {
-				TextNode.create(20, 30, 360, 0).text(Text.create("\u00A7lDark\u00A7r \u00A7otext\u00A7r \u00A7nwithout\u00A7r shadow", info.copy().color(Color.BLACK).shadow(null))).mode(TextMode.SPLIT).attach(rect);
+				TextNode.create(20, 30, 360, 0).text(Text.create("\u00A7lDark\u00A7r \u00A7otext\u00A7r \u00A7nwithout\u00A7r shadow", info.copy().color(Color.BLACK).shadowTint(null))).mode(TextMode.SPLIT).attach(rect);
 				TextNode.create(200, 255).text(Text.create("No shadow", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
 			})
 			.attach(container);
@@ -391,6 +391,8 @@ public class UIDemoMinecraft extends UIDemo {
 			ContainerNode.create(0, 1880, 1920, 80).attach(container);
 		})
 		.attach(this);
+
+		super.keybind(() -> JOID.close(this), Minecraft.getInstance().options.keyInventory);
 	}
 
 }
