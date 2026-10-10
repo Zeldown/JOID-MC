@@ -188,8 +188,8 @@ public final class MinecraftRenderBridge extends RenderBridge {
 		}
 
 		final MinecraftShader blazeShader = (MinecraftShader) shader;
-		final GpuBufferSlice vertices = this.uploadVertices(buffer, state);
-		final GpuBufferSlice uniforms = blazeShader.upload(state, this.getProjectionMatrix(state, target), super.getModelView(), stencil);
+		final GpuBufferSlice vertices = this.uploadVertices(buffer);
+		final GpuBufferSlice uniforms = blazeShader.upload(state, buffer, this.getProjectionMatrix(state, target), super.getModelView(), stencil);
 		if (color) {
 			this.record(PipelineKey.create(shader, state, primitive), target.getView(), target.getDepthView(), stencil.isTest() ? target.getStencilView() : ((MinecraftTexture) super.getEmptyTexture()).getView(), blazeShader, vertices, uniforms, buffer.getCount());
 		}
@@ -242,8 +242,8 @@ public final class MinecraftRenderBridge extends RenderBridge {
 		pass.draw(count, 1, 0, 0);
 	}
 
-	private GpuBufferSlice uploadVertices(final VertexBuffer buffer, final RenderState state) {
-		final ByteBuffer data = VertexFill.complete(buffer, this.getScratch(buffer.getCount() * VertexBuffer.STRIDE), state);
+	private GpuBufferSlice uploadVertices(final VertexBuffer buffer) {
+		final ByteBuffer data = VertexFill.complete(buffer, this.getScratch(buffer.getCount() * VertexBuffer.STRIDE));
 		return this.device.createCommandEncoder().transientMemory().uploadGpu(data, VertexBuffer.STRIDE, GpuBuffer.USAGE_VERTEX);
 	}
 

@@ -1,6 +1,6 @@
 package dev.joid.backend.minecraft.bridge.render.shader;
 
-import java.util.List;
+import java.util.Collection;
 
 import dev.joid.backend.minecraft.Backend;
 import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
@@ -8,10 +8,11 @@ import dev.joid.backend.minecraft.bridge.render.vertex.VertexLayout;
 import dev.joid.lib.bridge.render.matrix.MatrixStack;
 import dev.joid.lib.bridge.render.shader.Shader;
 import dev.joid.lib.bridge.render.shader.source.ShaderSource;
-import dev.joid.lib.bridge.render.shader.source.ShaderVariable;
+import dev.joid.lib.bridge.render.shader.source.ShaderTranslation;
 import dev.joid.lib.bridge.render.state.BlendState;
 import dev.joid.lib.bridge.render.state.RenderState;
 import dev.joid.lib.bridge.render.state.StencilEmulation;
+import dev.joid.lib.bridge.render.vertex.VertexBuffer;
 import lombok.Getter;
 import lombok.NonNull;
 
@@ -31,28 +32,20 @@ public final class MinecraftShader extends Shader {
 
 	private final GpuDevice device;
 
-	@Getter private final Identifier      identifier;
-	@Getter private final BindGroupLayout layout;
-	@Getter private final VertexFormat    vertexFormat;
-	@Getter private final Identifier      stencilIdentifier;
+	@Getter private Identifier      identifier;
+	@Getter private BindGroupLayout layout;
+	@Getter private VertexFormat    vertexFormat;
+	@Getter private Identifier      stencilIdentifier;
 
 	private Boolean active;
 
-	private MinecraftShader(final MinecraftRenderBridge bridge, final MinecraftShaderTranslator translator, final ShaderSource vertex, final ShaderSource fragment, final BlendState blend) {
-		super(bridge, translator, vertex, fragment, blend);
-		final MinecraftShaderTranslator stencilTranslator = MinecraftShaderTranslator.create().stencil(StencilEmulation.Pass.WRITE).clampToBorder(translator.isClampToBorder());
-		this.device            = bridge.getDevice();
-		this.identifier        = Identifier.fromNamespaceAndPath(Backend.MOD_ID, "shader/" + MinecraftShader.count++);
-		this.stencilIdentifier = Identifier.fromNamespaceAndPath(Backend.MOD_ID, this.identifier.getPath() + "_stencil");
-		this.layout            = MinecraftShader.createLayout(translator.getSamplers(vertex, fragment));
-		this.vertexFormat      = VertexLayout.create(vertex.getBuiltins());
-		bridge.getSourceProvider().register(this.identifier, ShaderType.VERTEX, translator.translateVertex(vertex, fragment));
-		bridge.getSourceProvider().register(this.identifier, ShaderType.FRAGMENT, translator.translateFragment(vertex, fragment));
-		bridge.getSourceProvider().register(this.stencilIdentifier, ShaderType.FRAGMENT, stencilTranslator.translateFragment(vertex, fragment));
+	private MinecraftShader(final MinecraftRenderBridge bridge, final ShaderSource vertex, final ShaderSource fragment, final BlendState blend) {
+		super(bridge, MinecraftShaderTranslator.create().stencil(StencilEmulation.Pass.TEST), vertex, fragment, blend);
+		this.device = bridge.getDevice();
 	}
 
 	public static @NonNull MinecraftShader create(final @NonNull MinecraftRenderBridge bridge, final @NonNull ShaderSource vertex, final @NonNull ShaderSource fragment, final @NonNull BlendState blend) {
-		return new MinecraftShader(bridge, MinecraftShaderTranslator.create().stencil(StencilEmulation.Pass.TEST), vertex, fragment, blend);
+		return new MinecraftShader(bridge, vertex, fragment, blend);
 	}
 
 	@Override
@@ -64,16 +57,28 @@ public final class MinecraftShader extends Shader {
 		return this.active;
 	}
 
-	public @NonNull GpuBufferSlice upload(final @NonNull RenderState state, final @NonNull float[] projection, final @NonNull MatrixStack modelView, final @NonNull StencilEmulation stencil) {
-		stencil.write(super.builtins(state, projection, modelView));
+	public @NonNull GpuBufferSlice upload(final @NonNull RenderState state, final @NonNull VertexBuffer buffer, final @NonNull float[] projection, final @NonNull MatrixStack modelView, final @NonNull StencilEmulation stencil) {
+		stencil.write(super.builtins(state, buffer, projection, modelView));
 		super.getBlock().pack();
 		return this.device.createCommandEncoder().transientMemory().uploadGpu(super.getBlock().getData().slice(0, super.getBlock().getSize()), this.device.getDeviceInfo().limits().minUniformOffsetAlignment(), GpuBuffer.USAGE_UNIFORM);
 	}
 
-	private static BindGroupLayout createLayout(final List<ShaderVariable> samplers) {
+	@Override
+	protected void compileProgram(final @NonNull ShaderTranslation translation) {
+		final MinecraftRenderBridge bridge = (MinecraftRenderBridge) super.getBridge();
+		this.identifier        = Identifier.fromNamespaceAndPath(Backend.MOD_ID, "shader/" + MinecraftShader.count++);
+		this.stencilIdentifier = Identifier.fromNamespaceAndPath(Backend.MOD_ID, this.identifier.getPath() + "_stencil");
+		this.layout            = MinecraftShader.createLayout(super.getSamplerMap().keySet());
+		this.vertexFormat      = VertexLayout.create(super.getVertex().getBuiltins());
+		bridge.getSourceProvider().register(this.identifier, ShaderType.VERTEX, translation.getVertex());
+		bridge.getSourceProvider().register(this.identifier, ShaderType.FRAGMENT, translation.getFragment());
+		bridge.getSourceProvider().register(this.stencilIdentifier, ShaderType.FRAGMENT, translation.getStencilFragment());
+	}
+
+	private static BindGroupLayout createLayout(final Collection<String> samplers) {
 		final BindGroupLayout.Builder layout = BindGroupLayout.builder().withUniform(MinecraftShaderTranslator.BLOCK, UniformType.UNIFORM_BUFFER);
-		for (final ShaderVariable sampler : samplers) {
-			layout.withSampler(sampler.getName());
+		for (final String sampler : samplers) {
+			layout.withSampler(sampler);
 		}
 		layout.withSampler(MinecraftShaderTranslator.STENCIL);
 		return layout.build();
