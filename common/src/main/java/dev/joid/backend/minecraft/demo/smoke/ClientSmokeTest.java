@@ -113,7 +113,7 @@ public final class ClientSmokeTest {
 	}
 
 	private static void joinWorld() {
-		ClientSmokeTest.waitFor("the end of the game loading", () -> ClientSmokeTest.isLoaded() || Minecraft.getInstance().gui.screen() instanceof AccessibilityOnboardingScreen, 600);
+		ClientSmokeTest.waitFor("the end of the game loading", () -> ClientSmokeTest.isLoaded() || Minecraft.getInstance().gui.screen() instanceof AccessibilityOnboardingScreen || Minecraft.getInstance().gui.screen() instanceof BackupConfirmScreen, 600);
 		if (ClientSmokeTest.computeOnClient(() -> Minecraft.getInstance().gui.screen() instanceof AccessibilityOnboardingScreen)) {
 			ClientSmokeTest.runOnClient(() -> Minecraft.getInstance().gui.screen().onClose());
 			ClientSmokeTest.waitFor("the end of the accessibility onboarding", () -> ClientSmokeTest.isLoaded() || Minecraft.getInstance().gui.screen() instanceof BackupConfirmScreen, 600);
