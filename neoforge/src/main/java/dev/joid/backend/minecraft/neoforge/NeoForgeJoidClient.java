@@ -4,10 +4,10 @@ import dev.joid.backend.minecraft.Backend;
 import dev.joid.backend.minecraft.neoforge.event.NeoForgeClientEvents;
 import dev.joid.backend.minecraft.neoforge.event.NeoForgeScreenEvents;
 import dev.joid.backend.minecraft.neoforge.network.NeoForgePayloads;
-import dev.joid.backend.minecraft.neoforge.registry.NeoForgeContainerScreens;
-import dev.joid.backend.minecraft.neoforge.registry.NeoForgeKeyBinds;
-import dev.joid.backend.minecraft.neoforge.registry.NeoForgeOverlayLayers;
-import dev.joid.backend.minecraft.neoforge.registry.NeoForgeReloadListeners;
+import dev.joid.backend.minecraft.neoforge.registry.NeoForgeContainerUIRegistry;
+import dev.joid.backend.minecraft.neoforge.registry.NeoForgeKeyBindRegistry;
+import dev.joid.backend.minecraft.neoforge.registry.NeoForgeOverlayLayerRegistry;
+import dev.joid.backend.minecraft.neoforge.registry.NeoForgeReloadListenerRegistry;
 
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -26,10 +26,10 @@ public final class NeoForgeJoidClient {
 		NeoForge.EVENT_BUS.addListener(NeoForgeScreenEvents::mousePressed);
 		NeoForge.EVENT_BUS.addListener(NeoForgeScreenEvents::mouseReleased);
 		NeoForge.EVENT_BUS.addListener(NeoForgeScreenEvents::mouseScrolled);
-		modBus.addListener(NeoForgeKeyBinds::register);
-		modBus.addListener(NeoForgeOverlayLayers::register);
-		modBus.addListener(NeoForgeReloadListeners::register);
-		modBus.addListener(NeoForgeContainerScreens::register);
+		modBus.addListener(NeoForgeKeyBindRegistry::register);
+		modBus.addListener(NeoForgeContainerUIRegistry::register);
+		modBus.addListener(NeoForgeOverlayLayerRegistry::register);
+		modBus.addListener(NeoForgeReloadListenerRegistry::register);
 		NeoForgePayloads.registerSender();
 	}
 

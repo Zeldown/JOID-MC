@@ -19,7 +19,7 @@ import dev.joid.backend.minecraft.lib.resource.resolver.impl.GpuTextureResourceR
 import dev.joid.backend.minecraft.lib.resource.resolver.impl.NamespacedResourceResolver;
 import dev.joid.backend.minecraft.lib.resource.resolver.impl.NativeImageResourceResolver;
 import dev.joid.backend.minecraft.lib.resource.resolver.impl.SpriteResourceResolver;
-import dev.joid.backend.minecraft.loader.registry.ReloadListener;
+import dev.joid.backend.minecraft.loader.registry.ReloadListenerRegistry;
 import dev.joid.base.openal.AlAudioBridge;
 import dev.joid.base.openal.binding.Lwjgl3AlBinding;
 import dev.joid.internal.JOID;
@@ -42,7 +42,7 @@ public final class Backend {
 	private static boolean registered;
 
 	public static void init() {
-		ReloadListener.create(Backend.MOD_ID + ":resources").onReload(ResourceReloader.inst()::reload).register();
+		ReloadListenerRegistry.create(Backend.MOD_ID + ":resources").onReload(ResourceReloader.inst()::reload).register();
 		if (Backend.isDemo()) {
 			DemoLauncher.init();
 		}

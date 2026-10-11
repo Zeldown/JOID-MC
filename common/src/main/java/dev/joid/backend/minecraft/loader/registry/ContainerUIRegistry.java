@@ -16,24 +16,24 @@ import net.minecraft.world.inventory.MenuType;
 
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public final class ContainerBinding<M extends AbstractContainerMenu> {
+public final class ContainerUIRegistry<M extends AbstractContainerMenu> {
 
-	private static final List<ContainerBinding<?>> REGISTERED = new ArrayList<>();
+	private static final List<ContainerUIRegistry<?>> REGISTERED = new ArrayList<>();
 
 	private final MenuType<M>                           type;
 	private final Function<M, ? extends ContainerUI<M>> factory;
 
-	public static <M extends AbstractContainerMenu> @NonNull ContainerBinding<M> create(final @NonNull MenuType<M> type, final @NonNull Function<M, ? extends ContainerUI<M>> factory) {
-		return new ContainerBinding<>(type, factory);
+	public static <M extends AbstractContainerMenu> @NonNull ContainerUIRegistry<M> create(final @NonNull MenuType<M> type, final @NonNull Function<M, ? extends ContainerUI<M>> factory) {
+		return new ContainerUIRegistry<>(type, factory);
 	}
 
-	public @NonNull ContainerBinding<M> register() {
-		ContainerBinding.REGISTERED.add(this);
+	public @NonNull ContainerUIRegistry<M> register() {
+		ContainerUIRegistry.REGISTERED.add(this);
 		return this;
 	}
 
-	public static @NonNull List<ContainerBinding<?>> getRegistered() {
-		return Collections.unmodifiableList(ContainerBinding.REGISTERED);
+	public static @NonNull List<ContainerUIRegistry<?>> getRegistered() {
+		return Collections.unmodifiableList(ContainerUIRegistry.REGISTERED);
 	}
 
 }

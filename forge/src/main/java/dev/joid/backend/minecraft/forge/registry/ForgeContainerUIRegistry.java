@@ -1,7 +1,7 @@
 package dev.joid.backend.minecraft.forge.registry;
 
 import dev.joid.backend.minecraft.bridge.ui.container.ContainerUIScreen;
-import dev.joid.backend.minecraft.loader.registry.ContainerBinding;
+import dev.joid.backend.minecraft.loader.registry.ContainerUIRegistry;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -11,14 +11,14 @@ import net.minecraftforge.eventbus.api.bus.BusGroup;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class ForgeContainerScreens {
+public final class ForgeContainerUIRegistry {
 
 	public static void register(final BusGroup modBusGroup) {
-		FMLClientSetupEvent.getBus(modBusGroup).addListener(event -> event.enqueueWork(() -> ContainerBinding.getRegistered().forEach(ForgeContainerScreens::register)));
+		FMLClientSetupEvent.getBus(modBusGroup).addListener(event -> event.enqueueWork(() -> ContainerUIRegistry.getRegistered().forEach(ForgeContainerUIRegistry::register)));
 	}
 
-	private static <M extends AbstractContainerMenu> void register(final ContainerBinding<M> binding) {
-		MenuScreens.register(binding.getType(), ContainerUIScreen.constructor(binding.getFactory()));
+	private static <M extends AbstractContainerMenu> void register(final ContainerUIRegistry<M> binding) {
+		MenuScreens.<M, ContainerUIScreen<M>>register(binding.getType(), (menu, _, _) -> binding.getFactory().apply(menu).getScreen());
 	}
 
 }

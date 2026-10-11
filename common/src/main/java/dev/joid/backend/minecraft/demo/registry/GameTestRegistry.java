@@ -14,24 +14,24 @@ import net.minecraft.gametest.framework.GameTestHelper;
 
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public final class GameTestFunction {
+public final class GameTestRegistry {
 
-	private static final List<GameTestFunction> REGISTERED = new ArrayList<>();
+	private static final List<GameTestRegistry> REGISTERED = new ArrayList<>();
 
 	private final String                   id;
 	private final Consumer<GameTestHelper> function;
 
-	public static @NonNull GameTestFunction create(final @NonNull String id, final @NonNull Consumer<GameTestHelper> function) {
-		return new GameTestFunction(id, function);
+	public static @NonNull GameTestRegistry create(final @NonNull String id, final @NonNull Consumer<GameTestHelper> function) {
+		return new GameTestRegistry(id, function);
 	}
 
-	public @NonNull GameTestFunction register() {
-		GameTestFunction.REGISTERED.add(this);
+	public @NonNull GameTestRegistry register() {
+		GameTestRegistry.REGISTERED.add(this);
 		return this;
 	}
 
-	public static @NonNull List<GameTestFunction> getRegistered() {
-		return Collections.unmodifiableList(GameTestFunction.REGISTERED);
+	public static @NonNull List<GameTestRegistry> getRegistered() {
+		return Collections.unmodifiableList(GameTestRegistry.REGISTERED);
 	}
 
 }

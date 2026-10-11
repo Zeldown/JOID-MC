@@ -10,11 +10,11 @@ import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.minecraft.resources.Identifier;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class FabricOverlayLayers {
+public final class FabricOverlayLayerRegistry {
 
 	public static void register() {
 		for (final OverlayLayer layer : OverlayLayer.values()) {
-			final Identifier element = FabricOverlayLayers.getElement(layer);
+			final Identifier element = FabricOverlayLayerRegistry.getElement(layer);
 			HudElementRegistry.attachElementBefore(element, MinecraftOverlayEvents.getId(layer, false), (graphics, _) -> MinecraftOverlayEvents.fireLayer(graphics, layer, false));
 			HudElementRegistry.attachElementAfter(element, MinecraftOverlayEvents.getId(layer, true), (graphics, _) -> MinecraftOverlayEvents.fireLayer(graphics, layer, true));
 			HudElementRegistry.replaceElement(element, vanilla -> (graphics, deltaTracker) -> {

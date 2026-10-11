@@ -12,11 +12,11 @@ import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class NeoForgeOverlayLayers {
+public final class NeoForgeOverlayLayerRegistry {
 
 	public static void register(final RegisterGuiLayersEvent event) {
 		for (final OverlayLayer layer : OverlayLayer.values()) {
-			final List<Identifier> layers = NeoForgeOverlayLayers.getLayers(layer);
+			final List<Identifier> layers = NeoForgeOverlayLayerRegistry.getLayers(layer);
 			event.registerBelow(layers.getFirst(), MinecraftOverlayEvents.getId(layer, false), (graphics, _) -> MinecraftOverlayEvents.fireLayer(graphics, layer, false));
 			event.registerAbove(layers.getLast(), MinecraftOverlayEvents.getId(layer, true), (graphics, _) -> MinecraftOverlayEvents.fireLayer(graphics, layer, true));
 			for (final Identifier vanillaLayer : layers) {

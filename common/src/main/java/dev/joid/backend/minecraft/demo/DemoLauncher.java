@@ -5,14 +5,14 @@ import dev.joid.backend.minecraft.demo.container.DemoContainer;
 import dev.joid.backend.minecraft.demo.container.DemoContainerGameTest;
 import dev.joid.backend.minecraft.demo.network.OpenDemoContainerPayload;
 import dev.joid.backend.minecraft.demo.network.OpenDemoContainerPayloadHandler;
-import dev.joid.backend.minecraft.demo.registry.GameTestFunction;
+import dev.joid.backend.minecraft.demo.registry.GameTestRegistry;
 import dev.joid.backend.minecraft.demo.smoke.ClientSmokeTest;
 import dev.joid.backend.minecraft.demo.ui.UIDemoContainer;
 import dev.joid.backend.minecraft.demo.ui.UIDemoMinecraft;
 import dev.joid.backend.minecraft.demo.ui.UIDemoOverlayLayer;
-import dev.joid.backend.minecraft.lib.ui.core.container.ContainerUI;
-import dev.joid.backend.minecraft.loader.registry.ContainerType;
-import dev.joid.backend.minecraft.loader.registry.KeyBind;
+import dev.joid.backend.minecraft.loader.registry.ContainerTypeRegistry;
+import dev.joid.backend.minecraft.loader.registry.ContainerUIRegistry;
+import dev.joid.backend.minecraft.loader.registry.KeyBindRegistry;
 import dev.joid.demo.ui.DemoEntry;
 import dev.joid.demo.ui.UIDemoChoice;
 import dev.joid.internal.JOID;
@@ -24,11 +24,11 @@ import lombok.NoArgsConstructor;
 public final class DemoLauncher {
 
 	public static void init() {
-		ContainerUI.bind(DemoContainer.TYPE, UIDemoContainer::new);
-		ContainerType.create(Backend.MOD_ID + ":demo/container", DemoContainer.TYPE).register();
-		KeyBind.create("joid.demo", Key.J).onPress(() -> JOID.open(new UIDemoChoice())).register();
+		ContainerUIRegistry.create(DemoContainer.TYPE, UIDemoContainer::new).register();
+		ContainerTypeRegistry.create(Backend.MOD_ID + ":demo/container", DemoContainer.TYPE).register();
+		KeyBindRegistry.create("joid.demo", Key.J).onPress(() -> JOID.open(new UIDemoChoice())).register();
 		OpenDemoContainerPayload.TYPE.onServer(OpenDemoContainerPayloadHandler::handle).register();
-		GameTestFunction.create(Backend.MOD_ID + ":demo/container", DemoContainerGameTest::run).register();
+		GameTestRegistry.create(Backend.MOD_ID + ":demo/container", DemoContainerGameTest::run).register();
 	}
 
 	public static void register() {

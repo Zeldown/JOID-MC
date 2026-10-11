@@ -36,7 +36,7 @@ public final class ContainerUIBridge extends StackUIBridge {
 	@Override
 	public void open(final @NonNull UI ui) {
 		if (ui instanceof ContainerUI) {
-			throw new IllegalStateException("The container UI " + ui.getClass().getSimpleName() + " opens with its container on the server (ServerPlayer.openMenu), not with JOID.open");
+			throw new IllegalStateException("The container UI " + ui.getClass().getSimpleName() + " opens with its menu on the server (ServerPlayer.openMenu), not with JOID.open: register its screen with ui.getScreen() in the menu screen registration of the loader (MenuScreens.register, RegisterMenuScreensEvent)");
 		}
 
 		super.open(ui);

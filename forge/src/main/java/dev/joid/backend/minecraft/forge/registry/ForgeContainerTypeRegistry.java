@@ -1,6 +1,6 @@
 package dev.joid.backend.minecraft.forge.registry;
 
-import dev.joid.backend.minecraft.loader.registry.ContainerType;
+import dev.joid.backend.minecraft.loader.registry.ContainerTypeRegistry;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -10,11 +10,11 @@ import net.minecraftforge.eventbus.api.bus.BusGroup;
 import net.minecraftforge.registries.RegisterEvent;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class ForgeContainerTypes {
+public final class ForgeContainerTypeRegistry {
 
 	public static void register(final BusGroup modBusGroup) {
 		RegisterEvent.getBus(modBusGroup).addListener(event -> event.register(Registries.MENU, helper -> {
-			for (final ContainerType<?> type : ContainerType.getRegistered()) {
+			for (final ContainerTypeRegistry<?> type : ContainerTypeRegistry.getRegistered()) {
 				helper.register(Identifier.parse(type.getId()), type.getType());
 			}
 		}));

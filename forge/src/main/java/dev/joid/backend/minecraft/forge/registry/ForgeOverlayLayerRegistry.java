@@ -13,16 +13,16 @@ import net.minecraftforge.client.gui.overlay.ForgeLayer;
 import net.minecraftforge.client.gui.overlay.ForgeLayeredDraw;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class ForgeOverlayLayers {
+public final class ForgeOverlayLayerRegistry {
 
 	public static void register() {
-		AddGuiOverlayLayersEvent.BUS.addListener(event -> ForgeOverlayLayers.add(event.getLayeredDraw()));
+		AddGuiOverlayLayersEvent.BUS.addListener(event -> ForgeOverlayLayerRegistry.add(event.getLayeredDraw()));
 	}
 
 	private static void add(final ForgeLayeredDraw draw) {
 		for (final OverlayLayer layer : OverlayLayer.values()) {
-			final Identifier stack = ForgeOverlayLayers.getStack(layer);
-			final List<Identifier> layers = ForgeOverlayLayers.getLayers(layer);
+			final Identifier stack = ForgeOverlayLayerRegistry.getStack(layer);
+			final List<Identifier> layers = ForgeOverlayLayerRegistry.getLayers(layer);
 			draw.addBelow(stack, MinecraftOverlayEvents.getId(layer, false), layers.getFirst(), (graphics, _) -> MinecraftOverlayEvents.fireLayer(graphics, layer, false));
 			draw.addAbove(stack, MinecraftOverlayEvents.getId(layer, true), layers.getLast(), (graphics, _) -> MinecraftOverlayEvents.fireLayer(graphics, layer, true));
 			for (final Identifier vanillaLayer : layers) {

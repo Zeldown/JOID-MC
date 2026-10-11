@@ -20,9 +20,9 @@ ext {
 
     developmentCallSites = [
             'dev/joid/backend/minecraft/Backend.class -> dev/joid/backend/minecraft/demo/DemoLauncher',
-            'dev/joid/backend/minecraft/fabric/FabricJoid.class -> dev/joid/backend/minecraft/fabric/demo/FabricGameTests',
-            'dev/joid/backend/minecraft/forge/ForgeJoid.class -> dev/joid/backend/minecraft/forge/demo/ForgeGameTests',
-            'dev/joid/backend/minecraft/neoforge/NeoForgeJoid.class -> dev/joid/backend/minecraft/neoforge/demo/NeoForgeGameTests'
+            'dev/joid/backend/minecraft/fabric/FabricJoid.class -> dev/joid/backend/minecraft/fabric/demo/FabricGameTestRegistry',
+            'dev/joid/backend/minecraft/forge/ForgeJoid.class -> dev/joid/backend/minecraft/forge/demo/ForgeGameTestRegistry',
+            'dev/joid/backend/minecraft/neoforge/NeoForgeJoid.class -> dev/joid/backend/minecraft/neoforge/demo/NeoForgeGameTestRegistry'
     ]
 
     moduleDescriptors = [

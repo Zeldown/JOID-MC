@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 
 import dev.joid.backend.minecraft.lib.ui.core.container.ContainerUI;
 import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
@@ -22,7 +21,6 @@ import com.mojang.blaze3d.platform.Window;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.screens.MenuScreens.ScreenConstructor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
@@ -41,19 +39,11 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 	@Getter
 	private final ContainerUI<M> ui;
 
-	protected ContainerUIScreen(final M container, final Inventory inventory, final Component title, final ContainerUI<M> ui) {
-		super(container, inventory, title);
+	public ContainerUIScreen(final M container, final Inventory inventory, final ContainerUI<M> ui) {
+		super(container, inventory, ContainerUIScreen.toTitle(ui));
 		this.bridge          = BridgeHandler.UI.getBridge(ContainerUIBridge.class);
 		this.consumedButtons = new HashSet<>();
 		this.ui              = ui;
-	}
-
-	public static <M extends AbstractContainerMenu> @NonNull ContainerUIScreen<M> create(final @NonNull M container, final @NonNull Inventory inventory, final @NonNull Component title, final @NonNull ContainerUI<M> ui) {
-		return new ContainerUIScreen<>(container, inventory, title, ui);
-	}
-
-	public static <M extends AbstractContainerMenu> @NonNull ScreenConstructor<M, ContainerUIScreen<M>> constructor(final @NonNull Function<M, ? extends ContainerUI<M>> ui) {
-		return (container, inventory, title) -> ContainerUIScreen.create(container, inventory, title, ui.apply(container));
 	}
 
 	@Override
@@ -102,12 +92,6 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 	@Override
 	public boolean shouldCloseOnEsc() {
 		return false;
-	}
-
-	@Override
-	public @NonNull Component getTitle() {
-		final UIDataMinecraft data = this.getMinecraftData();
-		return data == null || data.title().isEmpty() ? super.getTitle() : Component.translatable(data.title());
 	}
 
 	@Override
@@ -244,6 +228,11 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 			}
 		}
 		return Collections.emptyList();
+	}
+
+	private static Component toTitle(final ContainerUI<?> ui) {
+		final UIDataMinecraft data = ui.getClass().getAnnotation(UIDataMinecraft.class);
+		return data == null || data.title().isEmpty() ? Component.empty() : Component.translatable(data.title());
 	}
 
 }
