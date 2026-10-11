@@ -1,6 +1,7 @@
 package dev.joid.backend.minecraft.lib.draw.entity;
 
 import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 import dev.joid.backend.minecraft.lib.draw.raster.FeatureExternalRasterDrawable;
 import dev.joid.lib.draw.DrawUtils;
@@ -9,8 +10,11 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
 import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.Model;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
@@ -74,7 +78,8 @@ public final class DrawEntity {
 			return;
 		}
 
-		final double unit = Math.min(width / state.boundingBoxWidth, height / state.boundingBoxHeight) * scale;
+		final double[] extent = DrawEntity.getExtent(state);
+		final double unit = Math.min(width / (2D * extent[0]), height / (2D * extent[1])) * scale;
 		final float lookYaw = (float) Math.atan((x + width / 2D - lookX) * 0.75D / unit);
 		final float lookPitch = (float) Math.atan((y + height / 2D - lookY) * 0.75D / unit);
 		if (state instanceof final LivingEntityRenderState living) {
@@ -100,4 +105,34 @@ public final class DrawEntity {
 		}));
 	}
 
+
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	private static double[] getExtent(final EntityRenderState state) {
+		final double[] extent = {state.boundingBoxWidth / 2D, state.boundingBoxHeight / 2D};
+		if (!(Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(state) instanceof final LivingEntityRenderer<?, ?, ?> renderer)) {
+			return extent;
+		}
+
+		final Model model = renderer.getModel();
+		model.setupAnim(state);
+		final float[] bounds = {0F, Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY};
+		final Vector3f corner = new Vector3f();
+		model.root().visit(new PoseStack(), (pose, _, _, cube) -> {
+			for (int index = 0; index < 8; index++) {
+				pose.pose().transformPosition((index & 1) == 0 ? cube.minX / 16F : cube.maxX / 16F, (index & 2) == 0 ? cube.minY / 16F : cube.maxY / 16F, (index & 4) == 0 ? cube.minZ / 16F : cube.maxZ / 16F, corner);
+				bounds[0] = Math.max(bounds[0], (float) Math.sqrt(corner.x * corner.x + corner.z * corner.z));
+				bounds[1] = Math.min(bounds[1], corner.y);
+				bounds[2] = Math.max(bounds[2], corner.y);
+			}
+		});
+		if (bounds[2] <= bounds[1]) {
+			return extent;
+		}
+
+		final double factor = Math.max(1D, state.boundingBoxHeight / (bounds[2] - bounds[1]));
+		final double center = state.boundingBoxHeight / 2D;
+		extent[0] = Math.max(extent[0], bounds[0] * factor);
+		extent[1] = Math.max(extent[1], Math.max((1.501D - bounds[1]) * factor - center, center - (1.501D - bounds[2]) * factor));
+		return extent;
+	}
 }

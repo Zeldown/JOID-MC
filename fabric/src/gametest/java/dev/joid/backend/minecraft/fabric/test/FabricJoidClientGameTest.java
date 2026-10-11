@@ -182,6 +182,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			FabricJoidClientGameTest.verifyBlockLighting(context, singleplayer.getServer());
 			FabricJoidClientGameTest.verifyCursor(context);
 			FabricJoidClientGameTest.verifyFrameCounter(context);
+			FabricJoidClientGameTest.verifyEntityBounds(context);
 		}
 
 		context.runOnClient(_ -> FabricJoidClientGameTest.verify(JUnitCore.runClasses(FabricRenderBridgeContractTest.class)));
@@ -750,6 +751,43 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		context.waitTicks(5);
 		if (counts[0] != 3 || counts[1] != 0) {
 			throw new AssertionError("three frames of the same frame time give " + counts[0] + " overlay updates instead of 3 and " + counts[1] + " new render targets instead of 0");
+		}
+	}
+
+	private static void verifyEntityBounds(final ClientGameTestContext context) {
+		final List<String> failures = new ArrayList<>();
+		for (final double yaw : new double[] {0D, 45D, 90D}) {
+			context.runOnClient(_ -> JOID.open(new LongEntity(yaw)));
+			context.waitForScreen(UIScreen.class);
+			context.waitTicks(10);
+			final int[] node = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(LongEntity.class).getNodeList().ordered().getFirst().getChild(0, EntityNode.class)));
+			final int[] panel = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(LongEntity.class).getNodeList().ordered().getFirst()));
+			final BufferedImage image = FabricJoidClientGameTest.read(context.takeScreenshot("joid-entity-bounds-" + (int) yaw));
+			int drawn = 0;
+			int outside = 0;
+			for (int y = panel[1] + 2; y < panel[1] + panel[3] - 2; y++) {
+				for (int x = panel[0] + 2; x < panel[0] + panel[2] - 2; x++) {
+					final boolean inside = x >= node[0] - 1 && x <= node[0] + node[2] && y >= node[1] - 1 && y <= node[1] + node[3];
+					if (FabricJoidClientGameTest.delta(0x202020, image.getRGB(x, y) & 0xFFFFFF) > 8) {
+						if (inside) {
+							drawn++;
+						} else {
+							outside++;
+						}
+					}
+				}
+			}
+
+			if (drawn < 1000 || outside > 0) {
+				failures.add("the fox turned by " + yaw + " draws " + drawn + " pixels in its node " + Arrays.toString(node) + " and " + outside + " outside");
+			}
+
+			context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
+			context.waitForScreen(null);
+		}
+
+		if (!failures.isEmpty()) {
+			throw new AssertionError(failures.size() + " entity bounds checks failed:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
 		}
 	}
 
@@ -1710,6 +1748,29 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 
 		@Override
 		public void init() {}
+
+	}
+
+	@UIData(background = false)
+	@UIDataMinecraft(background = false)
+	public static final class LongEntity extends UI {
+
+		private final double yaw;
+
+		public LongEntity(final double yaw) {
+			this.yaw = yaw;
+		}
+
+		@Override
+		public void init() {
+			RectNode
+			.create(560, 340, 800, 400)
+			.color(new Color(0xFF202020))
+			.body(panel -> {
+				EntityNode.create(300, 100, 200, 200).type(EntityTypes.FOX).rotationYaw(this.yaw).attach(panel);
+			})
+			.attach(this);
+		}
 
 	}
 
