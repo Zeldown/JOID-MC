@@ -9,14 +9,15 @@ ext {
             'dev/joid/base/glfw/snapshot/**',
             'dev/joid/backend/minecraft/**/demo/**',
             'dev/joid/backend/minecraft/bridge/snapshot/**',
+            'dev/joid/backend/minecraft/showcase/**',
             'assets/joid/demo/**',
             'assets/joid/lang/**',
             'data/joid/**/demo/**'
     ]
 
-    developmentReferences = ~/dev\/joid\/(demo|test|backend\/minecraft\/([\w$]+\/)*(demo|snapshot))\/[\w$\/]+/
+    developmentReferences = ~/dev\/joid\/(demo|test|backend\/minecraft\/(showcase|([\w$]+\/)*(demo|snapshot)))\/[\w$\/]+/
 
-    developmentWords = ['demo', 'demos', 'test', 'tests', 'gametest', 'gametests', 'snapshot', 'snapshots', 'testkit']
+    developmentWords = ['demo', 'demos', 'test', 'tests', 'gametest', 'gametests', 'snapshot', 'snapshots', 'testkit', 'showcase']
 
     developmentCallSites = [
             'dev/joid/backend/minecraft/Backend.class -> dev/joid/backend/minecraft/demo/DemoLauncher',

@@ -13,6 +13,7 @@ import dev.joid.backend.minecraft.demo.ui.UIDemoOverlayLayer;
 import dev.joid.backend.minecraft.loader.registry.ContainerTypeRegistry;
 import dev.joid.backend.minecraft.loader.registry.ContainerUIRegistry;
 import dev.joid.backend.minecraft.loader.registry.KeyBindRegistry;
+import dev.joid.backend.minecraft.showcase.ShowcaseLauncher;
 import dev.joid.demo.ui.DemoEntry;
 import dev.joid.demo.ui.UIDemoChoice;
 import dev.joid.internal.JOID;
@@ -29,6 +30,9 @@ public final class DemoLauncher {
 		KeyBindRegistry.create("joid.demo", Key.J).onPress(() -> JOID.open(new UIDemoChoice())).register();
 		OpenDemoContainerPayload.TYPE.onServer(OpenDemoContainerPayloadHandler::handle).register();
 		GameTestRegistry.create(Backend.MOD_ID + ":demo/container", DemoContainerGameTest::run).register();
+		if (ShowcaseLauncher.isActive()) {
+			ShowcaseLauncher.init();
+		}
 	}
 
 	public static void register() {
@@ -37,6 +41,10 @@ public final class DemoLauncher {
 		UIDemoChoice.LIST.add(DemoEntry.create("UIDemoContainer", OpenDemoContainerPayload.INSTANCE::sendToServer).hover(UIDemoContainer.class.getName()));
 		if (Boolean.getBoolean("joid.smoke")) {
 			ClientSmokeTest.start();
+		}
+
+		if (ShowcaseLauncher.isActive()) {
+			ShowcaseLauncher.start();
 		}
 	}
 

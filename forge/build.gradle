@@ -21,6 +21,10 @@ minecraft {
                 systemProperty('joid.smoke', 'true')
                 args('--quickPlaySingleplayer', 'joid-smoke', '--width', '1920', '--height', '1080')
             }
+            if (project.hasProperty('joid.showcase')) {
+                project.properties.findAll { it.key.startsWith('joid.showcase') }.each { systemProperty(it.key, it.value.toString()) }
+                args('--quickPlaySingleplayer', 'joid-showcase', '--width', '1920', '--height', '1080', '--username', 'JOID')
+            }
         }
         register('server') {
             args('--nogui')

@@ -40,6 +40,10 @@ loom {
             setConfigName('Fabric Client')
             ideConfigGenerated(true)
             runDir('runs/client')
+            if (project.hasProperty('joid.showcase')) {
+                project.properties.findAll { it.key.startsWith('joid.showcase') }.each { vmArg("-D${it.key}=${it.value}") }
+                programArgs('--quickPlaySingleplayer', 'joid-showcase', '--width', '1920', '--height', '1080', '--username', 'JOID')
+            }
         }
         server {
             server()
