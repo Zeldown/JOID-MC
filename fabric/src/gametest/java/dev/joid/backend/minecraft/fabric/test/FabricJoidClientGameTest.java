@@ -821,7 +821,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		final double blurred = FabricJoidClientGameTest.edges(opened, outside);
 		System.out.println("[JOID] Container background: world edges " + sharp + ", blurred " + blurred);
 		if (context.computeOnClient(minecraft -> minecraft.gui.screen().isInGameUi()) || blurred > sharp * 0.6D) {
-			failures.add("the demo container with UIDataMinecraft blur does not blur the world: edges " + blurred + " behind the panel, " + sharp + " in the world");
+			failures.add("the demo container with the default Minecraft background does not blur the world: edges " + blurred + " behind the panel, " + sharp + " in the world");
 		}
 		FabricJoidClientGameTest.expectDrawn(failures, "diamonds in the first storage slot", opened, slots.get(0));
 		FabricJoidClientGameTest.moveTo(context, slots.get(0));
