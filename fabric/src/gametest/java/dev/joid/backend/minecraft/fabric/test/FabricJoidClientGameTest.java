@@ -84,6 +84,7 @@ import dev.joid.lib.ui.node.impl.structure.container.ContainerNode;
 import dev.joid.test.snapshot.SnapshotDifference;
 import dev.joid.test.snapshot.SnapshotImage;
 import dev.joid.test.snapshot.SnapshotRunner;
+import lombok.Getter;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.platform.cursor.CursorType;
@@ -97,6 +98,7 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContex
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.FocusableTextWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
@@ -105,6 +107,7 @@ import net.minecraft.client.gui.screens.options.controls.KeyBindsList;
 import net.minecraft.client.gui.screens.options.controls.KeyBindsScreen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.MouseButtonInfo;
+import net.minecraft.client.renderer.state.gui.GuiRenderState;
 import net.minecraft.client.resources.language.ClientLanguage;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundEventListener;
@@ -178,6 +181,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			FabricJoidClientGameTest.verifyContainer(context, singleplayer.getServer());
 			FabricJoidClientGameTest.verifyBlockLighting(context, singleplayer.getServer());
 			FabricJoidClientGameTest.verifyCursor(context);
+			FabricJoidClientGameTest.verifyFrameCounter(context);
 		}
 
 		context.runOnClient(_ -> FabricJoidClientGameTest.verify(JUnitCore.runClasses(FabricRenderBridgeContractTest.class)));
@@ -710,6 +714,27 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		FabricJoidClientGameTest.expectColor(failures, "overlay always shown toggled off", off, always, 0xDDDDDD, false);
 		if (!failures.isEmpty()) {
 			throw new AssertionError(failures.size() + " overlay checks failed:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
+		}
+	}
+
+	private static void verifyFrameCounter(final ClientGameTestContext context) {
+		context.runOnClient(_ -> JOID.open(new FrameOverlay()));
+		context.waitTicks(5);
+		final int[] counts = context.computeOnClient(minecraft -> {
+			final OverlayUIBridge bridge = BridgeHandler.UI.getBridge(OverlayUIBridge.class);
+			final List<?> targets = (List<?>) FabricJoidClientGameTest.field(FabricJoidClientGameTest.field(FabricJoidClientGameTest.field(bridge, "compositor"), "targetPool"), "targetList");
+			final FrameOverlay overlay = JOID.getUi(FrameOverlay.class);
+			final int updates = overlay.getUpdates();
+			final int size = targets.size();
+			for (int frame = 0; frame < 3; frame++) {
+				bridge.extract(new GuiGraphicsExtractor(minecraft, (GuiRenderState) FabricJoidClientGameTest.field(minecraft.gui, "guiRenderState"), 0, 0));
+			}
+			return new int[] {overlay.getUpdates() - updates, targets.size() - size};
+		});
+		context.runOnClient(_ -> JOID.close(JOID.getUi(FrameOverlay.class)));
+		context.waitTicks(5);
+		if (counts[0] != 3 || counts[1] != 0) {
+			throw new AssertionError("three frames of the same frame time give " + counts[0] + " overlay updates instead of 3 and " + counts[1] + " new render targets instead of 0");
 		}
 	}
 
@@ -1650,6 +1675,20 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 
 		@Override
 		public void init() {}
+
+	}
+
+	@UIData(background = false)
+	@UIDataOverlay(active = true)
+	public static final class FrameOverlay extends UI {
+
+		@Getter
+		private int updates;
+
+		@Override
+		public void init() {
+			RectNode.create(0, 0, 8, 8).color(Color.TRANSPARENT).onUpdate(_ -> this.updates++).attach(this);
+		}
 
 	}
 

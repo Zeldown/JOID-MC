@@ -2,6 +2,7 @@ package dev.joid.backend.minecraft.bridge.ui.overlay;
 
 import java.util.function.Predicate;
 
+import dev.joid.backend.minecraft.bridge.render.GuiFrameCounter;
 import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
 import dev.joid.backend.minecraft.bridge.ui.TooltipQueue;
 import dev.joid.backend.minecraft.bridge.ui.screen.GuiCompositor;
@@ -25,7 +26,7 @@ public final class OverlayUIBridge extends UIBridge {
 
 	private int  width;
 	private int  height;
-	private long frameTime;
+	private long frame;
 
 	private OverlayUIBridge(final MinecraftRenderBridge render, final MinecraftWindowBridge window) {
 		this.window       = window;
@@ -33,7 +34,7 @@ public final class OverlayUIBridge extends UIBridge {
 		this.tooltipQueue = TooltipQueue.create();
 		this.width        = window.getWidth();
 		this.height       = window.getHeight();
-		this.frameTime    = -1L;
+		this.frame        = -1L;
 	}
 
 	public static @NonNull OverlayUIBridge create(final @NonNull MinecraftRenderBridge render, final @NonNull MinecraftWindowBridge window) {
@@ -126,7 +127,7 @@ public final class OverlayUIBridge extends UIBridge {
 	}
 
 	private void extract(final GuiGraphicsExtractor graphics, final Predicate<UI> filter) {
-		this.prepareFrame();
+		this.prepareFrame(graphics);
 		if (super.getUiList().ordered().stream().noneMatch(ui -> filter.test(ui) && this.isShown(ui))) {
 			return;
 		}
@@ -136,13 +137,13 @@ public final class OverlayUIBridge extends UIBridge {
 		this.tooltipQueue.flush(graphics, (int) minecraft.mouseHandler.getScaledXPos(minecraft.getWindow()), (int) minecraft.mouseHandler.getScaledYPos(minecraft.getWindow()));
 	}
 
-	private void prepareFrame() {
-		final long frameTime = Minecraft.getInstance().getFrameTimeNs();
-		if (frameTime == this.frameTime || super.getUiList().isEmpty()) {
+	private void prepareFrame(final GuiGraphicsExtractor graphics) {
+		final long frame = GuiFrameCounter.inst().getFrame(graphics);
+		if (frame == this.frame || super.getUiList().isEmpty()) {
 			return;
 		}
 
-		this.frameTime = frameTime;
+		this.frame = frame;
 		if (this.window.getWidth() != this.width || this.window.getHeight() != this.height) {
 			this.width  = this.window.getWidth();
 			this.height = this.window.getHeight();

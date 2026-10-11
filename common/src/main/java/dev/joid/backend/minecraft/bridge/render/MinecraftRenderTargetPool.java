@@ -5,7 +5,7 @@ import java.util.List;
 
 import lombok.NonNull;
 
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 public final class MinecraftRenderTargetPool {
 
@@ -13,23 +13,23 @@ public final class MinecraftRenderTargetPool {
 	private final List<MinecraftRenderTarget> targetList;
 
 	private int  index;
-	private long frameTime;
+	private long frame;
 
 	private MinecraftRenderTargetPool(final MinecraftRenderBridge bridge) {
 		this.bridge     = bridge;
 		this.targetList = new ArrayList<>();
-		this.frameTime  = -1L;
+		this.frame      = -1L;
 	}
 
 	public static @NonNull MinecraftRenderTargetPool create(final @NonNull MinecraftRenderBridge bridge) {
 		return new MinecraftRenderTargetPool(bridge);
 	}
 
-	public @NonNull MinecraftRenderTarget acquire(final int width, final int height) {
-		final long frameTime = Minecraft.getInstance().getFrameTimeNs();
-		if (frameTime != this.frameTime) {
-			this.frameTime = frameTime;
-			this.index     = 0;
+	public @NonNull MinecraftRenderTarget acquire(final @NonNull GuiGraphicsExtractor graphics, final int width, final int height) {
+		final long frame = GuiFrameCounter.inst().getFrame(graphics);
+		if (frame != this.frame) {
+			this.frame = frame;
+			this.index = 0;
 		}
 
 		if (this.index == this.targetList.size()) {

@@ -49,7 +49,7 @@ public final class GuiCompositor {
 	public void composite(final @NonNull GuiGraphicsExtractor graphics, final @NonNull Runnable draw) {
 		final Window window = Minecraft.getInstance().getWindow();
 		final MinecraftRenderBridge render = (MinecraftRenderBridge) BridgeHandler.RENDER.get();
-		final MinecraftRenderTarget target = this.targetPool.acquire(window.getWidth(), window.getHeight());
+		final MinecraftRenderTarget target = this.targetPool.acquire(graphics, window.getWidth(), window.getHeight());
 		render.screenTarget(target).beginFrame();
 		try {
 			render.screen(window.getWidth(), window.getHeight());
