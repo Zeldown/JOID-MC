@@ -2,9 +2,11 @@ package dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot;
 
 import java.util.function.Supplier;
 
+import dev.joid.backend.minecraft.bridge.ui.container.ContainerUIBridge;
 import dev.joid.backend.minecraft.bridge.ui.container.ContainerUIScreen;
 import dev.joid.backend.minecraft.lib.draw.item.DrawItem;
 import dev.joid.backend.minecraft.lib.ui.core.container.ContainerUI;
+import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.color.Color;
 import dev.joid.lib.draw.DrawUtils;
 import dev.joid.lib.resource.Resource;
@@ -44,7 +46,7 @@ public class SlotNode extends Node {
 	@Override
 	public void draw(final double mouseX, final double mouseY) {
 		DrawUtils.SHAPE.drawRect(super.getX(), super.getY(), super.getWidth(), super.getHeight(), this.color);
-		final ContainerUIScreen<?> screen = super.getUi() instanceof final ContainerUI<?> ui ? ui.getScreen() : null;
+		final ContainerUIScreen<?> screen = super.getUi() instanceof final ContainerUI<?> ui ? BridgeHandler.UI.getBridge(ContainerUIBridge.class).getScreen(ui) : null;
 		if (this.slot == null || screen == null || !this.slot.isActive()) {
 			return;
 		}

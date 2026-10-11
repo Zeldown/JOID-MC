@@ -1,6 +1,6 @@
 package dev.joid.backend.minecraft.neoforge.registry;
 
-import dev.joid.backend.minecraft.bridge.ui.container.ContainerUIScreen;
+import dev.joid.backend.minecraft.lib.ui.core.container.ContainerUI;
 import dev.joid.backend.minecraft.loader.registry.ContainerUIRegistry;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -18,7 +18,7 @@ public final class NeoForgeContainerUIRegistry {
 	}
 
 	private static <M extends AbstractContainerMenu> void register(final RegisterMenuScreensEvent event, final ContainerUIRegistry<M> binding) {
-		event.<M, ContainerUIScreen<M>>register(binding.getType(), (menu, _, _) -> binding.getFactory().apply(menu).getScreen());
+		event.register(binding.getType(), ContainerUI.screen(binding.getFactory()));
 	}
 
 }
