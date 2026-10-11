@@ -2,6 +2,7 @@ package dev.joid.backend.minecraft.demo.ui;
 
 import dev.joid.backend.minecraft.demo.container.DemoContainer;
 import dev.joid.backend.minecraft.lib.ui.core.container.ContainerUI;
+import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
 import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
 import dev.joid.demo.DemoFont;
 import dev.joid.internal.JOID;
@@ -17,6 +18,7 @@ import dev.joid.lib.ui.node.impl.design.text.TextNode;
 import dev.joid.lib.utils.align.Align;
 
 @UIData(background = false)
+@UIDataMinecraft(blur = true)
 public class UIDemoContainer extends ContainerUI<DemoContainer> {
 
 	private static final Color INK         = new Color(153, 153, 153);

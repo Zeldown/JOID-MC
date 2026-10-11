@@ -90,6 +90,11 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 	}
 
 	@Override
+	public boolean isInGameUi() {
+		return !this.hasBlur() && super.isInGameUi();
+	}
+
+	@Override
 	public boolean shouldCloseOnEsc() {
 		return false;
 	}
@@ -170,6 +175,11 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 
 	private UIDataMinecraft getMinecraftData() {
 		return this.ui.getClass().getAnnotation(UIDataMinecraft.class);
+	}
+
+	private boolean hasBlur() {
+		final UIDataMinecraft data = this.getMinecraftData();
+		return data != null && data.background() && data.blur();
 	}
 
 	private boolean hasBackground() {

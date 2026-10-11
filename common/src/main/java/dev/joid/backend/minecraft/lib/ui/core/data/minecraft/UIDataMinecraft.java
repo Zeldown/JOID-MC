@@ -14,5 +14,6 @@ public @interface UIDataMinecraft {
 	public String  title()      default "";
 	public boolean pause()      default true;
 	public boolean background() default true;
+	public boolean blur()       default false;
 
 }

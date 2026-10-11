@@ -781,6 +781,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 	}
 
 	private static void verifyContainer(final ClientGameTestContext context, final TestServerContext server) {
+		final BufferedImage world = FabricJoidClientGameTest.read(context.takeScreenshot("joid-demo-container-world"));
 		context.runOnClient(_ -> JOID.open(new UIDemoChoice()));
 		context.waitForScreen(UIScreen.class);
 		context.waitTicks(20);
@@ -800,6 +801,13 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		final List<String> failures = new ArrayList<>();
 		final List<int[]> slots = context.computeOnClient(_ -> FabricJoidClientGameTest.slotBounds());
 		final BufferedImage opened = FabricJoidClientGameTest.read(context.takeScreenshot("joid-demo-container"));
+		final int[] outside = {40, 600, 500, 440};
+		final double sharp = FabricJoidClientGameTest.edges(world, outside);
+		final double blurred = FabricJoidClientGameTest.edges(opened, outside);
+		System.out.println("[JOID] Container background: world edges " + sharp + ", blurred " + blurred);
+		if (context.computeOnClient(minecraft -> minecraft.gui.screen().isInGameUi()) || blurred > sharp * 0.6D) {
+			failures.add("the demo container with UIDataMinecraft blur does not blur the world: edges " + blurred + " behind the panel, " + sharp + " in the world");
+		}
 		FabricJoidClientGameTest.expectDrawn(failures, "diamonds in the first storage slot", opened, slots.get(0));
 		FabricJoidClientGameTest.moveTo(context, slots.get(0));
 		context.getInput().pressMouse(GLFW.GLFW_MOUSE_BUTTON_LEFT);
@@ -873,8 +881,8 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 	}
 
 	private static void verifyContainerBounds(final ClientGameTestContext context, final TestServerContext server, final List<String> failures) {
-		if (context.computeOnClient(minecraft -> minecraft.gui.screen().isPauseScreen() || !minecraft.gui.screen().isInGameUi())) {
-			failures.add("the container screen pauses the game or is not an in-game screen");
+		if (context.computeOnClient(minecraft -> minecraft.gui.screen().isPauseScreen())) {
+			failures.add("the container screen pauses the game");
 		}
 
 		final int[] panel = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoContainer.class).getNodeList().ordered().getFirst()));
@@ -1571,6 +1579,18 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			}
 		}
 		return difference / (first.getWidth() * first.getHeight() * 3D);
+	}
+
+	private static double edges(final BufferedImage image, final int[] bounds) {
+		long edges = 0L;
+		for (int y = bounds[1]; y < bounds[1] + bounds[3]; y++) {
+			for (int x = bounds[0]; x < bounds[0] + bounds[2] - 1; x++) {
+				for (int shift = 0; shift < 24; shift += 8) {
+					edges += Math.abs((image.getRGB(x, y) >> shift & 0xFF) - (image.getRGB(x + 1, y) >> shift & 0xFF));
+				}
+			}
+		}
+		return edges / ((bounds[2] - 1) * bounds[3] * 3D);
 	}
 
 	private static int delta(final int expected, final int actual) {
