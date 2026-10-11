@@ -661,7 +661,22 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		context.runOnClient(minecraft -> ScreenMouseEvents.beforeMouseClick(minecraft.gui.screen()).register((_, _) -> vanillaClicks[0]++));
 		final BufferedImage inventory = FabricJoidClientGameTest.read(context.takeScreenshot("joid-overlay-inventory"));
 		FabricJoidClientGameTest.expectColor(failures, "interactive overlay over the inventory", inventory, interactive, 0xDDDDDD, true);
-		FabricJoidClientGameTest.expectColor(failures, "overlay above the hotbar over the inventory", inventory, hotbar, 0xDDDDDD, false);
+		context.runOnClient(_ -> JOID.close(JOID.getUi(UIDemoOverlayLayer.Hotbar.class)));
+		context.waitTicks(5);
+		final BufferedImage withoutHotbar = FabricJoidClientGameTest.read(context.takeScreenshot("joid-overlay-inventory-without-hotbar-overlay"));
+		FabricJoidClientGameTest.expectChange(failures, "overlay above the hotbar kept in the HUD under the inventory", List.of(inventory, withoutHotbar), hotbar, false);
+		context.runOnClient(_ -> JOID.open(new UIDemoOverlayLayer.Hotbar()));
+		context.waitTicks(5);
+		if (!context.computeOnClient(_ -> OverlayLayerRenderer.isCancelled(OverlayLayer.CONTEXTUAL_BAR))) {
+			failures.add("the overlay replacing the experience bar does not cancel the contextual bar under the inventory");
+		}
+
+		context.runOnClient(_ -> JOID.open(new HiddenHotbar()));
+		context.waitTicks(5);
+		final BufferedImage inventoryHidden = FabricJoidClientGameTest.read(context.takeScreenshot("joid-overlay-inventory-hotbar-hidden"));
+		FabricJoidClientGameTest.expectChange(failures, "vanilla hotbar cancelled by an overlay under the inventory", List.of(inventory, inventoryHidden), vanillaHotbar, false);
+		context.runOnClient(_ -> JOID.close(JOID.getUi(HiddenHotbar.class)));
+		context.waitTicks(5);
 		FabricJoidClientGameTest.expectColor(failures, "overlay always shown over the inventory", inventory, always, 0xDDDDDD, false);
 		context.getInput().setCursorPos(button[0] + button[2] / 2D, button[1] + button[3] / 2D);
 		context.waitTicks(5);

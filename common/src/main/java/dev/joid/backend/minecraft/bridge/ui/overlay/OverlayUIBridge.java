@@ -24,9 +24,10 @@ public final class OverlayUIBridge extends UIBridge {
 	private final TooltipQueue          tooltipQueue;
 	private final MinecraftWindowBridge window;
 
-	private int  width;
-	private int  height;
-	private long frame;
+	private int     width;
+	private int     height;
+	private long    frame;
+	private boolean layerPass;
 
 	private OverlayUIBridge(final MinecraftRenderBridge render, final MinecraftWindowBridge window) {
 		this.window       = window;
@@ -64,7 +65,7 @@ public final class OverlayUIBridge extends UIBridge {
 
 	@Override
 	public boolean isScreenOpen() {
-		return Minecraft.getInstance().gui.screen() != null;
+		return !this.layerPass && Minecraft.getInstance().gui.screen() != null;
 	}
 
 	@Override
@@ -99,14 +100,21 @@ public final class OverlayUIBridge extends UIBridge {
 	}
 
 	public void extract(final @NonNull GuiGraphicsExtractor graphics, final @NonNull OverlayLayer layer, final boolean post) {
-		if (!this.isScreenOpen() && !this.isOverlayHidden()) {
+		if (this.isOverlayHidden()) {
+			return;
+		}
+
+		this.layerPass = true;
+		try {
 			this.extract(graphics, ui -> OverlayUIBridge.isLayer(ui, layer) && OverlayUIBridge.getLayer(ui).post() == post);
+		} finally {
+			this.layerPass = false;
 		}
 	}
 
 	public void extractScreen(final @NonNull GuiGraphicsExtractor graphics) {
 		if (this.isScreenOpen()) {
-			this.extract(graphics, _ -> true);
+			this.extract(graphics, ui -> OverlayUIBridge.getLayer(ui) == null);
 			this.window.requestCursor(graphics, this.window.getCursor());
 		}
 	}
@@ -155,7 +163,7 @@ public final class OverlayUIBridge extends UIBridge {
 
 	private boolean isShown(final UI ui) {
 		final UIDataOverlayRenderObject render = ui.getOverlay().render();
-		return ui.getData().visible() && (render.always() || !this.isOverlayHidden()) && (render.screens() || !this.isScreenOpen());
+		return ui.getData().visible() && (render.always() || !this.isOverlayHidden()) && (OverlayUIBridge.getLayer(ui) != null || render.screens() || !this.isScreenOpen());
 	}
 
 	private static boolean isLayer(final UI ui, final OverlayLayer layer) {
