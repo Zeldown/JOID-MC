@@ -34,6 +34,7 @@ public final class ShowcaseClock {
 		if (ShowcaseClock.frozen) {
 			ShowcaseClock.frozen = false;
 			Util.setTimeSource(System::nanoTime);
+			BridgeHandler.CLOCK.unregister(ShowcaseClock.INTERFACE);
 		}
 	}
 

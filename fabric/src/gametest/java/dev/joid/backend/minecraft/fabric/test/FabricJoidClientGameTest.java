@@ -52,6 +52,7 @@ import dev.joid.backend.minecraft.lib.ui.node.impl.design.block.BlockNode;
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.entity.EntityNode;
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.item.ItemNode;
 import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
+import dev.joid.backend.minecraft.showcase.ShowcaseClock;
 import dev.joid.demo.asset.locator.impl.DemoAssetLocator;
 import dev.joid.demo.ui.DemoEntry;
 import dev.joid.demo.ui.UIDemoChoice;
@@ -64,6 +65,7 @@ import dev.joid.internal.JOID;
 import dev.joid.internal.JOIDEnv;
 import dev.joid.lib.asset.locator.AssetLocator;
 import dev.joid.lib.bridge.BridgeHandler;
+import dev.joid.lib.bridge.clock.IClockBridge;
 import dev.joid.lib.bridge.render.texture.ITexture;
 import dev.joid.lib.bridge.thread.DirectThreadBridge;
 import dev.joid.lib.color.Color;
@@ -196,6 +198,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			FabricJoidClientGameTest.verifyDebugKey(context);
 			FabricJoidClientGameTest.verifyFrameCounter(context);
 			FabricJoidClientGameTest.verifyEntityBounds(context);
+			FabricJoidClientGameTest.verifyShowcaseClock(context);
 		}
 
 		context.runOnClient(_ -> FabricJoidClientGameTest.verify(JUnitCore.runClasses(FabricRenderBridgeContractTest.class)));
@@ -823,6 +826,18 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		if (!failures.isEmpty()) {
 			throw new AssertionError(failures.size() + " entity bounds checks failed:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
 		}
+	}
+
+	private static void verifyShowcaseClock(final ClientGameTestContext context) {
+		context.runOnClient(_ -> {
+			final IClockBridge clock = BridgeHandler.CLOCK.get();
+			ShowcaseClock.freeze();
+			final IClockBridge frozen = BridgeHandler.CLOCK.get();
+			ShowcaseClock.release();
+			if (frozen == clock || BridgeHandler.CLOCK.get() != clock) {
+				throw new AssertionError("ShowcaseClock.release() leaves " + BridgeHandler.CLOCK.get() + " as the clock instead of " + clock);
+			}
+		});
 	}
 
 	private static void verifyCursor(final ClientGameTestContext context) {
