@@ -8,6 +8,7 @@
         "${mod_author}"
     ],
     "license": "${license}",
+    "icon": "assets/joid/icon.png",
     "environment": "client",
     "accessWidener": "joid.classtweaker",
     "entrypoints": {

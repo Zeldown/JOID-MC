@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.2/docs/images/logo.png" width="128" alt="JOID logo">
+
 # JOID-MC
 ## JOID interfaces inside Minecraft
 
