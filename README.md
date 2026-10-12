@@ -47,6 +47,8 @@ Real renders inside the game window, styled for this showcase: JOID ships with n
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.2/docs/images/showcase-chest.webp" alt="A chest redrawn with JOID over the world: real slots, a rotating player, items dragged with the mouse" width="100%">
+  <br>
+  <sub><b>Containers.</b> Real slots, synced with the server.</sub>
 </p>
 
 <table>
@@ -63,7 +65,7 @@ Real renders inside the game window, styled for this showcase: JOID ships with n
     <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.2/docs/images/showcase-loaders.webp" alt="The same interface on Fabric, NeoForge and Forge"></td>
   </tr>
   <tr>
-    <td align="center"><sub><b>Menus.</b> Any screen, your design.</sub></td>
+    <td align="center"><sub><b>Menus &amp; screens.</b> Redesign any vanilla menu, or build your own.</sub></td>
     <td align="center"><sub><b>Every loader.</b> The same code everywhere.</sub></td>
   </tr>
 </table>
