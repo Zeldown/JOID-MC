@@ -83,11 +83,29 @@ The dev mode and the demos turn on by themselves with the `-dev` jar: there is n
 
 ### In your workspace
 
-Download the `-dev` jar of your loader from the [releases](https://github.com/Zeldown/JOID-MC/releases), put it in the `libs/` folder of your mod and add it to your dependencies:
+Download the `-dev` jar of your loader from the [releases](https://github.com/Zeldown/JOID-MC/releases), put it in the `libs/` folder of your mod and add it to the dependencies of your `build.gradle`:
+
+**Fabric**
 
 ```gradle
 dependencies {
     implementation(files("libs/joid-backend-minecraft-fabric-26.2-1.0.0-dev.jar"))
+}
+```
+
+**NeoForge**
+
+```gradle
+dependencies {
+    implementation(files("libs/joid-backend-minecraft-neoforge-26.2-1.0.0-dev.jar"))
+}
+```
+
+**Forge**
+
+```gradle
+dependencies {
+    implementation(files("libs/joid-backend-minecraft-forge-26.2-1.0.0-dev.jar"))
 }
 ```
 
@@ -98,13 +116,17 @@ dependencies {
 JOID-MC is a separate mod that players install next to yours, like any library mod.
 
 1. **Do not bundle it** in your jar: no `include`, `jarJar` or shadow.
-2. **Declare it as required** in your mod metadata, with the mod id `joid`:
+2. **Declare it as required** in the metadata of your mod, with the mod id `joid`:
+
+**Fabric** · `fabric.mod.json`
 
 ```json
 "depends": {
     "joid": ">=1.0.0"
 }
 ```
+
+**NeoForge** · `neoforge.mods.toml`
 
 ```toml
 [[dependencies.yourmod]]
@@ -113,7 +135,14 @@ type = "required"
 versionRange = "[1.0.0,)"
 ```
 
-The first block goes in `fabric.mod.json`. The second goes in `neoforge.mods.toml`; in the `mods.toml` of Forge, write `mandatory = true` instead of `type = "required"`.
+**Forge** · `mods.toml`
+
+```toml
+[[dependencies.yourmod]]
+modId = "joid"
+mandatory = true
+versionRange = "[1.0.0,)"
+```
 
 3. **Mark JOID-MC as a required dependency** on CurseForge and Modrinth, so that launchers install it with your mod.
 4. **Use only what the `-prod` jar contains.** The demo classes and fonts (`DemoFont`) and the dev nodes exist only in `-dev`. Before publishing, swap the jar in `libs/` for the `-prod` one and start the game once.
@@ -183,17 +212,34 @@ public class BackpackUI extends ContainerUI<BackpackMenu> {
 }
 ```
 
-Register its screen where your loader registers menu screens, and open the menu as usual from the server:
+Register its screen with `ContainerUI.screen(...)` where your loader registers menu screens, then open the menu as usual from the server:
+
+**Fabric** · in your `ClientModInitializer`
 
 ```java
-MenuScreens.register(BackpackMenu.TYPE, ContainerUI.screen(BackpackUI::new));
+@Override
+public void onInitializeClient() {
+	MenuScreens.register(BackpackMenu.TYPE, ContainerUI.screen(BackpackUI::new));
+}
 ```
+
+**NeoForge** · in your client `@Mod` class, on `RegisterMenuScreensEvent`
 
 ```java
-event.register(BackpackMenu.TYPE, ContainerUI.screen(BackpackUI::new));
+public YourModClient(final IEventBus modBus) {
+	modBus.addListener((final RegisterMenuScreensEvent event) -> event.register(BackpackMenu.TYPE, ContainerUI.screen(BackpackUI::new)));
+}
 ```
 
-The first line is for Fabric and Forge (in `FMLClientSetupEvent`), the second for the `RegisterMenuScreensEvent` of NeoForge. `ContainerUI.screen(...)` is the only way to get the screen of a container UI. Your mod keeps its own menu types, registries and opening logic. `bounds(...)` tells which area belongs to the panel: a click outside drops the carried item, like in vanilla. Lay out the slots like any node ([Layout](https://joid.dev-zeldown.workers.dev/#/concepts/layout)); clicks, drags, shift-clicks and number keys on slots behave like vanilla, and the rest of the input works as in [Input](https://joid.dev-zeldown.workers.dev/#/concepts/input).
+**Forge** · in your `@Mod` class, on `FMLClientSetupEvent`
+
+```java
+public YourMod(final FMLJavaModLoadingContext context) {
+	FMLClientSetupEvent.getBus(context.getModBusGroup()).addListener(event -> event.enqueueWork(() -> MenuScreens.register(BackpackMenu.TYPE, ContainerUI.screen(BackpackUI::new))));
+}
+```
+
+`ContainerUI.screen(...)` is the only way to get the screen of a container UI. Your mod keeps its own menu types, registries and opening logic. `bounds(...)` tells which area belongs to the panel: a click outside drops the carried item, like in vanilla. Lay out the slots like any node ([Layout](https://joid.dev-zeldown.workers.dev/#/concepts/layout)); clicks, drags, shift-clicks and number keys on slots behave like vanilla, and the rest of the input works as in [Input](https://joid.dev-zeldown.workers.dev/#/concepts/input).
 
 ## HUD overlays
 
