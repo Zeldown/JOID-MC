@@ -62,12 +62,6 @@ Real renders inside the game window, styled for this showcase: JOID ships with n
     <td align="center"><sub><b>Bestiary.</b> Mobs, blocks and items in 3D.</sub></td>
     <td align="center"><sub><b>Menus &amp; screens.</b> Redesign any vanilla menu, or build your own.</sub></td>
   </tr>
-  <tr>
-    <td colspan="2"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.2/docs/images/showcase-loaders.webp" alt="The same interface on Fabric, NeoForge and Forge" width="100%"></td>
-  </tr>
-  <tr>
-    <td colspan="2" align="center"><sub><b>Every loader.</b> The same code everywhere.</sub></td>
-  </tr>
 </table>
 
 ---
