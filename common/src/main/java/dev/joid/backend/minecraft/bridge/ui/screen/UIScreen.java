@@ -1,5 +1,6 @@
 package dev.joid.backend.minecraft.bridge.ui.screen;
 
+import dev.joid.backend.minecraft.bridge.input.ConsumedKeys;
 import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
 import lombok.NonNull;
 
@@ -89,7 +90,12 @@ public class UIScreen extends Screen {
 
 	@Override
 	public boolean keyPressed(final KeyEvent event) {
-		return this.bridge.getInput().keyPressed(event.key());
+		return ConsumedKeys.press(event.key(), this.bridge.getInput().keyPressed(event.key()));
+	}
+
+	@Override
+	public boolean keyReleased(final KeyEvent event) {
+		return ConsumedKeys.release(event.key());
 	}
 
 	@Override

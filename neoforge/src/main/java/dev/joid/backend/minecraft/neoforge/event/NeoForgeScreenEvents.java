@@ -19,6 +19,12 @@ public final class NeoForgeScreenEvents {
 		}
 	}
 
+	public static void keyReleased(final ScreenEvent.KeyReleased.Pre event) {
+		if (MinecraftScreenEvents.fireKeyReleased(event.getKeyCode())) {
+			event.setCanceled(true);
+		}
+	}
+
 	public static void charTyped(final ScreenEvent.CharacterTyped.Pre event) {
 		if (MinecraftScreenEvents.fireCharTyped(event.getCodePoint())) {
 			event.setCanceled(true);

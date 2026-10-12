@@ -11,6 +11,7 @@ public final class ForgeScreenEvents {
 
 	public static void register() {
 		ScreenEvent.KeyPressed.Pre.BUS.addListener(ForgeScreenEvents::keyPressed);
+		ScreenEvent.KeyReleased.Pre.BUS.addListener(ForgeScreenEvents::keyReleased);
 		ScreenEvent.MouseDragged.Pre.BUS.addListener(ForgeScreenEvents::mouseMoved);
 		ScreenEvent.CharacterTyped.Pre.BUS.addListener(ForgeScreenEvents::charTyped);
 		ScreenEvent.MouseScrolled.Pre.BUS.addListener(ForgeScreenEvents::mouseScrolled);
@@ -21,6 +22,10 @@ public final class ForgeScreenEvents {
 
 	private static boolean keyPressed(final ScreenEvent.KeyPressed.Pre event) {
 		return MinecraftScreenEvents.fireKeyPressed(event.getInfo().key());
+	}
+
+	private static boolean keyReleased(final ScreenEvent.KeyReleased.Pre event) {
+		return MinecraftScreenEvents.fireKeyReleased(event.getInfo().key());
 	}
 
 	private static boolean charTyped(final ScreenEvent.CharacterTyped.Pre event) {

@@ -180,6 +180,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			FabricJoidClientGameTest.verifyContainer(context, singleplayer.getServer());
 			FabricJoidClientGameTest.verifyBlockLighting(context, singleplayer.getServer());
 			FabricJoidClientGameTest.verifyCursor(context);
+			FabricJoidClientGameTest.verifyDebugKey(context);
 			FabricJoidClientGameTest.verifyFrameCounter(context);
 			FabricJoidClientGameTest.verifyEntityBounds(context);
 		}
@@ -829,6 +830,44 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		final Object actual = context.computeOnClient(minecraft -> FabricJoidClientGameTest.field(minecraft.getWindow(), "currentCursor"));
 		if (actual != expected) {
 			failures.add(label + " at " + Arrays.toString(bounds) + " shows the cursor " + actual + " instead of " + expected);
+		}
+	}
+
+	private static void verifyDebugKey(final ClientGameTestContext context) {
+		context.runOnClient(_ -> JOID.open(new UIDemoChoice()));
+		context.waitForScreen(UIScreen.class);
+		context.waitTicks(20);
+		context.getInput().pressKey(GLFW.GLFW_KEY_F3);
+		context.waitTicks(5);
+		final boolean panel = context.computeOnClient(_ -> {
+			final UI ui = JOID.getUi(UIDemoChoice.class);
+			return ui.getNodeList().contains(ui.getDevNode());
+		});
+		final boolean hidden = context.computeOnClient(minecraft -> !minecraft.debugEntries.isOverlayVisible());
+		context.getInput().pressKey(GLFW.GLFW_KEY_F3);
+		context.waitTicks(5);
+		context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
+		context.waitForScreen(null);
+		context.getInput().pressKey(GLFW.GLFW_KEY_F3);
+		context.waitTicks(5);
+		final boolean vanilla = context.computeOnClient(minecraft -> minecraft.debugEntries.isOverlayVisible());
+		context.getInput().pressKey(GLFW.GLFW_KEY_F3);
+		context.waitTicks(5);
+		final List<String> failures = new ArrayList<>();
+		if (!panel) {
+			failures.add("F3 in UIDemoChoice does not show the dev panel of JOID");
+		}
+
+		if (!hidden) {
+			failures.add("F3 consumed by UIDemoChoice also shows the debug screen of Minecraft");
+		}
+
+		if (!vanilla) {
+			failures.add("F3 without a JOID UI does not show the debug screen of Minecraft");
+		}
+
+		if (!failures.isEmpty()) {
+			throw new AssertionError(failures.size() + " debug key checks failed:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
 		}
 	}
 

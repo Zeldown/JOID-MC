@@ -15,6 +15,7 @@ public final class FabricScreenEvents {
 		ScreenEvents.AFTER_INIT.register((_, screen, _, _) -> {
 			ScreenMouseEvents.allowMouseDrag(screen).register((_, _, _, _) -> !MinecraftScreenEvents.fireMouseMoved());
 			ScreenKeyboardEvents.allowKeyPress(screen).register((_, event) -> !MinecraftScreenEvents.fireKeyPressed(event.key()));
+			ScreenKeyboardEvents.allowKeyRelease(screen).register((_, event) -> !MinecraftScreenEvents.fireKeyReleased(event.key()));
 			ScreenMouseEvents.allowMouseClick(screen).register((_, event) -> !MinecraftScreenEvents.fireMousePressed(event.button()));
 			ScreenKeyboardEvents.allowCharType(screen).register((_, event) -> !MinecraftScreenEvents.fireCharTyped(event.codepoint()));
 			ScreenMouseEvents.allowMouseRelease(screen).register((_, event) -> !MinecraftScreenEvents.fireMouseReleased(event.button()));

@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import dev.joid.backend.minecraft.bridge.input.ConsumedKeys;
 import dev.joid.backend.minecraft.lib.ui.core.container.ContainerUI;
 import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
 import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
@@ -134,7 +135,12 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 
 	@Override
 	public boolean keyPressed(final KeyEvent event) {
-		return this.bridge.keyPressed(GlfwKeys.getKey(event.key())) || super.keyPressed(event);
+		return ConsumedKeys.press(event.key(), this.bridge.keyPressed(GlfwKeys.getKey(event.key()))) || super.keyPressed(event);
+	}
+
+	@Override
+	public boolean keyReleased(final KeyEvent event) {
+		return ConsumedKeys.release(event.key()) || super.keyReleased(event);
 	}
 
 	@Override

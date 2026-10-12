@@ -93,6 +93,7 @@ public final class ClientSmokeTest {
 			ClientSmokeTest.joinWorld();
 			ClientSmokeTest.verifyBridges(failures);
 			ClientSmokeTest.verifyKeyBind(failures);
+			ClientSmokeTest.verifyDebugKey(failures);
 			ClientSmokeTest.verifyOverlays(failures);
 			ClientSmokeTest.verifyScreenInput(failures);
 			ClientSmokeTest.verifyReload(failures);
@@ -205,6 +206,32 @@ public final class ClientSmokeTest {
 
 		ClientSmokeTest.press(GLFW.GLFW_KEY_J);
 		ClientSmokeTest.waitFor("UIDemoChoice opened by the key J", () -> Minecraft.getInstance().gui.screen() instanceof UIScreen && JOID.isOpen(UIDemoChoice.class), 30);
+		ClientSmokeTest.sleep(2000);
+	}
+
+	private static void verifyDebugKey(final List<String> failures) {
+		ClientSmokeTest.press(GLFW.GLFW_KEY_F3);
+		ClientSmokeTest.sleep(1000);
+		if (!ClientSmokeTest.computeOnClient(() -> JOID.getUi(UIDemoChoice.class).getNodeList().contains(JOID.getUi(UIDemoChoice.class).getDevNode()))) {
+			failures.add("F3 in UIDemoChoice does not show the dev panel of JOID");
+		}
+
+		if (ClientSmokeTest.computeOnClient(() -> Minecraft.getInstance().debugEntries.isOverlayVisible())) {
+			failures.add("F3 consumed by UIDemoChoice also shows the debug screen of Minecraft");
+		}
+
+		ClientSmokeTest.press(GLFW.GLFW_KEY_F3);
+		ClientSmokeTest.press(GLFW.GLFW_KEY_ESCAPE);
+		ClientSmokeTest.waitFor("the game without screen", () -> Minecraft.getInstance().gui.screen() == null, 30);
+		ClientSmokeTest.press(GLFW.GLFW_KEY_F3);
+		ClientSmokeTest.sleep(1000);
+		if (!ClientSmokeTest.computeOnClient(() -> Minecraft.getInstance().debugEntries.isOverlayVisible())) {
+			failures.add("F3 without a JOID UI does not show the debug screen of Minecraft");
+		}
+
+		ClientSmokeTest.press(GLFW.GLFW_KEY_F3);
+		ClientSmokeTest.press(GLFW.GLFW_KEY_J);
+		ClientSmokeTest.waitFor("UIDemoChoice opened again by the key J", () -> Minecraft.getInstance().gui.screen() instanceof UIScreen && JOID.isOpen(UIDemoChoice.class), 30);
 		ClientSmokeTest.sleep(2000);
 	}
 

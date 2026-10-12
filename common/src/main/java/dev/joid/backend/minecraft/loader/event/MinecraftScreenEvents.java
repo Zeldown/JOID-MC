@@ -1,5 +1,6 @@
 package dev.joid.backend.minecraft.loader.event;
 
+import dev.joid.backend.minecraft.bridge.input.ConsumedKeys;
 import dev.joid.backend.minecraft.bridge.ui.overlay.OverlayInputForwarder;
 import dev.joid.backend.minecraft.bridge.ui.overlay.OverlayLayerRenderer;
 import lombok.AccessLevel;
@@ -20,7 +21,11 @@ public final class MinecraftScreenEvents {
 	}
 
 	public static boolean fireKeyPressed(final int code) {
-		return OverlayInputForwarder.keyPressed(code);
+		return ConsumedKeys.press(code, OverlayInputForwarder.keyPressed(code));
+	}
+
+	public static boolean fireKeyReleased(final int code) {
+		return ConsumedKeys.release(code);
 	}
 
 	public static boolean fireCharTyped(final int codepoint) {
