@@ -2,7 +2,7 @@ package dev.joid.backend.minecraft.bridge.render.shader;
 
 import java.util.Collection;
 
-import dev.joid.backend.minecraft.Backend;
+import dev.joid.backend.minecraft.MinecraftJoid;
 import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
 import dev.joid.backend.minecraft.bridge.render.vertex.VertexLayout;
 import dev.joid.lib.bridge.render.matrix.MatrixStack;
@@ -66,8 +66,8 @@ public final class MinecraftShader extends Shader {
 	@Override
 	protected void compileProgram(final @NonNull ShaderTranslation translation) {
 		final MinecraftRenderBridge bridge = (MinecraftRenderBridge) super.getBridge();
-		this.identifier        = Identifier.fromNamespaceAndPath(Backend.MOD_ID, "shader/" + MinecraftShader.count++);
-		this.stencilIdentifier = Identifier.fromNamespaceAndPath(Backend.MOD_ID, this.identifier.getPath() + "_stencil");
+		this.identifier        = Identifier.fromNamespaceAndPath(MinecraftJoid.MOD_ID, "shader/" + MinecraftShader.count++);
+		this.stencilIdentifier = Identifier.fromNamespaceAndPath(MinecraftJoid.MOD_ID, this.identifier.getPath() + "_stencil");
 		this.layout            = MinecraftShader.createLayout(super.getSamplerMap().keySet());
 		this.vertexFormat      = VertexLayout.create(super.getVertex().getBuiltins());
 		bridge.getSourceProvider().register(this.identifier, ShaderType.VERTEX, translation.getVertex());

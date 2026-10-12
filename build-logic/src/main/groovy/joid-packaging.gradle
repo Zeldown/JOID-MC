@@ -1,26 +1,31 @@
 ext {
-    developmentPatterns = [
-            'assets/dev/**',
+    demoPatterns = [
             'assets/demo/**',
             'dev/joid/demo/**',
-            'dev/joid/internal/font/**',
-            'dev/joid/lib/ui/node/impl/dev/**',
-            'dev/joid/base/glfw/demo/**',
-            'dev/joid/base/glfw/snapshot/**',
             'dev/joid/backend/minecraft/**/demo/**',
-            'dev/joid/backend/minecraft/bridge/snapshot/**',
             'dev/joid/backend/minecraft/showcase/**',
             'assets/joid/demo/**',
             'assets/joid/lang/**',
             'data/joid/**/demo/**'
     ]
 
+    devPatterns = [
+            'assets/dev/**',
+            'dev/joid/internal/font/**',
+            'dev/joid/lib/ui/node/impl/dev/**',
+            'dev/joid/backend/minecraft/bridge/snapshot/**'
+    ]
+
+    demoReferences = ~/dev\/joid\/(demo|backend\/minecraft\/(showcase|([\w$]+\/)*demo))\/[\w$\/]+/
+
     developmentReferences = ~/dev\/joid\/(demo|test|backend\/minecraft\/(showcase|([\w$]+\/)*(demo|snapshot)))\/[\w$\/]+/
+
+    demoWords = ['demo', 'demos', 'showcase']
 
     developmentWords = ['demo', 'demos', 'test', 'tests', 'gametest', 'gametests', 'snapshot', 'snapshots', 'testkit', 'showcase']
 
-    developmentCallSites = [
-            'dev/joid/backend/minecraft/Backend.class -> dev/joid/backend/minecraft/demo/DemoLauncher',
+    demoCallSites = [
+            'dev/joid/backend/minecraft/MinecraftJoid.class -> dev/joid/backend/minecraft/demo/DemoLauncher',
             'dev/joid/backend/minecraft/fabric/FabricJoidClient.class -> dev/joid/backend/minecraft/fabric/demo/FabricGameTestRegistry',
             'dev/joid/backend/minecraft/forge/ForgeJoid.class -> dev/joid/backend/minecraft/forge/demo/ForgeGameTestRegistry'
     ]
@@ -30,7 +35,11 @@ ext {
             'META-INF/versions/*/module-info.class'
     ]
 
+    excludeDemo = { task ->
+        task.exclude(demoPatterns)
+    }
+
     excludeDevelopment = { task ->
-        task.exclude(developmentPatterns)
+        task.exclude(demoPatterns + devPatterns)
     }
 }

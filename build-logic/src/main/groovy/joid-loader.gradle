@@ -20,10 +20,11 @@ configurations {
     embed {
         transitive = false
     }
+    joidDemo
     joidDev
     joidProd
-    compileOnly.extendsFrom(embed, joidDev)
-    runtimeOnly.extendsFrom(embed, joidDev)
+    compileOnly.extendsFrom(embed, joidDemo)
+    runtimeOnly.extendsFrom(embed, joidDemo)
 }
 
 def loaderAttribute = Attribute.of('io.github.mcgradleconventions.loader', String)
@@ -36,6 +37,7 @@ dependencies {
     }
     commonJava(project(path: ':common', configuration: 'commonJava'))
     commonResources(project(path: ':common', configuration: 'commonResources'))
+    joidDemo(files(rootProject.file("libs/joid-core-${joid_version}-demo.jar")))
     joidDev(files(rootProject.file("libs/joid-core-${joid_version}-dev.jar")))
     joidProd(files(rootProject.file("libs/joid-core-${joid_version}-prod.jar")))
     compileOnly(files(rootProject.file("libs/joid-tool-testkit-${joid_version}.jar")))
@@ -89,11 +91,12 @@ shadowJar {
 
 def devJar = tasks.register('devJar', ShadowJar) {
     group = 'build'
-    description = 'Builds the dev jar of the mod, with the demos of JOID and of the mod.'
+    description = 'Builds the dev jar of the mod, with the dev mode of JOID and no demo.'
     archiveClassifier = 'dev'
     from(sourceSets.main.output)
     configurations = [project.configurations.embed, project.configurations.joidDev]
     exclude(moduleDescriptors)
+    excludeDemo(it)
     manifest.inheritFrom(jar.manifest)
 }
 
@@ -108,106 +111,122 @@ def prodJar = tasks.register('prodJar', ShadowJar) {
     manifest.inheritFrom(jar.manifest)
 }
 
-def verifyProdJar = tasks.register('verifyProdJar') {
-    group = 'verification'
-    description = 'Checks that the prod jar holds no code, asset or reference of the dev and demo modes.'
-    def archive = prodJar.flatMap { it.archiveFile }
-    def patterns = developmentPatterns
-    def references = developmentReferences
-    def callSites = developmentCallSites
-    def words = developmentWords
-    inputs.file(archive)
-    doLast {
-        def found = []
-        zipTree(archive).matching { include(patterns) }.visit { if (!it.directory) found << it.relativePath.pathString }
-        if (!found.isEmpty()) {
-            throw new GradleException("The prod jar holds development entries: ${found.take(10)}")
-        }
+def verifyJar = { String kind, File archive, List<String> patterns, java.util.regex.Pattern references, List<String> words, boolean devMode ->
+    def found = []
+    zipTree(archive).matching { include(patterns) }.visit { if (!it.directory) found << it.relativePath.pathString }
+    if (!found.isEmpty()) {
+        throw new GradleException("The ${kind} jar holds entries it must not ship: ${found.take(10)}")
+    }
 
-        def referencing = [] as SortedSet
-        new ZipFile(archive.get().asFile).withCloseable { zip ->
-            zip.entries().findAll { it.name.startsWith('dev/joid/backend/minecraft/') && it.name.endsWith('.class') }.each { entry ->
-                def text = new String(zip.getInputStream(entry).bytes, 'ISO-8859-1')
-                def matcher = references.matcher(text)
-                while (matcher.find()) {
-                    def reference = "${entry.name} -> ${matcher.group()}".toString()
-                    if (!callSites.contains(reference)) {
-                        referencing << reference
-                    }
+    def referencing = [] as SortedSet
+    new ZipFile(archive).withCloseable { zip ->
+        zip.entries().findAll { it.name.startsWith('dev/joid/backend/minecraft/') && it.name.endsWith('.class') }.each { entry ->
+            def text = new String(zip.getInputStream(entry).bytes, 'ISO-8859-1')
+            def matcher = references.matcher(text)
+            while (matcher.find()) {
+                def reference = "${entry.name} -> ${matcher.group()}".toString()
+                if (!demoCallSites.contains(reference)) {
+                    referencing << reference
                 }
             }
         }
-        if (!referencing.isEmpty()) {
-            throw new GradleException("The prod jar references development classes: ${referencing.take(10)}")
-        }
+    }
+    if (!referencing.isEmpty()) {
+        throw new GradleException("The ${kind} jar references classes it does not ship: ${referencing.take(10)}")
+    }
 
-        def named = [] as SortedSet
-        def translated = [] as SortedSet
-        def described = [] as SortedSet
-        def split = { String text -> text.split(/[^A-Za-z0-9]+|(?<=[a-z0-9])(?=[A-Z])/)*.toLowerCase() }
-        new ZipFile(archive.get().asFile).withCloseable { zip ->
-            zip.entries().findAll { !it.directory }.each { entry ->
-                if (split(entry.name).any { it in words }) {
-                    named << entry.name
-                }
+    def named = [] as SortedSet
+    def translated = [] as SortedSet
+    def described = [] as SortedSet
+    def split = { String text -> text.split(/[^A-Za-z0-9]+|(?<=[a-z0-9])(?=[A-Z])/)*.toLowerCase() }
+    new ZipFile(archive).withCloseable { zip ->
+        zip.entries().findAll { !it.directory }.each { entry ->
+            if (split(entry.name).any { it in words }) {
+                named << entry.name
+            }
 
-                if (entry.name ==~ /assets\/[^\/]+\/lang\/[^\/]+\.json/) {
-                    new JsonSlurper().parse(zip.getInputStream(entry)).keySet().findAll { key -> split(key).any { it in words } }.each { key -> translated << "${entry.name} -> ${key}".toString() }
-                }
+            if (entry.name ==~ /assets\/[^\/]+\/lang\/[^\/]+\.json/) {
+                new JsonSlurper().parse(zip.getInputStream(entry)).keySet().findAll { key -> split(key).any { it in words } }.each { key -> translated << "${entry.name} -> ${key}".toString() }
+            }
 
-                if (entry.name ==~ /[^\/]+\.(json|mcmeta|cfg|classtweaker)|META-INF\/[^\/]+\.(toml|cfg)|(assets|data)\/.+\.(json|mcmeta)/) {
-                    def lines = new String(zip.getInputStream(entry).bytes, 'UTF-8').readLines().collect { it.replaceAll(/#.*/, '') }
-                    if (lines.any { line -> split(line).any { it in words } }) {
-                        described << entry.name
-                    }
+            if (entry.name ==~ /[^\/]+\.(json|mcmeta|cfg|classtweaker)|META-INF\/[^\/]+\.(toml|cfg)|(assets|data)\/.+\.(json|mcmeta)/) {
+                def lines = new String(zip.getInputStream(entry).bytes, 'UTF-8').readLines().collect { it.replaceAll(/#.*/, '') }
+                if (lines.any { line -> split(line).any { it in words } }) {
+                    described << entry.name
                 }
             }
         }
-        if (!named.isEmpty()) {
-            throw new GradleException("The prod jar holds demo or test entries: ${named.take(10)}")
+    }
+    if (!named.isEmpty()) {
+        throw new GradleException("The ${kind} jar holds entries named after ${words}: ${named.take(10)}")
+    }
+
+    if (!translated.isEmpty()) {
+        throw new GradleException("The ${kind} jar holds translations named after ${words}: ${translated.take(10)}")
+    }
+
+    if (!described.isEmpty()) {
+        throw new GradleException("The ${kind} jar declares content named after ${words} in: ${described.take(10)}")
+    }
+
+    def loader = new URLClassLoader([archive.toURI().toURL()] as URL[], ClassLoader.platformClassLoader)
+    try {
+        def environment = loader.loadClass('dev.joid.internal.JOIDEnv')
+        if (environment.getMethod('isDevMode').invoke(null) != devMode) {
+            throw new GradleException("The ${kind} jar starts JOID with the dev mode ${devMode ? 'off' : 'on'}")
         }
 
-        if (!translated.isEmpty()) {
-            throw new GradleException("The prod jar holds demo or test translations: ${translated.take(10)}")
+        if (environment.getMethod('isDemoMode').invoke(null)) {
+            throw new GradleException("The ${kind} jar starts JOID with the demo mode on")
         }
 
-        if (!described.isEmpty()) {
-            throw new GradleException("The prod jar declares demo or test content in: ${described.take(10)}")
-        }
-
-        def loader = new URLClassLoader([archive.get().asFile.toURI().toURL()] as URL[], ClassLoader.platformClassLoader)
-        try {
-            def joid = loader.loadClass('dev.joid.internal.JOID')
-            def instance = joid.getMethod('inst').invoke(null)
-            ['setDevMode', 'setDemoMode'].each { mode ->
+        [['devMode', !devMode], ['demoMode', true]].each { mode, refused ->
+            if (refused) {
                 try {
-                    joid.getMethod(mode, Boolean.TYPE).invoke(instance, true)
-                    throw new GradleException("The prod jar accepts ${mode}(true)")
+                    environment.getMethod(mode, Boolean.TYPE).invoke(null, true)
+                    throw new GradleException("The ${kind} jar accepts JOIDEnv.${mode}(true)")
                 } catch (final java.lang.reflect.InvocationTargetException e) {
                     if (!(e.cause instanceof IllegalStateException)) {
                         throw e
                     }
                 }
             }
-        } finally {
-            loader.close()
         }
+    } finally {
+        loader.close()
+    }
+}
+
+def verifyProdJar = tasks.register('verifyProdJar') {
+    group = 'verification'
+    description = 'Checks that the prod jar holds no code, asset or reference of the dev and demo modes.'
+    def archive = prodJar.flatMap { it.archiveFile }
+    def patterns = demoPatterns + devPatterns
+    def references = developmentReferences
+    def words = developmentWords
+    inputs.file(archive)
+    doLast {
+        verifyJar('prod', archive.get().asFile, patterns, references, words, false)
     }
 }
 
 def verifyDevJar = tasks.register('verifyDevJar') {
     group = 'verification'
-    description = 'Checks that the dev jar holds the demos of JOID and of the mod.'
+    description = 'Checks that the dev jar starts JOID in dev mode and holds no code, asset or reference of the demos.'
     def archive = devJar.flatMap { it.archiveFile }
+    def patterns = demoPatterns
+    def references = demoReferences
+    def words = demoWords
     inputs.file(archive)
     doLast {
         new ZipFile(archive.get().asFile).withCloseable { zip ->
-            ['dev/joid/demo/DemoFont.class', 'dev/joid/lib/ui/node/impl/dev/DevNode.class', 'dev/joid/backend/minecraft/demo/DemoLauncher.class', 'assets/joid/lang/en_us.json', 'assets/joid/lang/fr_fr.json'].each { entry ->
+            ['dev/joid/lib/ui/node/impl/dev/DevNode.class', 'dev/joid/internal/font/DevFont.class'].each { entry ->
                 if (zip.getEntry(entry) == null) {
                     throw new GradleException("The dev jar misses ${entry}")
                 }
             }
         }
+        verifyJar('dev', archive.get().asFile, patterns, references, words, true)
     }
 }
 

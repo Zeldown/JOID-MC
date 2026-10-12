@@ -1,9 +1,10 @@
 package dev.joid.backend.minecraft.showcase;
 
-import dev.joid.backend.minecraft.Backend;
+import dev.joid.backend.minecraft.MinecraftJoid;
 import dev.joid.backend.minecraft.loader.registry.ContainerTypeRegistry;
 import dev.joid.backend.minecraft.loader.registry.ContainerUIRegistry;
 import dev.joid.backend.minecraft.showcase.ui.ShowChest;
+import dev.joid.internal.JOID;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -19,11 +20,8 @@ public final class ShowcaseLauncher {
 
 	public static void init() {
 		ContainerUIRegistry.create(ShowcaseLauncher.CHEST, ShowChest::new).register();
-		ContainerTypeRegistry.create(Backend.MOD_ID + ":showcase/chest", ShowcaseLauncher.CHEST).register();
-	}
-
-	public static void start() {
-		ShowcaseDirector.start();
+		ContainerTypeRegistry.create(MinecraftJoid.MOD_ID + ":showcase/chest", ShowcaseLauncher.CHEST).register();
+		JOID.onReady(ShowcaseDirector::start);
 	}
 
 	public static boolean isActive() {

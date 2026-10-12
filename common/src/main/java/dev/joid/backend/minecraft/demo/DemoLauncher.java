@@ -1,6 +1,6 @@
 package dev.joid.backend.minecraft.demo;
 
-import dev.joid.backend.minecraft.Backend;
+import dev.joid.backend.minecraft.MinecraftJoid;
 import dev.joid.backend.minecraft.demo.container.DemoContainer;
 import dev.joid.backend.minecraft.demo.container.DemoContainerGameTest;
 import dev.joid.backend.minecraft.demo.network.OpenDemoContainerPayload;
@@ -26,25 +26,23 @@ public final class DemoLauncher {
 
 	public static void init() {
 		ContainerUIRegistry.create(DemoContainer.TYPE, UIDemoContainer::new).register();
-		ContainerTypeRegistry.create(Backend.MOD_ID + ":demo/container", DemoContainer.TYPE).register();
+		ContainerTypeRegistry.create(MinecraftJoid.MOD_ID + ":demo/container", DemoContainer.TYPE).register();
 		KeyBindRegistry.create("joid.demo", Key.J).onPress(() -> JOID.open(new UIDemoChoice())).register();
 		OpenDemoContainerPayload.TYPE.onServer(OpenDemoContainerPayloadHandler::handle).register();
-		GameTestRegistry.create(Backend.MOD_ID + ":demo/container", DemoContainerGameTest::run).register();
+		GameTestRegistry.create(MinecraftJoid.MOD_ID + ":demo/container", DemoContainerGameTest::run).register();
 		if (ShowcaseLauncher.isActive()) {
 			ShowcaseLauncher.init();
 		}
+
+		JOID.onReady(DemoLauncher::register);
 	}
 
-	public static void register() {
+	private static void register() {
 		UIDemoChoice.LIST.add(DemoEntry.create(UIDemoMinecraft.class));
 		UIDemoChoice.LIST.add(DemoEntry.create("UIDemoOverlayLayer", UIDemoOverlayLayer::toggle).state(UIDemoOverlayLayer::isOpen).hover(UIDemoOverlayLayer.class.getName()));
 		UIDemoChoice.LIST.add(DemoEntry.create("UIDemoContainer", OpenDemoContainerPayload.INSTANCE::sendToServer).hover(UIDemoContainer.class.getName()));
 		if (Boolean.getBoolean("joid.smoke")) {
 			ClientSmokeTest.start();
-		}
-
-		if (ShowcaseLauncher.isActive()) {
-			ShowcaseLauncher.start();
 		}
 	}
 

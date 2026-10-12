@@ -14,6 +14,11 @@ public final class OverlayInputForwarder {
 		return bridge != null && bridge.keyPressed(GlfwKeys.getKey(code));
 	}
 
+	public static boolean keyReleased(final int code) {
+		final OverlayUIBridge bridge = BridgeHandler.UI.getBridge(OverlayUIBridge.class);
+		return bridge != null && bridge.keyReleased(GlfwKeys.getKey(code));
+	}
+
 	public static boolean charTyped(final int codepoint) {
 		final OverlayUIBridge bridge = BridgeHandler.UI.getBridge(OverlayUIBridge.class);
 		return bridge != null && bridge.charTyped(codepoint);

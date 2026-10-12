@@ -1,7 +1,8 @@
 package dev.joid.backend.minecraft.bridge.ui.screen;
 
-import dev.joid.backend.minecraft.bridge.input.ConsumedKeys;
 import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
+import dev.joid.base.glfw.input.GlfwKeys;
+import dev.joid.lib.input.mouse.MouseButton;
 import lombok.NonNull;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -70,37 +71,37 @@ public class UIScreen extends Screen {
 
 	@Override
 	public void mouseMoved(final double x, final double y) {
-		this.bridge.getInput().mouseMoved();
+		this.bridge.mouseMoved();
 	}
 
 	@Override
 	public boolean mouseClicked(final MouseButtonEvent event, final boolean doubleClick) {
-		return this.bridge.getInput().mousePressed(event.button());
+		return this.bridge.mousePressed(MouseButton.from(event.button()));
 	}
 
 	@Override
 	public boolean mouseReleased(final MouseButtonEvent event) {
-		return this.bridge.getInput().mouseReleased(event.button());
+		return this.bridge.mouseReleased(MouseButton.from(event.button()));
 	}
 
 	@Override
 	public boolean mouseScrolled(final double x, final double y, final double scrollX, final double scrollY) {
-		return this.bridge.getInput().mouseScrolled(scrollX, scrollY);
+		return this.bridge.mouseScroll(scrollX, scrollY);
 	}
 
 	@Override
 	public boolean keyPressed(final KeyEvent event) {
-		return ConsumedKeys.press(event.key(), this.bridge.getInput().keyPressed(event.key()));
+		return this.bridge.keyPressed(GlfwKeys.getKey(event.key()));
 	}
 
 	@Override
 	public boolean keyReleased(final KeyEvent event) {
-		return ConsumedKeys.release(event.key());
+		return this.bridge.keyReleased(GlfwKeys.getKey(event.key()));
 	}
 
 	@Override
 	public boolean charTyped(final CharacterEvent event) {
-		return this.bridge.getInput().charTyped(event.codepoint());
+		return this.bridge.charTyped(event.codepoint());
 	}
 
 	private boolean hasBackground() {

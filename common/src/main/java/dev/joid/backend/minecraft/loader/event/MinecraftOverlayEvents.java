@@ -2,7 +2,7 @@ package dev.joid.backend.minecraft.loader.event;
 
 import java.util.Locale;
 
-import dev.joid.backend.minecraft.Backend;
+import dev.joid.backend.minecraft.MinecraftJoid;
 import dev.joid.backend.minecraft.bridge.ui.overlay.OverlayLayerRenderer;
 import dev.joid.backend.minecraft.lib.ui.core.data.overlay.layer.OverlayLayer;
 import lombok.AccessLevel;
@@ -32,15 +32,15 @@ public final class MinecraftOverlayEvents {
 	}
 
 	public static @NonNull Identifier getId() {
-		return Identifier.fromNamespaceAndPath(Backend.MOD_ID, "overlay");
+		return Identifier.fromNamespaceAndPath(MinecraftJoid.MOD_ID, "overlay");
 	}
 
 	public static @NonNull Identifier getId(final @NonNull OverlayLayer layer, final boolean post) {
-		return Identifier.fromNamespaceAndPath(Backend.MOD_ID, "overlay/" + layer.name().toLowerCase(Locale.ROOT) + (post ? "_post" : "_pre"));
+		return Identifier.fromNamespaceAndPath(MinecraftJoid.MOD_ID, "overlay/" + layer.name().toLowerCase(Locale.ROOT) + (post ? "_post" : "_pre"));
 	}
 
 	public static @NonNull Identifier getHiddenHudId() {
-		return Identifier.fromNamespaceAndPath(Backend.MOD_ID, "overlay/hidden_hud");
+		return Identifier.fromNamespaceAndPath(MinecraftJoid.MOD_ID, "overlay/hidden_hud");
 	}
 
 }

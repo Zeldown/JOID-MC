@@ -4,11 +4,9 @@ import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
 import dev.joid.backend.minecraft.bridge.ui.TooltipQueue;
 import dev.joid.backend.minecraft.bridge.window.MinecraftWindowBridge;
 import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
-import dev.joid.base.glfw.input.GlfwInputForwarder;
 import dev.joid.lib.bridge.ui.StackUIBridge;
 import dev.joid.lib.ui.core.UI;
 import dev.joid.lib.ui.core.data.overlay.UIDataOverlayObject;
-import lombok.Getter;
 import lombok.NonNull;
 
 import net.minecraft.client.Minecraft;
@@ -20,16 +18,12 @@ public final class ScreenUIBridge extends StackUIBridge {
 	private final TooltipQueue          tooltipQueue;
 	private final MinecraftWindowBridge window;
 
-	@Getter
-	private final GlfwInputForwarder input;
-
 	private UIScreen screen;
 
 	private ScreenUIBridge(final MinecraftRenderBridge render, final MinecraftWindowBridge window) {
 		this.window       = window;
 		this.compositor   = GuiCompositor.create(render);
 		this.tooltipQueue = TooltipQueue.create();
-		this.input        = GlfwInputForwarder.create(this);
 	}
 
 	public static @NonNull ScreenUIBridge create(final @NonNull MinecraftRenderBridge render, final @NonNull MinecraftWindowBridge window) {

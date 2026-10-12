@@ -1,6 +1,6 @@
 package dev.joid.backend.minecraft.forge.network;
 
-import dev.joid.backend.minecraft.Backend;
+import dev.joid.backend.minecraft.MinecraftJoid;
 import dev.joid.backend.minecraft.bridge.network.PayloadPacket;
 import dev.joid.backend.minecraft.loader.network.IPayload;
 import dev.joid.backend.minecraft.loader.network.PayloadType;
@@ -25,7 +25,7 @@ public final class ForgePayloads {
 			return;
 		}
 
-		PayloadFlow<RegistryFriendlyByteBuf, CustomPacketPayload> flow = ChannelBuilder.named(Identifier.fromNamespaceAndPath(Backend.MOD_ID, "main")).networkProtocolVersion(1).optional().payloadChannel().play().serverbound();
+		PayloadFlow<RegistryFriendlyByteBuf, CustomPacketPayload> flow = ChannelBuilder.named(Identifier.fromNamespaceAndPath(MinecraftJoid.MOD_ID, "main")).networkProtocolVersion(1).optional().payloadChannel().play().serverbound();
 		for (final PayloadType<?> type : PayloadType.getRegistered()) {
 			flow = ForgePayloads.add(flow, type);
 		}

@@ -27,6 +27,7 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.openal.AL10;
 import org.lwjgl.opengl.GL11;
 
+import dev.joid.backend.minecraft.MinecraftBackend;
 import dev.joid.backend.minecraft.bridge.render.texture.MinecraftTexture;
 import dev.joid.backend.minecraft.bridge.snapshot.MinecraftSnapshotBackend;
 import dev.joid.backend.minecraft.bridge.thread.MinecraftThreadBridge;
@@ -56,6 +57,7 @@ import dev.joid.demo.ui.resource.UIDemoPlayer;
 import dev.joid.demo.ui.shader.UIDemoEffect;
 import dev.joid.demo.ui.shader.UIDemoShader;
 import dev.joid.internal.JOID;
+import dev.joid.internal.JOIDEnv;
 import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.bridge.render.texture.ITexture;
 import dev.joid.lib.color.Color;
@@ -132,6 +134,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 	public void runTest(final ClientGameTestContext context) {
 		context.waitFor(_ -> BridgeHandler.UI.getBridge(ScreenUIBridge.class) != null);
 		context.getInput().resizeWindow(1920, 1080);
+		FabricJoidClientGameTest.verifyBackend(context);
 		FabricJoidClientGameTest.verifyKeyBindLabels(context);
 		FabricJoidClientGameTest.verifyEntitiesWithoutWorld(context);
 		try (TestSingleplayerContext singleplayer = context.worldBuilder().create()) {
@@ -187,6 +190,27 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 
 		context.runOnClient(_ -> FabricJoidClientGameTest.verify(JUnitCore.runClasses(FabricRenderBridgeContractTest.class)));
 		context.runOnClient(_ -> FabricJoidClientGameTest.verifySnapshots(new File(System.getProperty("joid.snapshot.output", "snapshots/renders")), new File(System.getProperty("joid.snapshot.references", "snapshots/references"))));
+	}
+
+	private static void verifyBackend(final ClientGameTestContext context) {
+		context.runOnClient(minecraft -> {
+			final List<Class<?>> order = BridgeHandler.UI.getBridgeList().stream().<Class<?>>map(Object::getClass).toList();
+			if (!order.equals(List.of(ScreenUIBridge.class, ContainerUIBridge.class, OverlayUIBridge.class))) {
+				throw new AssertionError("The UI bridges of MinecraftBackend are ordered from the lowest priority as " + order);
+			}
+
+			if (!MinecraftBackend.inst().isRegistered() || !JOID.inst().isReady()) {
+				throw new AssertionError("JOID is not ready after the registration of MinecraftBackend");
+			}
+
+			if (!JOIDEnv.getDataDir().equals(new File(minecraft.gameDirectory, "config/joid"))) {
+				throw new AssertionError("The data folder of JOID is " + JOIDEnv.getDataDir());
+			}
+
+			if (!JOIDEnv.isDevMode() || !JOIDEnv.isDemoMode()) {
+				throw new AssertionError("The repository runs JOID with the dev mode " + JOIDEnv.isDevMode() + " and the demo mode " + JOIDEnv.isDemoMode());
+			}
+		});
 	}
 
 	private static void verifyHostBindings(final ClientGameTestContext context) {

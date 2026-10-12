@@ -49,7 +49,7 @@ neoForge {
 }
 
 configurations {
-    additionalRuntimeClasspath.extendsFrom(embed, joidDev)
+    additionalRuntimeClasspath.extendsFrom(embed, joidDemo)
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }

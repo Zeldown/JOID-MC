@@ -40,6 +40,7 @@ import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
 import dev.joid.demo.ui.DemoEntry;
 import dev.joid.demo.ui.UIDemoChoice;
 import dev.joid.internal.JOID;
+import dev.joid.internal.JOIDEnv;
 import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.input.key.Key;
 import dev.joid.lib.input.key.resolver.KeyResolver;
@@ -189,7 +190,7 @@ public final class ClientSmokeTest {
 				names.add("UI bridges");
 			}
 
-			if (!JOID.inst().isDemoMode()) {
+			if (!JOIDEnv.isDemoMode()) {
 				names.add("demo mode");
 			}
 			return names;

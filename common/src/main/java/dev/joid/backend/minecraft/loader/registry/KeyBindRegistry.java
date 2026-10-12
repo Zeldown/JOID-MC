@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import dev.joid.backend.minecraft.Backend;
+import dev.joid.backend.minecraft.MinecraftJoid;
 import dev.joid.lib.input.key.Key;
 import lombok.Getter;
 import lombok.NonNull;
@@ -23,7 +23,7 @@ public final class KeyBindRegistry {
 	private KeyBindRegistry(final String id, final Key key) {
 		this.id       = id;
 		this.key      = key;
-		this.category = Backend.MOD_ID + ":main";
+		this.category = MinecraftJoid.MOD_ID + ":main";
 		this.onPress  = () -> {};
 	}
 

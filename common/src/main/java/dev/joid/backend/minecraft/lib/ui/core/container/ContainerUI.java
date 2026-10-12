@@ -6,7 +6,7 @@ import dev.joid.backend.minecraft.bridge.ui.container.ContainerUIBridge;
 import dev.joid.backend.minecraft.bridge.ui.container.ContainerUIScreen;
 import dev.joid.backend.minecraft.lib.draw.item.DrawItem;
 import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
-import dev.joid.internal.JOID;
+import dev.joid.internal.JOIDEnv;
 import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.ui.core.UI;
 import dev.joid.lib.ui.node.Node;
@@ -83,7 +83,7 @@ public abstract class ContainerUI<M extends AbstractContainerMenu> extends UI {
 		}
 
 		if (left > right || top > bottom || left <= super.getViewX() && top <= super.getViewY() && right >= super.getViewX() + super.getViewWidth() && bottom >= super.getViewY() + super.getViewHeight()) {
-			if (!this.boundsWarned && JOID.inst().isDevMode()) {
+			if (!this.boundsWarned && JOIDEnv.isDevMode()) {
 				this.boundsWarned = true;
 				System.err.println("[JOID] The container UI " + this.getClass().getSimpleName() + " has no bounds and covers the whole view, call bounds(node) so that a click outside its panel drops the carried item");
 			}

@@ -18,13 +18,13 @@ configurations {
 }
 
 dependencies {
-    compileOnly(files(rootProject.file("libs/joid-core-${joid_version}-dev.jar")))
+    compileOnly(files(rootProject.file("libs/joid-core-${joid_version}-demo.jar")))
     compileOnly(files(rootProject.file("libs/joid-base-glfw-${joid_version}.jar")))
     compileOnly(files(rootProject.file("libs/joid-base-openal-${joid_version}.jar")))
     compileOnly(files(rootProject.file("libs/joid-tool-testkit-${joid_version}.jar")))
     compileOnly("javax.vecmath:vecmath:${vecmath_version}")
 
-    testImplementation(files(rootProject.file("libs/joid-core-${joid_version}-dev.jar")))
+    testImplementation(files(rootProject.file("libs/joid-core-${joid_version}-demo.jar")))
     testImplementation(files(rootProject.file("libs/joid-tool-testkit-${joid_version}.jar")))
     testImplementation("org.lwjgl:lwjgl:${shaderc_lwjgl_version}")
     testImplementation("org.lwjgl:lwjgl-shaderc:${shaderc_lwjgl_version}")
@@ -36,7 +36,7 @@ dependencies {
 
 test {
     useJUnit()
-    systemProperty('joid.config', layout.buildDirectory.dir('config').get().asFile.absolutePath)
+    systemProperty('joid.data', layout.buildDirectory.dir('joid').get().asFile.absolutePath)
     testLogging {
         exceptionFormat = 'full'
         events('failed')

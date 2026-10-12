@@ -1,6 +1,6 @@
 package dev.joid.backend.minecraft.fabric;
 
-import dev.joid.backend.minecraft.Backend;
+import dev.joid.backend.minecraft.MinecraftJoid;
 import dev.joid.backend.minecraft.fabric.demo.FabricGameTestRegistry;
 import dev.joid.backend.minecraft.fabric.event.FabricClientEvents;
 import dev.joid.backend.minecraft.fabric.event.FabricScreenEvents;
@@ -10,6 +10,7 @@ import dev.joid.backend.minecraft.fabric.registry.FabricContainerUIRegistry;
 import dev.joid.backend.minecraft.fabric.registry.FabricKeyBindRegistry;
 import dev.joid.backend.minecraft.fabric.registry.FabricOverlayLayerRegistry;
 import dev.joid.backend.minecraft.fabric.registry.FabricReloadListenerRegistry;
+import dev.joid.internal.JOIDEnv;
 
 import net.fabricmc.api.ClientModInitializer;
 
@@ -17,10 +18,10 @@ public final class FabricJoidClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
-		Backend.init();
+		MinecraftJoid.init();
 		FabricPayloads.register();
 		FabricContainerTypeRegistry.register();
-		if (Backend.isDemo()) {
+		if (JOIDEnv.isDemoMode()) {
 			FabricGameTestRegistry.register();
 		}
 
