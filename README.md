@@ -181,11 +181,18 @@ public class WelcomeUI extends UI {
 
 | Option | Default | Effect |
 |---|---|---|
-| `title` | `""` | Title of the screen, read by the narrator. |
-| `pause` | `true` | Pauses a singleplayer game while the screen is open. |
+| `title` | `""` | Title of the screen, read by the narrator: a translation key or plain text. |
+| `pause` | `true` | Pauses a singleplayer game while the screen is open. Container UIs never pause. |
 | `background` | `true` | Draws the Minecraft menu background behind the UI, screens and containers alike: the blurred world in game, the panorama on the title screen. `false` draws no Minecraft background. |
 
-Opening, closing and configuring UIs work as in [UIs](https://joid.dev-zeldown.workers.dev/#/concepts/uis).
+JOID draws its own dark fill above it (`@UIData(background)`, see [UIs](https://joid.dev-zeldown.workers.dev/#/concepts/uis)): add `@UIData(background = false)` to keep only the Minecraft background, or none at all.
+
+- `JOID.open(ui)` opens the screen, `JOID.close(ui)` closes it, and `Escape` closes the top UI unless it is `@UIData(closeable = false)`. Several UIs open at once share one screen, which closes with the last of them.
+- When the game or another mod opens its own screen, the JOID UIs of the screen close.
+- Over an open container, `JOID.open` opens the UI above it: the container stays open underneath.
+- UIs follow the GUI Scale option: at `Auto` they are at full size, at half that scale they are at half size. `@UIDataScale` caps or ignores it ([Canvas and Scaling](https://joid.dev-zeldown.workers.dev/#/concepts/canvas)).
+
+Everything else about UIs works as in [UIs](https://joid.dev-zeldown.workers.dev/#/concepts/uis).
 
 ## Containers
 
@@ -212,7 +219,7 @@ public class BackpackUI extends ContainerUI<BackpackMenu> {
 }
 ```
 
-Register its screen with `ContainerUI.screen(...)` where your loader registers menu screens, then open the menu as usual from the server:
+Register its screen with `ContainerUI.screen(...)` where your loader registers menu screens:
 
 **Fabric** · in your `ClientModInitializer`
 
@@ -239,7 +246,55 @@ public YourMod(final FMLJavaModLoadingContext context) {
 }
 ```
 
-`ContainerUI.screen(...)` is the only way to get the screen of a container UI. Your mod keeps its own menu types, registries and opening logic. `bounds(...)` tells which area belongs to the panel: a click outside drops the carried item, like in vanilla. Lay out the slots like any node ([Layout](https://joid.dev-zeldown.workers.dev/#/concepts/layout)); clicks, drags, shift-clicks and number keys on slots behave like vanilla, and the rest of the input works as in [Input](https://joid.dev-zeldown.workers.dev/#/concepts/input).
+`ContainerUI.screen(...)` is the only way to get the screen of a container UI. Your mod keeps its own menu types, registries and opening logic: open the menu from the server as usual (`player.openMenu(...)`), never with `JOID.open`, which throws for a container UI. `Escape` and the inventory key close it like a vanilla container.
+
+### ContainerUI
+
+| Member | Effect |
+|---|---|
+| `ContainerUI(menu)` | The constructor takes the menu that the screen shows. |
+| `getContainer()` | The menu: its `slots`, `getSlot(index)` and your own fields. |
+| `getCarried()` | The stack held by the mouse, `ItemStack.EMPTY` when there is none. |
+| `bounds(node)` | The panel is this node, wherever it moves. |
+| `bounds(x, y, width, height)` | The panel is this fixed area, in canvas units. |
+| `getBounds()` | The panel used right now: `{x, y, width, height}`. |
+| `getCarriedNode()` | The node that draws the held stack, above every other node. |
+| `ContainerUI.screen(factory)` | The screen constructor to register for the menu type. |
+
+The panel is the area of the container: a click outside it drops the held stack, a click inside it on no slot does nothing, like in vanilla. Without `bounds(...)`, the panel is the box around all visible nodes; when that box covers the whole window (a full-screen background, for example), no click can fall outside, and the dev mode warns about it in the console.
+
+The lib draws the held stack under the mouse, with its count, durability bar and cooldown, at the item size of the last hovered slot. During a drag, it shows what is left to place.
+
+### SlotNode
+
+A `SlotNode` shows and handles one slot of the menu:
+
+```java
+SlotNode.create(0, 0, 72, 72).slot(super.getContainer().getSlot(0)).color(Color.decode("#8B8B8B")).hoveredColor(Color.decode("#FFFFFF60")).attach(this);
+```
+
+| Method | Default | Effect |
+|---|---|---|
+| `slot(Slot)` | none | The slot it shows and handles. Without a slot, or while the slot is inactive, the node only draws its `color`. |
+| `color(Color)` | `Color.TRANSPARENT` | Background of the node. |
+| `hoveredColor(Color)` | `#FFFFFF80` | Drawn over the node while the slot is hovered. `Color.TRANSPARENT` turns it off. |
+| `getItemSize()` | | Size of the item: 16/18 of the smallest side of the node, like a 16 px item in an 18 px vanilla slot. |
+
+The slot draws its item centered with its count, durability bar and cooldown, the empty-slot icon of armor and offhand slots, the preview of a drag (the count turns yellow when the slot is full) and the vanilla tooltip of the hovered item. Every vanilla slot action works: click, right-click, shift-click, double-click, drag to split, number keys and `Q` to drop. Shift-click moves stacks with the `quickMoveStack` of your menu.
+
+The `x` and `y` of a `Slot` are not used: the `SlotNode` places it. `addStandardInventorySlots(inventory, x, y)` in your menu adds the 27 slots of the player inventory, then the 9 of the hotbar, after your own slots. For a menu with 27 slots of its own:
+
+```java
+for (int index = 0; index < 27; index++) {
+	SlotNode.create(48 + index % 9 * 72, 384 + index / 9 * 72, 68, 68).slot(super.getContainer().getSlot(27 + index)).attach(panel);
+}
+
+for (int index = 0; index < 9; index++) {
+	SlotNode.create(48 + index * 72, 624, 68, 68).slot(super.getContainer().getSlot(54 + index)).attach(panel);
+}
+```
+
+Lay out the slots like any node ([Layout](https://joid.dev-zeldown.workers.dev/#/concepts/layout)); the rest of the input works as in [Input](https://joid.dev-zeldown.workers.dev/#/concepts/input).
 
 ## HUD overlays
 
@@ -247,6 +302,7 @@ An overlay UI is drawn over the game. `@UIDataOverlayLayer` places it on a layer
 
 ```java
 @UIDataOverlay(active = true)
+@UIData(background = false, anchorY = Align.END)
 @UIDataOverlayLayer(layer = OverlayLayer.HEALTH, cancel = true)
 public class HealthBarUI extends UI {
 
@@ -262,13 +318,68 @@ public class HealthBarUI extends UI {
 JOID.open(new HealthBarUI());
 ```
 
-| Option | Effect |
-|---|---|
-| `layer` | The HUD layer: `HOTBAR`, `HEALTH`, `FOOD`, `EXPERIENCE_LEVEL`, `CROSSHAIR`, `CHAT`, `BOSS_BAR`… |
-| `post` | Draws after the vanilla layer instead of before. |
-| `cancel` | Hides the vanilla layer. |
+`@UIDataOverlay(active = true)` makes the UI an overlay: without it, `JOID.open` opens a screen. `@UIData(background = false)` removes the dark fill that would cover the game, and `anchorY = Align.END` keeps the bottom of the canvas on the bottom of the window, next to the vanilla bars, whatever the window ratio.
 
-A layer overlay follows the vanilla layer it replaces: it stays in the HUD under an open screen, blurred like the rest of the game, and keeps hiding the vanilla layer. Everything else about overlays (interaction, screens, F1) is in [Overlays with @UIDataOverlay](https://joid.dev-zeldown.workers.dev/#/concepts/uis?id=overlays-with-uidataoverlay).
+### @UIDataOverlay
+
+| Option | Default | Effect |
+|---|---|---|
+| `active` | `false` | Makes the UI an overlay. |
+| `render = @UIDataOverlayRender(screens = true)` | `false` | Keeps the overlay drawn over open screens and containers. |
+| `render = @UIDataOverlayRender(always = true)` | `false` | Keeps the overlay drawn when `F1` hides the HUD. |
+| `render = @UIDataOverlayRender(zindex = 10)` | `0` | Order among overlays: higher is drawn on top. |
+| `interaction = @UIDataOverlayInteraction(active = true)` | `false` | The overlay receives the mouse and the keyboard. |
+| `interaction = @UIDataOverlayInteraction(cancelClick = false)` | `true` | An event the overlay uses also reaches Minecraft. `cancelScroll` and `cancelKeyboard` do the same for the wheel and the keys. |
+
+The mouse is free only while a screen is open: to click an overlay, turn on `interaction` and `screens`. Clicks beside it reach the screen below:
+
+```java
+@UIData(background = false)
+@UIDataOverlay(active = true, interaction = @UIDataOverlayInteraction(active = true), render = @UIDataOverlayRender(screens = true))
+public class QuestTrackerUI extends UI {
+
+	@Override
+	public void init() {
+		RectNode.create(1560, 40, 320, 200).color(Color.decode("#1E2230")).onClick((_, _, _, _) -> JOID.close(this)).attach(this);
+	}
+
+}
+```
+
+The rest is in [Overlays with @UIDataOverlay](https://joid.dev-zeldown.workers.dev/#/concepts/uis?id=overlays-with-uidataoverlay).
+
+### @UIDataOverlayLayer
+
+| Option | Default | Effect |
+|---|---|---|
+| `layer` | required | The vanilla HUD layer the overlay is drawn with. |
+| `post` | `false` | `false` draws the overlay just before the vanilla layer, under it; `true` just after, over it. |
+| `cancel` | `false` | Hides the vanilla layer while the overlay is open and visible. |
+
+An overlay without `@UIDataOverlayLayer` is drawn above the whole HUD, and hides under open screens unless `render.screens` is on. A layer overlay is part of the HUD: under an open screen it stays drawn with the HUD, blurred like the game, and keeps hiding its vanilla layer. `F1` hides both, except with `render.always`.
+
+| `OverlayLayer` | Vanilla layer |
+|---|---|
+| `CAMERA_OVERLAYS` | Full-screen effects: vignette, pumpkin, powder snow, spyglass, nether portal and nausea. |
+| `CROSSHAIR` | The crosshair and the attack indicator. |
+| `HOTBAR` | The hotbar and the offhand slot. |
+| `ARMOR` | The armor bar. |
+| `HEALTH` | The hearts. |
+| `FOOD` | The hunger bar. |
+| `AIR` | The air bubbles. |
+| `MOUNT_HEALTH` | The hearts of the ridden mob. |
+| `CONTEXTUAL_BAR` | The experience bar, or the jump bar of a mount, or the locator bar. |
+| `EXPERIENCE_LEVEL` | The experience level number. |
+| `SELECTED_ITEM_NAME` | The name of the selected item, above the hotbar. |
+| `EFFECTS` | The status effect icons. |
+| `BOSS_BAR` | The boss bars. |
+| `SLEEP` | The fade to black while sleeping. |
+| `SCOREBOARD` | The sidebar scoreboard. |
+| `ACTION_BAR` | The action bar message. |
+| `TITLE` | The title and the subtitle. |
+| `CHAT` | The chat. |
+| `PLAYER_LIST` | The player list (`Tab`). |
+| `SUBTITLES` | The subtitles of sounds. |
 
 ## Minecraft components
 
@@ -277,34 +388,107 @@ A layer overlay follows the vanilla layer it replaces: it stays in the HUD under
 | `ItemNode` | An item stack, with its count, durability bar, cooldown, glint and tooltip. |
 | `BlockNode` | A block in 3D, with its rotation. |
 | `EntityNode` | An entity or a player skin in 3D, which can follow the mouse. |
-| `SlotNode` | A slot of a container, with its item, hover and drag. |
-
-```java
-ItemNode.create(100, 100, 64, 64).stack(new ItemStack(Items.DIAMOND_SWORD)).tooltip(true).attach(this);
-
-BlockNode.create(200, 100, 64, 64).block(Blocks.GRASS_BLOCK.defaultBlockState()).rotationYaw(30D).attach(this);
-
-EntityNode.create(300, 60, 120, 200).type(EntityTypes.FOX).followMouse(true).attach(this);
-```
+| `SlotNode` | A slot of a container (see [SlotNode](#slotnode)). |
 
 Items, blocks and entities are lit like in the vanilla inventory. Every setter also takes a signal or a lambda, like any JOID node ([Signals and State](https://joid.dev-zeldown.workers.dev/#/concepts/state)).
+
+### ItemNode
+
+| Method | Default | Effect |
+|---|---|---|
+| `stack(ItemStack)` | `ItemStack.EMPTY` | The stack to draw, in a square as large as the smallest side of the node, centered. |
+| `count(boolean)` | `true` | Draws the count when it is not 1. |
+| `bar(boolean)` | `true` | Draws the durability bar of a damaged item. |
+| `cooldown(boolean)` | `true` | Draws the cooldown of the local player on the item. |
+| `glint(boolean)` | the item's | `true` adds the enchantment glint, `false` removes it. |
+| `tooltip(boolean)` | `false` | Shows the vanilla tooltip of the item on hover. |
+
+```java
+ItemNode.create(100, 100, 64, 64).stack(new ItemStack(Items.DIAMOND_SWORD)).glint(true).tooltip(true).attach(this);
+
+ItemNode.create(200, 100, 64, 64).stack(() -> Minecraft.getInstance().player.getMainHandItem()).count(false).attach(this);
+```
+
+### BlockNode
+
+| Method | Default | Effect |
+|---|---|---|
+| `block(BlockState)` | `Blocks.AIR` | The block state to draw, in a square as large as the smallest side of the node, centered. |
+| `rotationYaw(double)` | `225D` | Turn around the vertical axis, in degrees. |
+| `rotationPitch(double)` | `30D` | Tilt toward you, in degrees. The defaults give the inventory view. |
+
+```java
+BlockNode.create(300, 100, 64, 64).block(Blocks.FURNACE.defaultBlockState()).rotationYaw(() -> System.currentTimeMillis() % 3600L / 10D).attach(this);
+```
+
+### EntityNode
+
+| Method | Default | Effect |
+|---|---|---|
+| `entity(Entity)` | none | An existing entity, drawn as it is: pose, armor, held items. |
+| `type(EntityType)` | none | A new entity of this type, created in the current world. Nothing is drawn without a world. |
+| `profile(GameProfile)`, `profile(ResolvableProfile)` | none | A player with the skin of this profile. The default skin shows until the skin is downloaded. |
+| `skin(PlayerSkin)` | none | A player with this skin. |
+| `scale(double)` | `1D` | Size relative to the node: the entity is fitted to the node and centered. |
+| `rotationYaw(double)` | `0D` | Turn around the vertical axis, in degrees. `0D` faces you. |
+| `rotationPitch(double)` | `0D` | Tilt toward you, in degrees. |
+| `followMouse(boolean)` | `false` | The body and the head turn toward the mouse while the UI is on top, like the player in the vanilla inventory. |
+
+`entity`, `type`, `profile` and `skin` are four sources: the last one set wins. `profile` and `skin` also work without a world, on the title screen.
+
+```java
+EntityNode.create(100, 300, 120, 200).type(EntityTypes.FOX).followMouse(true).attach(this);
+
+EntityNode.create(240, 300, 120, 200).entity(() -> Minecraft.getInstance().player).rotationYaw(-30D).attach(this);
+
+EntityNode.create(380, 300, 120, 200).profile(ResolvableProfile.createUnresolved("Notch")).attach(this);
+
+EntityNode.create(520, 300, 120, 200).skin(PlayerSkin.insecure(new ClientAsset.ResourceTexture(Identifier.fromNamespaceAndPath("yourmod", "entity/guard")), null, null, PlayerModelType.WIDE)).attach(this);
+```
+
+The last one reads its skin from `assets/yourmod/textures/entity/guard.png`.
+
+### Tooltips
+
+Tooltips are vanilla tooltips. The text tooltip of any node takes `§` codes, and `drawHover` of a UI takes an `ItemStack`, a `Component` or a list of lines:
+
+```java
+RectNode.create(100, 520, 64, 64).color(Color.decode("#8B8B8B")).hover(() -> "§6Quest board").attach(this);
+```
 
 ## Text
 
 The Minecraft fonts are JOID fonts: use them in any `TextInfo`, and mix them with your own fonts.
 
 ```java
-final TextInfo info = TextInfo.create(MinecraftFont.DEFAULT, MinecraftFont.SIZE * 3, Color.WHITE);
+final TextInfo info = TextInfo.create(MinecraftFont.DEFAULT, MinecraftFont.SIZE * 3, Color.WHITE).shadowTint(0.25F).shadow(3F, 3F);
 
 TextNode.create(100, 100).text(Text.create("§6Gold §lbold §kmagic", info)).attach(this);
 
 TextNode.create(100, 160).text(Text.create(Component.translatable("menu.game"), info)).attach(this);
 ```
 
-- `§` color and format codes, obfuscated text included.
-- A chat `Component`, with its colors, styles and translations.
-- The other game fonts: `MinecraftFont.ALT` (enchanting table), `ILLAGER`, `UNIFORM`.
-- Everything else from [Text and Fonts](https://joid.dev-zeldown.workers.dev/#/concepts/text): markup, effects, alignment, wrapping.
+| Member | Font |
+|---|---|
+| `MinecraftFont.DEFAULT` | The game font, with its bold. |
+| `MinecraftFont.ALT` | The enchanting table glyphs. |
+| `MinecraftFont.ILLAGER` | The illager runes. |
+| `MinecraftFont.UNIFORM` | The Unicode font of the game. |
+| `MinecraftFont.of(Identifier)` | Any font of a resource pack: `of(Identifier.fromNamespaceAndPath("yourmod", "runes"))` reads `assets/yourmod/font/runes.json`. |
+| `MinecraftFont.SIZE` | `8F`, the vanilla size: `MinecraftFont.SIZE * 3` draws the font three times larger. |
+
+The vanilla shadow is `shadowTint(0.25F)`, the color of each glyph at 25 %, with an offset of a font pixel: `shadow(3F, 3F)` at `SIZE * 3`.
+
+| Code | Effect |
+|---|---|
+| `§0` to `§9`, `§a` to `§f` | The 16 colors. A color also ends the formats before it. |
+| `§x§1§2§a§b§c§d` | Any hex color, here `#12ABCD`. |
+| `§l`, `§o`, `§n`, `§m`, `§k` | Bold, italic, underline, strikethrough, obfuscated. They add up. |
+| `§r` | Back to the color and style of the `TextInfo`. |
+
+`LegacyTextColor` gives the 16 colors as JOID colors: `LegacyTextColor.GOLD.getColor()`.
+
+A chat `Component` keeps its colors, hex colors included, its styles, and translates its `translatable` parts in the language of the game. The `§` codes and the `Component`s work with every JOID font, and the Minecraft fonts with everything else of [Text and Fonts](https://joid.dev-zeldown.workers.dev/#/concepts/text): markup, effects, alignment, wrapping.
 
 ## Textures and resources
 
@@ -314,9 +498,36 @@ Any texture of the game or of a resource pack is a JOID resource:
 ResourceNode.create(100, 100, 64, 64).resource(Resource.of("minecraft:textures/block/diamond_block.png")).attach(this);
 
 ResourceNode.create(200, 100, 64, 64).resource(Resource.of(Sheets.ITEMS_MAPPER.defaultNamespaceApply("diamond"))).attach(this);
+
+ResourceNode.create(300, 100, 240, 48).resource(Resource.of(new SpriteId(Sheets.GUI_SHEET, Identifier.withDefaultNamespace("widget/button")))).attach(this);
+
+ResourceNode.create(560, 100, 64, 64).resource(Resource.of(Minecraft.getInstance().getAtlasManager().getAtlasOrThrow(AtlasIds.BLOCKS))).attach(this);
 ```
 
-`namespace:path` locations, atlas sprites and `.mcmeta` animations work out of the box, and follow resource pack reloads. See [Images and Media](https://joid.dev-zeldown.workers.dev/#/concepts/media).
+| `Resource.of(...)` takes | Draws |
+|---|---|
+| A `"namespace:path"` string or an `Identifier` | A file of the game or of a resource pack. |
+| A `SpriteId` or a `TextureAtlasSprite` | A sprite of an atlas: items, blocks, GUI. |
+| An `AbstractTexture`, a `RenderTarget`, a `GpuTexture` or a `GpuTextureView` | A texture already on the GPU, such as a whole atlas, live. |
+| A `NativeImage` | A copy of the image, made when the resource is created. |
+
+Animated sprites and `.mcmeta` animations play like in game, and the resources follow resource pack reloads. Pixel art stays sharp: these resources use nearest filtering. Other files work the same way: `MsdfFontLoader.load("yourmod:fonts/inter.ttf")` loads a font of your mod. See [Images and Media](https://joid.dev-zeldown.workers.dev/#/concepts/media).
+
+## Sound and key bindings
+
+JOID videos play at the volume of the game: the volume of the `ResourcePlayerNode`, times `Master Volume`, times `UI`. `audioGroup` picks another slider of the Music & Sounds options:
+
+```java
+ResourcePlayerNode.create(430, 10, 640, 360).resource(Resource.of(new File("videos/intro.mp4"))).audioGroup(SoundSource.MUSIC).attach(this);
+```
+
+A `KeyMapping` works wherever JOID takes a key: the shortcut follows the key that the player chose in Controls.
+
+```java
+super.keybind(() -> JOID.close(this), Minecraft.getInstance().options.keyInventory);
+```
+
+`KeyResolver.resolve(mapping)` gives its JOID `Key`, or `null` when it is unbound or on a mouse button.
 
 ## Custom drawing
 
@@ -326,12 +537,27 @@ In a custom node, `DrawItem`, `DrawBlock` and `DrawEntity` draw Minecraft object
 @Override
 public void draw(final double mouseX, final double mouseY) {
 	DrawItem.inst().drawItem(super.getX(), super.getY(), 64D, this.stack);
-	DrawBlock.inst().drawBlock(super.getX() + 80D, super.getY(), 64D, Blocks.CHEST.defaultBlockState());
-	DrawEntity.inst().drawEntity(super.getX() + 160D, super.getY(), 64D, 128D, Minecraft.getInstance().player);
+	DrawItem.inst().drawItemCount(super.getX(), super.getY(), 64D, this.stack, "§ex3");
+	DrawBlock.inst().drawBlock(super.getX() + 80D, super.getY(), 64D, Blocks.CHEST.defaultBlockState(), 200D, 20D);
+	DrawEntity.inst().drawEntity(super.getX() + 160D, super.getY(), 64D, 128D, Minecraft.getInstance().player, 1D, 0D, 0D, super.toDrawX(mouseX), super.toDrawY(mouseY));
 }
 ```
 
-See [Custom Nodes](https://joid.dev-zeldown.workers.dev/#/nodes/custom-nodes) and [Drawing](https://joid.dev-zeldown.workers.dev/#/drawing/drawing).
+| Method | Draws |
+|---|---|
+| `DrawItem.inst().drawItem(x, y, size, stack)` | The item model in a square of `size`. |
+| `drawItemBar(x, y, size, stack)` | The durability bar of a damaged item. |
+| `drawItemCooldown(x, y, size, stack)` | The cooldown of the local player on the item. |
+| `drawItemCount(x, y, size, stack)` | The count, when it is not 1. |
+| `drawItemCount(x, y, size, stack, text)` | Any text in place of the count, `§` codes included. |
+| `DrawBlock.inst().drawBlock(x, y, size, state)` | The block in the inventory view. |
+| `drawBlock(x, y, size, state, rotationYaw, rotationPitch)` | The block with its rotation, in degrees. |
+| `DrawEntity.inst().drawEntity(x, y, width, height, entity)` | The entity fitted to the box, facing you. |
+| `drawEntity(x, y, width, height, entity, rotationYaw, rotationPitch)` | With its rotation, in degrees. |
+| `drawEntity(x, y, width, height, entity, scale, rotationYaw, rotationPitch, lookX, lookY)` | With its scale, and the head turned toward the point `lookX`, `lookY`. |
+| `DrawEntity.inst().drawPlayer(...)` | The same three forms with a `PlayerSkin` in place of the entity. |
+
+Draw the item, then its bar, cooldown and count, to match a slot. `toDrawX` and `toDrawY` turn the mouse into the coordinates of `draw`. See [Custom Nodes](https://joid.dev-zeldown.workers.dev/#/nodes/custom-nodes) and [Drawing](https://joid.dev-zeldown.workers.dev/#/drawing/drawing).
 
 ## License
 
