@@ -20,12 +20,16 @@ public final class OpenDemoContainerPayloadHandler {
 	private static final Map<UUID, SimpleContainer> STORAGES = new HashMap<>();
 
 	public static void handle(final OpenDemoContainerPayload payload, final ServerPlayer player) {
-		if (!player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER) && !player.level().getServer().isSingleplayerOwner(player.nameAndId())) {
+		if (!OpenDemoContainerPayloadHandler.canOpen(player)) {
 			return;
 		}
 
 		final SimpleContainer storage = OpenDemoContainerPayloadHandler.STORAGES.computeIfAbsent(player.getUUID(), _ -> new SimpleContainer(27));
 		player.openMenu(new SimpleMenuProvider((containerId, inventory, _) -> new DemoContainer(containerId, inventory, storage), Component.literal("Demo storage")));
+	}
+
+	public static boolean canOpen(final ServerPlayer player) {
+		return player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER) || player.level().getServer().isSingleplayerOwner(player.nameAndId());
 	}
 
 }

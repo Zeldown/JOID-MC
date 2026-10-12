@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
@@ -38,6 +39,8 @@ import dev.joid.backend.minecraft.bridge.ui.overlay.OverlayUIBridge;
 import dev.joid.backend.minecraft.bridge.ui.screen.ScreenUIBridge;
 import dev.joid.backend.minecraft.bridge.ui.screen.UIScreen;
 import dev.joid.backend.minecraft.demo.container.DemoContainer;
+import dev.joid.backend.minecraft.demo.network.OpenDemoContainerPayload;
+import dev.joid.backend.minecraft.demo.network.OpenDemoContainerPayloadHandler;
 import dev.joid.backend.minecraft.demo.ui.UIDemoContainer;
 import dev.joid.backend.minecraft.demo.ui.UIDemoMinecraft;
 import dev.joid.backend.minecraft.demo.ui.UIDemoOverlayLayer;
@@ -97,6 +100,7 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
+import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -118,12 +122,14 @@ import net.minecraft.network.chat.FontDescription;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.LevelBasedPermissionSet;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.player.PlayerModelType;
 import net.minecraft.world.entity.player.PlayerSkin;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
@@ -181,6 +187,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			FabricJoidClientGameTest.verifyDemos(context);
 			FabricJoidClientGameTest.verifyOverlays(context);
 			FabricJoidClientGameTest.verifyContainer(context, singleplayer.getServer());
+			FabricJoidClientGameTest.verifyContainerServer(context, singleplayer.getServer());
 			FabricJoidClientGameTest.verifyBlockLighting(context, singleplayer.getServer());
 			FabricJoidClientGameTest.verifyCursor(context);
 			FabricJoidClientGameTest.verifyDebugKey(context);
@@ -992,6 +999,68 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		context.getInput().setCursorPos(960D, 540D);
 		if (!failures.isEmpty()) {
 			throw new AssertionError(failures.size() + " container checks failed:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
+		}
+	}
+
+	private static void verifyContainerServer(final ClientGameTestContext context, final TestServerContext server) {
+		final List<String> failures = server.computeOnServer(minecraftServer -> {
+			final List<String> found = new ArrayList<>();
+			final FakePlayer stranger = FakePlayer.get(minecraftServer.overworld(), new GameProfile(UUID.randomUUID(), "JOIDStranger"));
+			if (OpenDemoContainerPayloadHandler.canOpen(stranger)) {
+				found.add("the demo container opens for a player who is not an operator");
+			}
+
+			minecraftServer.getPlayerList().op(stranger.nameAndId(), Optional.of(LevelBasedPermissionSet.MODERATOR), Optional.empty());
+			if (OpenDemoContainerPayloadHandler.canOpen(stranger)) {
+				found.add("the demo container opens for an operator of level 1");
+			}
+
+			minecraftServer.getPlayerList().op(stranger.nameAndId(), Optional.of(LevelBasedPermissionSet.GAMEMASTER), Optional.empty());
+			if (!OpenDemoContainerPayloadHandler.canOpen(stranger)) {
+				found.add("the demo container does not open for an operator of level 2");
+			}
+
+			minecraftServer.getPlayerList().deop(stranger.nameAndId());
+
+			final ServerPlayer player = FabricJoidClientGameTest.player(minecraftServer);
+			player.getInventory().clearContent();
+			OpenDemoContainerPayloadHandler.handle(OpenDemoContainerPayload.INSTANCE, player);
+			if (!(player.containerMenu instanceof final DemoContainer container)) {
+				found.add("the demo container does not open for the owner of the world");
+				return found;
+			}
+
+			container.getStorage().clearContent();
+			if (container.slots.size() != 63) {
+				found.add("the demo container has " + container.slots.size() + " slots instead of 63");
+			}
+
+			container.getSlot(0).set(new ItemStack(Items.AMETHYST_SHARD, 5));
+			container.quickMoveStack(player, 0);
+			if (!container.getSlot(0).getItem().isEmpty() || container.getSlot(62).getItem().getCount() != 5) {
+				found.add("a shift-click on a storage slot does not move its 5 shards to the last hotbar slot");
+			}
+
+			container.quickMoveStack(player, 62);
+			if (container.getSlot(0).getItem().getCount() != 5) {
+				found.add("a shift-click on the hotbar does not move the 5 shards back to the first storage slot");
+			}
+
+			container.clicked(0, 0, ContainerInput.PICKUP, player);
+			container.clicked(1, 1, ContainerInput.PICKUP, player);
+			if (container.getSlot(1).getItem().getCount() != 1 || container.getCarried().getCount() != 4) {
+				found.add("a right click places " + container.getSlot(1).getItem().getCount() + " shard and carries " + container.getCarried().getCount() + " instead of 1 and 4");
+			}
+
+			player.closeContainer();
+			if (player.getInventory().countItem(Items.AMETHYST_SHARD) != 4 || container.getStorage().getItem(1).getCount() != 1) {
+				found.add("closing the demo container gives back " + player.getInventory().countItem(Items.AMETHYST_SHARD) + " carried shards and keeps " + container.getStorage().getItem(1).getCount() + " in the storage instead of 4 and 1");
+			}
+			return found;
+		});
+		context.waitForScreen(null);
+		if (!failures.isEmpty()) {
+			throw new AssertionError(failures.size() + " server container checks failed:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
 		}
 	}
 

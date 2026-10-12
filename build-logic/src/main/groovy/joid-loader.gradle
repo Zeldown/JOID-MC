@@ -114,6 +114,8 @@ def prodJar = tasks.register('prodJar', ShadowJar) {
     manifest.inheritFrom(jar.manifest)
 }
 
+def loaderName = project.name
+
 def verifyJar = { String kind, File archive, List<String> patterns, java.util.regex.Pattern references, List<String> words, boolean devMode ->
     def found = []
     zipTree(archive).matching { include(patterns) }.visit { if (!it.directory) found << it.relativePath.pathString }
@@ -170,6 +172,29 @@ def verifyJar = { String kind, File archive, List<String> patterns, java.util.re
 
     if (!described.isEmpty()) {
         throw new GradleException("The ${kind} jar declares content named after ${words} in: ${described.take(10)}")
+    }
+
+    def server = [] as SortedSet
+    new ZipFile(archive).withCloseable { zip ->
+        if (loaderName == 'fabric' && new JsonSlurper().parse(zip.getInputStream(zip.getEntry('fabric.mod.json'))).environment != 'client') {
+            server << 'fabric.mod.json'
+        }
+
+        if (loaderName == 'forge' && !new String(zip.getInputStream(zip.getEntry('META-INF/mods.toml')).bytes, 'UTF-8').readLines().contains('clientSideOnly = true')) {
+            server << 'META-INF/mods.toml'
+        }
+
+        if (loaderName == 'neoforge') {
+            zip.entries().findAll { it.name.startsWith('dev/joid/backend/minecraft/') && it.name.endsWith('.class') }.each { entry ->
+                def text = new String(zip.getInputStream(entry).bytes, 'ISO-8859-1')
+                if (text.contains('Lnet/neoforged/fml/common/Mod;') && !(text.contains('Lnet/neoforged/api/distmarker/Dist;') && text.contains('CLIENT'))) {
+                    server << entry.name
+                }
+            }
+        }
+    }
+    if (!server.isEmpty()) {
+        throw new GradleException("The ${kind} jar is not declared client only in: ${server}")
     }
 
     def loader = new URLClassLoader([archive.toURI().toURL()] as URL[], ClassLoader.platformClassLoader)

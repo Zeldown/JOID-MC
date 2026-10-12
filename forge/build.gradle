@@ -14,7 +14,6 @@ minecraft {
     runs {
         configureEach {
             workingDir = layout.projectDirectory.dir("runs/${it.name}")
-            systemProperty('forge.enabledGameTestNamespaces', mod_id)
         }
         register('client') {
             if (project.hasProperty('joid.smoke')) {
@@ -29,7 +28,6 @@ minecraft {
         register('server') {
             args('--nogui')
         }
-        register('gameTestServer')
         register('data') {
             args('--mod', mod_id, '--all', '--output', file('src/generated/resources/').absolutePath, '--existing', file('src/main/resources/').absolutePath)
         }
@@ -81,11 +79,5 @@ tasks.named('genEclipseRuns') {
         fileTree(projectDir) { include('*.launch') }.each { launch ->
             launch.text = launch.text.replaceAll(/\s*<listEntry value="[^"]*org\.eclipse\.buildship\.core\.gradleclasspathcontainer[^"]*"\/>/, '')
         }
-    }
-}
-
-tasks.named('prodJar') {
-    filesMatching('META-INF/mods.toml') {
-        filter { line -> line == 'clientSideOnly = false' ? 'clientSideOnly = true' : line }
     }
 }

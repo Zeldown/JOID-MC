@@ -2,10 +2,8 @@ package dev.joid.backend.minecraft.demo;
 
 import dev.joid.backend.minecraft.MinecraftJoid;
 import dev.joid.backend.minecraft.demo.container.DemoContainer;
-import dev.joid.backend.minecraft.demo.container.DemoContainerGameTest;
 import dev.joid.backend.minecraft.demo.network.OpenDemoContainerPayload;
 import dev.joid.backend.minecraft.demo.network.OpenDemoContainerPayloadHandler;
-import dev.joid.backend.minecraft.demo.registry.GameTestRegistry;
 import dev.joid.backend.minecraft.demo.smoke.ClientSmokeTest;
 import dev.joid.backend.minecraft.demo.ui.UIDemoContainer;
 import dev.joid.backend.minecraft.demo.ui.UIDemoMinecraft;
@@ -29,7 +27,6 @@ public final class DemoLauncher {
 		ContainerTypeRegistry.create(MinecraftJoid.MOD_ID + ":demo/container", DemoContainer.TYPE).register();
 		KeyBindRegistry.create("joid.demo", Key.J).onPress(() -> JOID.open(new UIDemoChoice())).register();
 		OpenDemoContainerPayload.TYPE.onServer(OpenDemoContainerPayloadHandler::handle).register();
-		GameTestRegistry.create(MinecraftJoid.MOD_ID + ":demo/container", DemoContainerGameTest::run).register();
 		if (ShowcaseLauncher.isActive()) {
 			ShowcaseLauncher.init();
 		}

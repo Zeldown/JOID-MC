@@ -25,9 +25,7 @@ ext {
     developmentWords = ['demo', 'demos', 'test', 'tests', 'gametest', 'gametests', 'snapshot', 'snapshots', 'testkit', 'showcase']
 
     demoCallSites = [
-            'dev/joid/backend/minecraft/MinecraftJoid.class -> dev/joid/backend/minecraft/demo/DemoLauncher',
-            'dev/joid/backend/minecraft/fabric/FabricJoidClient.class -> dev/joid/backend/minecraft/fabric/demo/FabricGameTestRegistry',
-            'dev/joid/backend/minecraft/forge/ForgeJoid.class -> dev/joid/backend/minecraft/forge/demo/ForgeGameTestRegistry'
+            'dev/joid/backend/minecraft/MinecraftJoid.class -> dev/joid/backend/minecraft/demo/DemoLauncher'
     ]
 
     moduleDescriptors = [
