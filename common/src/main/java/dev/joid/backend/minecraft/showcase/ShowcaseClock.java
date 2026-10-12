@@ -22,9 +22,10 @@ public final class ShowcaseClock {
 			return;
 		}
 
-		ShowcaseClock.start  = System.currentTimeMillis();
-		ShowcaseClock.nanos  = Util.getNanos();
-		ShowcaseClock.frozen = true;
+		ShowcaseClock.start   = System.currentTimeMillis();
+		ShowcaseClock.nanos   = Util.getNanos();
+		ShowcaseClock.elapsed = 0L;
+		ShowcaseClock.frozen  = true;
 		ShowcaseClock.INTERFACE.setTime(ShowcaseClock.start);
 		BridgeHandler.CLOCK.register(ShowcaseClock.INTERFACE);
 		Util.setTimeSource(() -> ShowcaseClock.nanos);
