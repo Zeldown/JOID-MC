@@ -111,10 +111,10 @@ dependencies {
 
 ### Shipping your mod
 
-JOID-MC is a separate mod that players install next to yours, like any library mod.
+JOID-MC is a separate mod that players install next to yours, like any library mod. It runs on the client only: a server does not need it, and a client with JOID-MC joins a server without it.
 
 1. **Do not bundle it** in your jar: no `include`, `jarJar` or shadow.
-2. **Declare it as required** in the metadata of your mod, with the mod id `joid`:
+2. **Declare it as required on the client** in the metadata of your mod, with the mod id `joid`:
 
 **Fabric** · `fabric.mod.json`
 
@@ -124,6 +124,8 @@ JOID-MC is a separate mod that players install next to yours, like any library m
 }
 ```
 
+Fabric has no client-side dependency: use `depends` when your mod is `"environment": "client"`. A mod that also runs on servers declares `joid` in `recommends` and calls JOID-MC from its client entrypoint only.
+
 **NeoForge** · `neoforge.mods.toml`
 
 ```toml
@@ -131,6 +133,7 @@ JOID-MC is a separate mod that players install next to yours, like any library m
 modId = "joid"
 type = "required"
 versionRange = "[1.0.0,)"
+side = "CLIENT"
 ```
 
 **Forge** · `mods.toml`
@@ -140,6 +143,7 @@ versionRange = "[1.0.0,)"
 modId = "joid"
 mandatory = true
 versionRange = "[1.0.0,)"
+side = "CLIENT"
 ```
 
 3. **Mark JOID-MC as a required dependency** on CurseForge and Modrinth, so that launchers install it with your mod.

@@ -83,3 +83,9 @@ tasks.named('genEclipseRuns') {
         }
     }
 }
+
+tasks.named('prodJar') {
+    filesMatching('META-INF/mods.toml') {
+        filter { line -> line == 'clientSideOnly = false' ? 'clientSideOnly = true' : line }
+    }
+}

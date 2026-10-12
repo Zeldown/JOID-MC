@@ -8,12 +8,9 @@
         "${mod_author}"
     ],
     "license": "${license}",
-    "environment": "*",
+    "environment": "client",
     "accessWidener": "joid.classtweaker",
     "entrypoints": {
-        "main": [
-            "dev.joid.backend.minecraft.fabric.FabricJoid"
-        ],
         "client": [
             "dev.joid.backend.minecraft.fabric.FabricJoidClient"
         ]

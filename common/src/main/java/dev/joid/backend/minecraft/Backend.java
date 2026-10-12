@@ -39,9 +39,15 @@ public final class Backend {
 
 	public static final String MOD_ID = "joid";
 
+	private static boolean initialized;
 	private static boolean registered;
 
 	public static void init() {
+		if (Backend.initialized) {
+			return;
+		}
+
+		Backend.initialized = true;
 		ReloadListenerRegistry.create(Backend.MOD_ID + ":resources").onReload(ResourceReloader.inst()::reload).register();
 		if (Backend.isDemo()) {
 			DemoLauncher.init();
