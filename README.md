@@ -11,13 +11,14 @@
   <img align="center" src="https://img.shields.io/badge/loader-Fabric%20%C2%B7%20NeoForge%20%C2%B7%20Forge-orange">
   <img align="center" src="https://img.shields.io/badge/license-Apache--2.0-blue">
   <img align="center" src="https://github.com/Zeldown/JOID-MC/actions/workflows/build.yml/badge.svg?branch=version/26.2">
+  <a href="https://discord.joid.dev"><img align="center" src="https://img.shields.io/badge/discord-join-5865F2"></a>
 </div>
 
 <br>
 
 **Beautiful, reactive interfaces for Minecraft. One UI, every version and every loader.**
 
-[**CurseForge**](https://www.curseforge.com/minecraft/mc-mods/joid-mc) · [**Modrinth**](https://modrinth.com/project/joid-mc) · [**JOID Documentation**](https://documentation.joid.dev/) · [**Releases**](https://github.com/Zeldown/JOID-MC/releases)
+[**CurseForge**](https://www.curseforge.com/minecraft/mc-mods/joid-mc) · [**Modrinth**](https://modrinth.com/project/joid-mc) · [**JOID Documentation**](https://documentation.joid.dev/) · [**Releases**](https://github.com/Zeldown/JOID-MC/releases) · [**Discord**](https://discord.joid.dev)
 
 </div>
 
@@ -551,6 +552,10 @@ public void draw(final double mouseX, final double mouseY) {
 | `DrawEntity.inst().drawPlayer(...)` | The same three forms with a `PlayerSkin` in place of the entity. |
 
 Draw the item, then its bar, cooldown and count, to match a slot. `toDrawX` and `toDrawY` turn the mouse into the coordinates of `draw`. See [Custom Nodes](https://documentation.joid.dev/#/nodes/custom-nodes) and [Drawing](https://documentation.joid.dev/#/drawing/drawing).
+
+## Community
+
+Questions, bug reports and ideas are welcome on the [JOID Discord](https://discord.joid.dev).
 
 ## License
 

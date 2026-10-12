@@ -7,6 +7,11 @@
     "authors": [
         "${mod_author}"
     ],
+    "contact": {
+        "homepage": "https://github.com/Zeldown/JOID-MC",
+        "issues": "https://github.com/Zeldown/JOID-MC/issues",
+        "discord": "https://discord.joid.dev"
+    },
     "license": "${license}",
     "icon": "assets/joid/icon.png",
     "environment": "client",
