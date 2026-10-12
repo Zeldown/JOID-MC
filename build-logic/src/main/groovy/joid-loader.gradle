@@ -74,15 +74,18 @@ processResources {
 tasks.named('javadoc', Javadoc) {
     dependsOn(configurations.commonJava)
     source(configurations.commonJava)
+    excludeDemo(it)
 }
 
 tasks.named('sourcesJar', Jar) {
     dependsOn(configurations.commonJava, configurations.commonResources)
     from(configurations.commonJava, configurations.commonResources)
+    excludeDemo(it)
 }
 
 jar {
     archiveClassifier = 'slim'
+    excludeDemo(it)
 }
 
 shadowJar {
