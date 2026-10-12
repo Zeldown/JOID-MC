@@ -15,7 +15,7 @@
 
 **Beautiful, reactive interfaces for Minecraft. One UI, every version and every loader.**
 
-[**CurseForge**](https://www.curseforge.com/minecraft/mc-mods/joid-mc) · [**Modrinth**](https://modrinth.com/project/joid-mc) · [**JOID Documentation**](https://joid.dev-zeldown.workers.dev/) · [**Releases**](https://github.com/Zeldown/JOID-MC/releases)
+[**CurseForge**](https://www.curseforge.com/minecraft/mc-mods/joid-mc) · [**Modrinth**](https://modrinth.com/project/joid-mc) · [**JOID Documentation**](https://documentation.joid.dev/) · [**Releases**](https://github.com/Zeldown/JOID-MC/releases)
 
 </div>
 
@@ -68,7 +68,7 @@ Real renders inside the game window, styled for this showcase: JOID ships with n
 
 # Documentation
 
-JOID-MC is a JOID backend: everything in the [JOID documentation](https://joid.dev-zeldown.workers.dev/) applies as is. This part only covers what Minecraft adds.
+JOID-MC is a JOID backend: everything in the [JOID documentation](https://documentation.joid.dev/) applies as is. This part only covers what Minecraft adds.
 
 ## Installation
 
@@ -166,7 +166,7 @@ public class WelcomeUI extends UI {
 JOID.open(new WelcomeUI());
 ```
 
-The UI is laid out on JOID's design canvas (1920×1080 by default) and scaled to the window. In the development environment, the `J` key opens the JOID and Minecraft demos. To learn UIs, nodes, layout and signals, start with the [JOID Quick Start](https://joid.dev-zeldown.workers.dev/#/getting-started/quick-start).
+The UI is laid out on JOID's design canvas (1920×1080 by default) and scaled to the window. In the development environment, the `J` key opens the JOID and Minecraft demos. To learn UIs, nodes, layout and signals, start with the [JOID Quick Start](https://documentation.joid.dev/#/getting-started/quick-start).
 
 ## Screens
 
@@ -185,14 +185,14 @@ public class WelcomeUI extends UI {
 | `pause` | `true` | Pauses a singleplayer game while the screen is open. Container UIs never pause. |
 | `background` | `true` | Draws the Minecraft menu background behind the UI, screens and containers alike: the blurred world in game, the panorama on the title screen. `false` draws no Minecraft background. |
 
-JOID draws its own dark fill above it (`@UIData(background)`, see [UIs](https://joid.dev-zeldown.workers.dev/#/concepts/uis)): add `@UIData(background = false)` to keep only the Minecraft background, or none at all.
+JOID draws its own dark fill above it (`@UIData(background)`, see [UIs](https://documentation.joid.dev/#/concepts/uis)): add `@UIData(background = false)` to keep only the Minecraft background, or none at all.
 
 - `JOID.open(ui)` opens the screen, `JOID.close(ui)` closes it, and `Escape` closes the top UI unless it is `@UIData(closeable = false)`. Several UIs open at once share one screen, which closes with the last of them.
 - When the game or another mod opens its own screen, the JOID UIs of the screen close.
 - Over an open container, `JOID.open` opens the UI above it: the container stays open underneath.
-- UIs follow the GUI Scale option: at `Auto` they are at full size, at half that scale they are at half size. `@UIDataScale` caps or ignores it ([Canvas and Scaling](https://joid.dev-zeldown.workers.dev/#/concepts/canvas)).
+- UIs follow the GUI Scale option: at `Auto` they are at full size, at half that scale they are at half size. `@UIDataScale` caps or ignores it ([Canvas and Scaling](https://documentation.joid.dev/#/concepts/canvas)).
 
-Everything else about UIs works as in [UIs](https://joid.dev-zeldown.workers.dev/#/concepts/uis).
+Everything else about UIs works as in [UIs](https://documentation.joid.dev/#/concepts/uis).
 
 ## Containers
 
@@ -294,7 +294,7 @@ for (int index = 0; index < 9; index++) {
 }
 ```
 
-Lay out the slots like any node ([Layout](https://joid.dev-zeldown.workers.dev/#/concepts/layout)); the rest of the input works as in [Input](https://joid.dev-zeldown.workers.dev/#/concepts/input).
+Lay out the slots like any node ([Layout](https://documentation.joid.dev/#/concepts/layout)); the rest of the input works as in [Input](https://documentation.joid.dev/#/concepts/input).
 
 ## HUD overlays
 
@@ -346,7 +346,7 @@ public class QuestTrackerUI extends UI {
 }
 ```
 
-The rest is in [Overlays with @UIDataOverlay](https://joid.dev-zeldown.workers.dev/#/concepts/uis?id=overlays-with-uidataoverlay).
+The rest is in [Overlays with @UIDataOverlay](https://documentation.joid.dev/#/concepts/uis?id=overlays-with-uidataoverlay).
 
 ### @UIDataOverlayLayer
 
@@ -390,7 +390,7 @@ An overlay without `@UIDataOverlayLayer` is drawn above the whole HUD, and hides
 | `EntityNode` | An entity or a player skin in 3D, which can follow the mouse. |
 | `SlotNode` | A slot of a container (see [SlotNode](#slotnode)). |
 
-Items, blocks and entities are lit like in the vanilla inventory. Every setter also takes a signal or a lambda, like any JOID node ([Signals and State](https://joid.dev-zeldown.workers.dev/#/concepts/state)).
+Items, blocks and entities are lit like in the vanilla inventory. Every setter also takes a signal or a lambda, like any JOID node ([Signals and State](https://documentation.joid.dev/#/concepts/state)).
 
 ### ItemNode
 
@@ -488,7 +488,7 @@ The vanilla shadow is `shadowTint(0.25F)`, the color of each glyph at 25 %, with
 
 `LegacyTextColor` gives the 16 colors as JOID colors: `LegacyTextColor.GOLD.getColor()`.
 
-A chat `Component` keeps its colors, hex colors included, its styles, and translates its `translatable` parts in the language of the game. The `§` codes and the `Component`s work with every JOID font, and the Minecraft fonts with everything else of [Text and Fonts](https://joid.dev-zeldown.workers.dev/#/concepts/text): markup, effects, alignment, wrapping.
+A chat `Component` keeps its colors, hex colors included, its styles, and translates its `translatable` parts in the language of the game. The `§` codes and the `Component`s work with every JOID font, and the Minecraft fonts with everything else of [Text and Fonts](https://documentation.joid.dev/#/concepts/text): markup, effects, alignment, wrapping.
 
 ## Textures and resources
 
@@ -511,7 +511,7 @@ ResourceNode.create(560, 100, 64, 64).resource(Resource.of(Minecraft.getInstance
 | An `AbstractTexture`, a `RenderTarget`, a `GpuTexture` or a `GpuTextureView` | A texture already on the GPU, such as a whole atlas, live. |
 | A `NativeImage` | A copy of the image, made when the resource is created. |
 
-Animated sprites and `.mcmeta` animations play like in game, and the resources follow resource pack reloads. Pixel art stays sharp: these resources use nearest filtering. Other files work the same way: `MsdfFontLoader.load("yourmod:fonts/inter.ttf")` loads a font of your mod. See [Images and Media](https://joid.dev-zeldown.workers.dev/#/concepts/media).
+Animated sprites and `.mcmeta` animations play like in game, and the resources follow resource pack reloads. Pixel art stays sharp: these resources use nearest filtering. Other files work the same way: `MsdfFontLoader.load("yourmod:fonts/inter.ttf")` loads a font of your mod. See [Images and Media](https://documentation.joid.dev/#/concepts/media).
 
 ## Sound and key bindings
 
@@ -557,7 +557,7 @@ public void draw(final double mouseX, final double mouseY) {
 | `drawEntity(x, y, width, height, entity, scale, rotationYaw, rotationPitch, lookX, lookY)` | With its scale, and the head turned toward the point `lookX`, `lookY`. |
 | `DrawEntity.inst().drawPlayer(...)` | The same three forms with a `PlayerSkin` in place of the entity. |
 
-Draw the item, then its bar, cooldown and count, to match a slot. `toDrawX` and `toDrawY` turn the mouse into the coordinates of `draw`. See [Custom Nodes](https://joid.dev-zeldown.workers.dev/#/nodes/custom-nodes) and [Drawing](https://joid.dev-zeldown.workers.dev/#/drawing/drawing).
+Draw the item, then its bar, cooldown and count, to match a slot. `toDrawX` and `toDrawY` turn the mouse into the coordinates of `draw`. See [Custom Nodes](https://documentation.joid.dev/#/nodes/custom-nodes) and [Drawing](https://documentation.joid.dev/#/drawing/drawing).
 
 ## License
 
