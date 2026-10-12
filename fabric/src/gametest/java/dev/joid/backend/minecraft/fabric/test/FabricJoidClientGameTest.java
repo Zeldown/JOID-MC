@@ -53,7 +53,6 @@ import dev.joid.backend.minecraft.lib.ui.node.impl.design.entity.EntityNode;
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.item.ItemNode;
 import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
 import dev.joid.backend.minecraft.showcase.ShowcaseClock;
-import dev.joid.demo.asset.locator.impl.DemoAssetLocator;
 import dev.joid.demo.ui.DemoEntry;
 import dev.joid.demo.ui.UIDemoChoice;
 import dev.joid.demo.ui.cursor.UIDemoCursor;
@@ -63,7 +62,6 @@ import dev.joid.demo.ui.shader.UIDemoEffect;
 import dev.joid.demo.ui.shader.UIDemoShader;
 import dev.joid.internal.JOID;
 import dev.joid.internal.JOIDEnv;
-import dev.joid.lib.asset.locator.AssetLocator;
 import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.bridge.clock.IClockBridge;
 import dev.joid.lib.bridge.render.texture.ITexture;
@@ -1849,7 +1847,6 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		final DirectThreadBridge thread = new DirectThreadBridge();
 		final SnapshotRunner runner = SnapshotRunner.start(new MinecraftSnapshotBackend());
 		BridgeHandler.THREAD.register(thread);
-		AssetLocator.register(DemoAssetLocator.inst());
 		final List<DemoEntry> entries = new ArrayList<>(UIDemoChoice.LIST);
 		UIDemoChoice.LIST.removeIf(entry -> entry.getHover() != null && entry.getHover().startsWith("dev.joid.backend.minecraft."));
 		try {
@@ -1873,7 +1870,6 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		} finally {
 			UIDemoChoice.LIST.clear();
 			UIDemoChoice.LIST.addAll(entries);
-			BridgeHandler.THREAD.unregister(thread);
 			runner.stop();
 		}
 
