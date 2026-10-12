@@ -45,28 +45,28 @@ Draw your screen in your design tool, copy each layer's values, and get the same
 
 Real renders inside the game window, styled for this showcase: JOID ships with no design of its own. Watch them in the [1080p video](https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.2/docs/images/showcase.mp4).
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.2/docs/images/showcase-chest.webp" alt="A chest redrawn with JOID over the world: real slots, a rotating player, items dragged with the mouse" width="100%">
-  <br>
-  <sub><b>Containers.</b> Real slots, synced with the server.</sub>
-</p>
-
 <table>
   <tr>
     <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.2/docs/images/showcase-hud.webp" alt="Health, hunger and experience replaced by an animated JOID HUD, in game"></td>
-    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.2/docs/images/showcase-bestiary.webp" alt="A bestiary of cards with mobs, blocks and items turning in 3D"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.2/docs/images/showcase-chest.webp" alt="A chest redrawn with JOID over the world: real slots, a rotating player, items dragged with the mouse"></td>
   </tr>
   <tr>
     <td align="center"><sub><b>HUD.</b> Replace any layer, in game.</sub></td>
-    <td align="center"><sub><b>Bestiary.</b> Mobs, blocks and items in 3D.</sub></td>
+    <td align="center"><sub><b>Containers.</b> Real slots, synced with the server.</sub></td>
   </tr>
   <tr>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.2/docs/images/showcase-bestiary.webp" alt="A bestiary of cards with mobs, blocks and items turning in 3D"></td>
     <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.2/docs/images/showcase-pause.webp" alt="A redesigned pause menu over the blurred world, with the player in 3D"></td>
-    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.2/docs/images/showcase-loaders.webp" alt="The same interface on Fabric, NeoForge and Forge"></td>
   </tr>
   <tr>
+    <td align="center"><sub><b>Bestiary.</b> Mobs, blocks and items in 3D.</sub></td>
     <td align="center"><sub><b>Menus &amp; screens.</b> Redesign any vanilla menu, or build your own.</sub></td>
-    <td align="center"><sub><b>Every loader.</b> The same code everywhere.</sub></td>
+  </tr>
+  <tr>
+    <td colspan="2"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.2/docs/images/showcase-loaders.webp" alt="The same interface on Fabric, NeoForge and Forge" width="100%"></td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center"><sub><b>Every loader.</b> The same code everywhere.</sub></td>
   </tr>
 </table>
 
