@@ -12,7 +12,6 @@ import dev.joid.lib.font.FontWeight;
 import dev.joid.lib.input.cursor.Cursor;
 import dev.joid.lib.shader.impl.BorderShader.BorderMode;
 import dev.joid.lib.ui.core.UI;
-import dev.joid.lib.ui.core.data.UIData;
 import dev.joid.lib.ui.node.Node;
 import dev.joid.lib.ui.node.effect.impl.BlurNodeEffect;
 import dev.joid.lib.ui.node.effect.impl.BorderNodeEffect;
@@ -30,7 +29,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
-@UIData(background = false)
 @UIDataMinecraft(title = "menu.game")
 public class ShowPause extends UI implements IShowFocus {
 

@@ -11,7 +11,6 @@ import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
 import dev.joid.lib.color.Color;
 import dev.joid.lib.draw.text.builder.Text;
 import dev.joid.lib.font.FontWeight;
-import dev.joid.lib.ui.core.data.UIData;
 import dev.joid.lib.ui.node.Node;
 import dev.joid.lib.ui.node.effect.impl.BlurNodeEffect;
 import dev.joid.lib.ui.node.effect.impl.RoundedNodeEffect;
@@ -23,7 +22,6 @@ import dev.joid.lib.utils.align.Align;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.inventory.ChestMenu;
 
-@UIData(background = false)
 @UIDataMinecraft(title = "container.chest")
 public class ShowChest extends ContainerUI<ChestMenu> implements IShowFocus {
 

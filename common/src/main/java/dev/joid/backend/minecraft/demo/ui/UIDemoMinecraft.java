@@ -24,7 +24,6 @@ import dev.joid.lib.render.transform.Vector;
 import dev.joid.lib.render.transform.operation.RotateTransformOperation;
 import dev.joid.lib.render.transform.operation.ScaleTransformOperation;
 import dev.joid.lib.resource.Resource;
-import dev.joid.lib.ui.core.data.UIData;
 import dev.joid.lib.ui.node.effect.NodeEffect.NodeEffectScope;
 import dev.joid.lib.ui.node.effect.impl.CircleNodeEffect;
 import dev.joid.lib.ui.node.effect.impl.TransformNodeEffect;
@@ -55,7 +54,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 
-@UIData(background = false)
 @UIDataMinecraft(pause = false, title = "joid.demo.minecraft")
 public class UIDemoMinecraft extends UIDemo {
 

@@ -10,13 +10,11 @@ import dev.joid.lib.draw.text.builder.Text;
 import dev.joid.lib.font.TextInfo;
 import dev.joid.lib.input.cursor.Cursor;
 import dev.joid.lib.ui.core.UI;
-import dev.joid.lib.ui.core.data.UIData;
 import dev.joid.lib.ui.core.data.popup.UIDataPopup;
 import dev.joid.lib.ui.node.impl.design.shape.RectNode;
 import dev.joid.lib.ui.node.impl.design.text.TextNode;
 import dev.joid.lib.utils.align.Align;
 
-@UIData(background = false)
 public class UIDemoContainer extends ContainerUI<DemoContainer> {
 
 	private static final Color INK         = new Color(153, 153, 153);
@@ -65,7 +63,6 @@ public class UIDemoContainer extends ContainerUI<DemoContainer> {
 		TextNode.create(960, 944).text(Text.create("Click outside drops", caption, Align.CENTER)).anchorX(Align.CENTER).attach(this);
 	}
 
-	@UIData(background = false)
 	@UIDataPopup(active = true)
 	public static class Popup extends UI {
 

@@ -48,8 +48,8 @@ public final class UIDemoOverlayLayer {
 		return JOID.isOpen(Hotbar.class);
 	}
 
+	@UIData(anchorY = Align.END)
 	@UIDataOverlay(active = true)
-	@UIData(background = false, anchorY = Align.END)
 	@UIDataOverlayLayer(layer = OverlayLayer.HOTBAR, post = true)
 	public static class Hotbar extends UI {
 
@@ -68,8 +68,8 @@ public final class UIDemoOverlayLayer {
 
 	}
 
+	@UIData(anchorY = Align.END)
 	@UIDataOverlay(active = true)
-	@UIData(background = false, anchorY = Align.END)
 	@UIDataOverlayLayer(layer = OverlayLayer.CONTEXTUAL_BAR, cancel = true)
 	public static class Experience extends UI {
 
@@ -86,7 +86,6 @@ public final class UIDemoOverlayLayer {
 
 	}
 
-	@UIData(background = false)
 	@UIDataOverlay(active = true)
 	@UIDataOverlayLayer(layer = OverlayLayer.CROSSHAIR)
 	public static class Crosshair extends UI {
@@ -98,7 +97,6 @@ public final class UIDemoOverlayLayer {
 
 	}
 
-	@UIData(background = false)
 	@UIDataOverlay(active = true, interaction = @UIDataOverlayInteraction(active = true), render = @UIDataOverlayRender(screens = true))
 	public static class Interactive extends UI {
 
@@ -130,7 +128,6 @@ public final class UIDemoOverlayLayer {
 
 	}
 
-	@UIData(background = false)
 	@UIDataOverlay(active = true, render = @UIDataOverlayRender(always = true))
 	public static class Always extends UI {
 

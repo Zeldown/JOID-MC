@@ -67,7 +67,6 @@ import dev.joid.lib.input.key.resolver.KeyResolver;
 import dev.joid.lib.resource.Resource;
 import dev.joid.lib.resource.decoder.impl.VideoResourceDecoder;
 import dev.joid.lib.ui.core.UI;
-import dev.joid.lib.ui.core.data.UIData;
 import dev.joid.lib.ui.core.data.overlay.UIDataOverlay;
 import dev.joid.lib.ui.core.data.popup.UIDataPopup;
 import dev.joid.lib.ui.node.Node;
@@ -1741,7 +1740,6 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 
 	}
 
-	@UIData(background = false)
 	@UIDataOverlay(active = true)
 	@UIDataOverlayLayer(layer = OverlayLayer.HOTBAR, cancel = true)
 	public static final class HiddenHotbar extends UI {
@@ -1751,7 +1749,6 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 
 	}
 
-	@UIData(background = false)
 	@UIDataMinecraft(background = false)
 	public static final class LongEntity extends UI {
 
@@ -1774,7 +1771,6 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 
 	}
 
-	@UIData(background = false)
 	@UIDataOverlay(active = true)
 	public static final class FrameOverlay extends UI {
 
@@ -1788,7 +1784,6 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 
 	}
 
-	@UIData(background = false)
 	public static final class VanillaBackground extends UI {
 
 		@Override
@@ -1796,7 +1791,6 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 
 	}
 
-	@UIData(background = false)
 	@UIDataMinecraft(background = false)
 	public static final class NoBackground extends UI {
 

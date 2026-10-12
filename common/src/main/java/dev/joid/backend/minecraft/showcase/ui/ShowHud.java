@@ -28,8 +28,8 @@ import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.resources.model.sprite.SpriteId;
 import net.minecraft.resources.Identifier;
 
+@UIData(anchorY = Align.END)
 @UIDataOverlay(active = true)
-@UIData(background = false, anchorY = Align.END)
 @UIDataOverlayLayer(layer = OverlayLayer.HEALTH, cancel = true)
 public class ShowHud extends UI {
 
@@ -118,8 +118,8 @@ public class ShowHud extends UI {
 		return Minecraft.getInstance().player;
 	}
 
+	@UIData(anchorY = Align.END)
 	@UIDataOverlay(active = true)
-	@UIData(background = false, anchorY = Align.END)
 	@UIDataOverlayLayer(layer = OverlayLayer.FOOD, cancel = true)
 	public static class Food extends UI {
 
@@ -128,8 +128,8 @@ public class ShowHud extends UI {
 
 	}
 
+	@UIData(anchorY = Align.END)
 	@UIDataOverlay(active = true)
-	@UIData(background = false, anchorY = Align.END)
 	@UIDataOverlayLayer(layer = OverlayLayer.CONTEXTUAL_BAR, cancel = true)
 	public static class Experience extends UI {
 
@@ -138,8 +138,8 @@ public class ShowHud extends UI {
 
 	}
 
+	@UIData(anchorY = Align.END)
 	@UIDataOverlay(active = true)
-	@UIData(background = false, anchorY = Align.END)
 	@UIDataOverlayLayer(layer = OverlayLayer.EXPERIENCE_LEVEL, cancel = true)
 	public static class Level extends UI {
 
