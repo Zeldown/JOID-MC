@@ -76,8 +76,8 @@ Each release has two jars per loader, built from the same code:
 
 | Jar | Contains | For |
 |---|---|---|
-| `dev` | JOID-MC and JOID, with the dev tools and the demos (`J` key). | Your development environment only. |
-| `prod` | JOID-MC and JOID, without any dev tool, demo or demo asset. | Players. This is the jar on CurseForge and Modrinth. |
+| `dev` | JOID-MC and JOID, with the dev mode of JOID ([Development](#development)). | Your development environment only. |
+| `prod` | JOID-MC and JOID, without the dev mode. | Players. This is the jar on CurseForge and Modrinth. |
 
 ### In your workspace
 
@@ -124,7 +124,7 @@ JOID-MC is a separate mod that players install next to yours, like any library m
 }
 ```
 
-Fabric has no client-side dependency: use `depends` when your mod is `"environment": "client"`. A mod that also runs on servers declares `joid` in `recommends` and calls JOID-MC from its client entrypoint only.
+Fabric has no client-side dependency: use `depends` when your mod is `"environment": "client"`. A mod that also runs on servers declares `joid` in `recommends`, since a `depends` stops a dedicated server that does not have JOID-MC, and calls JOID-MC from its client entrypoint only.
 
 **NeoForge** · `neoforge.mods.toml`
 
@@ -167,24 +167,25 @@ public class WelcomeUI extends UI {
 JOID.open(new WelcomeUI());
 ```
 
-The UI is laid out on JOID's design canvas (1920×1080 by default) and scaled to the window. In the development environment, the `J` key opens the JOID and Minecraft demos. To learn UIs, nodes, layout and signals, start with the [JOID Quick Start](https://documentation.joid.dev/#/getting-started/quick-start).
+The UI is laid out on JOID's design canvas (1920×1080 by default) and scaled to the window. To learn UIs, nodes, layout and signals, start with the [JOID Quick Start](https://documentation.joid.dev/#/getting-started/quick-start).
 
 ## Development
 
-With the `dev` jar of [Installation](#installation), JOID-MC finds its demo classes at startup and turns on the dev mode and the demo mode of JOID by itself.
+The `dev` jar of [Installation](#installation) starts JOID in dev mode by itself, there is nothing to call. With a JOID UI open:
 
-| What the dev jar adds | |
+| Dev mode | |
 |---|---|
-| Dev mode | The JOID inspector panel, the reload shortcuts, hot reload, the profiler and warnings that point at your line: see [Dev mode](https://documentation.joid.dev/#/concepts/frame-loop). |
-| Demos | `J` opens the JOID demos with three Minecraft ones: `UIDemoMinecraft` (items, blocks, entities, textures, sounds), `UIDemoOverlayLayer` (HUD overlays, on and off) and `UIDemoContainer` (a container the server opens). The key is under *Options › Controls › Key Binds › JOID*. |
+| Inspector | `F3` shows or hides the inspector panel of the UI on top: the hierarchy of its nodes, and the bounds, properties and callbacks of the selected node. |
+| Reload | `Ctrl` + `R` or `F5` reloads the UI (its `init()` runs again), `Shift` on top replaces it with a new instance of its class. |
+| Hot reload | A UI reloads itself when the folder or the jar of its classes changes, for example after a recompilation from your IDE while the game runs. |
+| Zoom | `Alt` + scroll zooms the UI, `Shift` on top zooms faster. |
+| Profiler | The console logs how long each UI takes to load and every frame of a UI that takes longer than 16.66 ms. |
+| Warnings | `[JOID]` lines in the console point at what is wrong: a container UI without `bounds(...)`, a text that a signal cannot follow, a missing font weight, a shader beyond the baseline. |
+| Missing textures | A resource that fails to load shows the missing texture instead of nothing. |
 
-Not in the `prod` jar, so never used by a published mod:
+`@UIDataDebug(profiler = false, hotreload = false)` on a UI turns its profiler or its hot reload off. The keys go to JOID first: Minecraft does not see an `F3` or an `F5` that JOID used.
 
-- the JOID demos `dev.joid.demo.*`, `DemoFont` included, the dev nodes `dev.joid.lib.ui.node.impl.dev.*` and the internal fonts `dev.joid.internal.font.*`;
-- the demos and the showcase of JOID-MC, with their assets and translations;
-- `JOID.inst().setDevMode(true)` and `setDemoMode(true)`, which throw an `IllegalStateException`.
-
-Start the game once with the `prod` jar before publishing.
+None of this is in the `prod` jar: no inspector, no dev font, no profiler, no warning, and the dev mode cannot be turned on. Start the game once with the `prod` jar before publishing.
 
 ## Screens
 
