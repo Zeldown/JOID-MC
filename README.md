@@ -78,7 +78,18 @@ JOID-MC is a JOID backend: everything in the [JOID documentation](https://joid.d
 
 ## Installation
 
-Download the jar of your loader from the [releases](https://github.com/Zeldown/JOID-MC/releases), put it in the `libs/` folder of your mod and add it to your dependencies:
+Each release has two jars per loader, built from the same code:
+
+| Jar | Contains | For |
+|---|---|---|
+| `-dev` | JOID-MC and JOID, plus the dev mode (inspector, hot reload, warnings that point at your line) and the JOID and Minecraft demos on the `J` key. | Your development environment only. |
+| `-prod` | JOID-MC and JOID, without any dev tool, demo or demo asset. | Players. This is the jar on CurseForge and Modrinth. |
+
+The dev mode and the demos turn on by themselves with the `-dev` jar: there is nothing to configure.
+
+### In your workspace
+
+Download the `-dev` jar of your loader from the [releases](https://github.com/Zeldown/JOID-MC/releases), put it in the `libs/` folder of your mod and add it to your dependencies:
 
 ```gradle
 dependencies {
@@ -86,12 +97,32 @@ dependencies {
 }
 ```
 
-| Jar | Use |
-|---|---|
-| `-dev` | In your development environment: JOID with its dev mode (inspector, hot reload, warnings) and the demos. |
-| `-prod` | What players install, from CurseForge or Modrinth. |
+`runClient` then starts the game with JOID-MC in dev mode.
 
-Then declare the dependency on the mod `joid` in your `fabric.mod.json`, `neoforge.mods.toml` or `mods.toml`, and as *Required* on CurseForge and Modrinth.
+### Shipping your mod
+
+JOID-MC is a separate mod that players install next to yours, like any library mod.
+
+1. **Do not bundle it** in your jar: no `include`, `jarJar` or shadow.
+2. **Declare it as required** in your mod metadata, with the mod id `joid`:
+
+```json
+"depends": {
+    "joid": ">=1.0.0"
+}
+```
+
+```toml
+[[dependencies.yourmod]]
+modId = "joid"
+type = "required"
+versionRange = "[1.0.0,)"
+```
+
+The first block goes in `fabric.mod.json`. The second goes in `neoforge.mods.toml`; in the `mods.toml` of Forge, write `mandatory = true` instead of `type = "required"`.
+
+3. **Mark JOID-MC as a required dependency** on CurseForge and Modrinth, so that launchers install it with your mod.
+4. **Use only what the `-prod` jar contains.** The demo classes and fonts (`DemoFont`) and the dev nodes exist only in `-dev`. Before publishing, swap the jar in `libs/` for the `-prod` one and start the game once.
 
 ## Getting started
 
