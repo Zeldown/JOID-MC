@@ -76,14 +76,12 @@ Each release has two jars per loader, built from the same code:
 
 | Jar | Contains | For |
 |---|---|---|
-| `-dev` | JOID-MC and JOID, plus the dev mode (inspector, hot reload, warnings that point at your line) and the JOID and Minecraft demos on the `J` key. | Your development environment only. |
-| `-prod` | JOID-MC and JOID, without any dev tool, demo or demo asset. | Players. This is the jar on CurseForge and Modrinth. |
-
-The dev mode and the demos turn on by themselves with the `-dev` jar: there is nothing to configure.
+| `dev` | JOID-MC and JOID, with the dev tools and the demos (`J` key). | Your development environment only. |
+| `prod` | JOID-MC and JOID, without any dev tool, demo or demo asset. | Players. This is the jar on CurseForge and Modrinth. |
 
 ### In your workspace
 
-Download the `-dev` jar of your loader from the [releases](https://github.com/Zeldown/JOID-MC/releases), put it in the `libs/` folder of your mod and add it to the dependencies of your `build.gradle`:
+Download the `dev` jar of your loader from the [releases](https://github.com/Zeldown/JOID-MC/releases), put it in the `libs/` folder of your mod and add it to the dependencies of your `build.gradle`:
 
 **Fabric**
 
@@ -145,7 +143,6 @@ versionRange = "[1.0.0,)"
 ```
 
 3. **Mark JOID-MC as a required dependency** on CurseForge and Modrinth, so that launchers install it with your mod.
-4. **Use only what the `-prod` jar contains.** The demo classes and fonts (`DemoFont`) and the dev nodes exist only in `-dev`. Before publishing, swap the jar in `libs/` for the `-prod` one and start the game once.
 
 ## Getting started
 
@@ -168,6 +165,23 @@ JOID.open(new WelcomeUI());
 
 The UI is laid out on JOID's design canvas (1920×1080 by default) and scaled to the window. In the development environment, the `J` key opens the JOID and Minecraft demos. To learn UIs, nodes, layout and signals, start with the [JOID Quick Start](https://documentation.joid.dev/#/getting-started/quick-start).
 
+## Development
+
+With the `dev` jar of [Installation](#installation), JOID-MC finds its demo classes at startup and turns on the dev mode and the demo mode of JOID by itself.
+
+| What the dev jar adds | |
+|---|---|
+| Dev mode | The JOID inspector panel, the reload shortcuts, hot reload, the profiler and warnings that point at your line: see [Dev mode](https://documentation.joid.dev/#/concepts/frame-loop). |
+| Demos | `J` opens the JOID demos with three Minecraft ones: `UIDemoMinecraft` (items, blocks, entities, textures, sounds), `UIDemoOverlayLayer` (HUD overlays, on and off) and `UIDemoContainer` (a container the server opens). The key is under *Options › Controls › Key Binds › JOID*. |
+
+Not in the `prod` jar, so never used by a published mod:
+
+- the JOID demos `dev.joid.demo.*`, `DemoFont` included, the dev nodes `dev.joid.lib.ui.node.impl.dev.*` and the internal fonts `dev.joid.internal.font.*`;
+- the demos and the showcase of JOID-MC, with their assets and translations;
+- `JOID.inst().setDevMode(true)` and `setDemoMode(true)`, which throw an `IllegalStateException`.
+
+Start the game once with the `prod` jar before publishing.
+
 ## Screens
 
 A UI opened with `JOID.open` becomes a Minecraft screen. `@UIDataMinecraft` sets how it behaves in the game:
@@ -185,7 +199,7 @@ public class WelcomeUI extends UI {
 | `pause` | `true` | Pauses a singleplayer game while the screen is open. Container UIs never pause. |
 | `background` | `true` | Draws the Minecraft menu background behind the UI, screens and containers alike: the blurred world in game, the panorama on the title screen. `false` draws no Minecraft background. |
 
-JOID draws its own dark fill above it (`@UIData(background)`, see [UIs](https://documentation.joid.dev/#/concepts/uis)): add `@UIData(background = false)` to keep only the Minecraft background, or none at all.
+The Minecraft background and the dark fill of JOID (`@UIData(background)`, default `false`, see [UIs](https://documentation.joid.dev/#/concepts/uis)) are independent: add `@UIData(background = true)` to draw the JOID fill as well.
 
 - `JOID.open(ui)` opens the screen, `JOID.close(ui)` closes it, and `Escape` closes the top UI unless it is `@UIData(closeable = false)`. Several UIs open at once share one screen, which closes with the last of them.
 - When the game or another mod opens its own screen, the JOID UIs of the screen close.
@@ -301,8 +315,8 @@ Lay out the slots like any node ([Layout](https://documentation.joid.dev/#/conce
 An overlay UI is drawn over the game. `@UIDataOverlayLayer` places it on a layer of the Minecraft HUD, and can hide the vanilla layer:
 
 ```java
+@UIData(anchorY = Align.END)
 @UIDataOverlay(active = true)
-@UIData(background = false, anchorY = Align.END)
 @UIDataOverlayLayer(layer = OverlayLayer.HEALTH, cancel = true)
 public class HealthBarUI extends UI {
 
@@ -318,35 +332,7 @@ public class HealthBarUI extends UI {
 JOID.open(new HealthBarUI());
 ```
 
-`@UIDataOverlay(active = true)` makes the UI an overlay: without it, `JOID.open` opens a screen. `@UIData(background = false)` removes the dark fill that would cover the game, and `anchorY = Align.END` keeps the bottom of the canvas on the bottom of the window, next to the vanilla bars, whatever the window ratio.
-
-### @UIDataOverlay
-
-| Option | Default | Effect |
-|---|---|---|
-| `active` | `false` | Makes the UI an overlay. |
-| `render = @UIDataOverlayRender(screens = true)` | `false` | Keeps the overlay drawn over open screens and containers. |
-| `render = @UIDataOverlayRender(always = true)` | `false` | Keeps the overlay drawn when `F1` hides the HUD. |
-| `render = @UIDataOverlayRender(zindex = 10)` | `0` | Order among overlays: higher is drawn on top. |
-| `interaction = @UIDataOverlayInteraction(active = true)` | `false` | The overlay receives the mouse and the keyboard. |
-| `interaction = @UIDataOverlayInteraction(cancelClick = false)` | `true` | An event the overlay uses also reaches Minecraft. `cancelScroll` and `cancelKeyboard` do the same for the wheel and the keys. |
-
-The mouse is free only while a screen is open: to click an overlay, turn on `interaction` and `screens`. Clicks beside it reach the screen below:
-
-```java
-@UIData(background = false)
-@UIDataOverlay(active = true, interaction = @UIDataOverlayInteraction(active = true), render = @UIDataOverlayRender(screens = true))
-public class QuestTrackerUI extends UI {
-
-	@Override
-	public void init() {
-		RectNode.create(1560, 40, 320, 200).color(Color.decode("#1E2230")).onClick((_, _, _, _) -> JOID.close(this)).attach(this);
-	}
-
-}
-```
-
-The rest is in [Overlays with @UIDataOverlay](https://documentation.joid.dev/#/concepts/uis?id=overlays-with-uidataoverlay).
+`@UIDataOverlay(active = true)` makes the UI an overlay: without it, `JOID.open` opens a screen. Its other options are in [UIs](https://documentation.joid.dev/#/concepts/uis); in game, the mouse is free only while a screen is open, so an overlay that takes clicks needs `interaction` and `render.screens`. `anchorY = Align.END` keeps the bottom of the canvas on the bottom of the window, next to the vanilla bars, whatever the window ratio.
 
 ### @UIDataOverlayLayer
 
