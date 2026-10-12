@@ -1,7 +1,6 @@
 package dev.joid.backend.minecraft.lib.resource.resolver.impl;
 
 import java.awt.image.BufferedImage;
-import java.util.function.Consumer;
 
 import dev.joid.lib.resource.Resource;
 import dev.joid.lib.resource.ResourceBuilder;
@@ -20,14 +19,10 @@ public class NativeImageResourceResolver implements IResourceResolver {
 	}
 
 	@Override
-	public @NonNull Resource resolve(final @NonNull ResourceBuilder builder, final @NonNull Object input, final Consumer<Resource> callback) {
+	public @NonNull Resource resolve(final @NonNull ResourceBuilder builder, final @NonNull Object input) {
 		final NativeImage image = (NativeImage) input;
 		final String uniqueId = "native_image_" + System.identityHashCode(image);
-		final Resource resource = builder.compute(uniqueId, () -> new ResourceData(uniqueId, new RasterResourceDecoder(NativeImageResourceResolver.toBufferedImage(image)))).nearest();
-		if (callback != null) {
-			callback.accept(resource);
-		}
-		return resource;
+		return builder.compute(uniqueId, () -> new ResourceData(uniqueId, new RasterResourceDecoder(NativeImageResourceResolver.toBufferedImage(image)))).nearest();
 	}
 
 	private static BufferedImage toBufferedImage(final NativeImage image) {

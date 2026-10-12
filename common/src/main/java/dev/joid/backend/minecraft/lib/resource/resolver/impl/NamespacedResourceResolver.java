@@ -1,7 +1,5 @@
 package dev.joid.backend.minecraft.lib.resource.resolver.impl;
 
-import java.util.function.Consumer;
-
 import dev.joid.backend.minecraft.bridge.render.texture.GpuBorrowedTexture;
 import dev.joid.backend.minecraft.bridge.resource.ResourceReloader;
 import dev.joid.backend.minecraft.lib.asset.impl.NamespacedAsset;
@@ -33,13 +31,9 @@ public class NamespacedResourceResolver implements IResourceResolver {
 	}
 
 	@Override
-	public @NonNull Resource resolve(final @NonNull ResourceBuilder builder, final @NonNull Object input, final Consumer<Resource> callback) {
+	public @NonNull Resource resolve(final @NonNull ResourceBuilder builder, final @NonNull Object input) {
 		final NamespacedAsset asset = NamespacedAsset.create(NamespacedAssetLocator.parse(input));
-		final Resource resource = builder.compute(asset.getUniqueId(), () -> NamespacedResourceResolver.read(asset)).nearest();
-		if (callback != null) {
-			callback.accept(resource);
-		}
-		return resource;
+		return builder.compute(asset.getUniqueId(), () -> NamespacedResourceResolver.read(asset)).nearest();
 	}
 
 	public static @NonNull IResourceDecoder decoder(final @NonNull NamespacedAsset asset) {

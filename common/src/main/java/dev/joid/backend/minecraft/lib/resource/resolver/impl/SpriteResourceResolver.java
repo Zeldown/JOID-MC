@@ -1,7 +1,5 @@
 package dev.joid.backend.minecraft.lib.resource.resolver.impl;
 
-import java.util.function.Consumer;
-
 import dev.joid.backend.minecraft.lib.resource.decoder.impl.SpriteResourceDecoder;
 import dev.joid.lib.resource.Resource;
 import dev.joid.lib.resource.ResourceBuilder;
@@ -20,14 +18,10 @@ public class SpriteResourceResolver implements IResourceResolver {
 	}
 
 	@Override
-	public @NonNull Resource resolve(final @NonNull ResourceBuilder builder, final @NonNull Object input, final Consumer<Resource> callback) {
+	public @NonNull Resource resolve(final @NonNull ResourceBuilder builder, final @NonNull Object input) {
 		final SpriteId spriteId = input instanceof SpriteId ? (SpriteId) input : new SpriteId(((TextureAtlasSprite) input).atlasLocation(), ((TextureAtlasSprite) input).contents().name());
 		final String uniqueId = "sprite:" + spriteId.atlasLocation() + "#" + spriteId.texture();
-		final Resource resource = builder.compute(uniqueId, () -> new ResourceData(uniqueId, new SpriteResourceDecoder(spriteId))).nearest();
-		if (callback != null) {
-			callback.accept(resource);
-		}
-		return resource;
+		return builder.compute(uniqueId, () -> new ResourceData(uniqueId, new SpriteResourceDecoder(spriteId))).nearest();
 	}
 
 }
