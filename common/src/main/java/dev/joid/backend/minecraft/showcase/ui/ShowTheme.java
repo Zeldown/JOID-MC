@@ -1,7 +1,5 @@
 package dev.joid.backend.minecraft.showcase.ui;
 
-import javax.vecmath.Vector4f;
-
 import dev.joid.demo.DemoFont;
 import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.color.Color;
@@ -12,6 +10,7 @@ import dev.joid.lib.ui.node.effect.impl.BorderNodeEffect;
 import dev.joid.lib.ui.node.effect.impl.RoundedNodeEffect;
 import dev.joid.lib.ui.node.effect.impl.ShadowNodeEffect;
 import dev.joid.lib.ui.node.impl.design.shape.RectNode;
+import dev.joid.lib.utils.point.Point;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -35,18 +34,18 @@ public final class ShowTheme {
 	public static RectNode panel(final double x, final double y, final double width, final double height) {
 		return RectNode
 		.create(x, y, width, height)
-		.color(ShowTheme.vertical(ShowTheme.PANEL_TOP.copyAlpha(0.86F), ShowTheme.PANEL_BOTTOM.copyAlpha(0.92F)))
+		.color(ShowTheme.vertical(ShowTheme.PANEL_TOP.withAlpha(0.86F), ShowTheme.PANEL_BOTTOM.withAlpha(0.92F)))
 		.effect(RoundedNodeEffect.create(28F))
-		.effect(BorderNodeEffect.create(Color.WHITE.copyAlpha(0.10F), 1.5F, BorderMode.IN))
-		.effect(ShadowNodeEffect.create(Color.BLACK.copyAlpha(0.55F), 60F, 0D, 24D));
+		.effect(BorderNodeEffect.create(Color.WHITE.withAlpha(0.10F), 1.5F, BorderMode.IN))
+		.effect(ShadowNodeEffect.create(Color.BLACK.withAlpha(0.55F), 60F, 0D, 24D));
 	}
 
 	public static RectNode tile(final double x, final double y, final double width, final double height, final float radius) {
 		return RectNode
 		.create(x, y, width, height)
-		.color(Color.WHITE.copyAlpha(0.05F))
+		.color(Color.WHITE.withAlpha(0.05F))
 		.effect(RoundedNodeEffect.create(radius))
-		.effect(BorderNodeEffect.create(Color.WHITE.copyAlpha(0.06F), 1F, BorderMode.IN));
+		.effect(BorderNodeEffect.create(Color.WHITE.withAlpha(0.06F), 1F, BorderMode.IN));
 	}
 
 	public static TextInfo font(final FontWeight weight, final float size, final Color color) {
@@ -58,11 +57,11 @@ public final class ShowTheme {
 	}
 
 	public static Color vertical(final Color top, final Color bottom) {
-		return top.toGradient(bottom, new Vector4f(0F, 0F, 0F, 1F));
+		return top.toGradient(bottom, Point.create(0D, 0D), Point.create(0D, 1D));
 	}
 
 	public static Color horizontal(final Color left, final Color right) {
-		return left.toGradient(right, new Vector4f(0F, 0F, 1F, 0F));
+		return left.toGradient(right, Point.create(0D, 0D), Point.create(1D, 0D));
 	}
 
 	public static double now() {

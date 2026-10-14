@@ -24,7 +24,7 @@ public final class DrawItem {
 
 	private static final DrawItem INSTANCE = new DrawItem();
 
-	private static final Color COOLDOWN = new Color(0x7FFFFFFF);
+	private static final Color COOLDOWN = Color.argb(0x7FFFFFFF);
 
 	public static @NonNull DrawItem inst() {
 		return DrawItem.INSTANCE;
@@ -48,7 +48,7 @@ public final class DrawItem {
 
 		final double unit = size / 16D;
 		DrawUtils.SHAPE.drawRect(x + 2D * unit, y + 13D * unit, 13D * unit, 2D * unit, Color.BLACK);
-		DrawUtils.SHAPE.drawRect(x + 2D * unit, y + 13D * unit, stack.getBarWidth() * unit, unit, new Color(0xFF000000 | stack.getBarColor()));
+		DrawUtils.SHAPE.drawRect(x + 2D * unit, y + 13D * unit, stack.getBarWidth() * unit, unit, Color.rgb(stack.getBarColor()));
 	}
 
 	public void drawItemCooldown(final double x, final double y, final double size, final @NonNull ItemStack stack) {

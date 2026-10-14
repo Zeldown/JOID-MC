@@ -6,7 +6,7 @@ import dev.joid.backend.minecraft.bridge.ui.container.ContainerUIBridge;
 import dev.joid.backend.minecraft.bridge.ui.container.ContainerUIScreen;
 import dev.joid.backend.minecraft.lib.draw.item.DrawItem;
 import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
-import dev.joid.internal.JOIDEnv;
+import dev.joid.internal.JOIDLog;
 import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.ui.core.UI;
 import dev.joid.lib.ui.node.Node;
@@ -30,12 +30,11 @@ public abstract class ContainerUI<M extends AbstractContainerMenu> extends UI {
 	private Node     boundsNode;
 	private double[] bounds;
 	private double   carriedSize;
-	private boolean  boundsWarned;
 
 	protected ContainerUI(final @NonNull M container) {
 		this.container   = container;
 		this.carriedSize = 64D;
-		this.carriedNode = ContainerNode.create(0, 0, 0, 0).zindex(Integer.MAX_VALUE).interactive(false).onDraw((_, mouseX, mouseY) -> this.drawCarried(mouseX, mouseY));
+		this.carriedNode = ContainerNode.create(0, 0, 0, 0).zindex(Integer.MAX_VALUE).interactive(false).onDraw(event -> this.drawCarried(event.getMouseX(), event.getMouseY()));
 	}
 
 	public static <M extends AbstractContainerMenu> @NonNull ScreenConstructor<M, ContainerUIScreen<M>> screen(final @NonNull Function<M, ? extends ContainerUI<M>> factory) {
@@ -83,10 +82,7 @@ public abstract class ContainerUI<M extends AbstractContainerMenu> extends UI {
 		}
 
 		if (left > right || top > bottom || left <= super.getViewX() && top <= super.getViewY() && right >= super.getViewX() + super.getViewWidth() && bottom >= super.getViewY() + super.getViewHeight()) {
-			if (!this.boundsWarned && JOIDEnv.isDevMode()) {
-				this.boundsWarned = true;
-				System.err.println("[JOID] The container UI " + this.getClass().getSimpleName() + " has no bounds and covers the whole view, call bounds(node) so that a click outside its panel drops the carried item");
-			}
+			JOIDLog.devWarnOnce("ContainerUI.bounds." + this.getClass().getName(), () -> "The container UI " + this.getClass().getSimpleName() + " has no bounds and covers the whole view, call bounds(node) so that a click outside its panel drops the carried item");
 
 			if (left > right || top > bottom) {
 				return new double[] {super.getViewX(), super.getViewY(), super.getViewWidth(), super.getViewHeight()};

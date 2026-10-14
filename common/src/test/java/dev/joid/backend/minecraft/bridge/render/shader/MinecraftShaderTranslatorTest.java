@@ -93,7 +93,7 @@ public class MinecraftShaderTranslatorTest {
 		final ShaderSource fragment = ShaderSource.parse(ShaderStage.FRAGMENT, MinecraftShaderTranslatorTest.FRAGMENT);
 		final String translated = MinecraftShaderTranslatorTest.color().translateFragment(vertex, fragment);
 		Assert.assertTrue(translated.indexOf("uniform sampler2D tex;\n") < translated.indexOf("uniform sampler2D joid_Stencil;\n"));
-		Assert.assertEquals(List.of("tex"), MinecraftShaderTranslatorTest.color().getSamplers(vertex, fragment).stream().map(ShaderVariable::getName).toList());
+		Assert.assertEquals(List.of("tex", "joid_Stencil"), MinecraftShaderTranslatorTest.color().getSamplers(vertex, fragment).stream().map(ShaderVariable::getName).toList());
 	}
 
 	@Test

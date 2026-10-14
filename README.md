@@ -340,7 +340,7 @@ public class HealthBarUI extends UI {
 JOID.open(new HealthBarUI());
 ```
 
-`@UIDataOverlay(active = true)` makes the UI an overlay: without it, `JOID.open` opens a screen. Its other options are in [UIs](https://documentation.joid.dev/#/concepts/uis); in game, the mouse is free only while a screen is open, so an overlay that takes clicks needs `interaction` and `render.screens`. `anchorY = Align.END` keeps the bottom of the canvas on the bottom of the window, next to the vanilla bars, whatever the window ratio.
+`@UIDataOverlay(active = true)` makes the UI an overlay: without it, `JOID.open` opens a screen. Its other options are in [UIs](https://documentation.joid.dev/#/concepts/uis); in game, the mouse is free only while a screen is open, so an overlay that takes clicks needs `interaction` and `render.aboveScreens`. `anchorY = Align.END` keeps the bottom of the canvas on the bottom of the window, next to the vanilla bars, whatever the window ratio.
 
 ### @UIDataOverlayLayer
 
@@ -350,7 +350,7 @@ JOID.open(new HealthBarUI());
 | `post` | `false` | `false` draws the overlay just before the vanilla layer, under it; `true` just after, over it. |
 | `cancel` | `false` | Hides the vanilla layer while the overlay is open and visible. |
 
-An overlay without `@UIDataOverlayLayer` is drawn above the whole HUD, and hides under open screens unless `render.screens` is on. A layer overlay is part of the HUD: under an open screen it stays drawn with the HUD, blurred like the game, and keeps hiding its vanilla layer. `F1` hides both, except with `render.always`.
+An overlay without `@UIDataOverlayLayer` is drawn above the whole HUD; an open screen covers it, unless `render.aboveScreens` draws it over the screen. A layer overlay is part of the HUD: under an open screen it stays drawn with the HUD, blurred like the game, and keeps hiding its vanilla layer. `F1` hides both, except with `render.always`.
 
 | `OverlayLayer` | Vanilla layer |
 |---|---|
@@ -482,7 +482,7 @@ The vanilla shadow is `shadowTint(0.25F)`, the color of each glyph at 25 %, with
 
 `LegacyTextColor` gives the 16 colors as JOID colors: `LegacyTextColor.GOLD.getColor()`.
 
-A chat `Component` keeps its colors, hex colors included, its styles, and translates its `translatable` parts in the language of the game. The `§` codes and the `Component`s work with every JOID font, and the Minecraft fonts with everything else of [Text and Fonts](https://documentation.joid.dev/#/concepts/text): markup, effects, alignment, wrapping.
+A chat `Component` keeps its colors, hex colors included, its styles, and translates its `translatable` parts in the language of the game. The `§` codes and the `Component`s work with every JOID font, and the Minecraft fonts with everything else of [Text and Fonts](https://documentation.joid.dev/#/concepts/text): markup, effects, alignment, wrapping. Like the vanilla text boxes, JOID text fields drop a typed `§`: the codes come from your code, never from the player.
 
 ## Textures and resources
 
@@ -518,7 +518,7 @@ ResourcePlayerNode.create(430, 10, 640, 360).resource(Resource.of(new File("vide
 A `KeyMapping` works wherever JOID takes a key: the shortcut follows the key that the player chose in Controls.
 
 ```java
-super.keybind(() -> JOID.close(this), Minecraft.getInstance().options.keyInventory);
+Shortcut.create(Minecraft.getInstance().options.keyInventory).onTrigger(_ -> JOID.close(this)).attach(this);
 ```
 
 `KeyResolver.resolve(mapping)` gives its JOID `Key`, or `null` when it is unbound or on a mouse button.

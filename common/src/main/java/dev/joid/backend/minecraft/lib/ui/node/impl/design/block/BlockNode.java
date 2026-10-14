@@ -8,7 +8,6 @@ import dev.joid.lib.ui.node.Node;
 import lombok.Getter;
 import lombok.NonNull;
 
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 @Getter
@@ -22,9 +21,10 @@ public class BlockNode extends Node {
 	protected BlockNode(final double x, final double y, final double width, final double height) {
 		super(x, y, width, height);
 
-		this.block         = Blocks.AIR.defaultBlockState();
 		this.rotationYaw   = 225D;
 		this.rotationPitch = 30D;
+
+		super.<BlockNode>require("block", "call block(...) before attaching it", node -> node.block != null);
 	}
 
 	public static @NonNull BlockNode create(final double x, final double y, final double width, final double height) {
@@ -42,7 +42,7 @@ public class BlockNode extends Node {
 	}
 
 	public final <T extends BlockNode> @NonNull T block(final @NonNull Supplier<@NonNull BlockState> block) {
-		return super.follow("block", block, value -> this.block = value);
+		return super.follow("block", block, (final BlockNode node, final BlockState value) -> node.block = value);
 	}
 
 	public final <T extends BlockNode> @NonNull T rotationYaw(final double rotationYaw) {
@@ -50,7 +50,7 @@ public class BlockNode extends Node {
 	}
 
 	public final <T extends BlockNode> @NonNull T rotationYaw(final @NonNull Supplier<Double> rotationYaw) {
-		return super.follow("rotationYaw", rotationYaw, value -> this.rotationYaw = value);
+		return super.follow("rotationYaw", rotationYaw, (final BlockNode node, final Double value) -> node.rotationYaw = value);
 	}
 
 	public final <T extends BlockNode> @NonNull T rotationPitch(final double rotationPitch) {
@@ -58,7 +58,7 @@ public class BlockNode extends Node {
 	}
 
 	public final <T extends BlockNode> @NonNull T rotationPitch(final @NonNull Supplier<Double> rotationPitch) {
-		return super.follow("rotationPitch", rotationPitch, value -> this.rotationPitch = value);
+		return super.follow("rotationPitch", rotationPitch, (final BlockNode node, final Double value) -> node.rotationPitch = value);
 	}
 
 }

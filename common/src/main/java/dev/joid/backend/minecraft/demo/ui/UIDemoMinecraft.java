@@ -24,6 +24,7 @@ import dev.joid.lib.render.transform.Vector;
 import dev.joid.lib.render.transform.operation.RotateTransformOperation;
 import dev.joid.lib.render.transform.operation.ScaleTransformOperation;
 import dev.joid.lib.resource.Resource;
+import dev.joid.lib.ui.node.Node;
 import dev.joid.lib.ui.node.effect.NodeEffect.NodeEffectScope;
 import dev.joid.lib.ui.node.effect.impl.CircleNodeEffect;
 import dev.joid.lib.ui.node.effect.impl.TransformNodeEffect;
@@ -32,6 +33,7 @@ import dev.joid.lib.ui.node.impl.design.shape.RectNode;
 import dev.joid.lib.ui.node.impl.design.text.TextNode;
 import dev.joid.lib.ui.node.impl.structure.container.ContainerNode;
 import dev.joid.lib.ui.node.property.overflow.OverflowProperty;
+import dev.joid.lib.ui.shortcut.Shortcut;
 import dev.joid.lib.utils.align.Align;
 
 import com.mojang.authlib.GameProfile;
@@ -243,7 +245,7 @@ public class UIDemoMinecraft extends UIDemo {
 				.body(slot -> {
 					ItemNode.create(10, 10, 80, 80).stack(pearl).tooltip(true).attach(slot);
 				})
-				.onClick((_, _, _, _) -> Minecraft.getInstance().player.getCooldowns().addCooldown(pearl, 100))
+				.onClick(_ -> Minecraft.getInstance().player.getCooldowns().addCooldown(pearl, 100))
 				.attach(rect);
 				RectNode
 				.create(250, 70, 100, 100)
@@ -372,7 +374,7 @@ public class UIDemoMinecraft extends UIDemo {
 				.body(slot -> {
 					ResourceNode.create(10, 10, 80, 80).resource(Resource.of(Sheets.BLOCKS_MAPPER.defaultNamespaceApply("note_block"))).attach(slot);
 				})
-				.onClick((_, _, _, _) -> Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_PLING, 1F)))
+				.onClick(_ -> Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_PLING, 1F)))
 				.attach(rect);
 				TextNode.create(220, 255).text(Text.create("Vanilla sound", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
 			})
@@ -393,7 +395,7 @@ public class UIDemoMinecraft extends UIDemo {
 				.body(toggle -> {
 					TextNode.create(90, 30).text(Text.create("Active", info, Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(toggle);
 				})
-				.onClick((_, _, _, _) -> super.getScale().setActive(!super.getScale().active()))
+				.onClick(_ -> super.getScale().setActive(!super.getScale().active()))
 				.attach(rect);
 				RectNode
 				.create(230, 140, 180, 60)
@@ -402,7 +404,7 @@ public class UIDemoMinecraft extends UIDemo {
 				.body(toggle -> {
 					TextNode.create(90, 30).text(Text.create("Limit 0.75", info, Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(toggle);
 				})
-				.onClick((_, _, _, _) -> super.getScale().setLimited(!super.getScale().limited()).setLimit(0.75D))
+				.onClick(_ -> super.getScale().setLimited(!super.getScale().limited()).setLimit(0.75D))
 				.attach(rect);
 				TextNode.create(220, 255).text(Text.create("Interface scale", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
 			})
@@ -438,7 +440,8 @@ public class UIDemoMinecraft extends UIDemo {
 				RectNode
 				.create(20, 20, 400, 200)
 				.color(UIDemoMinecraft.PANEL)
-				.onDraw((panel, _, _) -> {
+				.onDraw(event -> {
+					final Node panel = event.getNode();
 					DrawItem.inst().drawItem(panel.getX() + 20D, panel.getY() + 60D, 80D, totem);
 					DrawItem.inst().drawItemCount(panel.getX() + 20D, panel.getY() + 60D, 80D, totem, "x3");
 					DrawBlock.inst().drawBlock(panel.getX() + 140D, panel.getY() + 60D, 80D, Blocks.BOOKSHELF.defaultBlockState(), 30D, 20D);
@@ -453,7 +456,7 @@ public class UIDemoMinecraft extends UIDemo {
 		})
 		.attach(this);
 
-		super.keybind(() -> JOID.close(this), Minecraft.getInstance().options.keyInventory);
+		Shortcut.create(Minecraft.getInstance().options.keyInventory).onTrigger(_ -> JOID.close(this)).attach(this);
 	}
 
 }

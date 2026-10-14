@@ -26,7 +26,7 @@ import net.minecraft.world.item.ItemStack;
 @Getter
 public class SlotNode extends Node {
 
-	private static final Color QUICK_CRAFT = new Color(0x80FFFFFF);
+	private static final Color QUICK_CRAFT = Color.argb(0x80FFFFFF);
 
 	private Slot  slot;
 	private Color color;
@@ -36,7 +36,9 @@ public class SlotNode extends Node {
 		super(x, y, width, height);
 
 		this.color        = Color.TRANSPARENT;
-		this.hoveredColor = new Color(0x80FFFFFF);
+		this.hoveredColor = Color.argb(0x80FFFFFF);
+
+		super.<SlotNode>require("slot", "call slot(...) before attaching it", node -> node.slot != null);
 	}
 
 	public static @NonNull SlotNode create(final double x, final double y, final double width, final double height) {
@@ -47,7 +49,7 @@ public class SlotNode extends Node {
 	public void draw(final double mouseX, final double mouseY) {
 		DrawUtils.SHAPE.drawRect(super.getX(), super.getY(), super.getWidth(), super.getHeight(), this.color);
 		final ContainerUIScreen<?> screen = super.getUi() instanceof final ContainerUI<?> ui ? BridgeHandler.UI.getBridge(ContainerUIBridge.class).getScreen(ui) : null;
-		if (this.slot == null || screen == null || !this.slot.isActive()) {
+		if (screen == null || !this.slot.isActive()) {
 			return;
 		}
 
@@ -104,7 +106,7 @@ public class SlotNode extends Node {
 	}
 
 	public final <T extends SlotNode> @NonNull T slot(final @NonNull Supplier<@NonNull Slot> slot) {
-		return super.follow("slot", slot, value -> this.slot = value);
+		return super.follow("slot", slot, (final SlotNode node, final Slot value) -> node.slot = value);
 	}
 
 	public final <T extends SlotNode> @NonNull T color(final @NonNull Color color) {
@@ -112,7 +114,7 @@ public class SlotNode extends Node {
 	}
 
 	public final <T extends SlotNode> @NonNull T color(final @NonNull Supplier<@NonNull Color> color) {
-		return super.follow("color", color, value -> this.color = value);
+		return super.follow("color", color, (final SlotNode node, final Color value) -> node.color = value);
 	}
 
 	public final <T extends SlotNode> @NonNull T hoveredColor(final Color hoveredColor) {
@@ -120,7 +122,7 @@ public class SlotNode extends Node {
 	}
 
 	public final <T extends SlotNode> @NonNull T hoveredColor(final @NonNull Supplier<Color> hoveredColor) {
-		return super.follow("hoveredColor", hoveredColor, value -> this.hoveredColor = value);
+		return super.follow("hoveredColor", hoveredColor, (final SlotNode node, final Color value) -> node.hoveredColor = value);
 	}
 
 	private void drawHighlight(final ContainerUIScreen<?> screen) {

@@ -45,7 +45,7 @@ public class UIDemoContainer extends ContainerUI<DemoContainer> {
 			.body(button -> {
 				TextNode.create(72, 24).text(Text.create("Popup", info, Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(button);
 			})
-			.onClick((_, _, _, _) -> JOID.open(new Popup()))
+			.onClick(_ -> JOID.open(new Popup()))
 			.attach(rect);
 			for (int index = 0; index < 27; index++) {
 				SlotNode.create(48 + index % 9 * 72, 96 + index / 9 * 72, 68, 68).slot(super.getContainer().getSlot(index)).color(UIDemoContainer.INK).attach(rect);
@@ -83,7 +83,7 @@ public class UIDemoContainer extends ContainerUI<DemoContainer> {
 				.body(button -> {
 					TextNode.create(90, 40).text(Text.create("Close", info, Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(button);
 				})
-				.onClick((_, _, _, _) -> JOID.close(this))
+				.onClick(_ -> JOID.close(this))
 				.attach(rect);
 				TextNode.create(200, 240).text(Text.create("Popup above", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
 			})

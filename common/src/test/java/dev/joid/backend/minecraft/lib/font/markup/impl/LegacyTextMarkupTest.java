@@ -21,7 +21,7 @@ public class LegacyTextMarkupTest {
 	public void setsTheColorOfAColorCode() {
 		final TextStyle style = LegacyTextMarkupTest.createStyle();
 		Assert.assertEquals(2, LegacyTextMarkup.inst().parse("\u00A7cHello", 0, style));
-		Assert.assertEquals(new Color(0xFFFF5555), style.getColor());
+		Assert.assertEquals(Color.rgb(0xFF5555), style.getColor());
 	}
 
 	@Test
@@ -29,7 +29,7 @@ public class LegacyTextMarkupTest {
 		final TextStyle style = LegacyTextMarkupTest.createStyle();
 		LegacyTextMarkup.inst().parse("\u00A7A\u00A7L", 0, style);
 		LegacyTextMarkup.inst().parse("\u00A7A\u00A7L", 2, style);
-		Assert.assertEquals(new Color(0xFF55FF55), style.getColor());
+		Assert.assertEquals(Color.rgb(0x55FF55), style.getColor());
 		Assert.assertEquals(FontWeight.BOLD, style.getWeight());
 	}
 
@@ -56,7 +56,7 @@ public class LegacyTextMarkupTest {
 		LegacyTextMarkup.inst().parse("\u00A7l\u00A7n\u00A7e", 4, style);
 		Assert.assertEquals(FontWeight.REGULAR, style.getWeight());
 		Assert.assertTrue(style.getEffects().isEmpty());
-		Assert.assertEquals(new Color(0xFFFFFF55), style.getColor());
+		Assert.assertEquals(Color.rgb(0xFFFF55), style.getColor());
 	}
 
 	@Test
@@ -85,7 +85,7 @@ public class LegacyTextMarkupTest {
 	public void setsTheColorOfAHexCode() {
 		final TextStyle style = LegacyTextMarkupTest.createStyle();
 		Assert.assertEquals(14, LegacyTextMarkup.inst().parse("\u00A7x\u00A71\u00A72\u00A7a\u00A7B\u00A7c\u00A7dHello", 0, style));
-		Assert.assertEquals(new Color(0xFF12ABCD), style.getColor());
+		Assert.assertEquals(Color.rgb(0x12ABCD), style.getColor());
 	}
 
 	@Test

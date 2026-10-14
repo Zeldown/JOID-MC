@@ -6,6 +6,8 @@ import dev.joid.lib.input.mouse.MouseButton;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import net.minecraft.util.StringUtil;
+
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class OverlayInputForwarder {
 
@@ -21,7 +23,7 @@ public final class OverlayInputForwarder {
 
 	public static boolean charTyped(final int codepoint) {
 		final OverlayUIBridge bridge = BridgeHandler.UI.getBridge(OverlayUIBridge.class);
-		return bridge != null && bridge.charTyped(codepoint);
+		return bridge != null && StringUtil.isAllowedChatCharacter(codepoint) && bridge.charTyped(codepoint);
 	}
 
 	public static boolean mouseMoved() {

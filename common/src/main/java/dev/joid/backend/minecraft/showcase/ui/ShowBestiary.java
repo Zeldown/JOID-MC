@@ -93,7 +93,7 @@ public class ShowBestiary extends UI implements IShowFocus {
 			final double width = info.getWidth(name) + 44D;
 			RectNode
 			.create(x, 238, width, 44)
-			.color(index == 0 ? ShowTheme.horizontal(ShowTheme.GRASS, ShowTheme.EMERALD) : Color.WHITE.copyAlpha(0.07F))
+			.color(index == 0 ? ShowTheme.horizontal(ShowTheme.GRASS, ShowTheme.EMERALD) : Color.WHITE.withAlpha(0.07F))
 			.effect(RoundedNodeEffect.create(22F))
 			.body(tab -> {
 				TextNode.create(width / 2D, 22).text(Text.create(name, info, Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(tab);
@@ -110,15 +110,15 @@ public class ShowBestiary extends UI implements IShowFocus {
 		final double delay = 0.15D + index * 0.07D;
 		this.cards[index] = RectNode
 		.create(x, y, 300, 326)
-		.color(ShowTheme.vertical(Color.decode("#1B2130").copyAlpha(0.88F), ShowTheme.INK.copyAlpha(0.92F)))
-		.hoveredColor(ShowTheme.vertical(Color.decode("#232B3D").copyAlpha(0.92F), ShowTheme.INK.copyAlpha(0.94F)))
+		.color(ShowTheme.vertical(Color.decode("#1B2130").withAlpha(0.88F), ShowTheme.INK.withAlpha(0.92F)))
+		.hoveredColor(ShowTheme.vertical(Color.decode("#232B3D").withAlpha(0.92F), ShowTheme.INK.withAlpha(0.94F)))
 		.y(() -> y + 48D * (1D - ShowTheme.ease(this.elapsed(), delay, 0.7D)) - (this.selected == index ? 8D : 0D))
 		.effect(RoundedNodeEffect.create(24F))
-		.effect(BorderNodeEffect.create(Color.WHITE.copyAlpha(0.09F), 1.5F, BorderMode.IN))
-		.effect(ShadowNodeEffect.create(Color.BLACK.copyAlpha(0.5F), 36F, 0D, 16D))
-		.onHoverStart((_, _, _) -> this.selected = index)
+		.effect(BorderNodeEffect.create(Color.WHITE.withAlpha(0.09F), 1.5F, BorderMode.IN))
+		.effect(ShadowNodeEffect.create(Color.BLACK.withAlpha(0.5F), 36F, 0D, 16D))
+		.onHoverStart(_ -> this.selected = index)
 		.body(card -> {
-			CircleNode.create(70, 34, 160).color(entry.color().copyAlpha(0.22F)).effect(BlurNodeEffect.create(36F)).interactive(false).attach(card);
+			CircleNode.create(70, 34, 160).color(entry.color().withAlpha(0.22F)).effect(BlurNodeEffect.create(36F)).interactive(false).attach(card);
 			final Node render = entry.render().apply(1D).interactive(false);
 			if (render instanceof final EntityNode entity) {
 				entity.rotationYaw(() -> -35D + this.elapsed() * 20D + index * 15D);
@@ -132,7 +132,7 @@ public class ShowBestiary extends UI implements IShowFocus {
 			final double width = chip.getWidth(entry.kind()) + 24D;
 			RectNode
 			.create(276 - width, 236, width, 28)
-			.color(entry.color().copyAlpha(0.14F))
+			.color(entry.color().withAlpha(0.14F))
 			.effect(RoundedNodeEffect.create(14F))
 			.body(tag -> {
 				TextNode.create(width / 2D, 14).text(Text.create(entry.kind(), chip, Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(tag);
@@ -147,7 +147,7 @@ public class ShowBestiary extends UI implements IShowFocus {
 		.panel(1410, 96, 390, 892)
 		.x(() -> 1410D + 60D * (1D - ShowTheme.ease(this.elapsed(), 0.3D, 0.8D)))
 		.body(panel -> {
-			CircleNode.create(55, 70, 280).color(() -> this.entry().color().copyAlpha(0.24F)).effect(BlurNodeEffect.create(50F)).interactive(false).attach(panel);
+			CircleNode.create(55, 70, 280).color(() -> this.entry().color().withAlpha(0.24F)).effect(BlurNodeEffect.create(50F)).interactive(false).attach(panel);
 			for (int index = 0; index < ShowBestiary.ENTRIES.size(); index++) {
 				final int entry = index;
 				final Node render = ShowBestiary.ENTRIES.get(index).render().apply(1.3D).interactive(false);
@@ -167,7 +167,7 @@ public class ShowBestiary extends UI implements IShowFocus {
 			.create(36, 800, 318, 60)
 			.color(ShowTheme.horizontal(ShowTheme.GRASS, ShowTheme.EMERALD))
 			.effect(RoundedNodeEffect.create(18F))
-			.effect(ShadowNodeEffect.create(ShowTheme.EMERALD.copyAlpha(0.45F), 24F, 0D, 6D))
+			.effect(ShadowNodeEffect.create(ShowTheme.EMERALD.withAlpha(0.45F), 24F, 0D, 6D))
 			.body(button -> {
 				TextNode.create(159, 30).text(Text.create("Track", ShowTheme.font(FontWeight.EXTRA_BOLD, 20F, ShowTheme.INK), Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(button);
 			})

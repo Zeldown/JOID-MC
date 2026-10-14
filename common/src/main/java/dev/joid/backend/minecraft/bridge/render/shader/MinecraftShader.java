@@ -49,7 +49,7 @@ public final class MinecraftShader extends Shader {
 	}
 
 	@Override
-	public boolean isActive() {
+	protected boolean isProgramActive() {
 		if (this.active == null) {
 			this.active = ((MinecraftRenderBridge) super.getBridge()).getPipelineCache().isValid(this.identifier, this.layout, this.vertexFormat, super.getBlend());
 		}
@@ -75,12 +75,20 @@ public final class MinecraftShader extends Shader {
 		bridge.getSourceProvider().register(this.stencilIdentifier, ShaderType.FRAGMENT, translation.getStencilFragment());
 	}
 
+	@Override
+	protected void deleteProgram() {
+		final MinecraftRenderBridge bridge = (MinecraftRenderBridge) super.getBridge();
+		bridge.getPipelineCache().remove(this);
+		bridge.getSourceProvider().unregister(this.identifier);
+		bridge.getSourceProvider().unregister(this.stencilIdentifier);
+		this.active = null;
+	}
+
 	private static BindGroupLayout createLayout(final Collection<String> samplers) {
 		final BindGroupLayout.Builder layout = BindGroupLayout.builder().withUniform(MinecraftShaderTranslator.BLOCK, UniformType.UNIFORM_BUFFER);
 		for (final String sampler : samplers) {
 			layout.withSampler(sampler);
 		}
-		layout.withSampler(MinecraftShaderTranslator.STENCIL);
 		return layout.build();
 	}
 

@@ -38,6 +38,10 @@ dependencies {
 test {
     useJUnit()
     systemProperty('joid.data', layout.buildDirectory.dir('joid').get().asFile.absolutePath)
+    workingDir = layout.buildDirectory.dir('test-run').get().asFile
+    doFirst {
+        workingDir.mkdirs()
+    }
     testLogging {
         exceptionFormat = 'full'
         events('failed')

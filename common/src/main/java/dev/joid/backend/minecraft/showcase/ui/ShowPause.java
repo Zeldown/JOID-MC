@@ -57,20 +57,20 @@ public class ShowPause extends UI implements IShowFocus {
 			this.button(panel, 3, "menu.options", new ItemStack(Items.COMPARATOR), false, () -> Minecraft.getInstance().gui.setScreen(new OptionsScreen(Minecraft.getInstance().gui.screen(), Minecraft.getInstance().options, true)));
 			this.button(panel, 4, "menu.multiplayerOptions.button", new ItemStack(Items.ENDER_EYE), false, null);
 			this.button(panel, 5, "menu.returnToMenu", new ItemStack(Items.OAK_DOOR), false, null);
-			RectNode.create(48, 760, 424, 1).color(Color.WHITE.copyAlpha(0.08F)).attach(panel);
+			RectNode.create(48, 760, 424, 1).color(Color.WHITE.withAlpha(0.08F)).attach(panel);
 			TextNode.create(48, 784).text(Text.create("Press Esc to resume", ShowTheme.font(FontWeight.MEDIUM, 15F, ShowTheme.FAINT))).attach(panel);
 		})
 		.attach(this);
 
-		CircleNode.create(1230, 240, 520).color(ShowTheme.GRASS.copyAlpha(0.16F)).effect(BlurNodeEffect.create(90F)).interactive(false).attach(this);
+		CircleNode.create(1230, 240, 520).color(ShowTheme.GRASS.withAlpha(0.16F)).effect(BlurNodeEffect.create(90F)).interactive(false).attach(this);
 
 		EntityNode.create(1290, 230, 400, 720).entity(Minecraft.getInstance().player).rotationYaw(() -> 20D * Math.sin(this.elapsed() * 0.8D)).y(() -> 230D + 30D * (1D - ShowTheme.ease(this.elapsed(), 0.2D, 0.9D))).interactive(false).attach(this);
 
 		RectNode
 		.create(1365, 120, 250, 52)
-		.color(ShowTheme.INK.copyAlpha(0.72F))
+		.color(ShowTheme.INK.withAlpha(0.72F))
 		.effect(RoundedNodeEffect.create(26F))
-		.effect(BorderNodeEffect.create(Color.WHITE.copyAlpha(0.12F), 1F, BorderMode.IN))
+		.effect(BorderNodeEffect.create(Color.WHITE.withAlpha(0.12F), 1F, BorderMode.IN))
 		.body(tag -> {
 			CircleNode.create(22, 19, 14).color(ShowTheme.GRASS).effect(ShadowNodeEffect.create(ShowTheme.GRASS, 10F)).attach(tag);
 			TextNode.create(140, 26).text(Text.create(Minecraft.getInstance().player.getName().getString(), ShowTheme.font(FontWeight.BOLD, 20F, ShowTheme.TEXT), Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(tag);
@@ -91,13 +91,13 @@ public class ShowPause extends UI implements IShowFocus {
 		final double delay = 0.1D + index * 0.05D;
 		this.buttons[index] = RectNode
 		.create(48, 196 + index * 88, 424, 72)
-		.color(primary ? ShowTheme.horizontal(ShowTheme.GRASS, ShowTheme.EMERALD) : Color.WHITE.copyAlpha(0.06F))
-		.hoveredColor(primary ? ShowTheme.horizontal(ShowTheme.GRASS.copyAlpha(0.9F), ShowTheme.EMERALD.copyAlpha(0.9F)) : Color.WHITE.copyAlpha(0.13F))
+		.color(primary ? ShowTheme.horizontal(ShowTheme.GRASS, ShowTheme.EMERALD) : Color.WHITE.withAlpha(0.06F))
+		.hoveredColor(primary ? ShowTheme.horizontal(ShowTheme.GRASS.withAlpha(0.9F), ShowTheme.EMERALD.withAlpha(0.9F)) : Color.WHITE.withAlpha(0.13F))
 		.x(() -> 48D - 40D * (1D - ShowTheme.ease(this.elapsed(), delay, 0.6D)))
 		.cursor(Cursor.POINTER)
 		.effect(RoundedNodeEffect.create(20F))
-		.effect(primary ? ShadowNodeEffect.create(ShowTheme.EMERALD.copyAlpha(0.45F), 26F, 0D, 8D) : BorderNodeEffect.create(Color.WHITE.copyAlpha(0.07F), 1F, BorderMode.IN))
-		.onClick((_, _, _, _) -> {
+		.effect(primary ? ShadowNodeEffect.create(ShowTheme.EMERALD.withAlpha(0.45F), 26F, 0D, 8D) : BorderNodeEffect.create(Color.WHITE.withAlpha(0.07F), 1F, BorderMode.IN))
+		.onClick(_ -> {
 			if (action != null) {
 				action.run();
 			}

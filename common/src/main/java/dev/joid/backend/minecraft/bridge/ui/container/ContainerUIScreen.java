@@ -26,6 +26,7 @@ import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.StringUtil;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
@@ -144,7 +145,7 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 
 	@Override
 	public boolean charTyped(final CharacterEvent event) {
-		return this.bridge.charTyped(event.codepoint()) || super.charTyped(event);
+		return StringUtil.isAllowedChatCharacter(event.codepoint()) && this.bridge.charTyped(event.codepoint()) || super.charTyped(event);
 	}
 
 	public boolean isQuickCrafting() {
@@ -175,7 +176,7 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 	@Override
 	protected Slot getHoveredSlot(final double x, final double y) {
 		final SlotNode node = this.getSlotNode(x, y);
-		return node != null && node.getSlot() != null && node.getSlot().isActive() ? node.getSlot() : null;
+		return node != null && node.getSlot().isActive() ? node.getSlot() : null;
 	}
 
 	private UIDataMinecraft getMinecraftData() {

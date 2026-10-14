@@ -7,7 +7,7 @@ import dev.joid.lib.ui.core.data.overlay.render.UIDataOverlayRender;
 import dev.joid.lib.ui.node.impl.design.shape.RectNode;
 import lombok.Getter;
 
-@UIDataOverlay(active = true, render = @UIDataOverlayRender(always = true, screens = true))
+@UIDataOverlay(active = true, render = @UIDataOverlayRender(always = true, aboveScreens = true))
 public final class ShowcaseFrameUI extends UI {
 
 	@Getter
@@ -15,7 +15,7 @@ public final class ShowcaseFrameUI extends UI {
 
 	@Override
 	public void init() {
-		RectNode.create(0, 0, 1, 1).color(Color.TRANSPARENT).interactive(false).onDraw((_, _, _) -> ShowcaseFrameUI.frame = ShowcaseFrameUI.frame + 1).attach(this);
+		RectNode.create(0, 0, 1, 1).color(Color.TRANSPARENT).interactive(false).onDraw(_ -> ShowcaseFrameUI.frame = ShowcaseFrameUI.frame + 1).attach(this);
 	}
 
 }

@@ -221,8 +221,10 @@ public final class MinecraftRenderBridge extends RenderBridge {
 		pass.setPipeline(pipeline);
 		pass.setUniform(MinecraftShaderTranslator.BLOCK, uniforms);
 		for (final UniformSampler sampler : shader.getSamplerMap().values()) {
-			final SamplerBinding binding = super.resolveSampler(sampler);
-			pass.bindTexture(sampler.getName(), ((IGpuTexture) binding.getTexture()).getView(), MinecraftRenderBridge.getSampler(binding.getSampling()));
+			if (!sampler.getName().equals(MinecraftShaderTranslator.STENCIL)) {
+				final SamplerBinding binding = super.resolveSampler(sampler);
+				pass.bindTexture(sampler.getName(), ((IGpuTexture) binding.getTexture()).getView(), MinecraftRenderBridge.getSampler(binding.getSampling()));
+			}
 		}
 		pass.bindTexture(MinecraftShaderTranslator.STENCIL, stencil, MinecraftRenderBridge.getSampler(TextureSampling.of(TextureFilter.NEAREST, TextureWrap.CLAMP_TO_EDGE, false)));
 		pass.setVertexBuffer(0, vertices);

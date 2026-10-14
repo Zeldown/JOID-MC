@@ -97,7 +97,7 @@ public final class UIDemoOverlayLayer {
 
 	}
 
-	@UIDataOverlay(active = true, interaction = @UIDataOverlayInteraction(active = true), render = @UIDataOverlayRender(screens = true))
+	@UIDataOverlay(active = true, interaction = @UIDataOverlayInteraction(active = true), render = @UIDataOverlayRender(aboveScreens = true))
 	public static class Interactive extends UI {
 
 		private int clicks;
@@ -119,7 +119,7 @@ public final class UIDemoOverlayLayer {
 				.body(button -> {
 					TextNode.create(90, 40).text(Text.create(() -> "Clicks " + this.clicks, info, Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(button);
 				})
-				.onClick((_, _, _, _) -> this.clicks++)
+				.onClick(_ -> this.clicks++)
 				.attach(rect);
 				TextNode.create(160, 200).text(Text.create("Interactive", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
 			})

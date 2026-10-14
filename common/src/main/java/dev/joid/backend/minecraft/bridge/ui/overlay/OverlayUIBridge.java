@@ -94,8 +94,8 @@ public final class OverlayUIBridge extends UIBridge {
 	}
 
 	public void extract(final @NonNull GuiGraphicsExtractor graphics) {
-		if (!this.isScreenOpen() && !this.isOverlayHidden()) {
-			this.extract(graphics, ui -> OverlayUIBridge.getLayer(ui) == null);
+		if (!this.isOverlayHidden()) {
+			this.extract(graphics, ui -> OverlayUIBridge.getLayer(ui) == null && !this.isAboveScreen(ui));
 		}
 	}
 
@@ -114,14 +114,14 @@ public final class OverlayUIBridge extends UIBridge {
 
 	public void extractScreen(final @NonNull GuiGraphicsExtractor graphics) {
 		if (this.isScreenOpen()) {
-			this.extract(graphics, ui -> OverlayUIBridge.getLayer(ui) == null);
+			this.extract(graphics, ui -> OverlayUIBridge.getLayer(ui) == null && ui.getOverlay().render().aboveScreens());
 			this.window.requestCursor(graphics, this.window.getCursor());
 		}
 	}
 
 	public void extractHiddenHud(final @NonNull GuiGraphicsExtractor graphics) {
-		if (!this.isScreenOpen() && this.isOverlayHidden()) {
-			this.extract(graphics, _ -> true);
+		if (this.isOverlayHidden()) {
+			this.extract(graphics, ui -> !this.isAboveScreen(ui));
 		}
 	}
 
@@ -163,7 +163,11 @@ public final class OverlayUIBridge extends UIBridge {
 
 	private boolean isShown(final UI ui) {
 		final UIDataOverlayRenderObject render = ui.getOverlay().render();
-		return ui.getData().visible() && (render.always() || !this.isOverlayHidden()) && (OverlayUIBridge.getLayer(ui) != null || render.screens() || !this.isScreenOpen());
+		return ui.getData().visible() && (render.always() || !this.isOverlayHidden());
+	}
+
+	private boolean isAboveScreen(final UI ui) {
+		return this.isScreenOpen() && ui.getOverlay().render().aboveScreens();
 	}
 
 	private static boolean isLayer(final UI ui, final OverlayLayer layer) {

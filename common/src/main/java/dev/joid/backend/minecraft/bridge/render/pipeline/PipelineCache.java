@@ -51,6 +51,10 @@ public final class PipelineCache {
 		return this.isValid(pipeline) ? pipeline : null;
 	}
 
+	public void remove(final @NonNull MinecraftShader shader) {
+		this.pipelineMap.keySet().removeIf(key -> key.getShader() == shader);
+	}
+
 	public boolean isValid(final @NonNull Identifier identifier, final @NonNull BindGroupLayout layout, final @NonNull VertexFormat vertexFormat, final @NonNull BlendState blend) {
 		return this.isValid(RenderPipeline.builder()
 				.withLocation(identifier)

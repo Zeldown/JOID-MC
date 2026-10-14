@@ -36,6 +36,8 @@ public class EntityNode extends Node {
 		super(x, y, width, height);
 
 		this.scale = 1D;
+
+		super.<EntityNode>require("entity", "call entity(...), skin(...), type(...) or profile(...) before attaching it", node -> node.entity != null || node.skin != null || node.type != null || node.profile != null || node.getSourceMap().containsKey("source"));
 	}
 
 	public static @NonNull EntityNode create(final double x, final double y, final double width, final double height) {
@@ -68,7 +70,7 @@ public class EntityNode extends Node {
 	}
 
 	public final <T extends EntityNode> @NonNull T entity(final @NonNull Supplier<Entity> entity) {
-		return super.follow("source", entity, value -> this.source(value, null, null, null));
+		return super.follow("source", entity, (final EntityNode node, final Entity value) -> node.source(value, null, null, null));
 	}
 
 	public final <T extends EntityNode> @NonNull T skin(final @NonNull PlayerSkin skin) {
@@ -76,7 +78,7 @@ public class EntityNode extends Node {
 	}
 
 	public final <T extends EntityNode> @NonNull T skin(final @NonNull Supplier<@NonNull PlayerSkin> skin) {
-		return super.follow("source", skin, value -> this.source(null, value, null, null));
+		return super.follow("source", skin, (final EntityNode node, final PlayerSkin value) -> node.source(null, value, null, null));
 	}
 
 	public final <T extends EntityNode> @NonNull T type(final @NonNull EntityType<?> type) {
@@ -84,7 +86,7 @@ public class EntityNode extends Node {
 	}
 
 	public final <T extends EntityNode> @NonNull T type(final @NonNull Supplier<@NonNull EntityType<?>> type) {
-		return super.follow("source", type, value -> this.source(null, null, value, null));
+		return super.follow("source", type, (final EntityNode node, final EntityType<?> value) -> node.source(null, null, value, null));
 	}
 
 	public final <T extends EntityNode> @NonNull T profile(final @NonNull GameProfile profile) {
@@ -96,7 +98,7 @@ public class EntityNode extends Node {
 	}
 
 	public final <T extends EntityNode> @NonNull T profile(final @NonNull Supplier<@NonNull ResolvableProfile> profile) {
-		return super.follow("source", profile, value -> this.source(null, null, null, value));
+		return super.follow("source", profile, (final EntityNode node, final ResolvableProfile value) -> node.source(null, null, null, value));
 	}
 
 	public final <T extends EntityNode> @NonNull T scale(final double scale) {
@@ -104,7 +106,7 @@ public class EntityNode extends Node {
 	}
 
 	public final <T extends EntityNode> @NonNull T scale(final @NonNull Supplier<Double> scale) {
-		return super.follow("scale", scale, value -> this.scale = value);
+		return super.follow("scale", scale, (final EntityNode node, final Double value) -> node.scale = value);
 	}
 
 	public final <T extends EntityNode> @NonNull T rotationYaw(final double rotationYaw) {
@@ -112,7 +114,7 @@ public class EntityNode extends Node {
 	}
 
 	public final <T extends EntityNode> @NonNull T rotationYaw(final @NonNull Supplier<Double> rotationYaw) {
-		return super.follow("rotationYaw", rotationYaw, value -> this.rotationYaw = value);
+		return super.follow("rotationYaw", rotationYaw, (final EntityNode node, final Double value) -> node.rotationYaw = value);
 	}
 
 	public final <T extends EntityNode> @NonNull T rotationPitch(final double rotationPitch) {
@@ -120,7 +122,7 @@ public class EntityNode extends Node {
 	}
 
 	public final <T extends EntityNode> @NonNull T rotationPitch(final @NonNull Supplier<Double> rotationPitch) {
-		return super.follow("rotationPitch", rotationPitch, value -> this.rotationPitch = value);
+		return super.follow("rotationPitch", rotationPitch, (final EntityNode node, final Double value) -> node.rotationPitch = value);
 	}
 
 	public final <T extends EntityNode> @NonNull T followMouse(final boolean followMouse) {
@@ -128,7 +130,7 @@ public class EntityNode extends Node {
 	}
 
 	public final <T extends EntityNode> @NonNull T followMouse(final @NonNull Supplier<Boolean> followMouse) {
-		return super.follow("followMouse", followMouse, value -> this.followMouse = value);
+		return super.follow("followMouse", followMouse, (final EntityNode node, final Boolean value) -> node.followMouse = value);
 	}
 
 	private void source(final Entity entity, final PlayerSkin skin, final EntityType<?> type, final ResolvableProfile profile) {

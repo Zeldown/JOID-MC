@@ -29,10 +29,11 @@ public class ItemNode extends Node {
 	protected ItemNode(final double x, final double y, final double width, final double height) {
 		super(x, y, width, height);
 
-		this.stack    = ItemStack.EMPTY;
 		this.count    = true;
 		this.bar      = true;
 		this.cooldown = true;
+
+		super.<ItemNode>require("stack", "call stack(...) before attaching it", node -> node.stack != null);
 	}
 
 	public static @NonNull ItemNode create(final double x, final double y, final double width, final double height) {
@@ -63,7 +64,7 @@ public class ItemNode extends Node {
 	}
 
 	public final <T extends ItemNode> @NonNull T stack(final @NonNull Supplier<@NonNull ItemStack> stack) {
-		return super.follow("stack", stack, value -> this.stack = value);
+		return super.follow("stack", stack, (final ItemNode node, final ItemStack value) -> node.stack = value);
 	}
 
 	public final <T extends ItemNode> @NonNull T count(final boolean count) {
@@ -71,7 +72,7 @@ public class ItemNode extends Node {
 	}
 
 	public final <T extends ItemNode> @NonNull T count(final @NonNull Supplier<Boolean> count) {
-		return super.follow("count", count, value -> this.count = value);
+		return super.follow("count", count, (final ItemNode node, final Boolean value) -> node.count = value);
 	}
 
 	public final <T extends ItemNode> @NonNull T bar(final boolean bar) {
@@ -79,7 +80,7 @@ public class ItemNode extends Node {
 	}
 
 	public final <T extends ItemNode> @NonNull T bar(final @NonNull Supplier<Boolean> bar) {
-		return super.follow("bar", bar, value -> this.bar = value);
+		return super.follow("bar", bar, (final ItemNode node, final Boolean value) -> node.bar = value);
 	}
 
 	public final <T extends ItemNode> @NonNull T cooldown(final boolean cooldown) {
@@ -87,7 +88,7 @@ public class ItemNode extends Node {
 	}
 
 	public final <T extends ItemNode> @NonNull T cooldown(final @NonNull Supplier<Boolean> cooldown) {
-		return super.follow("cooldown", cooldown, value -> this.cooldown = value);
+		return super.follow("cooldown", cooldown, (final ItemNode node, final Boolean value) -> node.cooldown = value);
 	}
 
 	public final <T extends ItemNode> @NonNull T tooltip(final boolean tooltip) {
@@ -95,11 +96,11 @@ public class ItemNode extends Node {
 	}
 
 	public final <T extends ItemNode> @NonNull T tooltip(final @NonNull Supplier<Boolean> tooltip) {
-		return super.follow("tooltip", tooltip, value -> {
-			this.tooltip = value;
-			super.removeHover(ItemNode.TOOLTIP);
+		return super.follow("tooltip", tooltip, (final ItemNode node, final Boolean value) -> {
+			node.tooltip = value;
+			node.removeHover(ItemNode.TOOLTIP);
 			if (value) {
-				super.hover(ItemNode.TOOLTIP);
+				node.hover(ItemNode.TOOLTIP);
 			}
 		});
 	}
@@ -109,7 +110,7 @@ public class ItemNode extends Node {
 	}
 
 	public final <T extends ItemNode> @NonNull T glint(final @NonNull Supplier<Boolean> glint) {
-		return super.follow("glint", glint, value -> this.glint = value);
+		return super.follow("glint", glint, (final ItemNode node, final Boolean value) -> node.glint = value);
 	}
 
 	private void drawTooltip(final double mouseX, final double mouseY) {

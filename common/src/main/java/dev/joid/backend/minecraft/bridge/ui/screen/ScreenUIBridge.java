@@ -1,5 +1,6 @@
 package dev.joid.backend.minecraft.bridge.ui.screen;
 
+import dev.joid.backend.minecraft.bridge.render.GuiFrameCounter;
 import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
 import dev.joid.backend.minecraft.bridge.ui.TooltipQueue;
 import dev.joid.backend.minecraft.bridge.window.MinecraftWindowBridge;
@@ -67,6 +68,7 @@ public final class ScreenUIBridge extends StackUIBridge {
 	}
 
 	public void frame(final @NonNull GuiGraphicsExtractor graphics, final int mouseX, final int mouseY) {
+		GuiFrameCounter.inst().getFrame(graphics);
 		super.update();
 		this.compositor.composite(graphics, super::draw);
 		this.window.requestCursor(graphics, this.window.getCursor());

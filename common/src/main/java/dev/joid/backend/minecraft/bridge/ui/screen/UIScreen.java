@@ -11,6 +11,7 @@ import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.StringUtil;
 
 public class UIScreen extends Screen {
 
@@ -101,7 +102,7 @@ public class UIScreen extends Screen {
 
 	@Override
 	public boolean charTyped(final CharacterEvent event) {
-		return this.bridge.charTyped(event.codepoint());
+		return StringUtil.isAllowedChatCharacter(event.codepoint()) && this.bridge.charTyped(event.codepoint());
 	}
 
 	private boolean hasBackground() {

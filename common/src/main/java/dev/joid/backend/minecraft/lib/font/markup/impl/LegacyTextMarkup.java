@@ -83,7 +83,7 @@ public final class LegacyTextMarkup implements ITextMarkup {
 			rgb = rgb << 4 | value;
 		}
 
-		style.reset().color(new Color(0xFF000000 | rgb));
+		style.reset().color(Color.rgb(rgb));
 		return 14;
 	}
 

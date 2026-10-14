@@ -1,5 +1,6 @@
 package dev.joid.backend.minecraft.bridge.render;
 
+import dev.joid.lib.bridge.BridgeHandler;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -22,6 +23,7 @@ public final class GuiFrameCounter {
 		if (graphics != this.graphics) {
 			this.graphics = graphics;
 			this.frame++;
+			BridgeHandler.UI.fireFrame();
 		}
 		return this.frame;
 	}

@@ -1885,7 +1885,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 
 		@Override
 		public void init() {
-			RectNode.create(760, 244, 108, 108).color(Color.WHITE).onClick((_, _, _, _) -> this.clicks++).attach(this);
+			RectNode.create(760, 244, 108, 108).color(Color.WHITE).onClick(_ -> this.clicks++).attach(this);
 		}
 
 	}
@@ -1912,7 +1912,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		public void init() {
 			RectNode
 			.create(560, 340, 800, 400)
-			.color(new Color(0xFF202020))
+			.color(Color.rgb(0x202020))
 			.body(panel -> {
 				EntityNode.create(300, 100, 200, 200).type(EntityTypes.FOX).rotationYaw(this.yaw).attach(panel);
 			})
