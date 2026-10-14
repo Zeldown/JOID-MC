@@ -55,6 +55,7 @@ loom {
             if (name == 'clientGameTest') {
                 vmArg("-Djoid.snapshot.output=${layout.buildDirectory.dir('snapshots/renders').get().asFile.absolutePath}")
                 vmArg("-Djoid.snapshot.references=${rootProject.file('.snapshots/references').absolutePath}")
+                vmArg("-Djoid.cache=${layout.buildDirectory.dir('joid-cache').get().asFile.absolutePath}")
                 if (project.hasProperty('joid.graphicsBackend')) {
                     programArgs('--graphicsBackend', project.property('joid.graphicsBackend').toString())
                 }

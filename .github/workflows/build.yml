@@ -67,6 +67,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y xvfb libgl1-mesa-dri libglx-mesa0 mesa-utils
 
+      - uses: actions/cache@v4
+        with:
+          path: fabric/build/joid-cache
+          key: joid-cache-${{ hashFiles('libs/joid-core-*.jar') }}
+
       - name: Client game tests
         env:
           LIBGL_ALWAYS_SOFTWARE: '1'
@@ -111,6 +116,11 @@ jobs:
 
       - name: Report the Vulkan device
         run: vulkaninfo --summary | grep -E "deviceName|driverName|driverInfo" || true
+
+      - uses: actions/cache@v4
+        with:
+          path: fabric/build/joid-cache
+          key: joid-cache-${{ hashFiles('libs/joid-core-*.jar') }}
 
       - name: Client game tests
         env:
