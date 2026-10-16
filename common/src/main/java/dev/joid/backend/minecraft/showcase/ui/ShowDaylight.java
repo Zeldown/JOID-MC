@@ -6,7 +6,14 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
+import dev.joid.lib.bridge.render.state.BlendState;
+import dev.joid.lib.bridge.render.state.BlendState.Equation;
+import dev.joid.lib.bridge.render.state.BlendState.Factor;
+import dev.joid.lib.bridge.render.texture.ITexture;
+import dev.joid.lib.bridge.render.texture.TextureFilter;
+import dev.joid.lib.bridge.render.texture.TextureWrap;
 import dev.joid.lib.color.Color;
+import dev.joid.lib.draw.DrawUtils;
 import dev.joid.lib.draw.text.builder.Text;
 import dev.joid.lib.font.FontWeight;
 import dev.joid.lib.resource.Resource;
@@ -18,7 +25,6 @@ import dev.joid.lib.ui.node.effect.impl.BlurNodeEffect;
 import dev.joid.lib.ui.node.effect.impl.BorderNodeEffect;
 import dev.joid.lib.ui.node.effect.impl.RoundedNodeEffect;
 import dev.joid.lib.ui.node.effect.impl.ShadowNodeEffect;
-import dev.joid.lib.ui.node.impl.design.resource.ResourceNode;
 import dev.joid.lib.ui.node.impl.design.shape.CircleNode;
 import dev.joid.lib.ui.node.impl.design.shape.RectNode;
 import dev.joid.lib.ui.node.impl.design.text.TextNode;
@@ -33,6 +39,8 @@ import net.minecraft.world.clock.ClockNetworkState;
 public class ShowDaylight extends UI implements IShowFocus {
 
 	private static final String[] PHASES = {"Full moon", "Waning gibbous", "Third quarter", "Waning crescent", "New moon", "Waxing crescent", "First quarter", "Waxing gibbous"};
+
+	private static final BlendState ADDITIVE = BlendState.create(Equation.ADD, Factor.SRC_ALPHA, Factor.ONE);
 
 	private static final Resource       SUN   = Resource.of("minecraft:textures/environment/celestial/sun.png");
 	private static final List<Resource> MOONS = Stream.of("full_moon", "waning_gibbous", "third_quarter", "waning_crescent", "new_moon", "waxing_crescent", "first_quarter", "waxing_gibbous").map(name -> Resource.of("minecraft:textures/environment/celestial/moon/" + name + ".png")).toList();
@@ -106,8 +114,10 @@ public class ShowDaylight extends UI implements IShowFocus {
 			CircleNode.create(70, 70, 140).color(() -> this.sky(0D).withAlpha(0.6F)).effect(BlurNodeEffect.create(30F)).interactive(false).attach(dial);
 			RectNode.create(0, 139, 280, 2).color(Color.WHITE.withAlpha(0.25F)).attach(dial);
 			RectNode.create(0, 141, 280, 139).color(Color.BLACK.withAlpha(0.25F)).attach(dial);
-			ResourceNode.create(0, 0, 48, 48).resource(ShowDaylight.SUN).x(() -> this.orbitX(0D)).y(() -> this.orbitY(0D)).interactive(false).attach(dial);
-			ResourceNode.create(0, 0, 48, 48).resource(() -> ShowDaylight.MOONS.get(this.day() % 8)).x(() -> this.orbitX(Math.PI)).y(() -> this.orbitY(Math.PI)).interactive(false).attach(dial);
+			RectNode.create(0, 0, 280, 280).color(Color.TRANSPARENT).interactive(false).layer((_, _) -> {
+				ShowDaylight.celestial(ShowDaylight.SUN, this.orbitX(0D), this.orbitY(0D));
+				ShowDaylight.celestial(ShowDaylight.MOONS.get(this.day() % 8), this.orbitX(Math.PI), this.orbitY(Math.PI));
+			}).attach(dial);
 		})
 		.attach(panel);
 	}
@@ -148,6 +158,16 @@ public class ShowDaylight extends UI implements IShowFocus {
 
 	private double elapsed() {
 		return ShowTheme.now() - this.start;
+	}
+
+	private static void celestial(final Resource resource, final double x, final double y) {
+		resource.request(48, 48);
+		resource.bind(TextureWrap.CLAMP_TO_EDGE, () -> {
+			final ITexture texture = resource.getTexture();
+			if (texture != null) {
+				DrawUtils.RESOURCE.drawTexture(x, y, 48D, 48D, texture, 0D, 0D, 1D, 1D, TextureFilter.NEAREST, ShowDaylight.ADDITIVE);
+			}
+		});
 	}
 
 	private static void world(final long ticks) {
