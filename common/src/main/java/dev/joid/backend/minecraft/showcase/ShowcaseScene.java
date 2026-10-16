@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Locale;
 
 import dev.joid.backend.minecraft.showcase.ui.IShowFocus;
+import dev.joid.backend.minecraft.showcase.ui.ShowAnvil;
 import dev.joid.backend.minecraft.showcase.ui.ShowBestiary;
 import dev.joid.backend.minecraft.showcase.ui.ShowChest;
 import dev.joid.backend.minecraft.showcase.ui.ShowFonts;
@@ -32,7 +33,9 @@ import net.minecraft.tags.StructureTags;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AnvilMenu;
 import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -48,6 +51,7 @@ public enum ShowcaseScene {
 	HUD(ShowcaseScene::hud),
 	CHEST(ShowcaseScene::chest),
 	PAUSE(ShowcaseScene::pause),
+	ANVIL(ShowcaseScene::anvil),
 	FONTS(ShowcaseScene::fonts),
 	DESIGN(ShowcaseScene::design),
 	LOADER(ShowcaseScene::loader),
@@ -244,6 +248,50 @@ public enum ShowcaseScene {
 		ShowcaseDirector.end();
 		ShowcaseDirector.runOnClient(() -> JOID.close(ui));
 		ShowcaseDirector.frames(20);
+	}
+
+	private static void anvil() {
+		ShowcaseDirector.frames(3);
+		ShowcaseDirector.begin("anvil");
+		ShowcaseDirector.frames(5);
+		ShowcaseDirector.runOnServer(player -> {
+			final ItemStack sword = player.getInventory().removeItemNoUpdate(0);
+			player.openMenu(new SimpleMenuProvider((containerId, inventory, _) -> {
+				final AnvilMenu menu = new AnvilMenu(containerId, inventory, ContainerLevelAccess.NULL);
+				menu.getSlot(AnvilMenu.INPUT_SLOT).set(sword);
+				return menu;
+			}, Component.translatable("container.repair")));
+		});
+		ShowcaseDirector.waitFor("the showcase anvil", () -> JOID.isOpen(ShowAnvil.class), 60);
+		final ShowAnvil ui = ShowcaseDirector.computeOnClient(() -> JOID.getUi(ShowAnvil.class));
+		ShowcaseDirector.frames(25);
+		ShowcaseDirector.move(1700D, 900D);
+		final double[] field = ShowcaseDirector.computeOnClient(() -> ShowcaseDirector.bounds(ui.getFocus()));
+		ShowcaseDirector.glide(field[0] + field[2] * 84D / 780D, field[1] + field[3] / 2D, 20);
+		ShowcaseDirector.frames(10);
+		ShowcaseDirector.click();
+		ShowcaseDirector.frames(2);
+		ShowcaseDirector.click();
+		ShowcaseDirector.frames(12);
+		ShowcaseDirector.type("Frostbite", 3);
+		ShowcaseDirector.frames(15);
+		ShowcaseDirector.capture("anvil");
+		ShowcaseDirector.glide(ShowcaseDirector.computeOnClient(() -> ui.getSlotNode(AnvilMenu.RESULT_SLOT)), 20);
+		ShowcaseDirector.frames(20);
+		ShowcaseDirector.click();
+		ShowcaseDirector.frames(5);
+		ShowcaseDirector.glide(ShowcaseDirector.computeOnClient(() -> ui.getSlotNode(30)), 22);
+		ShowcaseDirector.frames(4);
+		ShowcaseDirector.click();
+		ShowcaseDirector.frames(30);
+		ShowcaseDirector.end();
+		ShowcaseDirector.hidePointer();
+		ShowcaseDirector.runOnClient(() -> Minecraft.getInstance().player.closeContainer());
+		ShowcaseDirector.frames(5);
+		ShowcaseDirector.runOnServer(player -> player.getInventory().setItem(0, ShowcaseScene.enchant(player.level(), new ItemStack(Items.DIAMOND_SWORD), Enchantments.SHARPNESS, 5)));
+		ShowcaseDirector.command("xp set @a 27 levels");
+		ShowcaseDirector.command("xp set @a 62 points");
+		ShowcaseDirector.frames(5);
 	}
 
 	private static void pause() {

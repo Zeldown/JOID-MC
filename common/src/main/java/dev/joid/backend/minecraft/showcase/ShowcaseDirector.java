@@ -18,6 +18,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.glfw.GLFWCharCallback;
 import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.glfw.GLFWMouseButtonCallback;
@@ -165,6 +166,18 @@ public final class ShowcaseDirector {
 	public static void key(final int key) {
 		ShowcaseDirector.keyEvent(key, GLFW.GLFW_PRESS);
 		ShowcaseDirector.keyEvent(key, GLFW.GLFW_RELEASE);
+	}
+
+	public static void type(final String text, final int count) {
+		for (final char character : text.toCharArray()) {
+			ShowcaseDirector.runOnClient(() -> {
+				final long window = Minecraft.getInstance().getWindow().handle();
+				final GLFWCharCallback callback = GLFW.glfwSetCharCallback(window, null);
+				GLFW.glfwSetCharCallback(window, callback);
+				callback.invoke(window, character);
+			});
+			ShowcaseDirector.frames(count);
+		}
 	}
 
 	public static void command(final String command) {
