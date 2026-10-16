@@ -36,6 +36,10 @@ public class ShowFonts extends UI {
 	public void init() {
 		this.start = ShowTheme.now();
 
+		ShowTheme.panel(120, 120, 720, 840).attach(this);
+
+		ShowTheme.panel(900, 120, 900, 840).attach(this);
+
 		ContainerNode
 		.create(0, 0, 1920, 1080)
 		.effect(TransformNodeEffect.create(Transformation.create().translate(Vector.create(() -> this.zoom() * (780D - ShowFonts.PIVOT_X), () -> this.zoom() * (540D - ShowFonts.PIVOT_Y))).scale(Scale.create(() -> 1D + 5D * this.zoom(), () -> 1D + 5D * this.zoom(), () -> 1D), Vector.create(ShowFonts.PIVOT_X, ShowFonts.PIVOT_Y))).scope(NodeEffectScope.CHILDREN))
@@ -56,8 +60,8 @@ public class ShowFonts extends UI {
 	}
 
 	private void sizes(final Node container) {
-		ShowTheme
-		.panel(120, 120, 720, 840)
+		ContainerNode
+		.create(120, 120, 720, 840)
 		.body(panel -> {
 			TextNode.create(48, 52).text(Text.create("MINECRAFT FONT", ShowTheme.label(14F, ShowTheme.GRASS))).attach(panel);
 			TextNode.create(46, 76).text(Text.create("Sharp at any size", ShowTheme.font(FontWeight.EXTRA_BOLD, 40F, ShowTheme.TEXT))).attach(panel);
@@ -78,8 +82,8 @@ public class ShowFonts extends UI {
 		final TextInfo info = TextInfo.create(MinecraftFont.DEFAULT, 24F, ShowTheme.TEXT).shadow(3F, 3F);
 		final Component chat = Component.literal("[").withStyle(ChatFormatting.DARK_GRAY).append(Component.literal("Server").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD)).append(Component.literal("] ").withStyle(ChatFormatting.DARK_GRAY)).append(Component.literal("Welcome back, ").withStyle(ChatFormatting.WHITE)).append(Component.literal("Steve").withStyle(ChatFormatting.AQUA)).append(Component.literal("!").withStyle(ChatFormatting.WHITE));
 
-		ShowTheme
-		.panel(900, 120, 900, 840)
+		ContainerNode
+		.create(900, 120, 900, 840)
 		.body(panel -> {
 			TextNode.create(48, 52).text(Text.create("CHAT TEXT", ShowTheme.label(14F, ShowTheme.FAINT))).attach(panel);
 			TextNode.create(48, 82).text(Text.create(chat, info.withEffects(new ShowRiseTextEffect(this.start + 0.3D, 0.015D)))).attach(panel);
