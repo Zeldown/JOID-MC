@@ -11,7 +11,6 @@ import dev.joid.backend.minecraft.showcase.ui.ShowChest;
 import dev.joid.backend.minecraft.showcase.ui.ShowDaylight;
 import dev.joid.backend.minecraft.showcase.ui.ShowFonts;
 import dev.joid.backend.minecraft.showcase.ui.ShowHud;
-import dev.joid.backend.minecraft.showcase.ui.ShowPause;
 import dev.joid.backend.minecraft.showcase.ui.ShowQuests;
 import dev.joid.backend.minecraft.showcase.ui.ShowServers;
 import dev.joid.backend.minecraft.showcase.ui.ShowVideo;
@@ -53,7 +52,6 @@ public enum ShowcaseScene {
 
 	HUD(ShowcaseScene::hud),
 	CHEST(ShowcaseScene::chest),
-	PAUSE(ShowcaseScene::pause),
 	ANVIL(ShowcaseScene::anvil),
 	FONTS(ShowcaseScene::fonts),
 	VIDEO(ShowcaseScene::video),
@@ -375,14 +373,6 @@ public enum ShowcaseScene {
 		ShowcaseDirector.hidePointer();
 		ShowcaseDirector.runOnClient(() -> JOID.close(ui));
 		ShowcaseDirector.frames(20);
-	}
-
-	private static void pause() {
-		final ShowPause ui = new ShowPause();
-		ShowcaseScene.open(ui, "pause", () -> {
-			ShowcaseDirector.glide(ui.getButton(3), 15);
-			ShowcaseDirector.frames(20);
-		});
 	}
 
 	private static void design() {
