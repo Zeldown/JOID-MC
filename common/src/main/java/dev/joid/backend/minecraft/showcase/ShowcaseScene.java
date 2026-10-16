@@ -14,6 +14,7 @@ import dev.joid.backend.minecraft.showcase.ui.ShowHud;
 import dev.joid.backend.minecraft.showcase.ui.ShowPause;
 import dev.joid.backend.minecraft.showcase.ui.ShowQuests;
 import dev.joid.backend.minecraft.showcase.ui.ShowServers;
+import dev.joid.backend.minecraft.showcase.ui.ShowVideo;
 import dev.joid.internal.JOID;
 import dev.joid.lib.ui.core.UI;
 import dev.joid.lib.ui.node.Node;
@@ -55,6 +56,7 @@ public enum ShowcaseScene {
 	PAUSE(ShowcaseScene::pause),
 	ANVIL(ShowcaseScene::anvil),
 	FONTS(ShowcaseScene::fonts),
+	VIDEO(ShowcaseScene::video),
 	DESIGN(ShowcaseScene::design),
 	LOADER(ShowcaseScene::loader),
 	EXPLORE(ShowcaseScene::explore),
@@ -347,6 +349,31 @@ public enum ShowcaseScene {
 		ShowcaseDirector.runOnClient(() -> JOID.close(ui));
 		ShowcaseDirector.command("time set 4000");
 		ShowcaseScene.hideHud(false);
+		ShowcaseDirector.frames(20);
+	}
+
+	private static void video() {
+		final ShowVideo ui = new ShowVideo();
+		ShowcaseDirector.frames(3);
+		ShowcaseDirector.begin("video");
+		ShowcaseDirector.frames(5);
+		ShowcaseDirector.runOnClient(() -> JOID.open(ui));
+		ShowcaseDirector.waitFor("the showcase video", () -> ui.getPlayer().getDuration() > 0D, 300);
+		ShowcaseDirector.runOnClient(() -> ui.getPlayer().seek(40D));
+		ShowcaseDirector.sleep(3000);
+		ShowcaseDirector.frames(35);
+		ShowcaseDirector.move(1700D, 900D);
+		ShowcaseDirector.glide(ShowcaseDirector.computeOnClient(ui::getFocus), 20);
+		ShowcaseDirector.frames(20);
+		ShowcaseDirector.capture("video");
+		ShowcaseDirector.frames(20);
+		ShowcaseDirector.click();
+		ShowcaseDirector.frames(30);
+		ShowcaseDirector.click();
+		ShowcaseDirector.frames(45);
+		ShowcaseDirector.end();
+		ShowcaseDirector.hidePointer();
+		ShowcaseDirector.runOnClient(() -> JOID.close(ui));
 		ShowcaseDirector.frames(20);
 	}
 
