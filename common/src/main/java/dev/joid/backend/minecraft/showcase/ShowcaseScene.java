@@ -8,6 +8,7 @@ import dev.joid.backend.minecraft.showcase.ui.IShowFocus;
 import dev.joid.backend.minecraft.showcase.ui.ShowAnvil;
 import dev.joid.backend.minecraft.showcase.ui.ShowBestiary;
 import dev.joid.backend.minecraft.showcase.ui.ShowChest;
+import dev.joid.backend.minecraft.showcase.ui.ShowDaylight;
 import dev.joid.backend.minecraft.showcase.ui.ShowFonts;
 import dev.joid.backend.minecraft.showcase.ui.ShowHud;
 import dev.joid.backend.minecraft.showcase.ui.ShowPause;
@@ -58,7 +59,8 @@ public enum ShowcaseScene {
 	LOADER(ShowcaseScene::loader),
 	EXPLORE(ShowcaseScene::explore),
 	SERVERS(ShowcaseScene::servers),
-	BESTIARY(ShowcaseScene::bestiary);
+	BESTIARY(ShowcaseScene::bestiary),
+	DAYLIGHT(ShowcaseScene::daylight);
 
 	public static final String SEED = "1700";
 
@@ -317,6 +319,35 @@ public enum ShowcaseScene {
 			}
 			ShowcaseDirector.frames(15);
 		});
+	}
+
+	private static void daylight() {
+		final ShowDaylight ui = new ShowDaylight();
+		ShowcaseScene.hideHud(true);
+		ShowcaseDirector.frames(3);
+		ShowcaseDirector.begin("daylight");
+		ShowcaseDirector.frames(5);
+		ShowcaseDirector.runOnClient(() -> JOID.open(ui));
+		ShowcaseDirector.frames(30);
+		ShowcaseDirector.animate(66, progress -> ui.getTime().set(Math.round((4000D + 10500D * progress) / 50D) * 50D));
+		ShowcaseDirector.frames(10);
+		ShowcaseDirector.capture("daylight");
+		final double[] slider = ShowcaseDirector.computeOnClient(() -> ShowcaseDirector.bounds(ui.getFocus()));
+		ShowcaseDirector.move(1700D, 900D);
+		ShowcaseDirector.glide(slider[0] + slider[2] * (18D + 14500D / 48000D * 468D) / 504D, slider[1] + slider[3] / 2D, 22);
+		ShowcaseDirector.frames(6);
+		ShowcaseDirector.press();
+		ShowcaseDirector.frames(3);
+		ShowcaseDirector.glide(slider[0] + slider[2] * (18D + 30000D / 48000D * 468D) / 504D, slider[1] + slider[3] / 2D, 50);
+		ShowcaseDirector.frames(6);
+		ShowcaseDirector.release();
+		ShowcaseDirector.frames(30);
+		ShowcaseDirector.end();
+		ShowcaseDirector.hidePointer();
+		ShowcaseDirector.runOnClient(() -> JOID.close(ui));
+		ShowcaseDirector.command("time set 4000");
+		ShowcaseScene.hideHud(false);
+		ShowcaseDirector.frames(20);
 	}
 
 	private static void pause() {
