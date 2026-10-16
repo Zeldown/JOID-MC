@@ -58,12 +58,28 @@ Real renders inside the game window, styled for this showcase: JOID ships with n
     <td align="center"><sub><b>Containers.</b> Real slots, synced with the server.</sub></td>
   </tr>
   <tr>
-    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.2/docs/images/showcase-bestiary.webp" alt="A bestiary of cards with mobs, blocks and items turning in 3D"></td>
-    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.2/docs/images/showcase-pause.webp" alt="A redesigned pause menu over the blurred world, with the player in 3D"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.2/docs/images/showcase-bestiary.webp" alt="Cards of mobs, blocks and items turning in 3D, with a detail panel"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.2/docs/images/showcase-fonts.webp" alt="The Minecraft font from 8 to 72 px, chat colors and formats, the enchanting table alphabet decoded, then a 6x zoom that stays pixel-sharp"></td>
   </tr>
   <tr>
-    <td align="center"><sub><b>Bestiary.</b> Mobs, blocks and items in 3D.</sub></td>
-    <td align="center"><sub><b>Menus &amp; screens.</b> Redesign any vanilla menu, or build your own.</sub></td>
+    <td align="center"><sub><b>Game objects.</b> Entities, blocks and items, rendered in 3D.</sub></td>
+    <td align="center"><sub><b>Fonts.</b> The Minecraft font, sharp at any size, with § colors.</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.2/docs/images/showcase-anvil.webp" alt="A redesigned anvil: a word of the sword name is selected with a double click and retyped, the preview and the cost follow, then the renamed sword is taken"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.2/docs/images/showcase-servers.webp" alt="A server list with colored messages of the day: a server is dragged to the top, then the list scrolls"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub><b>Forms.</b> Type, check and preview, in a real anvil.</sub></td>
+    <td align="center"><sub><b>Lists.</b> Drag to reorder, scroll smoothly.</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.2/docs/images/showcase-daylight.webp" alt="A daylight panel over the live world: the sun dial, the clock, the sky, the moon phase and the world follow one time value, first as the game advances it, then as the slider is dragged"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.2/docs/images/showcase-video.webp" alt="A video with sound inside the game window, paused and resumed with its own controls"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub><b>Reactive.</b> Bind once, never refresh.</sub></td>
+    <td align="center"><sub><b>Video.</b> Play any video with sound, right in the game.</sub></td>
   </tr>
 </table>
 
