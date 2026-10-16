@@ -22,6 +22,7 @@ import org.lwjgl.glfw.GLFWCharCallback;
 import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.glfw.GLFWMouseButtonCallback;
+import org.lwjgl.glfw.GLFWScrollCallback;
 import org.lwjgl.glfw.GLFWWindowFocusCallback;
 
 import dev.joid.internal.JOID;
@@ -178,6 +179,15 @@ public final class ShowcaseDirector {
 			});
 			ShowcaseDirector.frames(count);
 		}
+	}
+
+	public static void scroll(final double notches) {
+		ShowcaseDirector.runOnClient(() -> {
+			final long window = Minecraft.getInstance().getWindow().handle();
+			final GLFWScrollCallback callback = GLFW.glfwSetScrollCallback(window, null);
+			GLFW.glfwSetScrollCallback(window, callback);
+			callback.invoke(window, 0D, notches);
+		});
 	}
 
 	public static void command(final String command) {

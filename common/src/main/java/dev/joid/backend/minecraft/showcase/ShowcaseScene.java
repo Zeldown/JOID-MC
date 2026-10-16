@@ -12,6 +12,7 @@ import dev.joid.backend.minecraft.showcase.ui.ShowFonts;
 import dev.joid.backend.minecraft.showcase.ui.ShowHud;
 import dev.joid.backend.minecraft.showcase.ui.ShowPause;
 import dev.joid.backend.minecraft.showcase.ui.ShowQuests;
+import dev.joid.backend.minecraft.showcase.ui.ShowServers;
 import dev.joid.internal.JOID;
 import dev.joid.lib.ui.core.UI;
 import dev.joid.lib.ui.node.Node;
@@ -56,6 +57,7 @@ public enum ShowcaseScene {
 	DESIGN(ShowcaseScene::design),
 	LOADER(ShowcaseScene::loader),
 	EXPLORE(ShowcaseScene::explore),
+	SERVERS(ShowcaseScene::servers),
 	BESTIARY(ShowcaseScene::bestiary);
 
 	public static final String SEED = "1700";
@@ -292,6 +294,29 @@ public enum ShowcaseScene {
 		ShowcaseDirector.command("xp set @a 27 levels");
 		ShowcaseDirector.command("xp set @a 62 points");
 		ShowcaseDirector.frames(5);
+	}
+
+	private static void servers() {
+		final ShowServers ui = new ShowServers();
+		ShowcaseScene.open(ui, "servers", () -> {
+			final double[] top = ShowcaseDirector.computeOnClient(() -> ShowcaseDirector.bounds(ui.getRow(0)));
+			ShowcaseDirector.press();
+			ShowcaseDirector.frames(4);
+			ShowcaseDirector.glide(top[0] + top[2] / 2D, top[1] + top[3] / 2D, 30);
+			ShowcaseDirector.frames(6);
+			ShowcaseDirector.release();
+			ShowcaseDirector.frames(15);
+			for (int notch = 0; notch < 6; notch++) {
+				ShowcaseDirector.scroll(-1D);
+				ShowcaseDirector.frames(3);
+			}
+			ShowcaseDirector.frames(10);
+			for (int notch = 0; notch < 6; notch++) {
+				ShowcaseDirector.scroll(1D);
+				ShowcaseDirector.frames(3);
+			}
+			ShowcaseDirector.frames(15);
+		});
 	}
 
 	private static void pause() {
