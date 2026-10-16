@@ -7,6 +7,7 @@ import java.util.Locale;
 import dev.joid.backend.minecraft.showcase.ui.IShowFocus;
 import dev.joid.backend.minecraft.showcase.ui.ShowBestiary;
 import dev.joid.backend.minecraft.showcase.ui.ShowChest;
+import dev.joid.backend.minecraft.showcase.ui.ShowFonts;
 import dev.joid.backend.minecraft.showcase.ui.ShowHud;
 import dev.joid.backend.minecraft.showcase.ui.ShowPause;
 import dev.joid.backend.minecraft.showcase.ui.ShowQuests;
@@ -47,6 +48,7 @@ public enum ShowcaseScene {
 	HUD(ShowcaseScene::hud),
 	CHEST(ShowcaseScene::chest),
 	PAUSE(ShowcaseScene::pause),
+	FONTS(ShowcaseScene::fonts),
 	DESIGN(ShowcaseScene::design),
 	LOADER(ShowcaseScene::loader),
 	EXPLORE(ShowcaseScene::explore),
@@ -228,6 +230,20 @@ public enum ShowcaseScene {
 			ShowcaseDirector.glide(ui.getCard(6), 15);
 			ShowcaseDirector.frames(25);
 		});
+	}
+
+	private static void fonts() {
+		final ShowFonts ui = new ShowFonts();
+		ShowcaseDirector.frames(3);
+		ShowcaseDirector.begin("fonts");
+		ShowcaseDirector.frames(5);
+		ShowcaseDirector.runOnClient(() -> JOID.open(ui));
+		ShowcaseDirector.frames(70);
+		ShowcaseDirector.capture("fonts");
+		ShowcaseDirector.frames(150);
+		ShowcaseDirector.end();
+		ShowcaseDirector.runOnClient(() -> JOID.close(ui));
+		ShowcaseDirector.frames(20);
 	}
 
 	private static void pause() {
