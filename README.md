@@ -75,11 +75,11 @@ Real renders inside the game window, styled for this showcase: JOID ships with n
   </tr>
   <tr>
     <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.2/docs/images/showcase-daylight.webp" alt="A daylight panel over the live world: the sun dial, the clock, the sky, the moon phase and the world follow one time value, first as the game advances it, then as the slider is dragged"></td>
-    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.2/docs/images/showcase-video.webp" alt="A video with sound inside the game window, paused and resumed with its own controls"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.2/docs/images/showcase-video.webp" alt="A video with sound inside the game window, paused and resumed with its own controls, then previewed frame by frame while the pointer hovers the timeline"></td>
   </tr>
   <tr>
     <td align="center"><sub><b>Reactive.</b> Bind once, never refresh.</sub></td>
-    <td align="center"><sub><b>Video.</b> Play any video with sound, right in the game.</sub></td>
+    <td align="center"><sub><b>Video.</b> Play any video, right in the game.</sub></td>
   </tr>
 </table>
 
@@ -471,7 +471,7 @@ RectNode.create(100, 520, 64, 64).color(Color.decode("#8B8B8B")).hover(() -> "§
 The Minecraft fonts are JOID fonts: use them in any `TextInfo`, and mix them with your own fonts.
 
 ```java
-final TextInfo info = TextInfo.create(MinecraftFont.DEFAULT, MinecraftFont.SIZE * 3, Color.WHITE).shadowTint(0.25F).shadow(3F, 3F);
+final TextInfo info = TextInfo.create(MinecraftFont.DEFAULT, MinecraftFont.SIZE * 3).color(Color.WHITE).shadowTint(0.25F).shadow(3F, 3F);
 
 TextNode.create(100, 100).text(Text.create("§6Gold §lbold §kmagic", info)).attach(this);
 
