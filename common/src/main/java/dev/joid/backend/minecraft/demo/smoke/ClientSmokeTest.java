@@ -39,6 +39,8 @@ import dev.joid.backend.minecraft.demo.ui.UIDemoMinecraftChoice;
 import dev.joid.backend.minecraft.demo.ui.UIDemoOverlayLayer;
 import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
 import dev.joid.demo.ui.DemoEntry;
+import dev.joid.demo.ui.UIDemoChoice;
+import dev.joid.demo.ui.simple.UIDemoSimple;
 import dev.joid.internal.JOID;
 import dev.joid.internal.JOIDEnv;
 import dev.joid.lib.bridge.BridgeHandler;
@@ -95,6 +97,7 @@ public final class ClientSmokeTest {
 			ClientSmokeTest.verifyBridges(failures);
 			ClientSmokeTest.verifyKeyBind(failures);
 			ClientSmokeTest.verifyDebugKey(failures);
+			ClientSmokeTest.verifyDemoMenu(failures);
 			ClientSmokeTest.verifyOverlays(failures);
 			ClientSmokeTest.verifyScreenInput(failures);
 			ClientSmokeTest.verifyReload(failures);
@@ -234,6 +237,18 @@ public final class ClientSmokeTest {
 		ClientSmokeTest.press(GLFW.GLFW_KEY_J);
 		ClientSmokeTest.waitFor("UIDemoMinecraftChoice opened again by the key J", () -> Minecraft.getInstance().gui.screen() instanceof UIScreen && JOID.isOpen(UIDemoMinecraftChoice.class), 30);
 		ClientSmokeTest.sleep(2000);
+	}
+
+	private static void verifyDemoMenu(final List<String> failures) {
+		ClientSmokeTest.click(ClientSmokeTest.entry("UIDemoSimple"));
+		ClientSmokeTest.waitFor("UIDemoSimple opened by a click on UIDemoMinecraftChoice", () -> JOID.isOpen(UIDemoSimple.class), 30);
+		ClientSmokeTest.sleep(2000);
+		ClientSmokeTest.press(GLFW.GLFW_KEY_ESCAPE);
+		ClientSmokeTest.waitFor("UIDemoMinecraftChoice opened again by Escape on UIDemoSimple", () -> !JOID.isOpen(UIDemoSimple.class) && JOID.isOpen(UIDemoMinecraftChoice.class), 30);
+		ClientSmokeTest.sleep(2000);
+		if (ClientSmokeTest.computeOnClient(() -> JOID.isOpen(UIDemoChoice.class))) {
+			failures.add("Escape on UIDemoSimple opens UIDemoChoice instead of UIDemoMinecraftChoice");
+		}
 	}
 
 	private static void verifyOverlays(final List<String> failures) {

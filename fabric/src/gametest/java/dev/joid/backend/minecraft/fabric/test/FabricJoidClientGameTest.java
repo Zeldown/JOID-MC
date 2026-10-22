@@ -55,6 +55,7 @@ import dev.joid.backend.minecraft.lib.ui.node.impl.design.item.ItemNode;
 import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
 import dev.joid.backend.minecraft.showcase.ShowcaseClock;
 import dev.joid.demo.ui.DemoEntry;
+import dev.joid.demo.ui.UIDemo;
 import dev.joid.demo.ui.UIDemoChoice;
 import dev.joid.demo.ui.cursor.UIDemoCursor;
 import dev.joid.demo.ui.font.UIDemoFont;
@@ -303,8 +304,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 
 	private static void verifyDemos(final ClientGameTestContext context) {
 		final List<String> failures = new ArrayList<>();
-		final List<DemoEntry> entries = new ArrayList<>(FabricJoidClientGameTest.entries(UIDemoChoice.class).stream().filter(entry -> !entry.getLabel().endsWith("Store")).toList());
-		entries.addAll(FabricJoidClientGameTest.entries(UIDemoMinecraftChoice.class));
+		final List<DemoEntry> entries = FabricJoidClientGameTest.entries(UIDemoMinecraftChoice.class).stream().filter(entry -> !entry.getLabel().endsWith("Store")).toList();
 		final PrintStream err = System.err;
 		for (final DemoEntry entry : entries) {
 			context.runOnClient(_ -> JOID.open(new UIDemoMinecraftChoice()));
@@ -330,15 +330,22 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 
 			if (entry.getState() != null) {
 				context.runOnClient(_ -> entry.getAction().run());
+			} else if (UIDemo.class.isAssignableFrom(FabricJoidClientGameTest.uiClass(entry))) {
+				for (int attempt = 0; attempt < 3 && context.computeOnClient(_ -> FabricJoidClientGameTest.isShown(entry)); attempt++) {
+					context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
+					for (int tick = 0; tick < 60 && context.computeOnClient(_ -> FabricJoidClientGameTest.isShown(entry)); tick += 5) {
+						context.waitTicks(5);
+					}
+				}
+
+				context.waitTicks(10);
+				if (!context.computeOnClient(_ -> JOID.isOpen(UIDemoMinecraftChoice.class) && !JOID.isOpen(UIDemoChoice.class))) {
+					failures.add(entry.getLabel() + " does not come back to UIDemoMinecraftChoice on Escape");
+				}
 			}
 
 			for (int attempt = 0; attempt < 6 && context.computeOnClient(minecraft -> minecraft.gui.screen() != null); attempt++) {
 				context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
-				context.waitTicks(20);
-			}
-
-			if (context.computeOnClient(_ -> JOID.isOpen(UIDemoChoice.class))) {
-				context.runOnClient(_ -> JOID.forceClose(JOID.getUi(UIDemoChoice.class)));
 				context.waitTicks(20);
 			}
 		}
@@ -354,8 +361,12 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			return entry.isActive();
 		}
 
+		return JOID.isOpen(FabricJoidClientGameTest.uiClass(entry));
+	}
+
+	private static Class<? extends UI> uiClass(final DemoEntry entry) {
 		try {
-			return JOID.isOpen(Class.forName(entry.getHover()).asSubclass(UI.class));
+			return Class.forName(entry.getHover()).asSubclass(UI.class);
 		} catch (final ClassNotFoundException exception) {
 			throw new AssertionError("The demo entry " + entry.getLabel() + " names the missing class " + entry.getHover(), exception);
 		}

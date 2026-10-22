@@ -11,6 +11,7 @@ import dev.joid.backend.minecraft.lib.ui.node.impl.design.block.BlockNode;
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.entity.EntityNode;
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.item.ItemNode;
 import dev.joid.demo.DemoFont;
+import dev.joid.demo.ui.UIDemo;
 import dev.joid.internal.JOID;
 import dev.joid.lib.color.Color;
 import dev.joid.lib.draw.text.Text;
@@ -21,7 +22,6 @@ import dev.joid.lib.render.transform.Rotation;
 import dev.joid.lib.render.transform.Scale;
 import dev.joid.lib.render.transform.Transformation;
 import dev.joid.lib.resource.Resource;
-import dev.joid.lib.ui.core.UI;
 import dev.joid.lib.ui.node.Node;
 import dev.joid.lib.ui.node.effect.NodeEffect.NodeEffectScope;
 import dev.joid.lib.ui.node.effect.impl.CircleNodeEffect;
@@ -55,7 +55,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 
 @UIDataMinecraft(pause = false, title = "joid.demo.minecraft")
-public class UIDemoMinecraft extends UI {
+public class UIDemoMinecraft extends UIDemo {
 
 	private static final Color INK         = new Color(153, 153, 153);
 	private static final Color PANEL       = new Color(48, 48, 48);
@@ -68,18 +68,6 @@ public class UIDemoMinecraft extends UI {
 		UIDemoMinecraft.CHECKER.setPixel(1, 0, UIDemoMinecraft.INK.getRGB());
 		UIDemoMinecraft.CHECKER.setPixel(0, 1, UIDemoMinecraft.INK.getRGB());
 		UIDemoMinecraft.CHECKER.setPixel(1, 1, UIDemoMinecraft.PLACEHOLDER.getRGB());
-	}
-
-	public UIDemoMinecraft() {
-		super.beforeClose(event -> {
-			if (!super.getData().active()) {
-				return;
-			}
-
-			super.getData().active(false);
-			JOID.open(new UIDemoMinecraftChoice());
-			event.cancel();
-		});
 	}
 
 	@Override

@@ -11,6 +11,7 @@ import dev.joid.backend.minecraft.loader.registry.ContainerTypeRegistry;
 import dev.joid.backend.minecraft.loader.registry.ContainerUIRegistry;
 import dev.joid.backend.minecraft.loader.registry.KeyBindRegistry;
 import dev.joid.backend.minecraft.showcase.ShowcaseLauncher;
+import dev.joid.demo.ui.UIDemoChoice;
 import dev.joid.internal.JOID;
 import dev.joid.lib.input.key.Key;
 import lombok.AccessLevel;
@@ -32,6 +33,7 @@ public final class DemoLauncher {
 	}
 
 	private static void register() {
+		UIDemoChoice.menu(UIDemoMinecraftChoice::new);
 		if (Boolean.getBoolean("joid.smoke")) {
 			ClientSmokeTest.start();
 		}
