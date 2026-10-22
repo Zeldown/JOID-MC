@@ -3,7 +3,7 @@ package dev.joid.backend.minecraft.showcase.ui;
 import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.item.ItemNode;
 import dev.joid.lib.color.Color;
-import dev.joid.lib.draw.text.builder.Text;
+import dev.joid.lib.draw.text.Text;
 import dev.joid.lib.font.FontWeight;
 import dev.joid.lib.shader.impl.BorderShader.BorderMode;
 import dev.joid.lib.ui.core.UI;
@@ -11,9 +11,9 @@ import dev.joid.lib.ui.node.Node;
 import dev.joid.lib.ui.node.effect.impl.BorderNodeEffect;
 import dev.joid.lib.ui.node.effect.impl.RoundedNodeEffect;
 import dev.joid.lib.ui.node.effect.impl.ShadowNodeEffect;
-import dev.joid.lib.ui.node.impl.design.shape.CircleNode;
-import dev.joid.lib.ui.node.impl.design.shape.RectNode;
-import dev.joid.lib.ui.node.impl.design.text.TextNode;
+import dev.joid.lib.ui.node.impl.shape.CircleNode;
+import dev.joid.lib.ui.node.impl.shape.RectNode;
+import dev.joid.lib.ui.node.impl.text.TextNode;
 import dev.joid.lib.utils.align.Align;
 
 import net.minecraft.world.item.Item;
@@ -31,8 +31,8 @@ public class ShowQuests extends UI implements IShowFocus {
 		.create(480, 200, 960, 680)
 		.color(ShowTheme.vertical(Color.decode("#1B2130").withAlpha(0.86F), Color.decode("#11151E").withAlpha(0.92F)))
 		.effect(RoundedNodeEffect.create(32F))
-		.effect(BorderNodeEffect.create(Color.WHITE.withAlpha(0.1F), 1.5F, BorderMode.IN))
-		.effect(ShadowNodeEffect.create(Color.BLACK.withAlpha(0.55F), 60F, 0D, 24D))
+		.effect(BorderNodeEffect.create(Color.WHITE.withAlpha(0.1F), 1.5F).mode(BorderMode.IN))
+		.effect(ShadowNodeEffect.create(Color.BLACK.withAlpha(0.55F), 60F).offsetY(24D))
 		.body(panel -> {
 			TextNode.create(56, 48).text(Text.create("Daily Quests", ShowTheme.font(FontWeight.BOLD, 40F, ShowTheme.TEXT))).attach(panel);
 			TextNode.create(58, 104).text(Text.create("Complete quests to earn emeralds", ShowTheme.font(FontWeight.REGULAR, 18F, ShowTheme.MUTED))).attach(panel);
@@ -41,7 +41,7 @@ public class ShowQuests extends UI implements IShowFocus {
 			.color(Color.WHITE.withAlpha(0.06F))
 			.effect(RoundedNodeEffect.create(22F))
 			.body(timer -> {
-				TextNode.create(90, 22).text(Text.create("Resets in 04:12", ShowTheme.font(FontWeight.BOLD, 16F, ShowTheme.MUTED), Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(timer);
+				TextNode.create(90, 22).text(Text.create("Resets in 04:12", ShowTheme.font(FontWeight.BOLD, 16F, ShowTheme.MUTED)).alignX(Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(timer);
 			})
 			.attach(panel);
 			this.quest(panel, 160, Items.DIAMOND, ShowTheme.DIAMOND, "Mine 16 Diamonds", 11, 16, 12);
@@ -53,10 +53,10 @@ public class ShowQuests extends UI implements IShowFocus {
 				CircleNode
 				.create(56 + day * 40, 606, 28)
 				.color(done ? ShowTheme.vertical(ShowTheme.GRASS, ShowTheme.EMERALD) : Color.WHITE.withAlpha(0.08F))
-				.effect(done ? ShadowNodeEffect.create(ShowTheme.EMERALD.withAlpha(0.5F), 10F) : BorderNodeEffect.create(Color.WHITE.withAlpha(0.06F), 1F, BorderMode.IN))
+				.effect(done ? ShadowNodeEffect.create(ShowTheme.EMERALD.withAlpha(0.5F), 10F) : BorderNodeEffect.create(Color.WHITE.withAlpha(0.06F), 1F).mode(BorderMode.IN))
 				.attach(panel);
 			}
-			TextNode.create(904, 610).text(Text.create("5 / 7 days", ShowTheme.font(FontWeight.BOLD, 16F, ShowTheme.MUTED), Align.END)).anchorX(Align.END).attach(panel);
+			TextNode.create(904, 610).text(Text.create("5 / 7 days", ShowTheme.font(FontWeight.BOLD, 16F, ShowTheme.MUTED)).alignX(Align.END)).anchorX(Align.END).attach(panel);
 		})
 		.attach(this);
 	}
@@ -72,7 +72,7 @@ public class ShowQuests extends UI implements IShowFocus {
 		.create(56, y, 848, 112)
 		.color(Color.WHITE.withAlpha(0.05F))
 		.effect(RoundedNodeEffect.create(20F))
-		.effect(BorderNodeEffect.create(Color.WHITE.withAlpha(0.06F), 1F, BorderMode.IN))
+		.effect(BorderNodeEffect.create(Color.WHITE.withAlpha(0.06F), 1F).mode(BorderMode.IN))
 		.body(row -> {
 			RectNode.create(20, 16, 80, 80).color(color.withAlpha(0.16F)).effect(RoundedNodeEffect.create(16F)).attach(row);
 			ItemNode.create(28, 24, 64, 64).stack(new ItemStack(item)).attach(row);
@@ -99,9 +99,9 @@ public class ShowQuests extends UI implements IShowFocus {
 			.create(732, 32, 96, 48)
 			.color(done ? ShowTheme.horizontal(ShowTheme.GRASS, ShowTheme.EMERALD) : Color.WHITE.withAlpha(0.06F))
 			.effect(RoundedNodeEffect.create(14F))
-			.effect(done ? ShadowNodeEffect.create(ShowTheme.EMERALD.withAlpha(0.45F), 18F, 0D, 4D) : BorderNodeEffect.create(Color.WHITE.withAlpha(0.07F), 1F, BorderMode.IN))
+			.effect(done ? ShadowNodeEffect.create(ShowTheme.EMERALD.withAlpha(0.45F), 18F).offsetY(4D) : BorderNodeEffect.create(Color.WHITE.withAlpha(0.07F), 1F).mode(BorderMode.IN))
 			.body(action -> {
-				TextNode.create(48, 24).text(Text.create(done ? "Claim" : "Track", ShowTheme.font(FontWeight.BOLD, 17F, done ? ShowTheme.INK : ShowTheme.MUTED), Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(action);
+				TextNode.create(48, 24).text(Text.create(done ? "Claim" : "Track", ShowTheme.font(FontWeight.BOLD, 17F, done ? ShowTheme.INK : ShowTheme.MUTED)).alignX(Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(action);
 			})
 			.attach(row);
 			if (done) {

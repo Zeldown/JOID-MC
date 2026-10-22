@@ -5,21 +5,21 @@ import java.util.function.Supplier;
 import dev.joid.backend.minecraft.lib.ui.core.data.overlay.layer.OverlayLayer;
 import dev.joid.backend.minecraft.lib.ui.core.data.overlay.layer.UIDataOverlayLayer;
 import dev.joid.lib.color.Color;
-import dev.joid.lib.draw.text.builder.Text;
+import dev.joid.lib.draw.text.Text;
 import dev.joid.lib.font.FontWeight;
 import dev.joid.lib.font.TextInfo;
 import dev.joid.lib.resource.Resource;
 import dev.joid.lib.shader.impl.BorderShader.BorderMode;
 import dev.joid.lib.ui.core.UI;
 import dev.joid.lib.ui.core.data.UIData;
-import dev.joid.lib.ui.core.data.overlay.UIDataOverlay;
+import dev.joid.lib.ui.core.data.UIDataOverlay;
 import dev.joid.lib.ui.node.effect.impl.BorderNodeEffect;
 import dev.joid.lib.ui.node.effect.impl.RoundedNodeEffect;
 import dev.joid.lib.ui.node.effect.impl.ShadowNodeEffect;
-import dev.joid.lib.ui.node.impl.design.resource.ResourceNode;
-import dev.joid.lib.ui.node.impl.design.shape.CircleNode;
-import dev.joid.lib.ui.node.impl.design.shape.RectNode;
-import dev.joid.lib.ui.node.impl.design.text.TextNode;
+import dev.joid.lib.ui.node.impl.resource.ResourceNode;
+import dev.joid.lib.ui.node.impl.shape.CircleNode;
+import dev.joid.lib.ui.node.impl.shape.RectNode;
+import dev.joid.lib.ui.node.impl.text.TextNode;
 import dev.joid.lib.utils.align.Align;
 
 import net.minecraft.client.Minecraft;
@@ -50,8 +50,8 @@ public class ShowHud extends UI {
 		.create(596, 974, 728, 10)
 		.color(ShowTheme.INK.withAlpha(0.78F))
 		.effect(RoundedNodeEffect.create(5F))
-		.effect(BorderNodeEffect.create(Color.WHITE.withAlpha(0.10F), 1F, BorderMode.IN))
-		.effect(ShadowNodeEffect.create(Color.BLACK.withAlpha(0.45F), 12F, 0D, 2D))
+		.effect(BorderNodeEffect.create(Color.WHITE.withAlpha(0.10F), 1F).mode(BorderMode.IN))
+		.effect(ShadowNodeEffect.create(Color.BLACK.withAlpha(0.45F), 12F).offsetY(2D))
 		.body(bar -> {
 			RectNode
 			.create(2, 2, 0, 6)
@@ -66,10 +66,10 @@ public class ShowHud extends UI {
 		CircleNode
 		.create(936, 922, 48)
 		.color(ShowTheme.vertical(Color.decode("#1B2130"), ShowTheme.INK))
-		.effect(BorderNodeEffect.create(ShowTheme.GRASS.withAlpha(0.9F), 2F, BorderMode.IN))
+		.effect(BorderNodeEffect.create(ShowTheme.GRASS.withAlpha(0.9F), 2F).mode(BorderMode.IN))
 		.effect(ShadowNodeEffect.create(ShowTheme.EMERALD.withAlpha(0.5F), 16F))
 		.body(badge -> {
-			TextNode.create(24, 25).text(Text.create(() -> String.valueOf(ShowHud.player().experienceLevel), ShowTheme.font(FontWeight.EXTRA_BOLD, 18F, ShowTheme.GRASS), Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(badge);
+			TextNode.create(24, 25).text(Text.create(() -> String.valueOf(ShowHud.player().experienceLevel), ShowTheme.font(FontWeight.EXTRA_BOLD, 18F, ShowTheme.GRASS)).alignX(Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(badge);
 		})
 		.attach(this);
 	}
@@ -81,8 +81,8 @@ public class ShowHud extends UI {
 		.create(x, 928, 336, 36)
 		.color(ShowTheme.INK.withAlpha(0.78F))
 		.effect(RoundedNodeEffect.create(18F))
-		.effect(BorderNodeEffect.create(Color.WHITE.withAlpha(0.10F), 1F, BorderMode.IN))
-		.effect(ShadowNodeEffect.create(Color.BLACK.withAlpha(0.45F), 18F, 0D, 4D))
+		.effect(BorderNodeEffect.create(Color.WHITE.withAlpha(0.10F), 1F).mode(BorderMode.IN))
+		.effect(ShadowNodeEffect.create(Color.BLACK.withAlpha(0.45F), 18F).offsetY(4D))
 		.body(capsule -> {
 			ResourceNode
 			.create(0, 0, 20, 20)
@@ -100,7 +100,7 @@ public class ShowHud extends UI {
 				RectNode.create(0, 0, 0, 6).color(ShowTheme.horizontal(from, to)).width(() -> 200D * ratio.get() * ShowTheme.ease(this.elapsed(), 0.15D, 1D)).effect(RoundedNodeEffect.create(3F)).effect(ShadowNodeEffect.create(from.withAlpha(0.6F), 6F)).attach(track);
 			})
 			.attach(capsule);
-			TextNode.create(290, 19).text(Text.create(() -> String.valueOf(value.get()), bold, Align.END)).anchorX(Align.END).anchorY(Align.CENTER).attach(capsule);
+			TextNode.create(290, 19).text(Text.create(() -> String.valueOf(value.get()), bold).alignX(Align.END)).anchorX(Align.END).anchorY(Align.CENTER).attach(capsule);
 			TextNode.create(294, 20).text(Text.create(() -> "/ " + total.get(), muted)).anchorY(Align.CENTER).attach(capsule);
 		});
 	}

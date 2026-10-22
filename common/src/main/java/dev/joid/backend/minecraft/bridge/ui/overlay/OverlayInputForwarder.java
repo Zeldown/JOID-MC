@@ -13,12 +13,12 @@ public final class OverlayInputForwarder {
 
 	public static boolean keyPressed(final int code) {
 		final OverlayUIBridge bridge = BridgeHandler.UI.getBridge(OverlayUIBridge.class);
-		return bridge != null && bridge.keyPressed(GlfwKeys.getKey(code));
+		return bridge != null && bridge.keyPressed(GlfwKeys.getPhysicalKey(code), GlfwKeys.getKey(code));
 	}
 
 	public static boolean keyReleased(final int code) {
 		final OverlayUIBridge bridge = BridgeHandler.UI.getBridge(OverlayUIBridge.class);
-		return bridge != null && bridge.keyReleased(GlfwKeys.getKey(code));
+		return bridge != null && bridge.keyReleased(GlfwKeys.getPhysicalKey(code), GlfwKeys.getKey(code));
 	}
 
 	public static boolean charTyped(final int codepoint) {
@@ -33,12 +33,12 @@ public final class OverlayInputForwarder {
 
 	public static boolean mousePressed(final int button) {
 		final OverlayUIBridge bridge = BridgeHandler.UI.getBridge(OverlayUIBridge.class);
-		return bridge != null && bridge.mousePressed(MouseButton.from(button));
+		return bridge != null && bridge.mousePressed(MouseButton.of(button));
 	}
 
 	public static boolean mouseReleased(final int button) {
 		final OverlayUIBridge bridge = BridgeHandler.UI.getBridge(OverlayUIBridge.class);
-		return bridge != null && bridge.mouseReleased(MouseButton.from(button));
+		return bridge != null && bridge.mouseReleased(MouseButton.of(button));
 	}
 
 	public static boolean mouseScrolled(final double notchesX, final double notchesY) {

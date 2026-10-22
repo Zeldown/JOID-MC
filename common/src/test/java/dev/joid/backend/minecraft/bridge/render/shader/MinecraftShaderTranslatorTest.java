@@ -12,7 +12,6 @@ import dev.joid.lib.bridge.render.shader.source.ShaderSource;
 import dev.joid.lib.bridge.render.shader.source.ShaderStage;
 import dev.joid.lib.bridge.render.shader.source.ShaderVariable;
 import dev.joid.lib.bridge.render.state.StencilEmulation;
-import dev.joid.test.shader.GlslCompiler;
 
 public class MinecraftShaderTranslatorTest {
 
@@ -63,8 +62,8 @@ public class MinecraftShaderTranslatorTest {
 
 	@Test
 	public void sharesTheUniformBlockBetweenStages() {
-		final ShaderSource vertex = ShaderSource.parse(ShaderStage.VERTEX, MinecraftShaderTranslatorTest.VERTEX);
-		final ShaderSource fragment = ShaderSource.parse(ShaderStage.FRAGMENT, MinecraftShaderTranslatorTest.FRAGMENT);
+		final ShaderSource vertex = ShaderSource.from(ShaderStage.VERTEX, MinecraftShaderTranslatorTest.VERTEX);
+		final ShaderSource fragment = ShaderSource.from(ShaderStage.FRAGMENT, MinecraftShaderTranslatorTest.FRAGMENT);
 		final String block = "layout(std140) uniform JoidUniforms {\n\tmat4 uProjectionMatrix;\n\tmat4 uModelViewMatrix;\n\tbool uLighting;\n\tint joid_AlphaTest;\n\tfloat joid_AlphaThreshold;\n\tint joid_StencilTest;\n\tint joid_StencilFunction;\n\tint joid_StencilReference;\n\tint joid_StencilMask;\n\tint joid_StencilFail;\n\tint joid_StencilPass;\n\tvec4 joid_CurrentColor;\n\tint joid_VertexColor;\n\tfloat u_Scale;\n\tvec4 u_Colors[4];\n\tvec3 u_Tint;\n\tmat3 u_Transform;\n};\n";
 		Assert.assertTrue(MinecraftShaderTranslatorTest.color().translateVertex(vertex, fragment).contains(block));
 		Assert.assertTrue(MinecraftShaderTranslatorTest.color().translateFragment(vertex, fragment).contains(block));
@@ -73,8 +72,8 @@ public class MinecraftShaderTranslatorTest {
 
 	@Test
 	public void declaresTheNamedAttributesAndVaryings() {
-		final ShaderSource vertex = ShaderSource.parse(ShaderStage.VERTEX, MinecraftShaderTranslatorTest.VERTEX);
-		final ShaderSource fragment = ShaderSource.parse(ShaderStage.FRAGMENT, MinecraftShaderTranslatorTest.FRAGMENT);
+		final ShaderSource vertex = ShaderSource.from(ShaderStage.VERTEX, MinecraftShaderTranslatorTest.VERTEX);
+		final ShaderSource fragment = ShaderSource.from(ShaderStage.FRAGMENT, MinecraftShaderTranslatorTest.FRAGMENT);
 		final String translatedVertex = MinecraftShaderTranslatorTest.color().translateVertex(vertex, fragment);
 		final String translatedFragment = MinecraftShaderTranslatorTest.color().translateFragment(vertex, fragment);
 		Assert.assertTrue(translatedVertex.contains("in vec3 aPosition;\n"));
@@ -89,8 +88,8 @@ public class MinecraftShaderTranslatorTest {
 
 	@Test
 	public void declaresTheStencilSamplerAfterTheShaderSamplers() {
-		final ShaderSource vertex = ShaderSource.parse(ShaderStage.VERTEX, MinecraftShaderTranslatorTest.VERTEX);
-		final ShaderSource fragment = ShaderSource.parse(ShaderStage.FRAGMENT, MinecraftShaderTranslatorTest.FRAGMENT);
+		final ShaderSource vertex = ShaderSource.from(ShaderStage.VERTEX, MinecraftShaderTranslatorTest.VERTEX);
+		final ShaderSource fragment = ShaderSource.from(ShaderStage.FRAGMENT, MinecraftShaderTranslatorTest.FRAGMENT);
 		final String translated = MinecraftShaderTranslatorTest.color().translateFragment(vertex, fragment);
 		Assert.assertTrue(translated.indexOf("uniform sampler2D tex;\n") < translated.indexOf("uniform sampler2D joid_Stencil;\n"));
 		Assert.assertEquals(List.of("tex", "joid_Stencil"), MinecraftShaderTranslatorTest.color().getSamplers(vertex, fragment).stream().map(ShaderVariable::getName).toList());
@@ -98,8 +97,8 @@ public class MinecraftShaderTranslatorTest {
 
 	@Test
 	public void writesTheStencilOnlyInTheStencilVariant() {
-		final ShaderSource vertex = ShaderSource.parse(ShaderStage.VERTEX, MinecraftShaderTranslatorTest.VERTEX);
-		final ShaderSource fragment = ShaderSource.parse(ShaderStage.FRAGMENT, MinecraftShaderTranslatorTest.FRAGMENT);
+		final ShaderSource vertex = ShaderSource.from(ShaderStage.VERTEX, MinecraftShaderTranslatorTest.VERTEX);
+		final ShaderSource fragment = ShaderSource.from(ShaderStage.FRAGMENT, MinecraftShaderTranslatorTest.FRAGMENT);
 		Assert.assertFalse(MinecraftShaderTranslatorTest.color().translateFragment(vertex, fragment).contains("joid_stencilApply(joid_stencilCompare"));
 		Assert.assertTrue(MinecraftShaderTranslatorTest.color().translateFragment(vertex, fragment).contains("if (joid_StencilTest != 0 && !joid_stencilCompare(joid_stencilValue())) {"));
 		Assert.assertTrue(MinecraftShaderTranslatorTest.color().translate(vertex, fragment).getStencilFragment().contains("value = joid_stencilApply(joid_stencilCompare(value) ? joid_StencilPass : joid_StencilFail, value);"));
@@ -107,8 +106,8 @@ public class MinecraftShaderTranslatorTest {
 
 	@Test
 	public void keepsTheLineNumbersOfTheBody() {
-		final ShaderSource vertex = ShaderSource.parse(ShaderStage.VERTEX, MinecraftShaderTranslatorTest.VERTEX);
-		final ShaderSource fragment = ShaderSource.parse(ShaderStage.FRAGMENT, MinecraftShaderTranslatorTest.FRAGMENT);
+		final ShaderSource vertex = ShaderSource.from(ShaderStage.VERTEX, MinecraftShaderTranslatorTest.VERTEX);
+		final ShaderSource fragment = ShaderSource.from(ShaderStage.FRAGMENT, MinecraftShaderTranslatorTest.FRAGMENT);
 		final String translated = MinecraftShaderTranslatorTest.color().translateFragment(vertex, fragment);
 		final String[] lines = translated.substring(translated.indexOf("#line 1\n") + "#line 1\n".length()).split("\n", -1);
 		Assert.assertEquals("    fragColor = texture(tex, (u_Transform * vec3(vTexCoord, 1.0)).xy) * vColor * vec4(u_Tint, uLighting ? 1.0 : 0.5);", lines[7]);

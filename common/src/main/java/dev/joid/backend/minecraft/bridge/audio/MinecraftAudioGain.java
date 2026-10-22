@@ -1,6 +1,6 @@
 package dev.joid.backend.minecraft.bridge.audio;
 
-import dev.joid.base.openal.IAudioGain;
+import dev.joid.base.openal.AudioGain;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -9,7 +9,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.sounds.SoundSource;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class MinecraftAudioGain implements IAudioGain {
+public final class MinecraftAudioGain implements AudioGain {
 
 	private static final MinecraftAudioGain INSTANCE = new MinecraftAudioGain();
 

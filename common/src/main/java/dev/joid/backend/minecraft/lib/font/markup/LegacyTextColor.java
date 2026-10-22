@@ -30,7 +30,7 @@ public enum LegacyTextColor {
 	private LegacyTextColor(final char code, final int rgb) {
 		this.code = code;
 		this.rgb = rgb;
-		this.color = Color.rgb(rgb).freeze();
+		this.color = Color.rgb(rgb).lock();
 	}
 
 	public static LegacyTextColor byRgb(final int rgb) {

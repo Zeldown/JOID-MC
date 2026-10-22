@@ -5,7 +5,7 @@ import java.util.Locale;
 import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
 import dev.joid.lib.color.Color;
 import dev.joid.lib.draw.DrawUtils;
-import dev.joid.lib.draw.text.builder.Text;
+import dev.joid.lib.draw.text.Text;
 import dev.joid.lib.font.FontWeight;
 import dev.joid.lib.input.cursor.Cursor;
 import dev.joid.lib.resource.Resource;
@@ -14,13 +14,13 @@ import dev.joid.lib.ui.node.Node;
 import dev.joid.lib.ui.node.effect.NodeEffect.NodeEffectScope;
 import dev.joid.lib.ui.node.effect.impl.RoundedNodeEffect;
 import dev.joid.lib.ui.node.effect.impl.ShadowNodeEffect;
-import dev.joid.lib.ui.node.impl.design.resource.ResourceNode.StretchType;
-import dev.joid.lib.ui.node.impl.design.resource.ResourcePlayerNode;
-import dev.joid.lib.ui.node.impl.design.shape.CircleNode;
-import dev.joid.lib.ui.node.impl.design.shape.RectNode;
-import dev.joid.lib.ui.node.impl.design.text.TextNode;
+import dev.joid.lib.ui.node.impl.resource.ResourceNode.StretchType;
+import dev.joid.lib.ui.node.impl.resource.ResourcePlayerNode;
+import dev.joid.lib.ui.node.impl.shape.CircleNode;
+import dev.joid.lib.ui.node.impl.shape.RectNode;
+import dev.joid.lib.ui.node.impl.text.TextNode;
 import dev.joid.lib.utils.align.Align;
-import dev.joid.lib.utils.point.Point;
+import dev.joid.lib.utils.geom.Point;
 import lombok.Getter;
 
 import net.minecraft.client.Minecraft;
@@ -45,7 +45,7 @@ public class ShowVideo extends UI implements IShowFocus {
 		.create(240, 96, 1440, 810)
 		.color(ShowTheme.INK)
 		.y(() -> 96D + 40D * (1D - ShowTheme.ease(this.elapsed(), 0D, 0.6D)))
-		.effect(ShadowNodeEffect.create(Color.BLACK.withAlpha(0.6F), 70F, 0D, 34D))
+		.effect(ShadowNodeEffect.create(Color.BLACK.withAlpha(0.6F), 70F).offsetY(34D))
 		.effect(RoundedNodeEffect.create(34F).scope(NodeEffectScope.CHILDREN))
 		.body(card -> {
 			this.player = ResourcePlayerNode
@@ -90,17 +90,11 @@ public class ShowVideo extends UI implements IShowFocus {
 		.hoveredColor(ShowTheme.GOLD)
 		.cursor(Cursor.POINTER)
 		.effect(ShadowNodeEffect.create(ShowTheme.GOLD.withAlpha(0.6F), 26F))
-		.onClick(_ -> {
-			if (this.player.isPlaying()) {
-				this.player.pause();
-			} else {
-				this.player.resume();
-			}
-		})
-		.layer((_, _) -> this.icon(98D, 732D))
+		.onClick(_ -> this.player.toggle())
+		.layer((_, _, _) -> this.icon(42D, 42D))
 		.attach(card);
-		RectNode.create(176, 712, 1060, 40).color(Color.TRANSPARENT).layer((_, _) -> this.bar(176D, 732D, 1060D)).attach(card);
-		TextNode.create(1384, 732).text(Text.create(() -> ShowVideo.clock(this.player.getProgress() * this.player.getDuration()) + " / " + ShowVideo.clock(this.player.getDuration()), ShowTheme.font(FontWeight.SEMI_BOLD, 22F, ShowTheme.TEXT), Align.END)).anchorX(Align.END).anchorY(Align.CENTER).attach(card);
+		RectNode.create(176, 712, 1060, 40).color(Color.TRANSPARENT).layer((_, _, _) -> this.bar(0D, 20D, 1060D)).attach(card);
+		TextNode.create(1384, 732).text(Text.create(() -> ShowVideo.clock(this.player.getProgress() * this.player.getDuration()) + " / " + ShowVideo.clock(this.player.getDuration()), ShowTheme.font(FontWeight.SEMI_BOLD, 22F, ShowTheme.TEXT)).alignX(Align.END)).anchorX(Align.END).anchorY(Align.CENTER).attach(card);
 	}
 
 	private void icon(final double x, final double y) {
@@ -108,7 +102,7 @@ public class ShowVideo extends UI implements IShowFocus {
 			DrawUtils.SHAPE.drawRoundedRect(x - 13D, y - 16D, 9D, 32D, ShowTheme.INK, 3F);
 			DrawUtils.SHAPE.drawRoundedRect(x + 4D, y - 16D, 9D, 32D, ShowTheme.INK, 3F);
 		} else {
-			DrawUtils.SHAPE.drawPolygon(ShowTheme.INK, Point.create(x - 9D, y - 17D), Point.create(x - 9D, y + 17D), Point.create(x + 17D, y));
+			DrawUtils.SHAPE.drawPolygon(ShowTheme.INK, Point.of(x - 9D, y - 17D), Point.of(x - 9D, y + 17D), Point.of(x + 17D, y));
 		}
 	}
 

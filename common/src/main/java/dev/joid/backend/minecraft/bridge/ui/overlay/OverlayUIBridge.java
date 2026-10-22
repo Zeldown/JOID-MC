@@ -11,8 +11,10 @@ import dev.joid.backend.minecraft.lib.ui.core.data.overlay.layer.OverlayLayer;
 import dev.joid.backend.minecraft.lib.ui.core.data.overlay.layer.UIDataOverlayLayer;
 import dev.joid.lib.bridge.ui.UIBridge;
 import dev.joid.lib.ui.core.UI;
-import dev.joid.lib.ui.core.data.overlay.UIDataOverlayObject;
-import dev.joid.lib.ui.core.data.overlay.render.UIDataOverlayRenderObject;
+import dev.joid.lib.ui.core.data.UIDataOverlay;
+import dev.joid.lib.ui.core.data.UIDataOverlayObject;
+import dev.joid.lib.ui.core.data.UIDataOverlayRenderObject;
+import dev.joid.lib.utils.annotation.AnnotationValues;
 import lombok.NonNull;
 
 import net.minecraft.client.Minecraft;
@@ -54,13 +56,8 @@ public final class OverlayUIBridge extends UIBridge {
 
 	@Override
 	public void add(final @NonNull UI ui) {
-		super.getUiList().add(ui);
+		super.add(ui);
 		ui.load(this.window.getWidth(), this.window.getHeight());
-	}
-
-	@Override
-	public void remove(final @NonNull UI ui) {
-		super.getUiList().remove(ui);
 	}
 
 	@Override
@@ -80,7 +77,7 @@ public final class OverlayUIBridge extends UIBridge {
 
 	@Override
 	public boolean canHandle(final @NonNull Class<? extends UI> clazz) {
-		return UIDataOverlayObject.getOrDefault(clazz).active();
+		return AnnotationValues.read(clazz.getAnnotation(UIDataOverlay.class), UIDataOverlayObject.create()).active();
 	}
 
 	@Override
@@ -136,7 +133,7 @@ public final class OverlayUIBridge extends UIBridge {
 
 	private void extract(final GuiGraphicsExtractor graphics, final Predicate<UI> filter) {
 		this.prepareFrame(graphics);
-		if (super.getUiList().ordered().stream().noneMatch(ui -> filter.test(ui) && this.isShown(ui))) {
+		if (super.getUiList().stream().noneMatch(ui -> filter.test(ui) && this.isShown(ui))) {
 			return;
 		}
 

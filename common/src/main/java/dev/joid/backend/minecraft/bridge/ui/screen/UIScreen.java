@@ -77,12 +77,12 @@ public class UIScreen extends Screen {
 
 	@Override
 	public boolean mouseClicked(final MouseButtonEvent event, final boolean doubleClick) {
-		return this.bridge.mousePressed(MouseButton.from(event.button()));
+		return this.bridge.mousePressed(MouseButton.of(event.button()));
 	}
 
 	@Override
 	public boolean mouseReleased(final MouseButtonEvent event) {
-		return this.bridge.mouseReleased(MouseButton.from(event.button()));
+		return this.bridge.mouseReleased(MouseButton.of(event.button()));
 	}
 
 	@Override
@@ -92,12 +92,12 @@ public class UIScreen extends Screen {
 
 	@Override
 	public boolean keyPressed(final KeyEvent event) {
-		return this.bridge.keyPressed(GlfwKeys.getKey(event.key()));
+		return this.bridge.keyPressed(GlfwKeys.getPhysicalKey(event.key()), GlfwKeys.getKey(event.key()));
 	}
 
 	@Override
 	public boolean keyReleased(final KeyEvent event) {
-		return this.bridge.keyReleased(GlfwKeys.getKey(event.key()));
+		return this.bridge.keyReleased(GlfwKeys.getPhysicalKey(event.key()), GlfwKeys.getKey(event.key()));
 	}
 
 	@Override

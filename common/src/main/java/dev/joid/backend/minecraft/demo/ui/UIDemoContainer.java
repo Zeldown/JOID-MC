@@ -6,13 +6,13 @@ import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
 import dev.joid.demo.DemoFont;
 import dev.joid.internal.JOID;
 import dev.joid.lib.color.Color;
-import dev.joid.lib.draw.text.builder.Text;
+import dev.joid.lib.draw.text.Text;
 import dev.joid.lib.font.TextInfo;
 import dev.joid.lib.input.cursor.Cursor;
 import dev.joid.lib.ui.core.UI;
-import dev.joid.lib.ui.core.data.popup.UIDataPopup;
-import dev.joid.lib.ui.node.impl.design.shape.RectNode;
-import dev.joid.lib.ui.node.impl.design.text.TextNode;
+import dev.joid.lib.ui.core.data.UIDataPopup;
+import dev.joid.lib.ui.node.impl.shape.RectNode;
+import dev.joid.lib.ui.node.impl.text.TextNode;
 import dev.joid.lib.utils.align.Align;
 
 public class UIDemoContainer extends ContainerUI<DemoContainer> {
@@ -27,9 +27,9 @@ public class UIDemoContainer extends ContainerUI<DemoContainer> {
 
 	@Override
 	public void init() {
-		final TextInfo title = TextInfo.create(DemoFont.MONTSERRAT, 32, UIDemoContainer.INK);
-		final TextInfo caption = TextInfo.create(DemoFont.MONTSERRAT, 24, UIDemoContainer.INK);
-		final TextInfo info = TextInfo.create(DemoFont.MONTSERRAT, 24, UIDemoContainer.PLACEHOLDER);
+		final TextInfo title = TextInfo.create(DemoFont.MONTSERRAT, 32).color(UIDemoContainer.INK);
+		final TextInfo caption = TextInfo.create(DemoFont.MONTSERRAT, 24).color(UIDemoContainer.INK);
+		final TextInfo info = TextInfo.create(DemoFont.MONTSERRAT, 24).color(UIDemoContainer.PLACEHOLDER);
 
 		RectNode
 		.create(588, 168, 744, 744)
@@ -43,7 +43,7 @@ public class UIDemoContainer extends ContainerUI<DemoContainer> {
 			.hoveredColor(UIDemoContainer.PANEL)
 			.cursor(Cursor.POINTER)
 			.body(button -> {
-				TextNode.create(72, 24).text(Text.create("Popup", info, Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(button);
+				TextNode.create(72, 24).text(Text.create("Popup", info).alignX(Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(button);
 			})
 			.onClick(_ -> JOID.open(new Popup()))
 			.attach(rect);
@@ -60,7 +60,7 @@ public class UIDemoContainer extends ContainerUI<DemoContainer> {
 		})
 		.attach(this);
 
-		TextNode.create(960, 944).text(Text.create("Click outside drops", caption, Align.CENTER)).anchorX(Align.CENTER).attach(this);
+		TextNode.create(960, 944).text(Text.create("Click outside drops", caption).alignX(Align.CENTER)).anchorX(Align.CENTER).attach(this);
 	}
 
 	@UIDataPopup(active = true)
@@ -68,8 +68,8 @@ public class UIDemoContainer extends ContainerUI<DemoContainer> {
 
 		@Override
 		public void init() {
-			final TextInfo caption = TextInfo.create(DemoFont.MONTSERRAT, 24, UIDemoContainer.INK);
-			final TextInfo info = TextInfo.create(DemoFont.MONTSERRAT, 24, UIDemoContainer.PLACEHOLDER);
+			final TextInfo caption = TextInfo.create(DemoFont.MONTSERRAT, 24).color(UIDemoContainer.INK);
+			final TextInfo info = TextInfo.create(DemoFont.MONTSERRAT, 24).color(UIDemoContainer.PLACEHOLDER);
 
 			RectNode
 			.create(760, 400, 400, 280)
@@ -81,11 +81,11 @@ public class UIDemoContainer extends ContainerUI<DemoContainer> {
 				.hoveredColor(UIDemoContainer.PANEL)
 				.cursor(Cursor.POINTER)
 				.body(button -> {
-					TextNode.create(90, 40).text(Text.create("Close", info, Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(button);
+					TextNode.create(90, 40).text(Text.create("Close", info).alignX(Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(button);
 				})
 				.onClick(_ -> JOID.close(this))
 				.attach(rect);
-				TextNode.create(200, 240).text(Text.create("Popup above", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
+				TextNode.create(200, 240).text(Text.create("Popup above", caption).alignX(Align.CENTER)).anchorX(Align.CENTER).attach(rect);
 			})
 			.attach(this);
 		}

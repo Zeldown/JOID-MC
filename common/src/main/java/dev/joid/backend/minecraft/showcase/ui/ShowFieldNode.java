@@ -2,7 +2,7 @@ package dev.joid.backend.minecraft.showcase.ui;
 
 import dev.joid.lib.color.Color;
 import dev.joid.lib.draw.DrawUtils;
-import dev.joid.lib.ui.node.impl.design.textfield.TextFieldNode;
+import dev.joid.lib.ui.node.impl.control.field.TextFieldNode;
 
 public class ShowFieldNode extends TextFieldNode {
 

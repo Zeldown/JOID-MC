@@ -1,48 +1,43 @@
 package dev.joid.backend.minecraft.showcase.ui;
 
 import dev.joid.lib.color.Color;
-import dev.joid.lib.draw.DrawUtils;
-import dev.joid.lib.ui.node.impl.structure.slider.SliderThumbNode;
-import dev.joid.lib.ui.node.impl.structure.slider.impl.DoubleSliderNode;
+import dev.joid.lib.ui.node.effect.impl.RoundedNodeEffect;
+import dev.joid.lib.ui.node.effect.impl.ShadowNodeEffect;
+import dev.joid.lib.ui.node.impl.control.slider.DoubleSliderNode;
+import dev.joid.lib.ui.node.impl.layout.ContainerNode;
+import dev.joid.lib.ui.node.impl.shape.CircleNode;
+import dev.joid.lib.ui.node.impl.shape.RectNode;
 
 public class ShowSliderNode extends DoubleSliderNode {
 
-	private final Color to;
-	private final Color from;
-
 	protected ShowSliderNode(final double x, final double y, final double width, final Color from, final Color to) {
 		super(x, y, width, 36);
-
-		this.from = from;
-		this.to   = to;
-		super.thumb(new Knob());
+		super.track(ContainerNode.create(0, 0, 0, 0).body(track -> {
+			RectNode
+			.create(0, 13, 0, 10)
+			.color(Color.WHITE.withAlpha(0.12F))
+			.<RectNode>width(track::getWidth)
+			.effect(RoundedNodeEffect.create(5F))
+			.attach(track);
+			RectNode
+			.create(0, 13, 0, 10)
+			.color(ShowTheme.horizontal(from, to))
+			.<RectNode>width(() -> 18D + super.getProgress() * (track.getWidth() - 36D))
+			.effect(RoundedNodeEffect.create(5F))
+			.effect(ShadowNodeEffect.create(to.withAlpha(0.6F), 14F))
+			.attach(track);
+		}));
+		super.thumb(CircleNode
+		.create(0, 0, 36)
+		.color(Color.WHITE)
+		.effect(ShadowNodeEffect.create(to.withAlpha(0.9F), 18F))
+		.body(thumb -> {
+			CircleNode.create(11, 11, 14).color(to).attach(thumb);
+		}));
 	}
 
 	public static ShowSliderNode create(final double x, final double y, final double width, final Color from, final Color to) {
 		return new ShowSliderNode(x, y, width, from, to);
-	}
-
-	@Override
-	public void drawSlider(final double mouseX, final double mouseY) {
-		final double center = 18D + super.getProgress() * (super.getWidth() - 36D);
-		DrawUtils.SHAPE.drawRoundedRect(super.getX(), super.getY() + 13D, super.getWidth(), 10D, Color.WHITE.withAlpha(0.12F), 5F);
-		DrawUtils.SHAPE.drawShadow(super.getX(), super.getY() + 13D, center, 10D, this.to.withAlpha(0.6F), 5F, 14F);
-		DrawUtils.SHAPE.drawRoundedRect(super.getX(), super.getY() + 13D, center, 10D, ShowTheme.horizontal(this.from, this.to), 5F);
-	}
-
-	private final class Knob extends SliderThumbNode {
-
-		private Knob() {
-			super(36, 36);
-		}
-
-		@Override
-		public void drawThumb(final double mouseX, final double mouseY) {
-			DrawUtils.SHAPE.drawShadow(super.getX(), super.getY(), 36D, 36D, ShowSliderNode.this.to.withAlpha(0.9F), 18F, 18F);
-			DrawUtils.SHAPE.drawCircle(super.getX() + 18D, super.getY() + 18D, Color.WHITE, 18D);
-			DrawUtils.SHAPE.drawCircle(super.getX() + 18D, super.getY() + 18D, ShowSliderNode.this.to, 7D);
-		}
-
 	}
 
 }

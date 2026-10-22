@@ -70,7 +70,7 @@ public final class McmetaResourceAnimationReader implements IResourceAnimationRe
 			}
 		}
 
-		return ResourceAnimation.create(size.width(), size.height(), 0, animation);
+		return ResourceAnimation.of(size.width(), size.height(), 0, animation);
 	}
 
 	private static @NonNull List<AnimationFrame> sequence(final int count) {
@@ -84,7 +84,7 @@ public final class McmetaResourceAnimationReader implements IResourceAnimationRe
 	private static @NonNull ResourceAnimationFrame frame(final @NonNull int[] pixels, final @NonNull FrameSize size, final int ticks) {
 		final int[] copy = pixels.clone();
 		ImageUtils.bleedAlpha(copy, size.width(), size.height());
-		return ResourceAnimationFrame.create(copy, ticks * 50L);
+		return ResourceAnimationFrame.of(copy, ticks * 50L);
 	}
 
 	private static @NonNull int[] mix(final @NonNull int[] current, final @NonNull int[] next, final float progress) {

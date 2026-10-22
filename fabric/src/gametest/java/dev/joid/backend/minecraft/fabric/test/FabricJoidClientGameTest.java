@@ -43,6 +43,7 @@ import dev.joid.backend.minecraft.demo.network.OpenDemoContainerPayload;
 import dev.joid.backend.minecraft.demo.network.OpenDemoContainerPayloadHandler;
 import dev.joid.backend.minecraft.demo.ui.UIDemoContainer;
 import dev.joid.backend.minecraft.demo.ui.UIDemoMinecraft;
+import dev.joid.backend.minecraft.demo.ui.UIDemoMinecraftChoice;
 import dev.joid.backend.minecraft.demo.ui.UIDemoOverlayLayer;
 import dev.joid.backend.minecraft.lib.font.impl.minecraft.MinecraftFont;
 import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
@@ -67,7 +68,7 @@ import dev.joid.lib.bridge.clock.IClockBridge;
 import dev.joid.lib.bridge.render.texture.ITexture;
 import dev.joid.lib.bridge.thread.DirectThreadBridge;
 import dev.joid.lib.color.Color;
-import dev.joid.lib.draw.text.builder.Text;
+import dev.joid.lib.draw.text.Text;
 import dev.joid.lib.font.TextInfo;
 import dev.joid.lib.font.converter.TextConverter;
 import dev.joid.lib.input.key.Key;
@@ -75,19 +76,19 @@ import dev.joid.lib.input.key.resolver.KeyResolver;
 import dev.joid.lib.resource.Resource;
 import dev.joid.lib.resource.decoder.impl.VideoResourceDecoder;
 import dev.joid.lib.ui.core.UI;
-import dev.joid.lib.ui.core.data.overlay.UIDataOverlay;
-import dev.joid.lib.ui.core.data.popup.UIDataPopup;
+import dev.joid.lib.ui.core.data.UIDataOverlay;
+import dev.joid.lib.ui.core.data.UIDataPopup;
 import dev.joid.lib.ui.node.Node;
 import dev.joid.lib.ui.node.effect.NodeEffect;
 import dev.joid.lib.ui.node.effect.NodeEffect.NodeEffectScope;
 import dev.joid.lib.ui.node.effect.impl.BlurNodeEffect;
 import dev.joid.lib.ui.node.effect.impl.CircleNodeEffect;
 import dev.joid.lib.ui.node.effect.impl.RoundedNodeEffect;
-import dev.joid.lib.ui.node.impl.design.resource.ResourceNode;
-import dev.joid.lib.ui.node.impl.design.resource.ResourcePlayerNode;
-import dev.joid.lib.ui.node.impl.design.shape.RectNode;
-import dev.joid.lib.ui.node.impl.design.text.TextNode;
-import dev.joid.lib.ui.node.impl.structure.container.ContainerNode;
+import dev.joid.lib.ui.node.impl.layout.ContainerNode;
+import dev.joid.lib.ui.node.impl.resource.ResourceNode;
+import dev.joid.lib.ui.node.impl.resource.ResourcePlayerNode;
+import dev.joid.lib.ui.node.impl.shape.RectNode;
+import dev.joid.lib.ui.node.impl.text.TextNode;
 import dev.joid.test.snapshot.SnapshotDifference;
 import dev.joid.test.snapshot.SnapshotImage;
 import dev.joid.test.snapshot.SnapshotRunner;
@@ -151,8 +152,8 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			context.getInput().pressKey(GLFW.GLFW_KEY_J);
 			context.waitForScreen(UIScreen.class);
 			context.runOnClient(_ -> {
-				if (JOID.getUi(UIDemoChoice.class) == null) {
-					throw new AssertionError("The key J did not open UIDemoChoice");
+				if (JOID.getUi(UIDemoMinecraftChoice.class) == null) {
+					throw new AssertionError("The key J did not open UIDemoMinecraftChoice");
 				}
 			});
 			context.waitTicks(40);
@@ -162,7 +163,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			FabricJoidClientGameTest.clickDemo(context, "UIDemoMinecraft", "joid-demo-choice-minecraft");
 			context.runOnClient(_ -> {
 				if (JOID.getUi(UIDemoMinecraft.class) == null) {
-					throw new AssertionError("Clicking the entry UIDemoMinecraft of UIDemoChoice did not open it");
+					throw new AssertionError("Clicking the entry UIDemoMinecraft of UIDemoMinecraftChoice did not open it");
 				}
 			});
 			FabricJoidClientGameTest.verifyHostBindings(context);
@@ -182,7 +183,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			context.runOnClient(FabricJoidClientGameTest::verifyWidths);
 			FabricJoidClientGameTest.verifyBitmapFont(context);
 			FabricJoidClientGameTest.verifyDepth(context);
-			context.runOnClient(_ -> JOID.open(new UIDemoChoice()));
+			context.runOnClient(_ -> JOID.open(new UIDemoMinecraftChoice()));
 			context.waitTicks(20);
 			context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
 			context.waitForScreen(null);
@@ -228,8 +229,8 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		context.getInput().pressKey(GLFW.GLFW_KEY_E);
 		context.waitTicks(40);
 		context.runOnClient(minecraft -> {
-			if (JOID.isOpen(UIDemoMinecraft.class) || !JOID.isOpen(UIDemoChoice.class)) {
-				throw new AssertionError("The inventory key bound by UIDemoMinecraft did not close it back to UIDemoChoice");
+			if (JOID.isOpen(UIDemoMinecraft.class) || !JOID.isOpen(UIDemoMinecraftChoice.class)) {
+				throw new AssertionError("The inventory key bound by UIDemoMinecraft did not close it back to UIDemoMinecraftChoice");
 			}
 
 			if (KeyResolver.resolve(minecraft.options.keyInventory) != Key.E) {
@@ -302,10 +303,11 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 
 	private static void verifyDemos(final ClientGameTestContext context) {
 		final List<String> failures = new ArrayList<>();
-		final List<DemoEntry> entries = context.computeOnClient(_ -> UIDemoChoice.LIST.stream().filter(entry -> !entry.getLabel().endsWith("Store")).toList());
+		final List<DemoEntry> entries = new ArrayList<>(FabricJoidClientGameTest.entries(UIDemoChoice.class).stream().filter(entry -> !entry.getLabel().endsWith("Store")).toList());
+		entries.addAll(FabricJoidClientGameTest.entries(UIDemoMinecraftChoice.class));
 		final PrintStream err = System.err;
 		for (final DemoEntry entry : entries) {
-			context.runOnClient(_ -> JOID.open(new UIDemoChoice()));
+			context.runOnClient(_ -> JOID.open(new UIDemoMinecraftChoice()));
 			context.waitForScreen(UIScreen.class);
 			context.waitTicks(10);
 			final ByteArrayOutputStream output = new ByteArrayOutputStream();
@@ -334,6 +336,11 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 				context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
 				context.waitTicks(20);
 			}
+
+			if (context.computeOnClient(_ -> JOID.isOpen(UIDemoChoice.class))) {
+				context.runOnClient(_ -> JOID.forceClose(JOID.getUi(UIDemoChoice.class)));
+				context.waitTicks(20);
+			}
 		}
 
 		context.waitForScreen(null);
@@ -351,6 +358,16 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			return JOID.isOpen(Class.forName(entry.getHover()).asSubclass(UI.class));
 		} catch (final ClassNotFoundException exception) {
 			throw new AssertionError("The demo entry " + entry.getLabel() + " names the missing class " + entry.getHover(), exception);
+		}
+	}
+
+	private static List<DemoEntry> entries(final Class<? extends UI> menu) {
+		try {
+			final Field field = menu.getDeclaredField("LIST");
+			field.setAccessible(true);
+			return (List<DemoEntry>) field.get(null);
+		} catch (final ReflectiveOperationException exception) {
+			throw new AssertionError("Unable to read the entries of " + menu.getSimpleName(), exception);
 		}
 	}
 
@@ -411,19 +428,19 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 	}
 
 	private static Vector2d center(final String label) {
-		final int index = UIDemoChoice.LIST.stream().map(DemoEntry::getLabel).toList().indexOf(label);
+		final int index = FabricJoidClientGameTest.entries(UIDemoMinecraftChoice.class).stream().map(DemoEntry::getLabel).toList().indexOf(label);
 
 		if (index < 0) {
-			throw new AssertionError("UIDemoChoice does not list " + label);
+			throw new AssertionError("UIDemoMinecraftChoice does not list " + label);
 		}
 
-		final UI ui = JOID.getUi(UIDemoChoice.class);
-		final Node entry = ui.getNodeList().ordered().getFirst().getChild(index, RectNode.class);
+		final UI ui = JOID.getUi(UIDemoMinecraftChoice.class);
+		final Node entry = ui.getNodeList().getFirst().getChild(index, RectNode.class);
 		return new Vector2d(ui.getView().toScreenX(entry.getAbsoluteX() + entry.getWidth() / 2D), ui.getView().toScreenY(entry.getAbsoluteY() + entry.getHeight() / 2D));
 	}
 
 	private static void screenshot(final ClientGameTestContext context, final UI ui, final String name) {
-		context.runOnClient(_ -> JOID.open(new UIDemoChoice()));
+		context.runOnClient(_ -> JOID.open(new UIDemoMinecraftChoice()));
 		context.waitTicks(20);
 		context.runOnClient(_ -> JOID.open(ui));
 		context.waitTicks(40);
@@ -438,7 +455,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		context.waitTicks(5);
 		context.takeScreenshot(name);
 		context.runOnClient(_ -> {
-			final double actual = JOID.getUi(UIDemoChoice.class).getView().getInterfaceScale();
+			final double actual = JOID.getUi(UIDemoMinecraftChoice.class).getView().getInterfaceScale();
 			if (actual != interfaceScale) {
 				throw new AssertionError("The GUI scale " + guiScale + " gives the interface scale " + actual + " instead of " + interfaceScale);
 			}
@@ -447,8 +464,8 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 
 	private static void verifyBitmapFont(final ClientGameTestContext context) {
 		final RectNode background = RectNode.create(0, 0, 1920, 1080).color(Color.BLACK);
-		final TextNode text = TextNode.create(960, 540).text(Text.create("HH", TextInfo.create(MinecraftFont.DEFAULT, MinecraftFont.SIZE * 4, Color.WHITE)));
-		context.runOnClient(_ -> JOID.open(new UIDemoChoice()));
+		final TextNode text = TextNode.create(960, 540).text(Text.create("HH", TextInfo.create(MinecraftFont.DEFAULT, MinecraftFont.SIZE * 4).color(Color.WHITE)));
+		context.runOnClient(_ -> JOID.open(new UIDemoMinecraftChoice()));
 		context.waitTicks(20);
 		context.runOnClient(_ -> JOID.open(new UI() {
 
@@ -472,7 +489,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			FabricJoidClientGameTest.expectCrisp(failures, "the GUI scale " + scale[0], image, bounds, scale[1]);
 		}
 
-		context.runOnClient(_ -> JOID.open(new UIDemoChoice()));
+		context.runOnClient(_ -> JOID.open(new UIDemoMinecraftChoice()));
 		context.waitTicks(20);
 		context.runOnClient(_ -> JOID.open(new UIDemoMinecraft()));
 		context.runOnClient(minecraft -> {
@@ -513,7 +530,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			}
 
 		};
-		context.runOnClient(_ -> JOID.open(new UIDemoChoice()));
+		context.runOnClient(_ -> JOID.open(new UIDemoMinecraftChoice()));
 		context.waitTicks(20);
 		context.runOnClient(_ -> JOID.open(ui));
 		context.waitTicks(40);
@@ -637,7 +654,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 	}
 
 	private static void verifyOverlays(final ClientGameTestContext context) {
-		context.runOnClient(_ -> JOID.open(new UIDemoChoice()));
+		context.runOnClient(_ -> JOID.open(new UIDemoMinecraftChoice()));
 		context.waitForScreen(UIScreen.class);
 		context.waitTicks(20);
 		FabricJoidClientGameTest.clickDemo(context, "UIDemoOverlayLayer", "joid-demo-choice-overlay-on");
@@ -647,12 +664,12 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		context.waitTicks(10);
 
 		final List<String> failures = new ArrayList<>();
-		final int[] hotbar = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoOverlayLayer.Hotbar.class).getNodeList().ordered().getFirst()));
-		final int[] experience = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoOverlayLayer.Experience.class).getNodeList().ordered().getFirst()));
-		final int[] interactive = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoOverlayLayer.Interactive.class).getNodeList().ordered().getFirst()));
-		final int[] crosshair = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoOverlayLayer.Crosshair.class).getNodeList().ordered().getFirst()));
-		final int[] always = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoOverlayLayer.Always.class).getNodeList().ordered().getFirst()));
-		final int[] button = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoOverlayLayer.Interactive.class).getNodeList().ordered().getFirst().getChild(0, RectNode.class)));
+		final int[] hotbar = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoOverlayLayer.Hotbar.class).getNodeList().getFirst()));
+		final int[] experience = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoOverlayLayer.Experience.class).getNodeList().getFirst()));
+		final int[] interactive = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoOverlayLayer.Interactive.class).getNodeList().getFirst()));
+		final int[] crosshair = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoOverlayLayer.Crosshair.class).getNodeList().getFirst()));
+		final int[] always = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoOverlayLayer.Always.class).getNodeList().getFirst()));
+		final int[] button = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoOverlayLayer.Interactive.class).getNodeList().getFirst().getChild(0, RectNode.class)));
 		final int[] vanillaHotbar = context.computeOnClient(minecraft -> {
 			final int guiScale = minecraft.getWindow().getGuiScale();
 			return new int[] {(minecraft.getWindow().getGuiScaledWidth() / 2 - 91) * guiScale, (minecraft.getWindow().getGuiScaledHeight() - 22) * guiScale, 182 * guiScale, 22 * guiScale};
@@ -751,7 +768,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			minecraft.resizeGui();
 		});
 		context.waitTicks(5);
-		context.runOnClient(_ -> JOID.open(new UIDemoChoice()));
+		context.runOnClient(_ -> JOID.open(new UIDemoMinecraftChoice()));
 		context.waitForScreen(UIScreen.class);
 		context.waitTicks(20);
 		FabricJoidClientGameTest.clickDemo(context, "UIDemoOverlayLayer", "joid-demo-choice-overlay-off");
@@ -795,8 +812,8 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			context.runOnClient(_ -> JOID.open(new LongEntity(yaw)));
 			context.waitForScreen(UIScreen.class);
 			context.waitTicks(10);
-			final int[] node = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(LongEntity.class).getNodeList().ordered().getFirst().getChild(0, EntityNode.class)));
-			final int[] panel = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(LongEntity.class).getNodeList().ordered().getFirst()));
+			final int[] node = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(LongEntity.class).getNodeList().getFirst().getChild(0, EntityNode.class)));
+			final int[] panel = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(LongEntity.class).getNodeList().getFirst()));
 			final BufferedImage image = FabricJoidClientGameTest.read(context.takeScreenshot("joid-entity-bounds-" + (int) yaw));
 			int drawn = 0;
 			int outside = 0;
@@ -839,23 +856,23 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 	}
 
 	private static void verifyCursor(final ClientGameTestContext context) {
-		context.runOnClient(_ -> JOID.open(new UIDemoChoice()));
+		context.runOnClient(_ -> JOID.open(new UIDemoMinecraftChoice()));
 		context.waitForScreen(UIScreen.class);
 		context.waitTicks(20);
 		FabricJoidClientGameTest.clickDemo(context, "UIDemoContainer", "joid-cursor-container");
 		context.waitForScreen(ContainerUIScreen.class);
 		final List<String> failures = new ArrayList<>();
-		final int[] popup = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoContainer.class).getNodeList().ordered().getFirst().getChild(0, RectNode.class)));
+		final int[] popup = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoContainer.class).getNodeList().getFirst().getChild(0, RectNode.class)));
 		FabricJoidClientGameTest.expectCursor(context, failures, "Popup button of the container", popup, CursorTypes.POINTING_HAND);
 		context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
 		context.waitForScreen(null);
-		context.runOnClient(_ -> JOID.open(new UIDemoChoice()));
+		context.runOnClient(_ -> JOID.open(new UIDemoMinecraftChoice()));
 		context.waitForScreen(UIScreen.class);
 		context.waitTicks(20);
 		FabricJoidClientGameTest.clickDemo(context, "UIDemoCursor", "joid-cursor-demo");
 		final List<int[]> cells = context.computeOnClient(_ -> {
 			final UI ui = JOID.getUi(UIDemoCursor.class);
-			final List<Node> nodes = ui.getNodeList().ordered();
+			final List<Node> nodes = ui.getNodeList();
 			return List.of(FabricJoidClientGameTest.bounds(nodes.get(1).getChild(0, RectNode.class)), FabricJoidClientGameTest.bounds(nodes.get(2).getChild(0, RectNode.class)), new int[] {(int) ui.getView().toScreenX(410D), (int) ui.getView().toScreenY(240D), 20, 20});
 		});
 		FabricJoidClientGameTest.expectCursor(context, failures, "Pointer cell of UIDemoCursor after the container", cells.get(0), CursorTypes.POINTING_HAND);
@@ -881,13 +898,13 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 	}
 
 	private static void verifyDebugKey(final ClientGameTestContext context) {
-		context.runOnClient(_ -> JOID.open(new UIDemoChoice()));
+		context.runOnClient(_ -> JOID.open(new UIDemoMinecraftChoice()));
 		context.waitForScreen(UIScreen.class);
 		context.waitTicks(20);
 		context.getInput().pressKey(GLFW.GLFW_KEY_F3);
 		context.waitTicks(5);
 		final boolean panel = context.computeOnClient(_ -> {
-			final UI ui = JOID.getUi(UIDemoChoice.class);
+			final UI ui = JOID.getUi(UIDemoMinecraftChoice.class);
 			return ui.getNodeList().contains(ui.getDevNode());
 		});
 		final boolean hidden = context.computeOnClient(minecraft -> !minecraft.debugEntries.isOverlayVisible());
@@ -902,11 +919,11 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		context.waitTicks(5);
 		final List<String> failures = new ArrayList<>();
 		if (!panel) {
-			failures.add("F3 in UIDemoChoice does not show the dev panel of JOID");
+			failures.add("F3 in UIDemoMinecraftChoice does not show the dev panel of JOID");
 		}
 
 		if (!hidden) {
-			failures.add("F3 consumed by UIDemoChoice also shows the debug screen of Minecraft");
+			failures.add("F3 consumed by UIDemoMinecraftChoice also shows the debug screen of Minecraft");
 		}
 
 		if (!vanilla) {
@@ -920,7 +937,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 
 	private static void verifyContainer(final ClientGameTestContext context, final TestServerContext server) {
 		final BufferedImage world = FabricJoidClientGameTest.read(context.takeScreenshot("joid-demo-container-world"));
-		context.runOnClient(_ -> JOID.open(new UIDemoChoice()));
+		context.runOnClient(_ -> JOID.open(new UIDemoMinecraftChoice()));
 		context.waitForScreen(UIScreen.class);
 		context.waitTicks(20);
 		final Vector2d entry = context.computeOnClient(_ -> FabricJoidClientGameTest.center("UIDemoContainer"));
@@ -1085,7 +1102,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			failures.add("the container screen pauses the game");
 		}
 
-		final int[] panel = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoContainer.class).getNodeList().ordered().getFirst()));
+		final int[] panel = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoContainer.class).getNodeList().getFirst()));
 		final int[] image = context.computeOnClient(minecraft -> {
 			final int scale = minecraft.getWindow().getGuiScale();
 			final Screen screen = minecraft.gui.screen();
@@ -1121,7 +1138,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		final ContainerPopup popup = new ContainerPopup();
 		context.runOnClient(_ -> JOID.open(popup));
 		context.waitTicks(20);
-		final int[] button = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(popup.getNodeList().ordered().getFirst()));
+		final int[] button = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(popup.getNodeList().getFirst()));
 		FabricJoidClientGameTest.moveTo(context, button);
 		context.takeScreenshot("joid-demo-container-popup");
 		if (!context.computeOnClient(minecraft -> minecraft.gui.screen() == screen && JOID.isOpen(popup) && BridgeHandler.UI.getBridge(ContainerUIBridge.class).isOpen(popup))) {
@@ -1163,22 +1180,22 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		context.waitTicks(5);
 		FabricJoidClientGameTest.expectContainer(context, server, failures, "a left click with 5 diamonds after the popup", 0, new int[] {2, 5});
 
-		context.runOnClient(_ -> JOID.open(new UIDemoChoice()));
+		context.runOnClient(_ -> JOID.open(new UIDemoMinecraftChoice()));
 		context.waitTicks(20);
-		if (!context.computeOnClient(minecraft -> minecraft.gui.screen() == screen && JOID.isOpen(UIDemoChoice.class))) {
-			failures.add("UIDemoChoice replaced the container screen instead of opening over it");
+		if (!context.computeOnClient(minecraft -> minecraft.gui.screen() == screen && JOID.isOpen(UIDemoMinecraftChoice.class))) {
+			failures.add("UIDemoMinecraftChoice replaced the container screen instead of opening over it");
 		}
 
 		context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
 		context.waitTicks(20);
-		if (context.computeOnClient(minecraft -> JOID.isOpen(UIDemoChoice.class) || minecraft.gui.screen() != screen)) {
-			failures.add("Escape does not close UIDemoChoice alone over the container");
+		if (context.computeOnClient(minecraft -> JOID.isOpen(UIDemoMinecraftChoice.class) || minecraft.gui.screen() != screen)) {
+			failures.add("Escape does not close UIDemoMinecraftChoice alone over the container");
 		}
 	}
 
 	private static void verifyContainerPopupButton(final ClientGameTestContext context, final TestServerContext server, final List<String> failures) {
 		final Screen screen = context.computeOnClient(minecraft -> minecraft.gui.screen());
-		final int[] button = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoContainer.class).getNodeList().ordered().getFirst().getChild(0, RectNode.class)));
+		final int[] button = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoContainer.class).getNodeList().getFirst().getChild(0, RectNode.class)));
 		FabricJoidClientGameTest.moveTo(context, button);
 		context.getInput().pressMouse(GLFW.GLFW_MOUSE_BUTTON_LEFT);
 		context.waitTicks(20);
@@ -1187,8 +1204,8 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			return;
 		}
 
-		final int[] panel = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoContainer.Popup.class).getNodeList().ordered().getFirst()));
-		final int[] close = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoContainer.Popup.class).getNodeList().ordered().getFirst().getChild(0, RectNode.class)));
+		final int[] panel = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoContainer.Popup.class).getNodeList().getFirst()));
+		final int[] close = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoContainer.Popup.class).getNodeList().getFirst().getChild(0, RectNode.class)));
 		final List<int[]> slots = context.computeOnClient(_ -> FabricJoidClientGameTest.slotBounds());
 		final int[] covered = slots.stream().filter(slot -> slot[0] > panel[0] && slot[1] > panel[1] && slot[0] + slot[2] < panel[0] + panel[2] && slot[1] + slot[3] < panel[1] + panel[3]).findFirst().orElseThrow();
 		FabricJoidClientGameTest.moveTo(context, covered);
@@ -1250,7 +1267,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 	private static List<int[]> slotBounds() {
 		final UI ui = JOID.getUi(UIDemoContainer.class);
 		final List<int[]> bounds = new ArrayList<>();
-		for (final Node node : ui.getNodeList().ordered()) {
+		for (final Node node : ui.getNodeList()) {
 			FabricJoidClientGameTest.bounds(ui, node, SlotNode.class, bounds);
 		}
 		return bounds;
@@ -1263,7 +1280,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 	private static void expectOverlays(final ClientGameTestContext context, final boolean open) {
 		context.runOnClient(_ -> {
 			if (JOID.isOpen(UIDemoOverlayLayer.Hotbar.class) != open || JOID.isOpen(UIDemoOverlayLayer.Experience.class) != open || JOID.isOpen(UIDemoOverlayLayer.Crosshair.class) != open || JOID.isOpen(UIDemoOverlayLayer.Interactive.class) != open || JOID.isOpen(UIDemoOverlayLayer.Always.class) != open) {
-				throw new AssertionError("The overlay entry of UIDemoChoice did not toggle the demo overlays " + (open ? "on" : "off"));
+				throw new AssertionError("The overlay entry of UIDemoMinecraftChoice did not toggle the demo overlays " + (open ? "on" : "off"));
 			}
 		});
 	}
@@ -1558,7 +1575,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		for (final int guiScale : new int[] {2, 0}) {
 			for (final boolean scaled : new boolean[] {true, false}) {
 				context.runOnClient(minecraft -> {
-					JOID.getUi(UIDemoMinecraft.class).getScale().setActive(scaled);
+					JOID.getUi(UIDemoMinecraft.class).getScale().active(scaled);
 					minecraft.options.guiScale().set(guiScale);
 					minecraft.resizeGui();
 				});
@@ -1568,7 +1585,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			}
 		}
 
-		context.runOnClient(_ -> JOID.getUi(UIDemoMinecraft.class).getScale().setActive(true));
+		context.runOnClient(_ -> JOID.getUi(UIDemoMinecraft.class).getScale().active(true));
 		context.waitTicks(5);
 		if (!failures.isEmpty()) {
 			throw new AssertionError(failures.size() + " interface scale checks failed:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
@@ -1590,7 +1607,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		final UIDemoPlayer player = new UIDemoPlayer();
 		final double master = context.computeOnClient(minecraft -> minecraft.options.getSoundSourceOptionInstance(SoundSource.MASTER).get());
 		final double interfaceVolume = context.computeOnClient(minecraft -> minecraft.options.getSoundSourceOptionInstance(SoundSource.UI).get());
-		context.runOnClient(_ -> JOID.open(new UIDemoChoice()));
+		context.runOnClient(_ -> JOID.open(new UIDemoMinecraftChoice()));
 		context.waitTicks(20);
 		context.runOnClient(_ -> JOID.open(player));
 		context.waitFor(_ -> FabricJoidClientGameTest.audioSource(player) != 0, 1200);
@@ -1619,7 +1636,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 	}
 
 	private static int audioSource(final UI ui) {
-		for (final Node node : ui.getNodeList().ordered()) {
+		for (final Node node : ui.getNodeList()) {
 			final int source = FabricJoidClientGameTest.audioSource(node);
 			if (source != 0) {
 				return source;
@@ -1673,7 +1690,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 	private static List<int[]> bounds(final Class<? extends Node> clazz) {
 		final UI ui = JOID.getUi(UIDemoMinecraft.class);
 		final List<int[]> bounds = new ArrayList<>();
-		for (final Node node : ui.getNodeList().ordered()) {
+		for (final Node node : ui.getNodeList()) {
 			FabricJoidClientGameTest.bounds(ui, node, clazz, bounds);
 		}
 		return bounds;
@@ -1847,8 +1864,6 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		final DirectThreadBridge thread = new DirectThreadBridge();
 		final SnapshotRunner runner = SnapshotRunner.start(new MinecraftSnapshotBackend());
 		BridgeHandler.THREAD.register(thread);
-		final List<DemoEntry> entries = new ArrayList<>(UIDemoChoice.LIST);
-		UIDemoChoice.LIST.removeIf(entry -> entry.getHover() != null && entry.getHover().startsWith("dev.joid.backend.minecraft."));
 		try {
 			final File rendererReferences = new File(new File(references, RenderSystem.getDevice().getDeviceInfo().backendName().toLowerCase(Locale.ROOT)), runner.getRenderer());
 			for (final String scenario : SnapshotRunner.getScenarios()) {
@@ -1868,8 +1883,6 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 				}
 			}
 		} finally {
-			UIDemoChoice.LIST.clear();
-			UIDemoChoice.LIST.addAll(entries);
 			runner.stop();
 		}
 

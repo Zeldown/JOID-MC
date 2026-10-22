@@ -2,7 +2,7 @@ package dev.joid.backend.minecraft.lib.draw.block;
 
 import org.joml.Quaternionf;
 
-import dev.joid.backend.minecraft.lib.draw.raster.FeatureExternalRasterDrawable;
+import dev.joid.backend.minecraft.lib.draw.raster.FeatureDrawableRaster;
 import dev.joid.lib.draw.DrawUtils;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -38,7 +38,7 @@ public final class DrawBlock {
 			return;
 		}
 
-		DrawUtils.RASTER.drawRaster(x, y, size, size, FeatureExternalRasterDrawable.create(Lighting.Entry.ITEMS_3D, (pose, collector) -> {
+		DrawUtils.RASTER.drawRaster(x, y, size, size, FeatureDrawableRaster.create(Lighting.Entry.ITEMS_3D, (pose, collector) -> {
 			pose.mulPose(new Quaternionf().rotationXYZ((float) Math.toRadians(rotationPitch), (float) Math.toRadians(rotationYaw), 0F));
 			pose.scale(0.625F, 0.625F, 0.625F);
 			pose.translate(-0.5F, -0.5F, -0.5F);

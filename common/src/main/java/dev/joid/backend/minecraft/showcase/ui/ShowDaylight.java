@@ -14,7 +14,7 @@ import dev.joid.lib.bridge.render.texture.TextureFilter;
 import dev.joid.lib.bridge.render.texture.TextureWrap;
 import dev.joid.lib.color.Color;
 import dev.joid.lib.draw.DrawUtils;
-import dev.joid.lib.draw.text.builder.Text;
+import dev.joid.lib.draw.text.Text;
 import dev.joid.lib.font.FontWeight;
 import dev.joid.lib.resource.Resource;
 import dev.joid.lib.shader.impl.BorderShader.BorderMode;
@@ -25,9 +25,9 @@ import dev.joid.lib.ui.node.effect.impl.BlurNodeEffect;
 import dev.joid.lib.ui.node.effect.impl.BorderNodeEffect;
 import dev.joid.lib.ui.node.effect.impl.RoundedNodeEffect;
 import dev.joid.lib.ui.node.effect.impl.ShadowNodeEffect;
-import dev.joid.lib.ui.node.impl.design.shape.CircleNode;
-import dev.joid.lib.ui.node.impl.design.shape.RectNode;
-import dev.joid.lib.ui.node.impl.design.text.TextNode;
+import dev.joid.lib.ui.node.impl.shape.CircleNode;
+import dev.joid.lib.ui.node.impl.shape.RectNode;
+import dev.joid.lib.ui.node.impl.text.TextNode;
 import dev.joid.lib.utils.align.Align;
 import lombok.Getter;
 
@@ -40,7 +40,7 @@ public class ShowDaylight extends UI implements IShowFocus {
 
 	private static final String[] PHASES = {"Full moon", "Waning gibbous", "Third quarter", "Waning crescent", "New moon", "Waxing crescent", "First quarter", "Waxing gibbous"};
 
-	private static final BlendState ADDITIVE = BlendState.create(Equation.ADD, Factor.SRC_ALPHA, Factor.ONE);
+	private static final BlendState ADDITIVE = BlendState.of(Equation.ADD, Factor.SRC_ALPHA, Factor.ONE);
 
 	private static final Resource       SUN   = Resource.of("minecraft:textures/environment/celestial/sun.png");
 	private static final List<Resource> MOONS = Stream.of("full_moon", "waning_gibbous", "third_quarter", "waning_crescent", "new_moon", "waxing_crescent", "first_quarter", "waxing_gibbous").map(name -> Resource.of("minecraft:textures/environment/celestial/moon/" + name + ".png")).toList();
@@ -52,16 +52,13 @@ public class ShowDaylight extends UI implements IShowFocus {
 	private ShowSliderNode slider;
 
 	public ShowDaylight() {
-		this.time = DoubleSignal.of(4000D);
+		this.time = new DoubleSignal(4000D);
 	}
 
 	@Override
 	public void init() {
 		this.start = ShowTheme.now();
-		this.time.subscribe(ticks -> {
-			ShowDaylight.world(ticks.longValue());
-			return true;
-		});
+		this.time.onChange(ticks -> ShowDaylight.world(ticks.longValue()));
 
 		ShowTheme
 		.panel(100, 100, 600, 880)
@@ -77,7 +74,7 @@ public class ShowDaylight extends UI implements IShowFocus {
 			.create(48, 640, 504, 44)
 			.color(() -> ShowTheme.horizontal(this.sky(0D), this.sky(0.5D)))
 			.effect(RoundedNodeEffect.create(22F))
-			.effect(BorderNodeEffect.create(Color.WHITE.withAlpha(0.12F), 1F, BorderMode.IN))
+			.effect(BorderNodeEffect.create(Color.WHITE.withAlpha(0.12F), 1F).mode(BorderMode.IN))
 			.body(band -> {
 				TextNode.create(24, 22).text(Text.create("SKY", ShowTheme.label(12F, Color.WHITE.withAlpha(0.8F)))).anchorY(Align.CENTER).attach(band);
 			})
@@ -87,13 +84,13 @@ public class ShowDaylight extends UI implements IShowFocus {
 			.color(ShowTheme.REDSTONE.withAlpha(0.16F))
 			.visible(this::isNight)
 			.effect(RoundedNodeEffect.create(24F))
-			.effect(BorderNodeEffect.create(ShowTheme.REDSTONE.withAlpha(0.5F), 1F, BorderMode.IN))
+			.effect(BorderNodeEffect.create(ShowTheme.REDSTONE.withAlpha(0.5F), 1F).mode(BorderMode.IN))
 			.body(warning -> {
 				CircleNode.create(22, 18, 12).color(ShowTheme.REDSTONE).effect(ShadowNodeEffect.create(ShowTheme.REDSTONE, 10F)).attach(warning);
 				TextNode.create(48, 24).text(Text.create("Monsters spawn", ShowTheme.font(FontWeight.BOLD, 18F, ShowTheme.REDSTONE))).anchorY(Align.CENTER).attach(warning);
 			})
 			.attach(panel);
-			this.slider = ShowSliderNode.create(48, 790, 504, ShowTheme.GOLD, ShowTheme.DIAMOND).range(0D, 48000D, 50D).signal(this.time);
+			this.slider = ShowSliderNode.create(48, 790, 504, ShowTheme.GOLD, ShowTheme.DIAMOND).range(0D, 48000D, 50D).value(this.time);
 			this.slider.attach(panel);
 		})
 		.attach(this);
@@ -108,13 +105,13 @@ public class ShowDaylight extends UI implements IShowFocus {
 		CircleNode
 		.create(160, 180, 280)
 		.color(() -> ShowTheme.vertical(this.sky(0D), this.sky(0.5D)))
-		.effect(BorderNodeEffect.create(Color.WHITE.withAlpha(0.14F), 2F, BorderMode.IN))
-		.effect(ShadowNodeEffect.create(Color.BLACK.withAlpha(0.5F), 30F, 0D, 10D))
+		.effect(BorderNodeEffect.create(Color.WHITE.withAlpha(0.14F), 2F).mode(BorderMode.IN))
+		.effect(ShadowNodeEffect.create(Color.BLACK.withAlpha(0.5F), 30F).offsetY(10D))
 		.body(dial -> {
 			CircleNode.create(70, 70, 140).color(() -> this.sky(0D).withAlpha(0.6F)).effect(BlurNodeEffect.create(30F)).interactive(false).attach(dial);
 			RectNode.create(0, 139, 280, 2).color(Color.WHITE.withAlpha(0.25F)).attach(dial);
 			RectNode.create(0, 141, 280, 139).color(Color.BLACK.withAlpha(0.25F)).attach(dial);
-			RectNode.create(0, 0, 280, 280).color(Color.TRANSPARENT).interactive(false).layer((_, _) -> {
+			RectNode.create(0, 0, 280, 280).color(Color.TRANSPARENT).interactive(false).layer((_, _, _) -> {
 				ShowDaylight.celestial(ShowDaylight.SUN, this.orbitX(0D), this.orbitY(0D));
 				ShowDaylight.celestial(ShowDaylight.MOONS.get(this.day() % 8), this.orbitX(Math.PI), this.orbitY(Math.PI));
 			}).attach(dial);

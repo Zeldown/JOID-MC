@@ -15,9 +15,8 @@ import dev.joid.backend.minecraft.lib.resource.resolver.impl.GpuTextureResourceR
 import dev.joid.backend.minecraft.lib.resource.resolver.impl.NamespacedResourceResolver;
 import dev.joid.backend.minecraft.lib.resource.resolver.impl.NativeImageResourceResolver;
 import dev.joid.backend.minecraft.lib.resource.resolver.impl.SpriteResourceResolver;
+import dev.joid.base.glfw.binding.Lwjgl3AlBinding;
 import dev.joid.base.openal.AlAudioBridge;
-import dev.joid.base.openal.binding.Lwjgl3AlBinding;
-import dev.joid.internal.JOID;
 import dev.joid.lib.asset.locator.AssetLocator;
 import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.bridge.audio.IAudioBridge;
@@ -29,18 +28,17 @@ import dev.joid.lib.font.converter.TextConverter;
 import dev.joid.lib.font.markup.TextMarkup;
 import dev.joid.lib.input.key.resolver.KeyResolver;
 import dev.joid.lib.resource.resolver.ResourceResolver;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
-public final class MinecraftBackend extends Backend<MinecraftBackend> {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class MinecraftBackend extends Backend {
 
 	private static final MinecraftBackend INSTANCE = new MinecraftBackend();
 
 	private MinecraftRenderBridge render;
 	private MinecraftWindowBridge window;
-
-	private MinecraftBackend() {
-		super(JOID.VERSION);
-	}
 
 	public static @NonNull MinecraftBackend inst() {
 		return MinecraftBackend.INSTANCE;

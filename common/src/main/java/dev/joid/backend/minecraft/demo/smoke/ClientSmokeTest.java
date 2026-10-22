@@ -35,17 +35,17 @@ import dev.joid.backend.minecraft.bridge.ui.screen.UIScreen;
 import dev.joid.backend.minecraft.bridge.window.MinecraftWindowBridge;
 import dev.joid.backend.minecraft.demo.container.DemoContainer;
 import dev.joid.backend.minecraft.demo.ui.UIDemoContainer;
+import dev.joid.backend.minecraft.demo.ui.UIDemoMinecraftChoice;
 import dev.joid.backend.minecraft.demo.ui.UIDemoOverlayLayer;
 import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
 import dev.joid.demo.ui.DemoEntry;
-import dev.joid.demo.ui.UIDemoChoice;
 import dev.joid.internal.JOID;
 import dev.joid.internal.JOIDEnv;
 import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.input.key.Key;
 import dev.joid.lib.input.key.resolver.KeyResolver;
 import dev.joid.lib.ui.node.Node;
-import dev.joid.lib.ui.node.impl.design.shape.RectNode;
+import dev.joid.lib.ui.node.impl.shape.RectNode;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -206,19 +206,19 @@ public final class ClientSmokeTest {
 		}
 
 		ClientSmokeTest.press(GLFW.GLFW_KEY_J);
-		ClientSmokeTest.waitFor("UIDemoChoice opened by the key J", () -> Minecraft.getInstance().gui.screen() instanceof UIScreen && JOID.isOpen(UIDemoChoice.class), 30);
+		ClientSmokeTest.waitFor("UIDemoMinecraftChoice opened by the key J", () -> Minecraft.getInstance().gui.screen() instanceof UIScreen && JOID.isOpen(UIDemoMinecraftChoice.class), 30);
 		ClientSmokeTest.sleep(2000);
 	}
 
 	private static void verifyDebugKey(final List<String> failures) {
 		ClientSmokeTest.press(GLFW.GLFW_KEY_F3);
 		ClientSmokeTest.sleep(1000);
-		if (!ClientSmokeTest.computeOnClient(() -> JOID.getUi(UIDemoChoice.class).getNodeList().contains(JOID.getUi(UIDemoChoice.class).getDevNode()))) {
-			failures.add("F3 in UIDemoChoice does not show the dev panel of JOID");
+		if (!ClientSmokeTest.computeOnClient(() -> JOID.getUi(UIDemoMinecraftChoice.class).getNodeList().contains(JOID.getUi(UIDemoMinecraftChoice.class).getDevNode()))) {
+			failures.add("F3 in UIDemoMinecraftChoice does not show the dev panel of JOID");
 		}
 
 		if (ClientSmokeTest.computeOnClient(() -> Minecraft.getInstance().debugEntries.isOverlayVisible())) {
-			failures.add("F3 consumed by UIDemoChoice also shows the debug screen of Minecraft");
+			failures.add("F3 consumed by UIDemoMinecraftChoice also shows the debug screen of Minecraft");
 		}
 
 		ClientSmokeTest.press(GLFW.GLFW_KEY_F3);
@@ -232,19 +232,19 @@ public final class ClientSmokeTest {
 
 		ClientSmokeTest.press(GLFW.GLFW_KEY_F3);
 		ClientSmokeTest.press(GLFW.GLFW_KEY_J);
-		ClientSmokeTest.waitFor("UIDemoChoice opened again by the key J", () -> Minecraft.getInstance().gui.screen() instanceof UIScreen && JOID.isOpen(UIDemoChoice.class), 30);
+		ClientSmokeTest.waitFor("UIDemoMinecraftChoice opened again by the key J", () -> Minecraft.getInstance().gui.screen() instanceof UIScreen && JOID.isOpen(UIDemoMinecraftChoice.class), 30);
 		ClientSmokeTest.sleep(2000);
 	}
 
 	private static void verifyOverlays(final List<String> failures) {
 		ClientSmokeTest.click(ClientSmokeTest.entry("UIDemoOverlayLayer"));
-		ClientSmokeTest.waitFor("the demo overlays opened by a click on UIDemoChoice", () -> JOID.isOpen(UIDemoOverlayLayer.Hotbar.class) && JOID.isOpen(UIDemoOverlayLayer.Always.class), 30);
+		ClientSmokeTest.waitFor("the demo overlays opened by a click on UIDemoMinecraftChoice", () -> JOID.isOpen(UIDemoOverlayLayer.Hotbar.class) && JOID.isOpen(UIDemoOverlayLayer.Always.class), 30);
 		ClientSmokeTest.press(GLFW.GLFW_KEY_ESCAPE);
 		ClientSmokeTest.waitFor("the game without screen", () -> Minecraft.getInstance().gui.screen() == null, 30);
 		ClientSmokeTest.sleep(2000);
 
-		final int[] hotbar = ClientSmokeTest.computeOnClient(() -> ClientSmokeTest.bounds(JOID.getUi(UIDemoOverlayLayer.Hotbar.class).getNodeList().ordered().getFirst()));
-		final int[] always = ClientSmokeTest.computeOnClient(() -> ClientSmokeTest.bounds(JOID.getUi(UIDemoOverlayLayer.Always.class).getNodeList().ordered().getFirst()));
+		final int[] hotbar = ClientSmokeTest.computeOnClient(() -> ClientSmokeTest.bounds(JOID.getUi(UIDemoOverlayLayer.Hotbar.class).getNodeList().getFirst()));
+		final int[] always = ClientSmokeTest.computeOnClient(() -> ClientSmokeTest.bounds(JOID.getUi(UIDemoOverlayLayer.Always.class).getNodeList().getFirst()));
 		final BufferedImage hud = ClientSmokeTest.capture("joid-smoke-overlay");
 		ClientSmokeTest.expectColor(failures, "overlay above the hotbar", hud, hotbar, 0xDDDDDD, true);
 		ClientSmokeTest.expectColor(failures, "overlay always shown", hud, always, 0xDDDDDD, true);
@@ -274,7 +274,7 @@ public final class ClientSmokeTest {
 			final int scale = Minecraft.getInstance().getWindow().getGuiScale();
 			return new int[] {((int) ClientSmokeTest.field(screen, "leftPos") + hotbar.x) * scale, ((int) ClientSmokeTest.field(screen, "topPos") + hotbar.y) * scale, 16 * scale, 16 * scale};
 		});
-		final int[] button = ClientSmokeTest.computeOnClient(() -> ClientSmokeTest.bounds(JOID.getUi(UIDemoOverlayLayer.Interactive.class).getNodeList().ordered().getFirst().getChild(0, RectNode.class)));
+		final int[] button = ClientSmokeTest.computeOnClient(() -> ClientSmokeTest.bounds(JOID.getUi(UIDemoOverlayLayer.Interactive.class).getNodeList().getFirst().getChild(0, RectNode.class)));
 		ClientSmokeTest.click(slot);
 		ClientSmokeTest.expectCarried(failures, server, "a click on 3 diamonds of the inventory", 3);
 		ClientSmokeTest.click(button);
@@ -313,14 +313,14 @@ public final class ClientSmokeTest {
 			failures.add("F3+T printed errors: " + String.join(System.lineSeparator(), errors));
 		}
 
-		final int[] hotbar = ClientSmokeTest.computeOnClient(() -> ClientSmokeTest.bounds(JOID.getUi(UIDemoOverlayLayer.Hotbar.class).getNodeList().ordered().getFirst()));
+		final int[] hotbar = ClientSmokeTest.computeOnClient(() -> ClientSmokeTest.bounds(JOID.getUi(UIDemoOverlayLayer.Hotbar.class).getNodeList().getFirst()));
 		ClientSmokeTest.expectColor(failures, "overlay above the hotbar after F3+T", ClientSmokeTest.capture("joid-smoke-reloaded"), hotbar, 0xDDDDDD, true);
 	}
 
 	private static void verifyContainer(final List<String> failures) {
 		final MinecraftServer server = ClientSmokeTest.computeOnClient(() -> Minecraft.getInstance().getSingleplayerServer());
 		ClientSmokeTest.press(GLFW.GLFW_KEY_J);
-		ClientSmokeTest.waitFor("UIDemoChoice opened by the key J", () -> JOID.isOpen(UIDemoChoice.class), 30);
+		ClientSmokeTest.waitFor("UIDemoMinecraftChoice opened by the key J", () -> JOID.isOpen(UIDemoMinecraftChoice.class), 30);
 		ClientSmokeTest.sleep(2000);
 		ClientSmokeTest.click(ClientSmokeTest.entry("UIDemoContainer"));
 		ClientSmokeTest.waitFor("the demo container opened by its payload", () -> Minecraft.getInstance().gui.screen() instanceof ContainerUIScreen && JOID.isOpen(UIDemoContainer.class), 60);
@@ -335,7 +335,7 @@ public final class ClientSmokeTest {
 			return null;
 		});
 		ClientSmokeTest.sleep(1000);
-		final int[] slot = ClientSmokeTest.computeOnClient(() -> ClientSmokeTest.bounds(JOID.getUi(UIDemoContainer.class).getNodeList().ordered().getFirst().getChild(0, SlotNode.class)));
+		final int[] slot = ClientSmokeTest.computeOnClient(() -> ClientSmokeTest.bounds(JOID.getUi(UIDemoContainer.class).getNodeList().getFirst().getChild(0, SlotNode.class)));
 		ClientSmokeTest.click(slot);
 		ClientSmokeTest.expectCarried(failures, server, "a click on 10 emeralds of the demo container", 10);
 		ClientSmokeTest.click(slot);
@@ -390,9 +390,19 @@ public final class ClientSmokeTest {
 
 	private static int[] entry(final String label) {
 		return ClientSmokeTest.computeOnClient(() -> {
-			final int index = UIDemoChoice.LIST.stream().map(DemoEntry::getLabel).toList().indexOf(label);
-			return ClientSmokeTest.bounds(JOID.getUi(UIDemoChoice.class).getNodeList().ordered().getFirst().getChild(index, RectNode.class));
+			final int index = ClientSmokeTest.entries().stream().map(DemoEntry::getLabel).toList().indexOf(label);
+			return ClientSmokeTest.bounds(JOID.getUi(UIDemoMinecraftChoice.class).getNodeList().getFirst().getChild(index, RectNode.class));
 		});
+	}
+
+	private static List<DemoEntry> entries() {
+		try {
+			final Field field = UIDemoMinecraftChoice.class.getDeclaredField("LIST");
+			field.setAccessible(true);
+			return (List<DemoEntry>) field.get(null);
+		} catch (final ReflectiveOperationException exception) {
+			throw new AssertionError("Unable to read the entries of UIDemoMinecraftChoice", exception);
+		}
 	}
 
 	private static int[] bounds(final Node node) {

@@ -3,7 +3,7 @@ package dev.joid.backend.minecraft.lib.draw.entity;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-import dev.joid.backend.minecraft.lib.draw.raster.FeatureExternalRasterDrawable;
+import dev.joid.backend.minecraft.lib.draw.raster.FeatureDrawableRaster;
 import dev.joid.lib.draw.DrawUtils;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -94,7 +94,7 @@ public final class DrawEntity {
 		camera.orientation = tilt.conjugate(new Quaternionf()).rotateY((float) Math.PI);
 		final float size = (float) (unit / Math.min(width, height) / 1.5D);
 		final float center = state.boundingBoxHeight / 2F;
-		DrawUtils.RASTER.drawRaster(x - width / 4D, y - height / 4D, width * 1.5D, height * 1.5D, FeatureExternalRasterDrawable.create(Lighting.Entry.ENTITY_IN_UI, (pose, collector) -> {
+		DrawUtils.RASTER.drawRaster(x - width / 4D, y - height / 4D, width * 1.5D, height * 1.5D, FeatureDrawableRaster.create(Lighting.Entry.ENTITY_IN_UI, (pose, collector) -> {
 			pose.scale(size, -size, -size);
 			pose.translate(0F, center, 0F);
 			pose.mulPose(new Quaternionf().rotationZ((float) Math.PI).mul(tilt));

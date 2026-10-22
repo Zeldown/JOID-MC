@@ -2,7 +2,7 @@ package dev.joid.backend.minecraft.lib.draw.raster;
 
 import java.util.function.BiConsumer;
 
-import dev.joid.lib.draw.raster.IExternalRasterDrawable;
+import dev.joid.lib.draw.raster.DrawableRaster;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
@@ -15,7 +15,7 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.SubmitNodeStorage;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public final class FeatureExternalRasterDrawable implements IExternalRasterDrawable {
+public final class FeatureDrawableRaster implements DrawableRaster {
 
 	private static final PoseStack         POSE    = new PoseStack();
 	private static final SubmitNodeStorage STORAGE = new SubmitNodeStorage();
@@ -23,8 +23,8 @@ public final class FeatureExternalRasterDrawable implements IExternalRasterDrawa
 	private final Lighting.Entry                             lighting;
 	private final BiConsumer<PoseStack, SubmitNodeCollector> submit;
 
-	public static @NonNull FeatureExternalRasterDrawable create(final @NonNull Lighting.Entry lighting, final @NonNull BiConsumer<PoseStack, SubmitNodeCollector> submit) {
-		return new FeatureExternalRasterDrawable(lighting, submit);
+	public static @NonNull FeatureDrawableRaster create(final @NonNull Lighting.Entry lighting, final @NonNull BiConsumer<PoseStack, SubmitNodeCollector> submit) {
+		return new FeatureDrawableRaster(lighting, submit);
 	}
 
 	@Override
@@ -32,14 +32,14 @@ public final class FeatureExternalRasterDrawable implements IExternalRasterDrawa
 		final Minecraft minecraft = Minecraft.getInstance();
 		final float size = Math.min(width, height);
 		minecraft.gameRenderer.lighting().setupFor(this.lighting);
-		FeatureExternalRasterDrawable.POSE.pushPose();
+		FeatureDrawableRaster.POSE.pushPose();
 		try {
-			FeatureExternalRasterDrawable.POSE.translate(width / 2F, height / 2F, 0F);
-			FeatureExternalRasterDrawable.POSE.scale(size, -size, size);
-			this.submit.accept(FeatureExternalRasterDrawable.POSE, FeatureExternalRasterDrawable.STORAGE);
-			minecraft.gameRenderer.featureRenderDispatcher().renderAllFeatures(FeatureExternalRasterDrawable.STORAGE);
+			FeatureDrawableRaster.POSE.translate(width / 2F, height / 2F, 0F);
+			FeatureDrawableRaster.POSE.scale(size, -size, size);
+			this.submit.accept(FeatureDrawableRaster.POSE, FeatureDrawableRaster.STORAGE);
+			minecraft.gameRenderer.featureRenderDispatcher().renderAllFeatures(FeatureDrawableRaster.STORAGE);
 		} finally {
-			FeatureExternalRasterDrawable.POSE.popPose();
+			FeatureDrawableRaster.POSE.popPose();
 		}
 	}
 

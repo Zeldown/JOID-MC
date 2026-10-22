@@ -7,7 +7,7 @@ import dev.joid.backend.minecraft.lib.font.impl.minecraft.MinecraftFont;
 import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.block.BlockNode;
 import dev.joid.lib.color.Color;
-import dev.joid.lib.draw.text.builder.Text;
+import dev.joid.lib.draw.text.Text;
 import dev.joid.lib.font.FontWeight;
 import dev.joid.lib.font.TextInfo;
 import dev.joid.lib.resource.Resource;
@@ -16,13 +16,12 @@ import dev.joid.lib.ui.core.UI;
 import dev.joid.lib.ui.node.Node;
 import dev.joid.lib.ui.node.effect.impl.RoundedNodeEffect;
 import dev.joid.lib.ui.node.effect.impl.ShadowNodeEffect;
-import dev.joid.lib.ui.node.impl.design.resource.ResourceNode;
-import dev.joid.lib.ui.node.impl.design.shape.RectNode;
-import dev.joid.lib.ui.node.impl.design.text.TextNode;
-import dev.joid.lib.ui.node.impl.structure.reorderable.ReorderableFlexNode;
-import dev.joid.lib.ui.node.property.overflow.OverflowProperty;
+import dev.joid.lib.ui.node.impl.layout.ReorderableFlexNode;
+import dev.joid.lib.ui.node.impl.resource.ResourceNode;
+import dev.joid.lib.ui.node.impl.shape.RectNode;
+import dev.joid.lib.ui.node.impl.text.TextNode;
+import dev.joid.lib.ui.node.property.OverflowProperty;
 import dev.joid.lib.utils.align.Align;
-import dev.joid.lib.utils.box.BoundingBox;
 
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.resources.model.sprite.SpriteId;
@@ -57,7 +56,7 @@ public class ShowServers extends UI implements IShowFocus {
 	public ShowServers() {
 		this.rows     = new Node[ShowServers.SERVERS.size()];
 		this.order    = new ArrayList<>();
-		this.favorite = StringSignal.of(ShowServers.SERVERS.getFirst().name());
+		this.favorite = new StringSignal(ShowServers.SERVERS.getFirst().name());
 	}
 
 	@Override
@@ -78,22 +77,22 @@ public class ShowServers extends UI implements IShowFocus {
 			.effect(RoundedNodeEffect.create(28F))
 			.body(chip -> {
 				TextNode.create(24, 28).text(Text.create("FAVORITE", ShowTheme.label(14F, ShowTheme.GRASS))).anchorY(Align.CENTER).attach(chip);
-				TextNode.create(276, 28).text(Text.create(this.favorite::get, ShowTheme.font(FontWeight.BOLD, 20F, ShowTheme.TEXT), Align.END)).anchorX(Align.END).anchorY(Align.CENTER).attach(chip);
+				TextNode.create(276, 28).text(Text.create(this.favorite::get, ShowTheme.font(FontWeight.BOLD, 20F, ShowTheme.TEXT)).alignX(Align.END)).anchorX(Align.END).anchorY(Align.CENTER).attach(chip);
 			})
 			.attach(panel);
 			RectNode
 			.create(30, 160, 980, 730)
 			.color(Color.TRANSPARENT)
 			.overflow(OverflowProperty.SCROLL)
-			.scrollbar(ShowScrollbarNode.create(964, 0, 8, 150, BoundingBox.create(964, 0, 8, 730)))
+			.scrollbar(ShowScrollbarNode.create(964, 0, 8, 730))
 			.body(area -> {
 				final ReorderableFlexNode list = ReorderableFlexNode
 				.vertical(20, 0, 920)
-				.margin(12D)
 				.onReorderEnd(event -> {
-					this.order.add(event.getNewIndex(), this.order.remove(event.getOldIndex()));
+					this.order.add(event.getIndex(), this.order.remove(event.getPrevious()));
 					this.favorite.set(this.order.getFirst());
-				});
+				})
+				.margin(12D);
 				list.body(_ -> {
 					for (int index = 0; index < ShowServers.SERVERS.size(); index++) {
 						this.row(list, index);
@@ -130,8 +129,8 @@ public class ShowServers extends UI implements IShowFocus {
 			})
 			.attach(row);
 			TextNode.create(102, 28).text(Text.create(server.name(), ShowTheme.font(FontWeight.SEMI_BOLD, 24F, ShowTheme.TEXT))).anchorY(Align.CENTER).attach(row);
-			TextNode.create(102, 54).text(Text.create(server.motd(), TextInfo.create(MinecraftFont.DEFAULT, 16F, ShowTheme.TEXT).shadow(2F, 2F))).attach(row);
-			TextNode.create(820, 44).text(Text.create(server.players(), ShowTheme.font(FontWeight.SEMI_BOLD, 20F, ShowTheme.MUTED), Align.END)).anchorX(Align.END).anchorY(Align.CENTER).attach(row);
+			TextNode.create(102, 54).text(Text.create(server.motd(), TextInfo.create(MinecraftFont.DEFAULT, 16F).color(ShowTheme.TEXT).shadow(2F, 2F))).attach(row);
+			TextNode.create(820, 44).text(Text.create(server.players(), ShowTheme.font(FontWeight.SEMI_BOLD, 20F, ShowTheme.MUTED)).alignX(Align.END)).anchorX(Align.END).anchorY(Align.CENTER).attach(row);
 			ResourceNode.create(850, 36, 30, 24).resource(Resource.of(new SpriteId(Sheets.GUI_SHEET, Identifier.withDefaultNamespace("server_list/ping_" + server.ping())))).interactive(false).attach(row);
 		})
 		.hoverDuration(160L)

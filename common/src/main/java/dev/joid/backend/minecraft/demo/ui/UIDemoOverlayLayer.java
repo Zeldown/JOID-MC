@@ -5,16 +5,16 @@ import dev.joid.backend.minecraft.lib.ui.core.data.overlay.layer.UIDataOverlayLa
 import dev.joid.demo.DemoFont;
 import dev.joid.internal.JOID;
 import dev.joid.lib.color.Color;
-import dev.joid.lib.draw.text.builder.Text;
+import dev.joid.lib.draw.text.Text;
 import dev.joid.lib.font.TextInfo;
 import dev.joid.lib.input.cursor.Cursor;
 import dev.joid.lib.ui.core.UI;
 import dev.joid.lib.ui.core.data.UIData;
-import dev.joid.lib.ui.core.data.overlay.UIDataOverlay;
-import dev.joid.lib.ui.core.data.overlay.interaction.UIDataOverlayInteraction;
-import dev.joid.lib.ui.core.data.overlay.render.UIDataOverlayRender;
-import dev.joid.lib.ui.node.impl.design.shape.RectNode;
-import dev.joid.lib.ui.node.impl.design.text.TextNode;
+import dev.joid.lib.ui.core.data.UIDataOverlay;
+import dev.joid.lib.ui.core.data.UIDataOverlayInteraction;
+import dev.joid.lib.ui.core.data.UIDataOverlayRender;
+import dev.joid.lib.ui.node.impl.shape.RectNode;
+import dev.joid.lib.ui.node.impl.text.TextNode;
 import dev.joid.lib.utils.align.Align;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -55,13 +55,13 @@ public final class UIDemoOverlayLayer {
 
 		@Override
 		public void init() {
-			final TextInfo caption = TextInfo.create(DemoFont.MONTSERRAT, 24, UIDemoOverlayLayer.INK);
+			final TextInfo caption = TextInfo.create(DemoFont.MONTSERRAT, 24).color(UIDemoOverlayLayer.INK);
 
 			RectNode
 			.create(596, 840, 728, 60)
 			.color(UIDemoOverlayLayer.PLACEHOLDER)
 			.body(rect -> {
-				TextNode.create(364, 30).text(Text.create("Above the hotbar", caption, Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(rect);
+				TextNode.create(364, 30).text(Text.create("Above the hotbar", caption).alignX(Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(rect);
 			})
 			.attach(this);
 		}
@@ -104,8 +104,8 @@ public final class UIDemoOverlayLayer {
 
 		@Override
 		public void init() {
-			final TextInfo caption = TextInfo.create(DemoFont.MONTSERRAT, 24, UIDemoOverlayLayer.INK);
-			final TextInfo info = TextInfo.create(DemoFont.MONTSERRAT, 24, UIDemoOverlayLayer.PLACEHOLDER);
+			final TextInfo caption = TextInfo.create(DemoFont.MONTSERRAT, 24).color(UIDemoOverlayLayer.INK);
+			final TextInfo info = TextInfo.create(DemoFont.MONTSERRAT, 24).color(UIDemoOverlayLayer.PLACEHOLDER);
 
 			RectNode
 			.create(80, 420, 320, 240)
@@ -117,11 +117,11 @@ public final class UIDemoOverlayLayer {
 				.hoveredColor(UIDemoOverlayLayer.PANEL)
 				.cursor(Cursor.POINTER)
 				.body(button -> {
-					TextNode.create(90, 40).text(Text.create(() -> "Clicks " + this.clicks, info, Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(button);
+					TextNode.create(90, 40).text(Text.create(() -> "Clicks " + this.clicks, info).alignX(Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(button);
 				})
 				.onClick(_ -> this.clicks++)
 				.attach(rect);
-				TextNode.create(160, 200).text(Text.create("Interactive", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
+				TextNode.create(160, 200).text(Text.create("Interactive", caption).alignX(Align.CENTER)).anchorX(Align.CENTER).attach(rect);
 			})
 			.attach(this);
 		}
@@ -133,14 +133,14 @@ public final class UIDemoOverlayLayer {
 
 		@Override
 		public void init() {
-			final TextInfo caption = TextInfo.create(DemoFont.MONTSERRAT, 24, UIDemoOverlayLayer.INK);
+			final TextInfo caption = TextInfo.create(DemoFont.MONTSERRAT, 24).color(UIDemoOverlayLayer.INK);
 
 			RectNode
 			.create(1520, 420, 320, 240)
 			.color(UIDemoOverlayLayer.PLACEHOLDER)
 			.body(rect -> {
-				TextNode.create(160, 100).text(Text.create("F1", caption, Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(rect);
-				TextNode.create(160, 200).text(Text.create("Always", caption, Align.CENTER)).anchorX(Align.CENTER).attach(rect);
+				TextNode.create(160, 100).text(Text.create("F1", caption).alignX(Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(rect);
+				TextNode.create(160, 200).text(Text.create("Always", caption).alignX(Align.CENTER)).anchorX(Align.CENTER).attach(rect);
 			})
 			.attach(this);
 		}

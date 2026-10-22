@@ -38,19 +38,19 @@ public class NamespacedResourceResolver implements IResourceResolver {
 
 	public static @NonNull IResourceDecoder decoder(final @NonNull NamespacedAsset asset) {
 		final AnimationMetadataSection animation = asset.getAnimation();
-		return animation == null ? ResourceFormat.decoder(asset) : new AnimatedResourceDecoder(asset, McmetaResourceAnimationReader.create(animation));
+		return animation == null ? ResourceFormat.decoder(asset) : AnimatedResourceDecoder.create(asset, McmetaResourceAnimationReader.create(animation));
 	}
 
 	private static @NonNull ResourceData read(final @NonNull NamespacedAsset asset) {
 		final Identifier identifier = asset.getId();
 		if (NamespacedResourceResolver.isLoaded(identifier) && asset.getAnimation() == null) {
-			return ResourceReloader.inst().track(new ResourceData(asset.getUniqueId(), null).texture(GpuBorrowedTexture.create(() -> Minecraft.getInstance().getTextureManager().getTexture(identifier).getTextureView())), asset);
+			return ResourceReloader.inst().track(ResourceData.create(asset.getUniqueId(), null).texture(GpuBorrowedTexture.create(() -> Minecraft.getInstance().getTextureManager().getTexture(identifier).getTextureView())), asset);
 		}
 
 		try {
-			return ResourceReloader.inst().track(new ResourceData(asset.getUniqueId(), NamespacedResourceResolver.decoder(asset)), asset);
+			return ResourceReloader.inst().track(ResourceData.create(asset.getUniqueId(), NamespacedResourceResolver.decoder(asset)), asset);
 		} catch (final RuntimeException exception) {
-			final ResourceData data = new ResourceData(asset.getUniqueId(), null);
+			final ResourceData data = ResourceData.create(asset.getUniqueId(), null);
 			data.fail(exception);
 			return data;
 		}

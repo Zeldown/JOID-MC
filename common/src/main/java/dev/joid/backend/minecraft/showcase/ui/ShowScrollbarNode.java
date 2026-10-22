@@ -1,26 +1,25 @@
 package dev.joid.backend.minecraft.showcase.ui;
 
 import dev.joid.lib.color.Color;
-import dev.joid.lib.draw.DrawUtils;
-import dev.joid.lib.ui.node.impl.structure.scrollbar.ScrollbarNode;
-import dev.joid.lib.utils.box.BoundingBox;
+import dev.joid.lib.ui.node.effect.impl.RoundedNodeEffect;
+import dev.joid.lib.ui.node.effect.impl.ShadowNodeEffect;
+import dev.joid.lib.ui.node.impl.control.scrollbar.ScrollbarNode;
+import dev.joid.lib.ui.node.impl.shape.RectNode;
 
 public class ShowScrollbarNode extends ScrollbarNode {
 
-	protected ShowScrollbarNode(final double x, final double y, final double width, final double height, final BoundingBox scroll) {
-		super(x, y, width, height, scroll);
+	protected ShowScrollbarNode(final double x, final double y, final double width, final double height) {
+		super(x, y, width, height);
+		super.track(RectNode.create(0, 0, 0, 0).color(Color.WHITE.withAlpha(0.06F)).effect(RoundedNodeEffect.create((float) width / 2F)));
+		super.thumb(RectNode
+		.create(0, 0, 0, 0)
+		.color(ShowTheme.vertical(ShowTheme.GRASS, ShowTheme.EMERALD))
+		.effect(RoundedNodeEffect.create((float) width / 2F))
+		.effect(ShadowNodeEffect.create(ShowTheme.EMERALD.withAlpha(0.5F), 12F)));
 	}
 
-	public static ShowScrollbarNode create(final double x, final double y, final double width, final double height, final BoundingBox scroll) {
-		return new ShowScrollbarNode(x, y, width, height, scroll);
-	}
-
-	@Override
-	public void drawScrollbar(final double mouseX, final double mouseY) {
-		final BoundingBox scroll = super.getScroll();
-		DrawUtils.SHAPE.drawRoundedRect(scroll.getMinX(), scroll.getMinY(), scroll.getWidth(), scroll.getHeight(), Color.WHITE.withAlpha(0.06F), (float) scroll.getWidth() / 2F);
-		DrawUtils.SHAPE.drawShadow(super.getX(), super.getY(), super.getWidth(), super.getHeight(), ShowTheme.EMERALD.withAlpha(0.5F), (float) super.getWidth() / 2F, 12F);
-		DrawUtils.SHAPE.drawRoundedRect(super.getX(), super.getY(), super.getWidth(), super.getHeight(), ShowTheme.vertical(ShowTheme.GRASS, ShowTheme.EMERALD), (float) super.getWidth() / 2F);
+	public static ShowScrollbarNode create(final double x, final double y, final double width, final double height) {
+		return new ShowScrollbarNode(x, y, width, height);
 	}
 
 }

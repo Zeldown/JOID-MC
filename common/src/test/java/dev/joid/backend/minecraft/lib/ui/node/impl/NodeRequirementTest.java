@@ -1,7 +1,7 @@
 package dev.joid.backend.minecraft.lib.ui.node.impl;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.lang.reflect.Field;
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -79,18 +79,19 @@ public class NodeRequirementTest {
 		try {
 			NodeRequirementTest.checkRequirements(node);
 			Assert.fail("The " + node.getClass().getSimpleName() + " was accepted without its setting");
-		} catch (final InvocationTargetException exception) {
-			Assert.assertTrue(exception.getCause() instanceof IllegalStateException);
-			Assert.assertEquals(message, exception.getCause().getMessage());
+		} catch (final IllegalStateException exception) {
+			Assert.assertEquals(message, exception.getMessage());
 		} catch (final ReflectiveOperationException exception) {
 			throw new AssertionError(exception);
 		}
 	}
 
 	private static void checkRequirements(final Node node) throws ReflectiveOperationException {
-		final Method method = Node.class.getDeclaredMethod("checkRequirements");
-		method.setAccessible(true);
-		method.invoke(node);
+		final Field field = Node.class.getDeclaredField("requirementList");
+		field.setAccessible(true);
+		for (final Runnable requirement : (List<Runnable>) field.get(node)) {
+			requirement.run();
+		}
 	}
 
 }

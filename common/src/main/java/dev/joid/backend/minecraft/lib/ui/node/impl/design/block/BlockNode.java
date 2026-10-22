@@ -42,7 +42,7 @@ public class BlockNode extends Node {
 	}
 
 	public final <T extends BlockNode> @NonNull T block(final @NonNull Supplier<@NonNull BlockState> block) {
-		return super.follow("block", block, (final BlockNode node, final BlockState value) -> node.block = value);
+		return super.follow("block", block, value -> this.block = value);
 	}
 
 	public final <T extends BlockNode> @NonNull T rotationYaw(final double rotationYaw) {
@@ -50,7 +50,7 @@ public class BlockNode extends Node {
 	}
 
 	public final <T extends BlockNode> @NonNull T rotationYaw(final @NonNull Supplier<Double> rotationYaw) {
-		return super.follow("rotationYaw", rotationYaw, (final BlockNode node, final Double value) -> node.rotationYaw = value);
+		return super.follow("rotationYaw", rotationYaw, value -> this.rotationYaw = value);
 	}
 
 	public final <T extends BlockNode> @NonNull T rotationPitch(final double rotationPitch) {
@@ -58,7 +58,7 @@ public class BlockNode extends Node {
 	}
 
 	public final <T extends BlockNode> @NonNull T rotationPitch(final @NonNull Supplier<Double> rotationPitch) {
-		return super.follow("rotationPitch", rotationPitch, (final BlockNode node, final Double value) -> node.rotationPitch = value);
+		return super.follow("rotationPitch", rotationPitch, value -> this.rotationPitch = value);
 	}
 
 }

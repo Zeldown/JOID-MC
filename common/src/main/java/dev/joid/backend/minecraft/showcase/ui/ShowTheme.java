@@ -9,8 +9,8 @@ import dev.joid.lib.shader.impl.BorderShader.BorderMode;
 import dev.joid.lib.ui.node.effect.impl.BorderNodeEffect;
 import dev.joid.lib.ui.node.effect.impl.RoundedNodeEffect;
 import dev.joid.lib.ui.node.effect.impl.ShadowNodeEffect;
-import dev.joid.lib.ui.node.impl.design.shape.RectNode;
-import dev.joid.lib.utils.point.Point;
+import dev.joid.lib.ui.node.impl.shape.RectNode;
+import dev.joid.lib.utils.geom.Point;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -36,8 +36,8 @@ public final class ShowTheme {
 		.create(x, y, width, height)
 		.color(ShowTheme.vertical(ShowTheme.PANEL_TOP.withAlpha(0.86F), ShowTheme.PANEL_BOTTOM.withAlpha(0.92F)))
 		.effect(RoundedNodeEffect.create(28F))
-		.effect(BorderNodeEffect.create(Color.WHITE.withAlpha(0.10F), 1.5F, BorderMode.IN))
-		.effect(ShadowNodeEffect.create(Color.BLACK.withAlpha(0.55F), 60F, 0D, 24D));
+		.effect(BorderNodeEffect.create(Color.WHITE.withAlpha(0.10F), 1.5F).mode(BorderMode.IN))
+		.effect(ShadowNodeEffect.create(Color.BLACK.withAlpha(0.55F), 60F).offsetY(24D));
 	}
 
 	public static RectNode tile(final double x, final double y, final double width, final double height, final float radius) {
@@ -45,11 +45,11 @@ public final class ShowTheme {
 		.create(x, y, width, height)
 		.color(Color.WHITE.withAlpha(0.05F))
 		.effect(RoundedNodeEffect.create(radius))
-		.effect(BorderNodeEffect.create(Color.WHITE.withAlpha(0.06F), 1F, BorderMode.IN));
+		.effect(BorderNodeEffect.create(Color.WHITE.withAlpha(0.06F), 1F).mode(BorderMode.IN));
 	}
 
 	public static TextInfo font(final FontWeight weight, final float size, final Color color) {
-		return TextInfo.create(DemoFont.MONTSERRAT, weight, size, color);
+		return TextInfo.create(DemoFont.MONTSERRAT, size).weight(weight).color(color);
 	}
 
 	public static TextInfo label(final float size, final Color color) {
@@ -57,11 +57,11 @@ public final class ShowTheme {
 	}
 
 	public static Color vertical(final Color top, final Color bottom) {
-		return top.toGradient(bottom, Point.create(0D, 0D), Point.create(0D, 1D));
+		return top.toGradient(bottom, Point.of(0D, 0D), Point.of(0D, 1D));
 	}
 
 	public static Color horizontal(final Color left, final Color right) {
-		return left.toGradient(right, Point.create(0D, 0D), Point.create(1D, 0D));
+		return left.toGradient(right, Point.of(0D, 0D), Point.of(1D, 0D));
 	}
 
 	public static double now() {

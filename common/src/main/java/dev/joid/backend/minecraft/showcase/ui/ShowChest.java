@@ -9,14 +9,14 @@ import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.entity.EntityNode;
 import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
 import dev.joid.lib.color.Color;
-import dev.joid.lib.draw.text.builder.Text;
+import dev.joid.lib.draw.text.Text;
 import dev.joid.lib.font.FontWeight;
 import dev.joid.lib.ui.node.Node;
 import dev.joid.lib.ui.node.effect.impl.BlurNodeEffect;
 import dev.joid.lib.ui.node.effect.impl.RoundedNodeEffect;
-import dev.joid.lib.ui.node.impl.design.shape.CircleNode;
-import dev.joid.lib.ui.node.impl.design.shape.RectNode;
-import dev.joid.lib.ui.node.impl.design.text.TextNode;
+import dev.joid.lib.ui.node.impl.shape.CircleNode;
+import dev.joid.lib.ui.node.impl.shape.RectNode;
+import dev.joid.lib.ui.node.impl.text.TextNode;
 import dev.joid.lib.utils.align.Align;
 
 import net.minecraft.client.Minecraft;
@@ -50,14 +50,14 @@ public class ShowChest extends ContainerUI<ChestMenu> implements IShowFocus {
 			.body(card -> {
 				CircleNode.create(30, 90, 240).color(ShowTheme.GRASS.withAlpha(0.20F)).effect(BlurNodeEffect.create(40F)).interactive(false).attach(card);
 				EntityNode.create(30, 50, 240, 420).entity(Minecraft.getInstance().player).rotationYaw(() -> -25D + this.elapsed() * 12D).scale(0.9D).attach(card);
-				TextNode.create(150, 520).text(Text.create(Minecraft.getInstance().player.getName().getString(), ShowTheme.font(FontWeight.EXTRA_BOLD, 28F, ShowTheme.TEXT), Align.CENTER)).anchorX(Align.CENTER).attach(card);
-				TextNode.create(150, 562).text(Text.create(() -> "Survival · Level " + Minecraft.getInstance().player.experienceLevel, ShowTheme.font(FontWeight.MEDIUM, 16F, ShowTheme.MUTED), Align.CENTER)).anchorX(Align.CENTER).attach(card);
+				TextNode.create(150, 520).text(Text.create(Minecraft.getInstance().player.getName().getString(), ShowTheme.font(FontWeight.EXTRA_BOLD, 28F, ShowTheme.TEXT)).alignX(Align.CENTER)).anchorX(Align.CENTER).attach(card);
+				TextNode.create(150, 562).text(Text.create(() -> "Survival · Level " + Minecraft.getInstance().player.experienceLevel, ShowTheme.font(FontWeight.MEDIUM, 16F, ShowTheme.MUTED)).alignX(Align.CENTER)).anchorX(Align.CENTER).attach(card);
 				this.stat(card, 612, "Health", ShowTheme.REDSTONE, () -> Minecraft.getInstance().player.getHealth() / 20D);
 				this.stat(card, 666, "Hunger", ShowTheme.GOLD, () -> Minecraft.getInstance().player.getFoodData().getFoodLevel() / 20D);
 			})
 			.attach(panel);
 			TextNode.create(380, 44).text(Text.create("Chest", ShowTheme.font(FontWeight.EXTRA_BOLD, 34F, ShowTheme.TEXT))).attach(panel);
-			TextNode.create(1160, 62).text(Text.create(() -> this.countItems() + " / 27 slots", ShowTheme.font(FontWeight.SEMI_BOLD, 16F, ShowTheme.MUTED), Align.END)).anchorX(Align.END).attach(panel);
+			TextNode.create(1160, 62).text(Text.create(() -> this.countItems() + " / 27 slots", ShowTheme.font(FontWeight.SEMI_BOLD, 16F, ShowTheme.MUTED)).alignX(Align.END)).anchorX(Align.END).attach(panel);
 			this.grid(panel, 0, 100, 3);
 			TextNode.create(380, 388).text(Text.create("INVENTORY", ShowTheme.label(14F, ShowTheme.FAINT))).attach(panel);
 			RectNode.create(500, 396, 660, 1).color(Color.WHITE.withAlpha(0.08F)).attach(panel);

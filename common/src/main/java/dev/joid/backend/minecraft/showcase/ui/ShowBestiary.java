@@ -9,8 +9,8 @@ import dev.joid.backend.minecraft.lib.ui.node.impl.design.block.BlockNode;
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.entity.EntityNode;
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.item.ItemNode;
 import dev.joid.lib.color.Color;
+import dev.joid.lib.draw.text.Text;
 import dev.joid.lib.draw.text.TextMode;
-import dev.joid.lib.draw.text.builder.Text;
 import dev.joid.lib.font.FontWeight;
 import dev.joid.lib.font.TextInfo;
 import dev.joid.lib.shader.impl.BorderShader.BorderMode;
@@ -20,10 +20,10 @@ import dev.joid.lib.ui.node.effect.impl.BlurNodeEffect;
 import dev.joid.lib.ui.node.effect.impl.BorderNodeEffect;
 import dev.joid.lib.ui.node.effect.impl.RoundedNodeEffect;
 import dev.joid.lib.ui.node.effect.impl.ShadowNodeEffect;
-import dev.joid.lib.ui.node.impl.design.shape.CircleNode;
-import dev.joid.lib.ui.node.impl.design.shape.RectNode;
-import dev.joid.lib.ui.node.impl.design.text.TextNode;
-import dev.joid.lib.ui.node.impl.structure.container.ContainerNode;
+import dev.joid.lib.ui.node.impl.layout.ContainerNode;
+import dev.joid.lib.ui.node.impl.shape.CircleNode;
+import dev.joid.lib.ui.node.impl.shape.RectNode;
+import dev.joid.lib.ui.node.impl.text.TextNode;
 import dev.joid.lib.utils.align.Align;
 import lombok.Getter;
 
@@ -96,7 +96,7 @@ public class ShowBestiary extends UI implements IShowFocus {
 			.color(index == 0 ? ShowTheme.horizontal(ShowTheme.GRASS, ShowTheme.EMERALD) : Color.WHITE.withAlpha(0.07F))
 			.effect(RoundedNodeEffect.create(22F))
 			.body(tab -> {
-				TextNode.create(width / 2D, 22).text(Text.create(name, info, Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(tab);
+				TextNode.create(width / 2D, 22).text(Text.create(name, info).alignX(Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(tab);
 			})
 			.attach(this);
 			x += width + 12D;
@@ -114,8 +114,8 @@ public class ShowBestiary extends UI implements IShowFocus {
 		.hoveredColor(ShowTheme.vertical(Color.decode("#232B3D").withAlpha(0.92F), ShowTheme.INK.withAlpha(0.94F)))
 		.y(() -> y + 48D * (1D - ShowTheme.ease(this.elapsed(), delay, 0.7D)) - (this.selected == index ? 8D : 0D))
 		.effect(RoundedNodeEffect.create(24F))
-		.effect(BorderNodeEffect.create(Color.WHITE.withAlpha(0.09F), 1.5F, BorderMode.IN))
-		.effect(ShadowNodeEffect.create(Color.BLACK.withAlpha(0.5F), 36F, 0D, 16D))
+		.effect(BorderNodeEffect.create(Color.WHITE.withAlpha(0.09F), 1.5F).mode(BorderMode.IN))
+		.effect(ShadowNodeEffect.create(Color.BLACK.withAlpha(0.5F), 36F).offsetY(16D))
 		.onHoverStart(_ -> this.selected = index)
 		.body(card -> {
 			CircleNode.create(70, 34, 160).color(entry.color().withAlpha(0.22F)).effect(BlurNodeEffect.create(36F)).interactive(false).attach(card);
@@ -135,7 +135,7 @@ public class ShowBestiary extends UI implements IShowFocus {
 			.color(entry.color().withAlpha(0.14F))
 			.effect(RoundedNodeEffect.create(14F))
 			.body(tag -> {
-				TextNode.create(width / 2D, 14).text(Text.create(entry.kind(), chip, Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(tag);
+				TextNode.create(width / 2D, 14).text(Text.create(entry.kind(), chip).alignX(Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(tag);
 			})
 			.attach(card);
 		})
@@ -167,9 +167,9 @@ public class ShowBestiary extends UI implements IShowFocus {
 			.create(36, 800, 318, 60)
 			.color(ShowTheme.horizontal(ShowTheme.GRASS, ShowTheme.EMERALD))
 			.effect(RoundedNodeEffect.create(18F))
-			.effect(ShadowNodeEffect.create(ShowTheme.EMERALD.withAlpha(0.45F), 24F, 0D, 6D))
+			.effect(ShadowNodeEffect.create(ShowTheme.EMERALD.withAlpha(0.45F), 24F).offsetY(6D))
 			.body(button -> {
-				TextNode.create(159, 30).text(Text.create("Track", ShowTheme.font(FontWeight.EXTRA_BOLD, 20F, ShowTheme.INK), Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(button);
+				TextNode.create(159, 30).text(Text.create("Track", ShowTheme.font(FontWeight.EXTRA_BOLD, 20F, ShowTheme.INK)).alignX(Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(button);
 			})
 			.attach(panel);
 		})

@@ -107,7 +107,7 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 
 	@Override
 	public boolean mouseClicked(final MouseButtonEvent event, final boolean doubleClick) {
-		if (this.bridge.mousePressed(MouseButton.from(event.button()))) {
+		if (this.bridge.mousePressed(MouseButton.of(event.button()))) {
 			this.consumedButtons.add(event.button());
 			return true;
 		}
@@ -121,7 +121,7 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 
 	@Override
 	public boolean mouseReleased(final MouseButtonEvent event) {
-		final boolean consumed = this.bridge.mouseReleased(MouseButton.from(event.button()));
+		final boolean consumed = this.bridge.mouseReleased(MouseButton.of(event.button()));
 		if (this.consumedButtons.remove(event.button())) {
 			return true;
 		}
@@ -135,12 +135,12 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 
 	@Override
 	public boolean keyPressed(final KeyEvent event) {
-		return this.bridge.keyPressed(GlfwKeys.getKey(event.key())) || super.keyPressed(event);
+		return this.bridge.keyPressed(GlfwKeys.getPhysicalKey(event.key()), GlfwKeys.getKey(event.key())) || super.keyPressed(event);
 	}
 
 	@Override
 	public boolean keyReleased(final KeyEvent event) {
-		return this.bridge.keyReleased(GlfwKeys.getKey(event.key())) || super.keyReleased(event);
+		return this.bridge.keyReleased(GlfwKeys.getPhysicalKey(event.key()), GlfwKeys.getKey(event.key())) || super.keyReleased(event);
 	}
 
 	@Override
@@ -221,7 +221,7 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 
 	private List<Node> getNodeList(final double x, final double y) {
 		final Window window = Minecraft.getInstance().getWindow();
-		final List<UI> uiList = new ArrayList<>(this.bridge.getUiList().ordered());
+		final List<UI> uiList = new ArrayList<>(this.bridge.getUiList());
 		for (int index = uiList.size() - 1; index >= 0; index--) {
 			final UI ui = uiList.get(index);
 			if (ui != this.ui && (!ui.getData().active() || !ui.getData().visible())) {

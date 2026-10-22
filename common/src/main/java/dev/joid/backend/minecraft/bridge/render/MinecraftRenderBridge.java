@@ -181,7 +181,7 @@ public final class MinecraftRenderBridge extends RenderBridge {
 			return;
 		}
 
-		final StencilEmulation stencil = StencilEmulation.create(state, target.getStencil() != null);
+		final StencilEmulation stencil = StencilEmulation.from(state, target.getStencil() != null);
 		final boolean color = state.isColorWrite() || state.isDepthTest() && state.isDepthWrite();
 		if (!color && !stencil.isWrite()) {
 			return;
@@ -191,7 +191,7 @@ public final class MinecraftRenderBridge extends RenderBridge {
 		final GpuBufferSlice vertices = this.uploadVertices(buffer);
 		final GpuBufferSlice uniforms = blazeShader.upload(state, buffer, this.getProjectionMatrix(state, target), super.getModelView(), stencil);
 		if (color) {
-			this.record(PipelineKey.create(shader, state, primitive), target.getView(), target.getDepthView(), stencil.isTest() ? target.getStencilView() : ((MinecraftTexture) super.getEmptyTexture()).getView(), blazeShader, vertices, uniforms, buffer.getCount());
+			this.record(PipelineKey.of(shader, state, primitive), target.getView(), target.getDepthView(), stencil.isTest() ? target.getStencilView() : ((MinecraftTexture) super.getEmptyTexture()).getView(), blazeShader, vertices, uniforms, buffer.getCount());
 		}
 
 		if (stencil.isWrite()) {

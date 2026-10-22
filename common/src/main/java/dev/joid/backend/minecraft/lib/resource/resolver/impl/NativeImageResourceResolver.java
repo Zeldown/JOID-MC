@@ -22,7 +22,7 @@ public class NativeImageResourceResolver implements IResourceResolver {
 	public @NonNull Resource resolve(final @NonNull ResourceBuilder builder, final @NonNull Object input) {
 		final NativeImage image = (NativeImage) input;
 		final String uniqueId = "native_image_" + System.identityHashCode(image);
-		return builder.compute(uniqueId, () -> new ResourceData(uniqueId, new RasterResourceDecoder(NativeImageResourceResolver.toBufferedImage(image)))).nearest();
+		return builder.compute(uniqueId, () -> ResourceData.create(uniqueId, RasterResourceDecoder.create(NativeImageResourceResolver.toBufferedImage(image)))).nearest();
 	}
 
 	private static BufferedImage toBufferedImage(final NativeImage image) {

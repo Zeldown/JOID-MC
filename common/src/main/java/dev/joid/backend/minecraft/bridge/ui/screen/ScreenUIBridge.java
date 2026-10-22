@@ -7,7 +7,9 @@ import dev.joid.backend.minecraft.bridge.window.MinecraftWindowBridge;
 import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
 import dev.joid.lib.bridge.ui.StackUIBridge;
 import dev.joid.lib.ui.core.UI;
-import dev.joid.lib.ui.core.data.overlay.UIDataOverlayObject;
+import dev.joid.lib.ui.core.data.UIDataOverlay;
+import dev.joid.lib.ui.core.data.UIDataOverlayObject;
+import dev.joid.lib.utils.annotation.AnnotationValues;
 import lombok.NonNull;
 
 import net.minecraft.client.Minecraft;
@@ -45,11 +47,11 @@ public final class ScreenUIBridge extends StackUIBridge {
 
 	@Override
 	public boolean canHandle(final @NonNull Class<? extends UI> clazz) {
-		return !UIDataOverlayObject.getOrDefault(clazz).active();
+		return !AnnotationValues.read(clazz.getAnnotation(UIDataOverlay.class), UIDataOverlayObject.create()).active();
 	}
 
 	public UIDataMinecraft getMinecraftData() {
-		for (final UI ui : super.getUiList().ordered()) {
+		for (final UI ui : super.getUiList()) {
 			if (!ui.getOverlay().active()) {
 				return ui.getClass().getAnnotation(UIDataMinecraft.class);
 			}

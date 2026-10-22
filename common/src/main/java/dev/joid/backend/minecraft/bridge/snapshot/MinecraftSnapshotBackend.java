@@ -48,7 +48,7 @@ public final class MinecraftSnapshotBackend implements ISnapshotBackend {
 			}
 
 			try (GpuBufferSlice.MappedView view = buffer.map(true, false)) {
-				return SnapshotImage.fromBytes(view.data(), width, height, true, PixelLayout.RGBA8);
+				return SnapshotImage.from(view.data(), width, height, true, PixelLayout.RGBA8);
 			}
 		} finally {
 			buffer.close();

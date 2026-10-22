@@ -11,7 +11,7 @@ import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.ui.core.UI;
 import dev.joid.lib.ui.node.Node;
 import dev.joid.lib.ui.node.impl.dev.DevNode;
-import dev.joid.lib.ui.node.impl.structure.container.ContainerNode;
+import dev.joid.lib.ui.node.impl.layout.ContainerNode;
 import lombok.Getter;
 import lombok.NonNull;
 

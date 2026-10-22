@@ -1,6 +1,6 @@
 package dev.joid.backend.minecraft.lib.draw.item;
 
-import dev.joid.backend.minecraft.lib.draw.raster.FeatureExternalRasterDrawable;
+import dev.joid.backend.minecraft.lib.draw.raster.FeatureDrawableRaster;
 import dev.joid.backend.minecraft.lib.font.impl.minecraft.MinecraftFont;
 import dev.joid.lib.color.Color;
 import dev.joid.lib.draw.DrawUtils;
@@ -38,7 +38,7 @@ public final class DrawItem {
 		final Minecraft minecraft = Minecraft.getInstance();
 		final ItemStackRenderState state = new ItemStackRenderState();
 		minecraft.getItemModelResolver().updateForTopItem(state, stack, ItemDisplayContext.GUI, minecraft.level, minecraft.player, 0);
-		DrawUtils.RASTER.drawRaster(x, y, size, size, FeatureExternalRasterDrawable.create(state.usesBlockLight() ? Lighting.Entry.ITEMS_3D : Lighting.Entry.ITEMS_FLAT, (pose, collector) -> state.submit(pose, collector, LightCoordsUtil.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0)));
+		DrawUtils.RASTER.drawRaster(x, y, size, size, FeatureDrawableRaster.create(state.usesBlockLight() ? Lighting.Entry.ITEMS_3D : Lighting.Entry.ITEMS_FLAT, (pose, collector) -> state.submit(pose, collector, LightCoordsUtil.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0)));
 	}
 
 	public void drawItemBar(final double x, final double y, final double size, final @NonNull ItemStack stack) {
@@ -79,7 +79,7 @@ public final class DrawItem {
 		}
 
 		final double unit = size / 16D;
-		final TextInfo info = TextInfo.create(MinecraftFont.DEFAULT, (float) (MinecraftFont.SIZE * unit), Color.WHITE).shadowTint(0.25F).shadow((float) unit, (float) unit);
+		final TextInfo info = TextInfo.create(MinecraftFont.DEFAULT, (float) (MinecraftFont.SIZE * unit)).color(Color.WHITE).shadowTint(0.25F).shadow((float) unit, (float) unit);
 		DrawUtils.TEXT.drawText(x + 17D * unit - info.getWidth(count), y + 9D * unit, count, info, Align.START, Align.START);
 	}
 

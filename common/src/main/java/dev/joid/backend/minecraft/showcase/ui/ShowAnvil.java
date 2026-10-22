@@ -9,16 +9,16 @@ import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.item.ItemNode;
 import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
 import dev.joid.lib.color.Color;
-import dev.joid.lib.draw.text.builder.Text;
+import dev.joid.lib.draw.text.Text;
 import dev.joid.lib.font.FontWeight;
 import dev.joid.lib.font.TextInfo;
 import dev.joid.lib.signal.impl.primitive.StringSignal;
 import dev.joid.lib.ui.node.Node;
 import dev.joid.lib.ui.node.effect.impl.BlurNodeEffect;
 import dev.joid.lib.ui.node.effect.impl.RoundedNodeEffect;
-import dev.joid.lib.ui.node.impl.design.shape.CircleNode;
-import dev.joid.lib.ui.node.impl.design.shape.RectNode;
-import dev.joid.lib.ui.node.impl.design.text.TextNode;
+import dev.joid.lib.ui.node.impl.shape.CircleNode;
+import dev.joid.lib.ui.node.impl.shape.RectNode;
+import dev.joid.lib.ui.node.impl.text.TextNode;
 import dev.joid.lib.utils.align.Align;
 
 import net.minecraft.client.Minecraft;
@@ -43,7 +43,7 @@ public class ShowAnvil extends ContainerUI<AnvilMenu> implements IShowFocus, Con
 	public ShowAnvil(final AnvilMenu container) {
 		super(container);
 
-		this.name      = StringSignal.of("");
+		this.name      = new StringSignal("");
 		this.slotNodes = new ArrayList<>();
 		container.addSlotListener(this);
 	}
@@ -60,22 +60,22 @@ public class ShowAnvil extends ContainerUI<AnvilMenu> implements IShowFocus, Con
 		.body(panel -> {
 			this.preview(panel);
 			TextNode.create(380, 44).text(Text.create("Anvil", ShowTheme.font(FontWeight.EXTRA_BOLD, 34F, ShowTheme.TEXT))).attach(panel);
-			TextNode.create(1160, 62).text(Text.create(() -> "Level " + Minecraft.getInstance().player.experienceLevel, ShowTheme.font(FontWeight.SEMI_BOLD, 16F, ShowTheme.GRASS), Align.END)).anchorX(Align.END).attach(panel);
+			TextNode.create(1160, 62).text(Text.create(() -> "Level " + Minecraft.getInstance().player.experienceLevel, ShowTheme.font(FontWeight.SEMI_BOLD, 16F, ShowTheme.GRASS)).alignX(Align.END)).anchorX(Align.END).attach(panel);
 			TextNode.create(380, 104).text(Text.create("ITEM NAME", ShowTheme.label(14F, ShowTheme.FAINT))).attach(panel);
 			this.field = ShowFieldNode
 			.create(380, 128, 780, ShowTheme.GRASS)
-			.info(TextInfo.create(MinecraftFont.DEFAULT, 24F, ShowTheme.TEXT).shadow(3F, 3F))
+			.info(TextInfo.create(MinecraftFont.DEFAULT, 24F).color(ShowTheme.TEXT).shadow(3F, 3F))
 			.marginHorizontal(24D)
 			.maxTextLength(AnvilMenu.MAX_NAME_LENGTH)
 			.focused(true)
-			.signal(this.name)
+			.text(this.name)
 			.onChange(event -> this.rename(event.getText()))
 			.attach(panel);
 			TextNode.create(382, 210).text(() -> Text.create(this.hint(), ShowTheme.font(FontWeight.SEMI_BOLD, 15F, this.hintColor()))).attach(panel);
 			this.tile(panel, AnvilMenu.INPUT_SLOT, 380);
-			TextNode.create(531, 296).text(Text.create("+", TextInfo.create(MinecraftFont.DEFAULT, 32F, ShowTheme.FAINT), Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(panel);
+			TextNode.create(531, 296).text(Text.create("+", TextInfo.create(MinecraftFont.DEFAULT, 32F).color(ShowTheme.FAINT)).alignX(Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(panel);
 			this.tile(panel, AnvilMenu.ADDITIONAL_SLOT, 578);
-			TextNode.create(729, 296).text(Text.create("\u2192", TextInfo.create(MinecraftFont.DEFAULT, 32F, ShowTheme.FAINT), Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(panel);
+			TextNode.create(729, 296).text(Text.create("\u2192", TextInfo.create(MinecraftFont.DEFAULT, 32F).color(ShowTheme.FAINT)).alignX(Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(panel);
 			this.tile(panel, AnvilMenu.RESULT_SLOT, 776);
 			TextNode.create(380, 388).text(Text.create("INVENTORY", ShowTheme.label(14F, ShowTheme.FAINT))).attach(panel);
 			RectNode.create(500, 396, 660, 1).color(Color.WHITE.withAlpha(0.08F)).attach(panel);
@@ -111,8 +111,8 @@ public class ShowAnvil extends ContainerUI<AnvilMenu> implements IShowFocus, Con
 			TextNode.create(28, 32).text(Text.create("PREVIEW", ShowTheme.label(13F, ShowTheme.FAINT))).attach(card);
 			CircleNode.create(40, 100, 220).color(ShowTheme.DIAMOND.withAlpha(0.20F)).effect(BlurNodeEffect.create(40F)).interactive(false).attach(card);
 			ItemNode.create(70, 130, 160, 160).stack(this::item).glint(true).interactive(false).y(() -> 130D + 6D * Math.sin(this.elapsed() * 2D)).attach(card);
-			TextNode.create(150, 360).text(Text.create(this::title, TextInfo.create(MinecraftFont.DEFAULT, 16F, ShowTheme.TEXT).shadow(2F, 2F), Align.CENTER)).anchorX(Align.CENTER).attach(card);
-			TextNode.create(150, 400).text(Text.create("\u00A77Sharpness V", TextInfo.create(MinecraftFont.DEFAULT, 16F, ShowTheme.TEXT).shadow(2F, 2F), Align.CENTER)).anchorX(Align.CENTER).visible(() -> !this.item().isEmpty()).attach(card);
+			TextNode.create(150, 360).text(Text.create(this::title, TextInfo.create(MinecraftFont.DEFAULT, 16F).color(ShowTheme.TEXT).shadow(2F, 2F)).alignX(Align.CENTER)).anchorX(Align.CENTER).attach(card);
+			TextNode.create(150, 400).text(Text.create("\u00A77Sharpness V", TextInfo.create(MinecraftFont.DEFAULT, 16F).color(ShowTheme.TEXT).shadow(2F, 2F)).alignX(Align.CENTER)).anchorX(Align.CENTER).visible(() -> !this.item().isEmpty()).attach(card);
 			RectNode.create(28, 480, 244, 1).color(Color.WHITE.withAlpha(0.08F)).attach(card);
 			TextNode.create(28, 504).text(Text.create("COST", ShowTheme.label(12F, ShowTheme.FAINT))).attach(card);
 			TextNode.create(28, 528).text(() -> Text.create(this.cost(), ShowTheme.font(FontWeight.EXTRA_BOLD, 26F, super.getContainer().getCost() >= 40 ? ShowTheme.REDSTONE : ShowTheme.TEXT))).attach(card);
@@ -121,7 +121,7 @@ public class ShowAnvil extends ContainerUI<AnvilMenu> implements IShowFocus, Con
 			.color(() -> this.isReady() ? ShowTheme.horizontal(ShowTheme.GRASS, ShowTheme.EMERALD) : Color.WHITE.withAlpha(0.07F))
 			.effect(RoundedNodeEffect.create(18F))
 			.body(button -> {
-				TextNode.create(122, 30).text(() -> Text.create(this.isReady() ? "Take the result" : "Rename to forge", ShowTheme.font(FontWeight.EXTRA_BOLD, 18F, this.isReady() ? ShowTheme.INK : ShowTheme.FAINT), Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(button);
+				TextNode.create(122, 30).text(() -> Text.create(this.isReady() ? "Take the result" : "Rename to forge", ShowTheme.font(FontWeight.EXTRA_BOLD, 18F, this.isReady() ? ShowTheme.INK : ShowTheme.FAINT)).alignX(Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(button);
 			})
 			.attach(card);
 		})

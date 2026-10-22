@@ -77,14 +77,15 @@ processResources {
             'forge_version'                : forge_version,
             'forge_loader_version_range'   : forge_loader_version_range,
             'credits'                      : credits,
-            'java_version'                 : java_version
+            'java_version'                 : java_version,
+            'joid_version'                 : joid_version
     ]
 
     var jsonExpandProps = expandProps.collectEntries {
         key, value -> [(key): value instanceof String ? value.replace('\n', '\\\\n') : value]
     }
 
-    filesMatching(['META-INF/mods.toml', 'META-INF/neoforge.mods.toml']) {
+    filesMatching(['META-INF/mods.toml', 'META-INF/neoforge.mods.toml', 'dev/joid/backend/minecraft/backend.properties']) {
         expand expandProps
     }
 

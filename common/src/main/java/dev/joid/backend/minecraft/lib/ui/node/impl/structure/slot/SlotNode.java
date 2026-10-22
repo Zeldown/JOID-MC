@@ -106,7 +106,7 @@ public class SlotNode extends Node {
 	}
 
 	public final <T extends SlotNode> @NonNull T slot(final @NonNull Supplier<@NonNull Slot> slot) {
-		return super.follow("slot", slot, (final SlotNode node, final Slot value) -> node.slot = value);
+		return super.follow("slot", slot, value -> this.slot = value);
 	}
 
 	public final <T extends SlotNode> @NonNull T color(final @NonNull Color color) {
@@ -114,7 +114,7 @@ public class SlotNode extends Node {
 	}
 
 	public final <T extends SlotNode> @NonNull T color(final @NonNull Supplier<@NonNull Color> color) {
-		return super.follow("color", color, (final SlotNode node, final Color value) -> node.color = value);
+		return super.follow("color", color, value -> this.color = value);
 	}
 
 	public final <T extends SlotNode> @NonNull T hoveredColor(final Color hoveredColor) {
@@ -122,7 +122,7 @@ public class SlotNode extends Node {
 	}
 
 	public final <T extends SlotNode> @NonNull T hoveredColor(final @NonNull Supplier<Color> hoveredColor) {
-		return super.follow("hoveredColor", hoveredColor, (final SlotNode node, final Color value) -> node.hoveredColor = value);
+		return super.follow("hoveredColor", hoveredColor, value -> this.hoveredColor = value);
 	}
 
 	private void drawHighlight(final ContainerUIScreen<?> screen) {

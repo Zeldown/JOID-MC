@@ -2,7 +2,6 @@ package dev.joid.backend.minecraft.bridge.window;
 
 import org.lwjgl.glfw.GLFW;
 
-import dev.joid.base.glfw.GlfwWindows;
 import dev.joid.base.glfw.input.GlfwKeys;
 import dev.joid.lib.bridge.window.IWindowBridge;
 import dev.joid.lib.input.cursor.Cursor;
@@ -50,7 +49,7 @@ public final class MinecraftWindowBridge implements IWindowBridge {
 		}
 
 		final Window window = Minecraft.getInstance().getWindow();
-		return GlfwWindows.toFramebuffer(Minecraft.getInstance().mouseHandler.xpos(), window.getScreenWidth(), window.getWidth());
+		return MinecraftWindowBridge.toFramebuffer(Minecraft.getInstance().mouseHandler.xpos(), window.getScreenWidth(), window.getWidth());
 	}
 
 	@Override
@@ -60,7 +59,7 @@ public final class MinecraftWindowBridge implements IWindowBridge {
 		}
 
 		final Window window = Minecraft.getInstance().getWindow();
-		return GlfwWindows.toFramebuffer(Minecraft.getInstance().mouseHandler.ypos(), window.getScreenHeight(), window.getHeight());
+		return MinecraftWindowBridge.toFramebuffer(Minecraft.getInstance().mouseHandler.ypos(), window.getScreenHeight(), window.getHeight());
 	}
 
 	@Override
@@ -69,13 +68,8 @@ public final class MinecraftWindowBridge implements IWindowBridge {
 	}
 
 	@Override
-	public boolean isKeyDown(final @NonNull Key key) {
-		return GlfwKeys.isKeyDown(key, code -> InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), code));
-	}
-
-	@Override
-	public boolean isPhysicalKeyDown(final @NonNull Key key) {
-		return GlfwKeys.isPhysicalKeyDown(key, code -> InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), code));
+	public boolean isKeyDown(final @NonNull Key physicalKey) {
+		return GlfwKeys.isKeyDown(physicalKey, code -> InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), code));
 	}
 
 	@Override
@@ -113,6 +107,10 @@ public final class MinecraftWindowBridge implements IWindowBridge {
 			case RESIZE_NWSE -> DiagonalCursor.NWSE;
 			case RESIZE_NESW -> DiagonalCursor.NESW;
 		};
+	}
+
+	private static double toFramebuffer(final double position, final int windowSize, final int framebufferSize) {
+		return windowSize == 0 ? position : position * framebufferSize / windowSize;
 	}
 
 	private static final class DiagonalCursor {
