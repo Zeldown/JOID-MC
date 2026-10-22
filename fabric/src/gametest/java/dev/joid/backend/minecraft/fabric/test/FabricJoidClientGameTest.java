@@ -58,7 +58,9 @@ import dev.joid.demo.ui.DemoEntry;
 import dev.joid.demo.ui.UIDemo;
 import dev.joid.demo.ui.UIDemoChoice;
 import dev.joid.demo.ui.cursor.UIDemoCursor;
+import dev.joid.demo.ui.event.UIDemoEventFlow;
 import dev.joid.demo.ui.font.UIDemoFont;
+import dev.joid.demo.ui.node.impl.control.checkbox.DemoCheckboxNode;
 import dev.joid.demo.ui.resource.UIDemoPlayer;
 import dev.joid.demo.ui.shader.UIDemoEffect;
 import dev.joid.demo.ui.shader.UIDemoShader;
@@ -331,6 +333,10 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			if (entry.getState() != null) {
 				context.runOnClient(_ -> entry.getAction().run());
 			} else if (UIDemo.class.isAssignableFrom(FabricJoidClientGameTest.uiClass(entry))) {
+				if (FabricJoidClientGameTest.uiClass(entry) == UIDemoEventFlow.class) {
+					FabricJoidClientGameTest.click(context, context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoEventFlow.class), DemoCheckboxNode.class)).getFirst());
+				}
+
 				for (int attempt = 0; attempt < 3 && context.computeOnClient(_ -> FabricJoidClientGameTest.isShown(entry)); attempt++) {
 					context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
 					for (int tick = 0; tick < 60 && context.computeOnClient(_ -> FabricJoidClientGameTest.isShown(entry)); tick += 5) {
@@ -1698,7 +1704,10 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 	}
 
 	private static List<int[]> bounds(final Class<? extends Node> clazz) {
-		final UI ui = JOID.getUi(UIDemoMinecraft.class);
+		return FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoMinecraft.class), clazz);
+	}
+
+	private static List<int[]> bounds(final UI ui, final Class<? extends Node> clazz) {
 		final List<int[]> bounds = new ArrayList<>();
 		for (final Node node : ui.getNodeList()) {
 			FabricJoidClientGameTest.bounds(ui, node, clazz, bounds);
