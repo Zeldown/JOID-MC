@@ -334,7 +334,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 				context.runOnClient(_ -> entry.getAction().run());
 			} else if (UIDemo.class.isAssignableFrom(FabricJoidClientGameTest.uiClass(entry))) {
 				if (FabricJoidClientGameTest.uiClass(entry) == UIDemoEventFlow.class) {
-					FabricJoidClientGameTest.click(context, context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoEventFlow.class), DemoCheckboxNode.class)).getFirst());
+					FabricJoidClientGameTest.click(context, context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoEventFlow.class), DemoCheckboxNode.class)).get(1));
 				}
 
 				for (int attempt = 0; attempt < 3 && context.computeOnClient(_ -> FabricJoidClientGameTest.isShown(entry)); attempt++) {
@@ -353,6 +353,12 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			for (int attempt = 0; attempt < 6 && context.computeOnClient(minecraft -> minecraft.gui.screen() != null); attempt++) {
 				context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
 				context.waitTicks(20);
+			}
+
+			if (context.computeOnClient(minecraft -> minecraft.gui.screen() != null)) {
+				failures.add(entry.getLabel() + " keeps a screen open after Escape");
+				context.runOnClient(minecraft -> minecraft.gui.setScreen(null));
+				context.waitTicks(10);
 			}
 		}
 
