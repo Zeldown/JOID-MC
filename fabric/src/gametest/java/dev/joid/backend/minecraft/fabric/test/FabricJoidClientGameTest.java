@@ -1658,8 +1658,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 
 	private static int audioSource(final Node node) {
 		if (node instanceof final ResourcePlayerNode player) {
-			final Resource resource = (Resource) FabricJoidClientGameTest.field(player, "resource");
-			final Object decoder = resource == null ? null : resource.getDecoder();
+			final Object decoder = player.getPlayback();
 			final Object audioPlayer = decoder instanceof VideoResourceDecoder ? FabricJoidClientGameTest.field(decoder, "audioPlayer") : null;
 			final Object source = audioPlayer == null ? null : FabricJoidClientGameTest.field(audioPlayer, "source");
 			return source == null ? 0 : (int) FabricJoidClientGameTest.field(source, "source");
