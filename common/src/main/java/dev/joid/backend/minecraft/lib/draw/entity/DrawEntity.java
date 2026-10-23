@@ -104,7 +104,6 @@ public final class DrawEntity {
 		}));
 	}
 
-
 	private static double[] getExtent(final EntityRenderState state) {
 		final double[] extent = {state.boundingBoxWidth / 2D, state.boundingBoxHeight / 2D};
 		if (!(Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(state) instanceof final LivingEntityRenderer<?, ?, ?> renderer)) {
