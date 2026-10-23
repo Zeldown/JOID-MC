@@ -4,6 +4,7 @@ import dev.joid.backend.minecraft.demo.container.DemoContainer;
 import dev.joid.backend.minecraft.lib.ui.core.container.ContainerUI;
 import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
 import dev.joid.demo.DemoFont;
+import dev.joid.demo.ui.UIDemoChoice;
 import dev.joid.internal.JOID;
 import dev.joid.lib.color.Color;
 import dev.joid.lib.draw.text.Text;
@@ -14,6 +15,7 @@ import dev.joid.lib.ui.core.data.UIDataPopup;
 import dev.joid.lib.ui.node.impl.shape.RectNode;
 import dev.joid.lib.ui.node.impl.text.TextNode;
 import dev.joid.lib.utils.align.Align;
+import net.minecraft.client.Minecraft;
 
 public class UIDemoContainer extends ContainerUI<DemoContainer> {
 
@@ -23,6 +25,11 @@ public class UIDemoContainer extends ContainerUI<DemoContainer> {
 
 	public UIDemoContainer(final DemoContainer container) {
 		super(container);
+		super.beforeClose(event -> {
+			event.cancel();
+			Minecraft.getInstance().player.closeContainer();
+			JOID.open(UIDemoChoice.getMenu().get());
+		});
 	}
 
 	@Override

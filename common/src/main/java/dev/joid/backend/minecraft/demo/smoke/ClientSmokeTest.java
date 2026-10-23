@@ -360,11 +360,14 @@ public final class ClientSmokeTest {
 
 		ClientSmokeTest.capture("joid-smoke-container");
 		ClientSmokeTest.press(GLFW.GLFW_KEY_ESCAPE);
-		ClientSmokeTest.waitFor("the demo container to close", () -> Minecraft.getInstance().gui.screen() == null, 30);
+		ClientSmokeTest.waitFor("the demo container to come back to UIDemoMinecraftChoice", () -> Minecraft.getInstance().gui.screen() instanceof UIScreen && JOID.isOpen(UIDemoMinecraftChoice.class) && !JOID.isOpen(UIDemoContainer.class), 30);
 		ClientSmokeTest.sleep(1000);
 		if (!ClientSmokeTest.computeOnServer(server, player -> player.containerMenu == player.inventoryMenu)) {
 			failures.add("Escape does not close the demo container on the server");
 		}
+
+		ClientSmokeTest.press(GLFW.GLFW_KEY_ESCAPE);
+		ClientSmokeTest.waitFor("UIDemoMinecraftChoice to close after the demo container", () -> Minecraft.getInstance().gui.screen() == null, 30);
 	}
 
 	private static void expectCarried(final List<String> failures, final MinecraftServer server, final String label, final int count) {

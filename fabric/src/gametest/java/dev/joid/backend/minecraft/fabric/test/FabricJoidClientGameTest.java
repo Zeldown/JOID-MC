@@ -331,7 +331,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 
 			if (entry.getState() != null) {
 				context.runOnClient(_ -> entry.getAction().run());
-			} else if (UIDemo.class.isAssignableFrom(FabricJoidClientGameTest.uiClass(entry))) {
+			} else if (UIDemo.class.isAssignableFrom(FabricJoidClientGameTest.uiClass(entry)) || FabricJoidClientGameTest.uiClass(entry) == UIDemoContainer.class) {
 				if (FabricJoidClientGameTest.uiClass(entry) == UIDemoEventFlow.class) {
 					FabricJoidClientGameTest.click(context, context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoEventFlow.class), DemoCheckboxNode.class)).get(1));
 				}
@@ -887,8 +887,6 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		final int[] popup = context.computeOnClient(_ -> FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoContainer.class).getNodeList().getFirst().getChild(0, RectNode.class)));
 		FabricJoidClientGameTest.expectCursor(context, failures, "Popup button of the container", popup, CursorTypes.POINTING_HAND);
 		context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
-		context.waitForScreen(null);
-		context.runOnClient(_ -> JOID.open(new UIDemoMinecraftChoice()));
 		context.waitForScreen(UIScreen.class);
 		context.waitTicks(20);
 		FabricJoidClientGameTest.clickDemo(context, "UIDemoCursor", "joid-cursor-demo");
@@ -1045,11 +1043,19 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		FabricJoidClientGameTest.verifyContainerDepth(context, failures);
 
 		context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
-		context.waitForScreen(null);
+		context.waitForScreen(UIScreen.class);
 		context.waitTicks(5);
 		if (!server.computeOnServer(minecraftServer -> FabricJoidClientGameTest.player(minecraftServer).containerMenu == FabricJoidClientGameTest.player(minecraftServer).inventoryMenu)) {
 			failures.add("Escape does not close the container on the server");
 		}
+
+		if (!context.computeOnClient(_ -> JOID.isOpen(UIDemoMinecraftChoice.class) && !JOID.isOpen(UIDemoContainer.class))) {
+			failures.add("Escape on the container does not come back to UIDemoMinecraftChoice");
+		}
+
+		context.waitTicks(20);
+		context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
+		context.waitForScreen(null);
 
 		context.getInput().setCursorPos(960D, 540D);
 		if (!failures.isEmpty()) {
