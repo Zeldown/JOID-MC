@@ -16,11 +16,11 @@ import net.minecraft.resources.Identifier;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MinecraftFontFace implements IFontFace {
 
-	private final FontDescription.Resource description;
 	private final FontWeight               weight;
+	private final FontDescription.Resource description;
 
 	public static @NonNull MinecraftFontFace of(final @NonNull Identifier identifier, final @NonNull FontWeight weight) {
-		return new MinecraftFontFace(new FontDescription.Resource(identifier), weight);
+		return new MinecraftFontFace(weight, new FontDescription.Resource(identifier));
 	}
 
 	public boolean isBold() {

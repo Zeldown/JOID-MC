@@ -18,10 +18,10 @@ public final class MinecraftFont extends BitmapFont<MinecraftFontFace> {
 
 	private static final Map<Identifier, MinecraftFont> FONTS = new ConcurrentHashMap<>();
 
-	public static final MinecraftFont DEFAULT = MinecraftFont.of(Identifier.withDefaultNamespace("default"));
 	public static final MinecraftFont ALT     = MinecraftFont.of(Identifier.withDefaultNamespace("alt"));
-	public static final MinecraftFont ILLAGER = MinecraftFont.of(Identifier.withDefaultNamespace("illageralt"));
+	public static final MinecraftFont DEFAULT = MinecraftFont.of(Identifier.withDefaultNamespace("default"));
 	public static final MinecraftFont UNIFORM = MinecraftFont.of(Identifier.withDefaultNamespace("uniform"));
+	public static final MinecraftFont ILLAGER = MinecraftFont.of(Identifier.withDefaultNamespace("illageralt"));
 
 	private final Identifier id;
 
