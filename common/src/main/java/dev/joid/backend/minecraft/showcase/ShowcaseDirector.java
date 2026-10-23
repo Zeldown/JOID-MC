@@ -287,7 +287,7 @@ public final class ShowcaseDirector {
 				final CreateWorldScreen screen = (CreateWorldScreen) Minecraft.getInstance().gui.screen();
 				final WorldCreationUiState state = screen.getUiState();
 				state.setName(ShowcaseDirector.WORLD);
-				state.setSeed(System.getProperty("joid.showcase.seed", ShowcaseScene.SEED));
+				state.setSeed(System.getProperty("joid.showcase.seed", "1700"));
 				state.setDifficulty(Difficulty.NORMAL);
 				state.getGameRules().set(GameRules.ADVANCE_TIME, false, null);
 				state.getGameRules().set(GameRules.ADVANCE_WEATHER, false, null);

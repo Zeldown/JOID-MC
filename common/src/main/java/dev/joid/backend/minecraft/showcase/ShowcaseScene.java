@@ -61,8 +61,6 @@ public enum ShowcaseScene {
 	BESTIARY(ShowcaseScene::bestiary),
 	DAYLIGHT(ShowcaseScene::daylight);
 
-	public static final String SEED = "1700";
-
 	private static boolean prepared;
 
 	private final Runnable action;
