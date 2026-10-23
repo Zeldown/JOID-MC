@@ -3,21 +3,23 @@ package dev.joid.backend.minecraft.showcase.ui;
 import dev.joid.lib.color.Color;
 import dev.joid.lib.font.effect.ITextEffect;
 import dev.joid.lib.font.effect.ITextGlyph;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.NonNull;
 
-public class ShowDecodeTextEffect implements ITextEffect {
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+public final class ShowDecodeTextEffect implements ITextEffect {
 
 	private final double start;
 	private final Color  accent;
 	private final double stagger;
 
-	public ShowDecodeTextEffect(final double start, final double stagger, final Color accent) {
-		this.start   = start;
-		this.accent  = accent;
-		this.stagger = stagger;
+	public static @NonNull ShowDecodeTextEffect of(final double start, final @NonNull Color accent, final double stagger) {
+		return new ShowDecodeTextEffect(start, accent, stagger);
 	}
 
 	@Override
-	public void apply(final ITextGlyph glyph) {
+	public void apply(final @NonNull ITextGlyph glyph) {
 		if (Character.isWhitespace(glyph.getCodepoint())) {
 			return;
 		}

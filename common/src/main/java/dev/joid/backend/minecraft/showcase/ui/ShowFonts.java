@@ -65,7 +65,7 @@ public class ShowFonts extends UI {
 			for (int index = 0; index < sizes.length; index++) {
 				final float size = sizes[index];
 				final Color color = index == sizes.length - 1 ? ShowTheme.GOLD : ShowTheme.MUTED.to(ShowTheme.TEXT, index / (sizes.length - 1F));
-				final TextInfo info = TextInfo.create(MinecraftFont.DEFAULT, size).color(color).shadow(size / MinecraftFont.SIZE, size / MinecraftFont.SIZE).effects(new ShowRiseTextEffect(this.start + 0.15D + index * 0.09D, 0.02D));
+				final TextInfo info = TextInfo.create(MinecraftFont.DEFAULT, size).color(color).shadow(size / MinecraftFont.SIZE, size / MinecraftFont.SIZE).effects(ShowRiseTextEffect.of(this.start + 0.15D + index * 0.09D, 0.02D));
 				TextNode.create(48, y).text(Text.create("Crisp at " + sizes[index] + " px", info)).attach(panel);
 				y += size * 1.25D + 26D;
 			}
@@ -81,15 +81,15 @@ public class ShowFonts extends UI {
 		.panel(900, 120, 900, 840)
 		.body(panel -> {
 			TextNode.create(48, 52).text(Text.create("CHAT TEXT", ShowTheme.label(14F, ShowTheme.FAINT))).attach(panel);
-			TextNode.create(48, 82).text(Text.create(chat, info.withEffects(new ShowRiseTextEffect(this.start + 0.3D, 0.015D)))).attach(panel);
+			TextNode.create(48, 82).text(Text.create(chat, info.withEffects(ShowRiseTextEffect.of(this.start + 0.3D, 0.015D)))).attach(panel);
 			TextNode.create(48, 172).text(Text.create("\u00A7 COLORS", ShowTheme.label(14F, ShowTheme.FAINT))).attach(panel);
-			TextNode.create(48, 202).text(Text.create("\u00A7cRed \u00A76Gold \u00A7eYellow \u00A7aGreen \u00A7bAqua \u00A79Blue \u00A7dPink", info.withEffects(new ShowRiseTextEffect(this.start + 0.4D, 0.015D)))).attach(panel);
+			TextNode.create(48, 202).text(Text.create("\u00A7cRed \u00A76Gold \u00A7eYellow \u00A7aGreen \u00A7bAqua \u00A79Blue \u00A7dPink", info.withEffects(ShowRiseTextEffect.of(this.start + 0.4D, 0.015D)))).attach(panel);
 			TextNode.create(48, 292).text(Text.create("\u00A7 FORMATS", ShowTheme.label(14F, ShowTheme.FAINT))).attach(panel);
-			TextNode.create(48, 322).text(Text.create("\u00A7lBold\u00A7r \u00A7oitalic\u00A7r \u00A7nunderlined\u00A7r \u00A7mstruck\u00A7r \u00A7e\u00A7kmagic", info.withEffects(new ShowRiseTextEffect(this.start + 0.5D, 0.015D)))).attach(panel);
+			TextNode.create(48, 322).text(Text.create("\u00A7lBold\u00A7r \u00A7oitalic\u00A7r \u00A7nunderlined\u00A7r \u00A7mstruck\u00A7r \u00A7e\u00A7kmagic", info.withEffects(ShowRiseTextEffect.of(this.start + 0.5D, 0.015D)))).attach(panel);
 			RectNode.create(48, 412, 804, 1).color(Color.WHITE.withAlpha(0.08F)).attach(panel);
 			TextNode.create(48, 446).text(Text.create("ENCHANTING TABLE", ShowTheme.label(14F, ShowTheme.AMETHYST))).attach(panel);
-			TextNode.create(48, 480).text(Text.create("Sharpness V", TextInfo.create(MinecraftFont.ALT, 40F).color(ShowTheme.AMETHYST).shadow(5F, 5F).effects(new ShowRiseTextEffect(this.start + 0.6D, 0.03D)))).attach(panel);
-			TextNode.create(48, 560).text(Text.create("Sharpness V", TextInfo.create(MinecraftFont.DEFAULT, 40F).color(ShowTheme.TEXT).shadow(5F, 5F).effects(new ShowDecodeTextEffect(this.start + 1D, 0.08D, ShowTheme.AMETHYST)))).attach(panel);
+			TextNode.create(48, 480).text(Text.create("Sharpness V", TextInfo.create(MinecraftFont.ALT, 40F).color(ShowTheme.AMETHYST).shadow(5F, 5F).effects(ShowRiseTextEffect.of(this.start + 0.6D, 0.03D)))).attach(panel);
+			TextNode.create(48, 560).text(Text.create("Sharpness V", TextInfo.create(MinecraftFont.DEFAULT, 40F).color(ShowTheme.TEXT).shadow(5F, 5F).effects(ShowDecodeTextEffect.of(this.start + 1D, ShowTheme.AMETHYST, 0.08D)))).attach(panel);
 			TextNode.create(48, 650, 804, 0).text(Text.create("The enchanting table alphabet, then the same line decoded in the default font.", ShowTheme.font(FontWeight.MEDIUM, 18F, ShowTheme.MUTED))).attach(panel);
 			RectNode.create(48, 718, 804, 1).color(Color.WHITE.withAlpha(0.08F)).attach(panel);
 			TextNode.create(48, 752).text(Text.create("One bitmap atlas, drawn texel for texel at every size.", ShowTheme.font(FontWeight.MEDIUM, 18F, ShowTheme.MUTED))).attach(panel);

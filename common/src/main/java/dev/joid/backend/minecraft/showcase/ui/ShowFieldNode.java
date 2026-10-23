@@ -3,6 +3,7 @@ package dev.joid.backend.minecraft.showcase.ui;
 import dev.joid.lib.color.Color;
 import dev.joid.lib.draw.DrawUtils;
 import dev.joid.lib.ui.node.impl.control.field.TextFieldNode;
+import lombok.NonNull;
 
 public class ShowFieldNode extends TextFieldNode {
 
@@ -17,7 +18,7 @@ public class ShowFieldNode extends TextFieldNode {
 		this.accent = accent;
 	}
 
-	public static ShowFieldNode create(final double x, final double y, final double width, final Color accent) {
+	public static @NonNull ShowFieldNode create(final double x, final double y, final double width, final @NonNull Color accent) {
 		return new ShowFieldNode(x, y, width, accent);
 	}
 
