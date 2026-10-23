@@ -54,8 +54,6 @@ import net.minecraft.world.level.gamerules.GameRules;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ShowcaseDirector {
 
-	private static final String WORLD = "joid-showcase";
-
 	private static String  clip;
 	private static int     captures;
 	private static int     clipFrame;
@@ -280,13 +278,13 @@ public final class ShowcaseDirector {
 			GLFW.glfwSetWindowFocusCallback(window, callback);
 			callback.invoke(window, true);
 		});
-		if (ShowcaseDirector.computeOnClient(() -> Minecraft.getInstance().level == null && !Minecraft.getInstance().getLevelSource().levelExists(ShowcaseDirector.WORLD))) {
+		if (ShowcaseDirector.computeOnClient(() -> Minecraft.getInstance().level == null && !Minecraft.getInstance().getLevelSource().levelExists("joid-showcase"))) {
 			ShowcaseDirector.runOnClient(() -> CreateWorldScreen.openFresh(Minecraft.getInstance(), () -> Minecraft.getInstance().gui.setScreen(new TitleScreen())));
 			ShowcaseDirector.waitFor("the world creation screen", () -> Minecraft.getInstance().gui.screen() instanceof CreateWorldScreen, 120);
 			ShowcaseDirector.runOnClient(() -> {
 				final CreateWorldScreen screen = (CreateWorldScreen) Minecraft.getInstance().gui.screen();
 				final WorldCreationUiState state = screen.getUiState();
-				state.setName(ShowcaseDirector.WORLD);
+				state.setName("joid-showcase");
 				state.setSeed(System.getProperty("joid.showcase.seed", "1700"));
 				state.setDifficulty(Difficulty.NORMAL);
 				state.getGameRules().set(GameRules.ADVANCE_TIME, false, null);

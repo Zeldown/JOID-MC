@@ -109,7 +109,7 @@ public class ShowBestiary extends UI implements IShowFocus {
 		final double delay = 0.15D + index * 0.07D;
 		this.cards[index] = RectNode
 		.create(x, y, 300, 326)
-		.color(ShowTheme.vertical(Color.decode("#1B2130").withAlpha(0.88F), ShowTheme.INK.withAlpha(0.92F)))
+		.color(ShowTheme.vertical(ShowTheme.PANEL_TOP.withAlpha(0.88F), ShowTheme.INK.withAlpha(0.92F)))
 		.hoveredColor(ShowTheme.vertical(Color.decode("#232B3D").withAlpha(0.92F), ShowTheme.INK.withAlpha(0.94F)))
 		.y(() -> y + 48D * (1D - ShowTheme.ease(this.elapsed(), delay, 0.7D)) - (this.selected == index ? 8D : 0D))
 		.effect(RoundedNodeEffect.create(24F))

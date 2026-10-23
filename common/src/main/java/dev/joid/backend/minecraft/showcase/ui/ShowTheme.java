@@ -27,9 +27,10 @@ public final class ShowTheme {
 	public static final Color EMERALD  = Color.decode("#2BD67B").lock();
 	public static final Color REDSTONE = Color.decode("#FF4D5E").lock();
 	public static final Color AMETHYST = Color.decode("#B284FF").lock();
+	public static final Color EMBER    = Color.decode("#FF8A5C").lock();
 
-	private static final Color PANEL_TOP    = Color.decode("#1B2130").lock();
-	private static final Color PANEL_BOTTOM = Color.decode("#11151E").lock();
+	public static final Color PANEL_TOP    = Color.decode("#1B2130").lock();
+	public static final Color PANEL_BOTTOM = Color.decode("#11151E").lock();
 
 	public static RectNode panel(final double x, final double y, final double width, final double height) {
 		return RectNode

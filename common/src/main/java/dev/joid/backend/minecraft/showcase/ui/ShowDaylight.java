@@ -149,7 +149,7 @@ public class ShowDaylight extends UI implements IShowFocus {
 		final double dusk = Math.max(0D, 1D - Math.abs(Math.sin(this.angle())) * 4D);
 		final Color day = Color.decode("#78A7FF").to(Color.decode("#C6DBFF"), (float) shift);
 		final Color night = Color.decode("#0B1026").to(Color.decode("#1B2244"), (float) shift);
-		return night.to(day, (float) light).to(Color.decode("#FF8A5C"), (float) (dusk * 0.6D * (1D - shift)));
+		return night.to(day, (float) light).to(ShowTheme.EMBER, (float) (dusk * 0.6D * (1D - shift)));
 	}
 
 	private double elapsed() {

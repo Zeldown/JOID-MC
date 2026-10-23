@@ -41,7 +41,7 @@ public class ShowHud extends UI {
 	public void init() {
 		this.start = ShowTheme.now();
 
-		this.capsule(596, ShowTheme.REDSTONE, Color.decode("#FF8A5C"), ShowHud.HEART, () -> (double) (ShowHud.player().getHealth() / ShowHud.player().getMaxHealth()), () -> (int) Math.ceil(ShowHud.player().getHealth()), () -> (int) ShowHud.player().getMaxHealth()).attach(this);
+		this.capsule(596, ShowTheme.REDSTONE, ShowTheme.EMBER, ShowHud.HEART, () -> (double) (ShowHud.player().getHealth() / ShowHud.player().getMaxHealth()), () -> (int) Math.ceil(ShowHud.player().getHealth()), () -> (int) ShowHud.player().getMaxHealth()).attach(this);
 
 		this.capsule(988, ShowTheme.GOLD, Color.decode("#FF9F1C"), ShowHud.FOOD, () -> ShowHud.player().getFoodData().getFoodLevel() / 20D, () -> ShowHud.player().getFoodData().getFoodLevel(), () -> 20).attach(this);
 
@@ -64,7 +64,7 @@ public class ShowHud extends UI {
 
 		CircleNode
 		.create(936, 922, 48)
-		.color(ShowTheme.vertical(Color.decode("#1B2130"), ShowTheme.INK))
+		.color(ShowTheme.vertical(ShowTheme.PANEL_TOP, ShowTheme.INK))
 		.effect(BorderNodeEffect.create(ShowTheme.GRASS.withAlpha(0.9F), 2F).mode(BorderMode.IN))
 		.effect(ShadowNodeEffect.create(ShowTheme.EMERALD.withAlpha(0.5F), 16F))
 		.body(badge -> {

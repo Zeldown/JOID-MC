@@ -28,7 +28,7 @@ public class ShowQuests extends UI implements IShowFocus {
 	public void init() {
 		RectNode
 		.create(480, 200, 960, 680)
-		.color(ShowTheme.vertical(Color.decode("#1B2130").withAlpha(0.86F), Color.decode("#11151E").withAlpha(0.92F)))
+		.color(ShowTheme.vertical(ShowTheme.PANEL_TOP.withAlpha(0.86F), ShowTheme.PANEL_BOTTOM.withAlpha(0.92F)))
 		.effect(RoundedNodeEffect.create(32F))
 		.effect(BorderNodeEffect.create(Color.WHITE.withAlpha(0.1F), 1.5F).mode(BorderMode.IN))
 		.effect(ShadowNodeEffect.create(Color.BLACK.withAlpha(0.55F), 60F).offsetY(24D))
