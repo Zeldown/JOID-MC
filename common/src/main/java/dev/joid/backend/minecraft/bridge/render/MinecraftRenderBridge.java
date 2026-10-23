@@ -200,7 +200,7 @@ public final class MinecraftRenderBridge extends RenderBridge {
 		}
 	}
 
-	public static @NonNull GpuSampler getSampler(final @NonNull TextureSampling sampling) {
+	public static @NonNull GpuSampler getSampler(final TextureSampling sampling) {
 		final AddressMode address = sampling.getWrap() == TextureWrap.REPEAT ? AddressMode.REPEAT : AddressMode.CLAMP_TO_EDGE;
 		final FilterMode mode = sampling.getFilter() == TextureFilter.LINEAR ? FilterMode.LINEAR : FilterMode.NEAREST;
 		return RenderSystem.getSamplerCache().getSampler(address, address, mode, mode, sampling.isMipmapFiltered());

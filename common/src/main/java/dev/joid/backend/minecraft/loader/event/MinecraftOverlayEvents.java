@@ -14,19 +14,19 @@ import net.minecraft.resources.Identifier;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MinecraftOverlayEvents {
 
-	public static void fireHud(final @NonNull GuiGraphicsExtractor graphics) {
+	public static void fireHud(final GuiGraphicsExtractor graphics) {
 		OverlayLayerRenderer.extract(graphics);
 	}
 
-	public static void fireHiddenHud(final @NonNull GuiGraphicsExtractor graphics) {
+	public static void fireHiddenHud(final GuiGraphicsExtractor graphics) {
 		OverlayLayerRenderer.extractHiddenHud(graphics);
 	}
 
-	public static void fireLayer(final @NonNull GuiGraphicsExtractor graphics, final @NonNull OverlayLayer layer, final boolean post) {
+	public static void fireLayer(final GuiGraphicsExtractor graphics, final OverlayLayer layer, final boolean post) {
 		OverlayLayerRenderer.extract(graphics, layer, post);
 	}
 
-	public static boolean isCancelled(final @NonNull OverlayLayer layer) {
+	public static boolean isCancelled(final OverlayLayer layer) {
 		return OverlayLayerRenderer.isCancelled(layer);
 	}
 
@@ -34,7 +34,7 @@ public final class MinecraftOverlayEvents {
 		return Identifier.fromNamespaceAndPath(MinecraftJoid.MOD_ID, "overlay");
 	}
 
-	public static @NonNull Identifier getId(final @NonNull OverlayLayer layer, final boolean post) {
+	public static @NonNull Identifier getId(final OverlayLayer layer, final boolean post) {
 		return Identifier.fromNamespaceAndPath(MinecraftJoid.MOD_ID, "overlay/" + layer.name().toLowerCase(Locale.ROOT) + (post ? "_post" : "_pre"));
 	}
 

@@ -4,13 +4,12 @@ import dev.joid.backend.minecraft.bridge.ui.overlay.OverlayInputForwarder;
 import dev.joid.backend.minecraft.bridge.ui.overlay.OverlayLayerRenderer;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MinecraftScreenEvents {
 
-	public static void fireRender(final @NonNull GuiGraphicsExtractor graphics) {
+	public static void fireRender(final GuiGraphicsExtractor graphics) {
 		OverlayLayerRenderer.extractScreen(graphics);
 	}
 

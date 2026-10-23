@@ -28,7 +28,7 @@ public final class ScreenUIBridge extends StackUIBridge {
 		this.tooltipQueue = new TooltipQueue();
 	}
 
-	public void removed(final @NonNull UIScreen screen) {
+	public void removed(final UIScreen screen) {
 		if (this.screen == screen) {
 			this.screen = null;
 			super.closeAll();
@@ -64,7 +64,7 @@ public final class ScreenUIBridge extends StackUIBridge {
 		this.tooltipQueue.push(content);
 	}
 
-	public void frame(final @NonNull GuiGraphicsExtractor graphics, final int mouseX, final int mouseY) {
+	public void frame(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY) {
 		GuiFrameCounter.inst().getFrame(graphics);
 		super.update();
 		this.compositor.composite(graphics, super::draw);

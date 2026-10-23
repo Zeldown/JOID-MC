@@ -87,7 +87,7 @@ public final class MinecraftWindowBridge implements IWindowBridge {
 		Minecraft.getInstance().keyboardHandler.setClipboard(text);
 	}
 
-	public void requestCursor(final @NonNull GuiGraphicsExtractor graphics, final @NonNull Cursor cursor) {
+	public void requestCursor(final GuiGraphicsExtractor graphics, final Cursor cursor) {
 		if (!this.isMouseGrabbed()) {
 			graphics.requestCursor(MinecraftWindowBridge.getCursorType(cursor));
 		}

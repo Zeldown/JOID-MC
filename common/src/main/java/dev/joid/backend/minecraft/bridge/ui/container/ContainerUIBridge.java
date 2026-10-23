@@ -40,19 +40,19 @@ public final class ContainerUIBridge extends StackUIBridge {
 		super.open(ui);
 	}
 
-	public void added(final @NonNull ContainerUIScreen<?> screen) {
+	public void added(final ContainerUIScreen<?> screen) {
 		this.screen = screen;
 		super.add(screen.getUi());
 	}
 
-	public void removed(final @NonNull ContainerUIScreen<?> screen) {
+	public void removed(final ContainerUIScreen<?> screen) {
 		if (this.screen == screen) {
 			this.screen = null;
 			super.closeAll();
 		}
 	}
 
-	public ContainerUIScreen<?> getScreen(final @NonNull ContainerUI<?> ui) {
+	public ContainerUIScreen<?> getScreen(final ContainerUI<?> ui) {
 		return this.screen != null && this.screen.getUi() == ui ? this.screen : null;
 	}
 
@@ -81,7 +81,7 @@ public final class ContainerUIBridge extends StackUIBridge {
 		this.tooltipQueue.push(content);
 	}
 
-	public void frame(final @NonNull GuiGraphicsExtractor graphics, final int mouseX, final int mouseY) {
+	public void frame(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY) {
 		GuiFrameCounter.inst().getFrame(graphics);
 		super.update();
 		this.compositor.composite(graphics, super::draw);

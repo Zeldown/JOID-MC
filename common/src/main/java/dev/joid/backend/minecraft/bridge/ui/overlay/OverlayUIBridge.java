@@ -85,13 +85,13 @@ public final class OverlayUIBridge extends UIBridge {
 		this.tooltipQueue.push(content);
 	}
 
-	public void extract(final @NonNull GuiGraphicsExtractor graphics) {
+	public void extract(final GuiGraphicsExtractor graphics) {
 		if (!this.isOverlayHidden()) {
 			this.extract(graphics, ui -> OverlayUIBridge.getLayer(ui) == null && !this.isAboveScreen(ui));
 		}
 	}
 
-	public void extract(final @NonNull GuiGraphicsExtractor graphics, final @NonNull OverlayLayer layer, final boolean post) {
+	public void extract(final GuiGraphicsExtractor graphics, final OverlayLayer layer, final boolean post) {
 		if (this.isOverlayHidden()) {
 			return;
 		}
@@ -104,20 +104,20 @@ public final class OverlayUIBridge extends UIBridge {
 		}
 	}
 
-	public void extractScreen(final @NonNull GuiGraphicsExtractor graphics) {
+	public void extractScreen(final GuiGraphicsExtractor graphics) {
 		if (this.isScreenOpen()) {
 			this.extract(graphics, ui -> OverlayUIBridge.getLayer(ui) == null && ui.getOverlay().render().aboveScreens());
 			this.window.requestCursor(graphics, this.window.getCursor());
 		}
 	}
 
-	public void extractHiddenHud(final @NonNull GuiGraphicsExtractor graphics) {
+	public void extractHiddenHud(final GuiGraphicsExtractor graphics) {
 		if (this.isOverlayHidden()) {
 			this.extract(graphics, ui -> !this.isAboveScreen(ui));
 		}
 	}
 
-	public boolean isCancelled(final @NonNull OverlayLayer layer) {
+	public boolean isCancelled(final OverlayLayer layer) {
 		for (final UI ui : super.getUiList()) {
 			if (OverlayUIBridge.isLayer(ui, layer) && OverlayUIBridge.getLayer(ui).cancel() && this.isShown(ui)) {
 				return true;
