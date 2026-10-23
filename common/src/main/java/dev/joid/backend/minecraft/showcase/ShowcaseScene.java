@@ -245,9 +245,9 @@ public enum ShowcaseScene {
 		ShowcaseDirector.begin("fonts");
 		ShowcaseDirector.frames(5);
 		ShowcaseDirector.runOnClient(() -> JOID.open(ui));
-		ShowcaseDirector.frames(70);
+		ShowcaseDirector.frames(135);
 		ShowcaseDirector.capture("fonts");
-		ShowcaseDirector.frames(150);
+		ShowcaseDirector.frames(85);
 		ShowcaseDirector.end();
 		ShowcaseDirector.runOnClient(() -> JOID.close(ui));
 		ShowcaseDirector.frames(20);

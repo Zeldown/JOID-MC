@@ -27,7 +27,7 @@ import net.minecraft.network.chat.Component;
 public class ShowFonts extends UI {
 
 	private static final double PIVOT_X = 168D;
-	private static final double PIVOT_Y = 272D;
+	private static final double PIVOT_Y = 258D;
 
 	private double start;
 
