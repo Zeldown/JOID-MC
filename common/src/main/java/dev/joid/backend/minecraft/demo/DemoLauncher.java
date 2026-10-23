@@ -22,9 +22,9 @@ public final class DemoLauncher {
 
 	public static void init() {
 		ContainerUIRegistry.create(DemoContainer.TYPE, UIDemoContainer::new).register();
+		OpenDemoContainerPayload.TYPE.onServer(OpenDemoContainerPayloadHandler::handle).register();
 		ContainerTypeRegistry.create(MinecraftJoid.MOD_ID + ":demo/container", DemoContainer.TYPE).register();
 		KeyBindRegistry.create("joid.demo", Key.J).onPress(() -> JOID.open(new UIDemoMinecraftChoice())).register();
-		OpenDemoContainerPayload.TYPE.onServer(OpenDemoContainerPayloadHandler::handle).register();
 		if (ShowcaseLauncher.isActive()) {
 			ShowcaseLauncher.init();
 		}
