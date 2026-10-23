@@ -88,7 +88,7 @@ public final class MinecraftTexture extends Texture implements IGpuTexture {
 		chain.forEachStep((level, _, _, _, _) -> {
 			final GpuTextureView source = this.bridge.getDevice().createTextureView(this.texture, level - 1, 1);
 			final GpuTextureView target = this.bridge.getDevice().createTextureView(this.texture, level, 1);
-			try (RenderPass pass = this.bridge.getPassEncoder().encoder().createRenderPass(() -> "JOID Mipmap", target, Optional.empty())) {
+			try (final RenderPass pass = this.bridge.getPassEncoder().encoder().createRenderPass(() -> "JOID Mipmap", target, Optional.empty())) {
 				RenderSystem.bindDefaultUniforms(pass);
 				pass.setPipeline(RenderPipelines.TRACY_BLIT);
 				pass.bindTexture("InSampler", source, RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));

@@ -149,7 +149,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		FabricJoidClientGameTest.verifyBackend(context);
 		FabricJoidClientGameTest.verifyKeyBindLabels(context);
 		FabricJoidClientGameTest.verifyEntitiesWithoutWorld(context);
-		try (TestSingleplayerContext singleplayer = context.worldBuilder().create()) {
+		try (final TestSingleplayerContext singleplayer = context.worldBuilder().create()) {
 			singleplayer.getConnection().waitForChunksRender();
 			context.getInput().pressKey(GLFW.GLFW_KEY_J);
 			context.waitForScreen(UIScreen.class);
@@ -1866,7 +1866,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 	}
 
 	private static BufferedImage texture(final Minecraft minecraft, final String path) {
-		try (InputStream stream = minecraft.getResourceManager().getResource(Identifier.withDefaultNamespace(path)).orElseThrow().open()) {
+		try (final InputStream stream = minecraft.getResourceManager().getResource(Identifier.withDefaultNamespace(path)).orElseThrow().open()) {
 			return ImageIO.read(stream);
 		} catch (final IOException exception) {
 			throw new AssertionError("Unable to read the texture " + path, exception);

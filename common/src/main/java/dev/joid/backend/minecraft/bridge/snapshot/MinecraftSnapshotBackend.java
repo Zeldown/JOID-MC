@@ -42,12 +42,12 @@ public final class MinecraftSnapshotBackend implements ISnapshotBackend {
 		try {
 			final CommandEncoder encoder = RenderSystem.getDevice().createCommandEncoder();
 			encoder.copyTextureToBuffer(this.target.getTexture().getTexture(), buffer, 0L, () -> {}, 0, 0, 0, width, height);
-			try (GpuFence fence = encoder.createFence()) {
+			try (final GpuFence fence = encoder.createFence()) {
 				encoder.submit();
 				fence.awaitCompletion(Long.MAX_VALUE);
 			}
 
-			try (GpuBufferSlice.MappedView view = buffer.map(true, false)) {
+			try (final GpuBufferSlice.MappedView view = buffer.map(true, false)) {
 				return SnapshotImage.from(view.data(), width, height, true, PixelLayout.RGBA8);
 			}
 		} finally {
