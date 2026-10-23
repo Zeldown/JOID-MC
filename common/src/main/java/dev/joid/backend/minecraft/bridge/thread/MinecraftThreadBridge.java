@@ -1,6 +1,7 @@
 package dev.joid.backend.minecraft.bridge.thread;
 
 import dev.joid.lib.bridge.thread.IThreadBridge;
+import lombok.NonNull;
 import net.minecraft.client.Minecraft;
 
 public final class MinecraftThreadBridge implements IThreadBridge {
@@ -11,7 +12,7 @@ public final class MinecraftThreadBridge implements IThreadBridge {
 	}
 
 	@Override
-	public void execute(final Runnable runnable) {
+	public void execute(final @NonNull Runnable runnable) {
 		Minecraft.getInstance().execute(runnable);
 	}
 
