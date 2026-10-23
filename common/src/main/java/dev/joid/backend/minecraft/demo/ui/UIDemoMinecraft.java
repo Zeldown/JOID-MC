@@ -56,8 +56,8 @@ import net.minecraft.world.level.block.Blocks;
 @UIDataMinecraft(pause = false, title = "joid.demo.minecraft")
 public class UIDemoMinecraft extends UIDemo {
 
-	private static final Color INK         = new Color(153, 153, 153).lock();
 	private static final Color PANEL       = new Color(48, 48, 48).lock();
+	private static final Color INK         = new Color(153, 153, 153).lock();
 	private static final Color PLACEHOLDER = new Color(221, 221, 221).lock();
 
 	private static final NativeImage CHECKER = new NativeImage(2, 2, false);

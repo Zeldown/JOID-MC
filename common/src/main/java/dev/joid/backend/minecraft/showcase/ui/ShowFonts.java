@@ -32,6 +32,7 @@ public class ShowFonts extends UI {
 	public void init() {
 		final double pivotX = 168D;
 		final double pivotY = 258D;
+
 		this.start = ShowTheme.now();
 
 		ContainerNode
