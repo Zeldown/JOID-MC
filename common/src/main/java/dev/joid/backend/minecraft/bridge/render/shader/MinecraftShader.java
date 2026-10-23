@@ -15,6 +15,7 @@ import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
 import dev.joid.backend.minecraft.bridge.render.vertex.VertexLayout;
 import dev.joid.lib.bridge.render.matrix.MatrixStack;
 import dev.joid.lib.bridge.render.shader.Shader;
+import dev.joid.lib.bridge.render.shader.source.GlslShaderTranslator;
 import dev.joid.lib.bridge.render.shader.source.ShaderSource;
 import dev.joid.lib.bridge.render.shader.source.ShaderTranslation;
 import dev.joid.lib.bridge.render.state.BlendState;
@@ -84,7 +85,7 @@ public final class MinecraftShader extends Shader {
 	}
 
 	private static BindGroupLayout createLayout(final Collection<String> samplers) {
-		final BindGroupLayout.Builder layout = BindGroupLayout.builder().withUniform(MinecraftShaderTranslator.BLOCK, UniformType.UNIFORM_BUFFER);
+		final BindGroupLayout.Builder layout = BindGroupLayout.builder().withUniform(GlslShaderTranslator.BLOCK, UniformType.UNIFORM_BUFFER);
 		for (final String sampler : samplers) {
 			layout.withSampler(sampler);
 		}

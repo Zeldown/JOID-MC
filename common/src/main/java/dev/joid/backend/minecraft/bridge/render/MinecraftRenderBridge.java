@@ -22,7 +22,6 @@ import dev.joid.backend.minecraft.bridge.render.framebuffer.MinecraftFrameBuffer
 import dev.joid.backend.minecraft.bridge.render.pass.PassEncoder;
 import dev.joid.backend.minecraft.bridge.render.pipeline.PipelineCache;
 import dev.joid.backend.minecraft.bridge.render.shader.MinecraftShader;
-import dev.joid.backend.minecraft.bridge.render.shader.MinecraftShaderTranslator;
 import dev.joid.backend.minecraft.bridge.render.shader.ShaderSourceProvider;
 import dev.joid.backend.minecraft.bridge.render.texture.IGpuTexture;
 import dev.joid.backend.minecraft.bridge.render.texture.MinecraftTexture;
@@ -31,6 +30,7 @@ import dev.joid.lib.bridge.render.framebuffer.IFrameBuffer;
 import dev.joid.lib.bridge.render.matrix.DepthRange;
 import dev.joid.lib.bridge.render.shader.IShader;
 import dev.joid.lib.bridge.render.shader.SamplerBinding;
+import dev.joid.lib.bridge.render.shader.source.GlslShaderTranslator;
 import dev.joid.lib.bridge.render.shader.source.ShaderSource;
 import dev.joid.lib.bridge.render.shader.uniform.UniformSampler;
 import dev.joid.lib.bridge.render.state.BlendState;
@@ -219,14 +219,14 @@ public final class MinecraftRenderBridge extends RenderBridge {
 		final RenderState state = super.getState();
 		final RenderPass pass = this.passEncoder.begin(color, depth);
 		pass.setPipeline(pipeline);
-		pass.setUniform(MinecraftShaderTranslator.BLOCK, uniforms);
+		pass.setUniform(GlslShaderTranslator.BLOCK, uniforms);
 		for (final UniformSampler sampler : shader.getSamplerMap().values()) {
-			if (!sampler.getName().equals(MinecraftShaderTranslator.STENCIL)) {
+			if (!sampler.getName().equals(GlslShaderTranslator.STENCIL)) {
 				final SamplerBinding binding = super.resolveSampler(sampler);
 				pass.bindTexture(sampler.getName(), ((IGpuTexture) binding.getTexture()).getView(), MinecraftRenderBridge.getSampler(binding.getSampling()));
 			}
 		}
-		pass.bindTexture(MinecraftShaderTranslator.STENCIL, stencil, MinecraftRenderBridge.getSampler(TextureSampling.of(TextureFilter.NEAREST, TextureWrap.CLAMP_TO_EDGE, false)));
+		pass.bindTexture(GlslShaderTranslator.STENCIL, stencil, MinecraftRenderBridge.getSampler(TextureSampling.of(TextureFilter.NEAREST, TextureWrap.CLAMP_TO_EDGE, false)));
 		pass.setVertexBuffer(0, vertices);
 
 		final int width = color.getWidth(0);
