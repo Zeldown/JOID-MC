@@ -44,7 +44,7 @@ public final class MinecraftShader extends Shader {
 		this.device = bridge.getDevice();
 	}
 
-	public static @NonNull MinecraftShader create(final @NonNull MinecraftRenderBridge bridge, final @NonNull ShaderSource vertex, final @NonNull ShaderSource fragment, final @NonNull BlendState blend) {
+	public static @NonNull MinecraftShader create(final MinecraftRenderBridge bridge, final ShaderSource vertex, final ShaderSource fragment, final BlendState blend) {
 		return new MinecraftShader(bridge, vertex, fragment, blend);
 	}
 

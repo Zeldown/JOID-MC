@@ -31,7 +31,7 @@ public final class MinecraftTexture extends Texture implements IGpuTexture {
 		this.bridge = bridge;
 	}
 
-	public static @NonNull MinecraftTexture create(final @NonNull MinecraftRenderBridge bridge) {
+	public static @NonNull MinecraftTexture create(final MinecraftRenderBridge bridge) {
 		return new MinecraftTexture(bridge);
 	}
 
