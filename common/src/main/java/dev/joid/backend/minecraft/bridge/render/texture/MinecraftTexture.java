@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.NonNull;
 
 import com.mojang.blaze3d.GpuFormat;
+import com.mojang.blaze3d.systems.DeviceInfo;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.FilterMode;
@@ -37,6 +38,12 @@ public final class MinecraftTexture extends Texture implements IGpuTexture {
 
 	@Override
 	protected void allocateStorage(final @NonNull MipmapChain chain) {
+		final DeviceInfo info = this.bridge.getDevice().getDeviceInfo();
+		final int maxSize = info.limits().maxTextureSizeForFormat(GpuFormat.RGBA8_UNORM);
+		if (chain.getWidth() > maxSize || chain.getHeight() > maxSize) {
+			throw new IllegalArgumentException("A texture of " + chain.getWidth() + "x" + chain.getHeight() + " exceeds the maximum size " + maxSize + " of " + info.name() + ", downscale the image");
+		}
+
 		this.release();
 		this.texture = this.createTexture(chain);
 		this.view    = this.bridge.getDevice().createTextureView(this.texture);
