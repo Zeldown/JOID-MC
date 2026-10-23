@@ -105,15 +105,13 @@ public final class DrawEntity {
 	}
 
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
 	private static double[] getExtent(final EntityRenderState state) {
 		final double[] extent = {state.boundingBoxWidth / 2D, state.boundingBoxHeight / 2D};
 		if (!(Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(state) instanceof final LivingEntityRenderer<?, ?, ?> renderer)) {
 			return extent;
 		}
 
-		final Model model = renderer.getModel();
-		model.setupAnim(state);
+		final Model<?> model = DrawEntity.setupModel(renderer, state);
 		final float[] bounds = {0F, Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY};
 		final Vector3f corner = new Vector3f();
 		model.root().visit(new PoseStack(), (pose, _, _, cube) -> {
@@ -133,5 +131,11 @@ public final class DrawEntity {
 		extent[0] = Math.max(extent[0], bounds[0] * factor);
 		extent[1] = Math.max(extent[1], Math.max((1.501D - bounds[1]) * factor - center, center - (1.501D - bounds[2]) * factor));
 		return extent;
+	}
+
+	private static <S extends LivingEntityRenderState> Model<? super S> setupModel(final LivingEntityRenderer<?, S, ?> renderer, final EntityRenderState state) {
+		final Model<? super S> model = renderer.getModel();
+		model.setupAnim((S) state);
+		return model;
 	}
 }
