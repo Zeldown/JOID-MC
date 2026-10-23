@@ -101,6 +101,7 @@ import dev.joid.test.snapshot.SnapshotDifference;
 import dev.joid.test.snapshot.SnapshotImage;
 import dev.joid.test.snapshot.SnapshotRunner;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
@@ -494,6 +495,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			@Override
 			public void init() {
 				background.attach(this);
+
 				text.attach(this);
 			}
 
@@ -1458,7 +1460,9 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			@Override
 			public void init() {
 				profile.attach(this);
+
 				custom.attach(this);
+
 				mob.attach(this);
 			}
 
@@ -1536,7 +1540,9 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			@Override
 			public void init() {
 				item.attach(this);
+
 				block.attach(this);
+
 				furnace.attach(this);
 			}
 
@@ -1959,14 +1965,11 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 
 	}
 
+	@RequiredArgsConstructor
 	@UIDataMinecraft(background = false)
 	public static final class LongEntity extends UI {
 
 		private final double yaw;
-
-		public LongEntity(final double yaw) {
-			this.yaw = yaw;
-		}
 
 		@Override
 		public void init() {

@@ -78,6 +78,7 @@ public class UIDemoMinecraft extends UIDemo {
 		final ItemStack pearl = new ItemStack(Items.ENDER_PEARL, 16);
 		final ItemStack totem = new ItemStack(Items.TOTEM_OF_UNDYING);
 		final PlayerSkin skin = PlayerSkin.insecure(new ClientAsset.ResourceTexture(Identifier.fromNamespaceAndPath("joid", "demo/skin"), Identifier.fromNamespaceAndPath("joid", "demo/textures/skin.png")), null, null, PlayerModelType.WIDE);
+
 		damaged.setDamageValue(1100);
 
 		ContainerNode
