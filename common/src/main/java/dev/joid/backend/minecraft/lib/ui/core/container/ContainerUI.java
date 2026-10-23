@@ -40,16 +40,16 @@ public abstract class ContainerUI<M extends AbstractContainerMenu> extends UI {
 		return (menu, inventory, _) -> new ContainerUIScreen<>(menu, inventory, factory.apply(menu));
 	}
 
-	public final @NonNull ContainerUI<M> bounds(final @NonNull Node node) {
+	public final <T extends ContainerUI<M>> @NonNull T bounds(final @NonNull Node node) {
 		this.boundsNode = node;
 		this.bounds     = null;
-		return this;
+		return (T) this;
 	}
 
-	public final @NonNull ContainerUI<M> bounds(final double x, final double y, final double width, final double height) {
+	public final <T extends ContainerUI<M>> @NonNull T bounds(final double x, final double y, final double width, final double height) {
 		this.boundsNode = null;
 		this.bounds     = new double[] {x, y, width, height};
-		return this;
+		return (T) this;
 	}
 
 	public @NonNull double[] getBounds() {
