@@ -75,13 +75,13 @@ public final class McmetaResourceAnimationReader implements IResourceAnimationRe
 		return frames;
 	}
 
-	private static @NonNull ResourceAnimationFrame frame(final @NonNull int[] pixels, final @NonNull FrameSize size, final int ticks) {
+	private static @NonNull ResourceAnimationFrame frame(final int[] pixels, final FrameSize size, final int ticks) {
 		final int[] copy = pixels.clone();
 		ImageUtils.bleedAlpha(copy, size.width(), size.height());
 		return ResourceAnimationFrame.of(copy, ticks * 50L);
 	}
 
-	private static @NonNull int[] mix(final @NonNull int[] current, final @NonNull int[] next, final float progress) {
+	private static @NonNull int[] mix(final int[] current, final int[] next, final float progress) {
 		final int[] mixed = new int[current.length];
 		for (int i = 0; i < mixed.length; i++) {
 			int pixel = 0;

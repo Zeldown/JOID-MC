@@ -68,7 +68,7 @@ public final class LegacyTextMarkup implements ITextMarkup {
 		return 2;
 	}
 
-	private static int parseHex(final @NonNull String text, final int index, final @NonNull TextStyle style) {
+	private static int parseHex(final String text, final int index, final TextStyle style) {
 		if (index + 14 > text.length()) {
 			return 2;
 		}

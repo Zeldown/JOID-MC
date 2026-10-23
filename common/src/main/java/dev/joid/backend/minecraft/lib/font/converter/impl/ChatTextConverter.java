@@ -44,7 +44,7 @@ public final class ChatTextConverter implements ITextConverter {
 		return converted.toString();
 	}
 
-	private static @NonNull String codes(final @NonNull Style style) {
+	private static @NonNull String codes(final Style style) {
 		final StringBuilder codes = new StringBuilder();
 		final TextColor color = style.getColor();
 		if (color != null) {
@@ -67,7 +67,7 @@ public final class ChatTextConverter implements ITextConverter {
 		return codes.toString();
 	}
 
-	private static void append(final @NonNull StringBuilder codes, final boolean enabled, final char code) {
+	private static void append(final StringBuilder codes, final boolean enabled, final char code) {
 		if (enabled) {
 			codes.append(LegacyTextMarkup.PREFIX).append(code);
 		}

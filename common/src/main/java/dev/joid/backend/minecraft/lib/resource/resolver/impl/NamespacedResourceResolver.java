@@ -40,7 +40,7 @@ public class NamespacedResourceResolver implements IResourceResolver {
 		return animation == null ? ResourceFormat.decoder(asset) : AnimatedResourceDecoder.create(asset, new McmetaResourceAnimationReader(animation));
 	}
 
-	private static @NonNull ResourceData read(final @NonNull NamespacedAsset asset) {
+	private static @NonNull ResourceData read(final NamespacedAsset asset) {
 		final Identifier identifier = asset.getId();
 		if (NamespacedResourceResolver.isLoaded(identifier) && asset.getAnimation() == null) {
 			return ResourceReloader.inst().track(ResourceData.create(asset.getUniqueId(), null).texture(GpuBorrowedTexture.of(() -> Minecraft.getInstance().getTextureManager().getTexture(identifier).getTextureView())), asset);
@@ -55,7 +55,7 @@ public class NamespacedResourceResolver implements IResourceResolver {
 		}
 	}
 
-	private static boolean isLoaded(final @NonNull Identifier identifier) {
+	private static boolean isLoaded(final Identifier identifier) {
 		return Minecraft.getInstance().getTextureManager().byPath.containsKey(identifier);
 	}
 

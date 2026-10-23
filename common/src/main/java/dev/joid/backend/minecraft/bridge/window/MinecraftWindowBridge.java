@@ -93,7 +93,7 @@ public final class MinecraftWindowBridge implements IWindowBridge {
 		}
 	}
 
-	private static @NonNull CursorType getCursorType(final @NonNull Cursor cursor) {
+	private static @NonNull CursorType getCursorType(final Cursor cursor) {
 		return switch (cursor) {
 			case DEFAULT -> CursorType.DEFAULT;
 			case POINTER -> CursorTypes.POINTING_HAND;
