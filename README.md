@@ -313,7 +313,7 @@ SlotNode.create(0, 0, 72, 72).slot(super.getContainer().getSlot(0)).color(Color.
 
 | Method | Default | Effect |
 |---|---|---|
-| `slot(Slot)` | none | The slot it shows and handles. Without a slot, or while the slot is inactive, the node only draws its `color`. |
+| `slot(Slot)` | none | Required. The slot it shows and handles. While the slot is inactive, the node only draws its `color`. |
 | `color(Color)` | `Color.TRANSPARENT` | Background of the node. |
 | `hoveredColor(Color)` | `#FFFFFF80` | Drawn over the node while the slot is hovered. `Color.TRANSPARENT` turns it off. |
 | `getItemSize()` | | Size of the item: 16/18 of the smallest side of the node, like a 16 px item in an 18 px vanilla slot. |
@@ -406,7 +406,7 @@ Items, blocks and entities are lit like in the vanilla inventory. Every setter a
 
 | Method | Default | Effect |
 |---|---|---|
-| `stack(ItemStack)` | `ItemStack.EMPTY` | The stack to draw, in a square as large as the smallest side of the node, centered. |
+| `stack(ItemStack)` | none | Required. The stack to draw, in a square as large as the smallest side of the node, centered. |
 | `count(boolean)` | `true` | Draws the count when it is not 1. |
 | `bar(boolean)` | `true` | Draws the durability bar of a damaged item. |
 | `cooldown(boolean)` | `true` | Draws the cooldown of the local player on the item. |
@@ -423,7 +423,7 @@ ItemNode.create(200, 100, 64, 64).stack(() -> Minecraft.getInstance().player.get
 
 | Method | Default | Effect |
 |---|---|---|
-| `block(BlockState)` | `Blocks.AIR` | The block state to draw, in a square as large as the smallest side of the node, centered. |
+| `block(BlockState)` | none | Required. The block state to draw, in a square as large as the smallest side of the node, centered. |
 | `rotationYaw(double)` | `225D` | Turn around the vertical axis, in degrees. |
 | `rotationPitch(double)` | `30D` | Tilt toward you, in degrees. The defaults give the inventory view. |
 
@@ -444,7 +444,7 @@ BlockNode.create(300, 100, 64, 64).block(Blocks.FURNACE.defaultBlockState()).rot
 | `rotationPitch(double)` | `0D` | Tilt toward you, in degrees. |
 | `followMouse(boolean)` | `false` | The body and the head turn toward the mouse while the UI is on top, like the player in the vanilla inventory. |
 
-`entity`, `type`, `profile` and `skin` are four sources: the last one set wins. `profile` and `skin` also work without a world, on the title screen.
+`entity`, `type`, `profile` and `skin` are four sources: one of them is required, and the last one set wins. `profile` and `skin` also work without a world, on the title screen.
 
 ```java
 EntityNode.create(100, 300, 120, 200).type(EntityTypes.FOX).followMouse(true).attach(this);
