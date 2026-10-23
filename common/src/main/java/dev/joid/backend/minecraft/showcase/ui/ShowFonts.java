@@ -82,9 +82,9 @@ public class ShowFonts extends UI {
 		.body(panel -> {
 			TextNode.create(48, 52).text(Text.create("CHAT TEXT", ShowTheme.label(14F, ShowTheme.FAINT))).attach(panel);
 			TextNode.create(48, 82).text(Text.create(chat, info.withEffects(ShowRiseTextEffect.of(this.start + 0.3D, 0.015D)))).attach(panel);
-			TextNode.create(48, 172).text(Text.create("\u00A7 COLORS", ShowTheme.label(14F, ShowTheme.FAINT))).attach(panel);
+			TextNode.create(48, 172).text(Text.create("\u00A7 COLORS", ShowTheme.label(14F, ShowTheme.FAINT).markups())).attach(panel);
 			TextNode.create(48, 202).text(Text.create("\u00A7cRed \u00A76Gold \u00A7eYellow \u00A7aGreen \u00A7bAqua \u00A79Blue \u00A7dPink", info.withEffects(ShowRiseTextEffect.of(this.start + 0.4D, 0.015D)))).attach(panel);
-			TextNode.create(48, 292).text(Text.create("\u00A7 FORMATS", ShowTheme.label(14F, ShowTheme.FAINT))).attach(panel);
+			TextNode.create(48, 292).text(Text.create("\u00A7 FORMATS", ShowTheme.label(14F, ShowTheme.FAINT).markups())).attach(panel);
 			TextNode.create(48, 322).text(Text.create("\u00A7lBold\u00A7r \u00A7oitalic\u00A7r \u00A7nunderlined\u00A7r \u00A7mstruck\u00A7r \u00A7e\u00A7kmagic", info.withEffects(ShowRiseTextEffect.of(this.start + 0.5D, 0.015D)))).attach(panel);
 			RectNode.create(48, 412, 804, 1).color(Color.WHITE.withAlpha(0.08F)).attach(panel);
 			TextNode.create(48, 446).text(Text.create("ENCHANTING TABLE", ShowTheme.label(14F, ShowTheme.AMETHYST))).attach(panel);
