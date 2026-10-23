@@ -15,21 +15,20 @@ import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
 import dev.joid.lib.bridge.render.texture.MipmapChain;
 import dev.joid.lib.bridge.render.texture.Texture;
 import dev.joid.lib.utils.image.PixelLayout;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import net.minecraft.client.renderer.RenderPipelines;
 
 @Getter
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MinecraftTexture extends Texture implements IMinecraftTexture {
 
 	private final MinecraftRenderBridge bridge;
 
 	private GpuTexture     texture;
 	private GpuTextureView view;
-
-	private MinecraftTexture(final MinecraftRenderBridge bridge) {
-		this.bridge = bridge;
-	}
 
 	public static @NonNull MinecraftTexture create(final MinecraftRenderBridge bridge) {
 		return new MinecraftTexture(bridge);
