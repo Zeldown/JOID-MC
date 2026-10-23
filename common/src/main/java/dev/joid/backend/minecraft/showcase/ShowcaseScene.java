@@ -359,8 +359,10 @@ public enum ShowcaseScene {
 		ShowcaseDirector.runOnClient(() -> ui.getPlayer().seek(40D));
 		ShowcaseDirector.sleep(3000);
 		ShowcaseDirector.frames(35);
+		final double[] button = ShowcaseDirector.computeOnClient(() -> ShowcaseDirector.bounds(ui.getFocus()));
 		ShowcaseDirector.move(1700D, 900D);
-		ShowcaseDirector.glide(ShowcaseDirector.computeOnClient(ui::getFocus), 20);
+		ShowcaseDirector.glide(button[0] + button[2], button[1] + button[3] + 15D, 16);
+		ShowcaseDirector.glide(button[0] + button[2] / 2D, button[1] + button[3] / 2D, 8);
 		ShowcaseDirector.frames(10);
 		ShowcaseDirector.click();
 		ShowcaseDirector.frames(24);
