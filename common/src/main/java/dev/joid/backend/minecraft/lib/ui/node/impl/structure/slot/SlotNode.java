@@ -25,7 +25,7 @@ import net.minecraft.world.item.ItemStack;
 @Getter
 public class SlotNode extends Node {
 
-	private static final Color QUICK_CRAFT = Color.argb(0x80FFFFFF);
+	private static final Color QUICK_CRAFT = Color.argb(0x80FFFFFF).lock();
 
 	private Slot  slot;
 	private Color color;

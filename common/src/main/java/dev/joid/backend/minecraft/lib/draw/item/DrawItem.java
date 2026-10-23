@@ -23,7 +23,7 @@ public final class DrawItem {
 
 	private static final DrawItem INSTANCE = new DrawItem();
 
-	private static final Color COOLDOWN = Color.argb(0x7FFFFFFF);
+	private static final Color COOLDOWN = Color.argb(0x7FFFFFFF).lock();
 
 	public static @NonNull DrawItem inst() {
 		return DrawItem.INSTANCE;

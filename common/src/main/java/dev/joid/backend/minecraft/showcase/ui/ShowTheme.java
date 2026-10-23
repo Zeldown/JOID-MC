@@ -17,19 +17,19 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ShowTheme {
 
-	public static final Color INK      = Color.decode("#0D1017");
-	public static final Color GOLD     = Color.decode("#FFC93C");
-	public static final Color TEXT     = Color.decode("#F4F6FB");
-	public static final Color GRASS    = Color.decode("#7ED957");
-	public static final Color MUTED    = Color.decode("#A3ACBD");
-	public static final Color FAINT    = Color.decode("#6E7789");
-	public static final Color DIAMOND  = Color.decode("#4FE3E6");
-	public static final Color EMERALD  = Color.decode("#2BD67B");
-	public static final Color REDSTONE = Color.decode("#FF4D5E");
-	public static final Color AMETHYST = Color.decode("#B284FF");
+	public static final Color INK      = Color.decode("#0D1017").lock();
+	public static final Color GOLD     = Color.decode("#FFC93C").lock();
+	public static final Color TEXT     = Color.decode("#F4F6FB").lock();
+	public static final Color GRASS    = Color.decode("#7ED957").lock();
+	public static final Color MUTED    = Color.decode("#A3ACBD").lock();
+	public static final Color FAINT    = Color.decode("#6E7789").lock();
+	public static final Color DIAMOND  = Color.decode("#4FE3E6").lock();
+	public static final Color EMERALD  = Color.decode("#2BD67B").lock();
+	public static final Color REDSTONE = Color.decode("#FF4D5E").lock();
+	public static final Color AMETHYST = Color.decode("#B284FF").lock();
 
-	private static final Color PANEL_TOP    = Color.decode("#1B2130");
-	private static final Color PANEL_BOTTOM = Color.decode("#11151E");
+	private static final Color PANEL_TOP    = Color.decode("#1B2130").lock();
+	private static final Color PANEL_BOTTOM = Color.decode("#11151E").lock();
 
 	public static RectNode panel(final double x, final double y, final double width, final double height) {
 		return RectNode
