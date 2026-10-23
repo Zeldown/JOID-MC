@@ -20,7 +20,7 @@ public final class PassEncoder {
 	private GpuTextureView color;
 	private GpuTextureView depth;
 
-	public @NonNull RenderPass begin(final @NonNull GpuTextureView color, final GpuTextureView depth) {
+	public @NonNull RenderPass begin(final GpuTextureView color, final GpuTextureView depth) {
 		if (this.pass != null && this.color == color && this.depth == depth) {
 			return this.pass;
 		}

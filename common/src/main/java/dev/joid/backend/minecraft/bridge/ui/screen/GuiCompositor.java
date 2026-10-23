@@ -15,7 +15,6 @@ import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.bridge.render.texture.TextureFilter;
 import dev.joid.lib.bridge.render.texture.TextureSampling;
 import dev.joid.lib.bridge.render.texture.TextureWrap;
-import lombok.NonNull;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.render.TextureSetup;
@@ -42,7 +41,7 @@ public final class GuiCompositor {
 		this.targetPool = new MinecraftRenderTargetPool(bridge);
 	}
 
-	public void composite(final @NonNull GuiGraphicsExtractor graphics, final @NonNull Runnable draw) {
+	public void composite(final GuiGraphicsExtractor graphics, final Runnable draw) {
 		final Window window = Minecraft.getInstance().getWindow();
 		final MinecraftRenderBridge render = (MinecraftRenderBridge) BridgeHandler.RENDER.get();
 		final MinecraftRenderTarget target = this.targetPool.acquire(graphics, window.getWidth(), window.getHeight());

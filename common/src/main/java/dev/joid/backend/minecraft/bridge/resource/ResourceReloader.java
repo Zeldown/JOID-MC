@@ -42,7 +42,7 @@ public final class ResourceReloader {
 		}
 	}
 
-	public @NonNull ResourceData track(final @NonNull ResourceData data, final @NonNull NamespacedAsset asset) {
+	public @NonNull ResourceData track(final ResourceData data, final NamespacedAsset asset) {
 		this.tracked.put(data, asset);
 		return data;
 	}

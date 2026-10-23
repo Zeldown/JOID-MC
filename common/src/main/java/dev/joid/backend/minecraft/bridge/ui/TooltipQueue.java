@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import dev.joid.lib.font.converter.TextConverter;
-import lombok.NonNull;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
@@ -14,11 +13,11 @@ public final class TooltipQueue {
 
 	private Object content;
 
-	public void push(final @NonNull Object content) {
+	public void push(final Object content) {
 		this.content = content;
 	}
 
-	public void flush(final @NonNull GuiGraphicsExtractor graphics, final int mouseX, final int mouseY) {
+	public void flush(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY) {
 		final Object content = this.content;
 		this.content = null;
 		if (content instanceof final ItemStack stack) {

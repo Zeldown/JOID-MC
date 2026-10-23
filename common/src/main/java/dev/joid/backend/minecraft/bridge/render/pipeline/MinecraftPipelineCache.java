@@ -24,7 +24,6 @@ import dev.joid.backend.minecraft.bridge.render.shader.ShaderSourceProvider;
 import dev.joid.lib.bridge.render.state.BlendState;
 import dev.joid.lib.bridge.render.state.PipelineKey;
 import dev.joid.lib.bridge.render.vertex.Primitive;
-import lombok.NonNull;
 import net.minecraft.resources.Identifier;
 
 public final class MinecraftPipelineCache {
@@ -39,7 +38,7 @@ public final class MinecraftPipelineCache {
 		this.pipelineMap    = new HashMap<>();
 	}
 
-	public RenderPipeline get(final @NonNull PipelineKey key) {
+	public RenderPipeline get(final PipelineKey key) {
 		RenderPipeline pipeline = this.pipelineMap.get(key);
 		if (pipeline == null) {
 			pipeline = MinecraftPipelineCache.build(key, this.pipelineMap.size());
@@ -49,11 +48,11 @@ public final class MinecraftPipelineCache {
 		return this.isValid(pipeline) ? pipeline : null;
 	}
 
-	public void remove(final @NonNull MinecraftShader shader) {
+	public void remove(final MinecraftShader shader) {
 		this.pipelineMap.keySet().removeIf(key -> key.getShader() == shader);
 	}
 
-	public boolean isValid(final @NonNull Identifier identifier, final @NonNull BindGroupLayout layout, final @NonNull VertexFormat vertexFormat, final @NonNull BlendState blend) {
+	public boolean isValid(final Identifier identifier, final BindGroupLayout layout, final VertexFormat vertexFormat, final BlendState blend) {
 		return this.isValid(RenderPipeline.builder()
 				.withLocation(identifier)
 				.withVertexShader(identifier)

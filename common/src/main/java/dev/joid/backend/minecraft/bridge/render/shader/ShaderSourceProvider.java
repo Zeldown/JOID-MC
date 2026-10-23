@@ -7,7 +7,6 @@ import java.util.Map;
 import com.mojang.blaze3d.shaders.ShaderSource;
 import com.mojang.blaze3d.shaders.ShaderType;
 
-import lombok.NonNull;
 import net.minecraft.resources.Identifier;
 
 public final class ShaderSourceProvider implements ShaderSource {
@@ -21,11 +20,11 @@ public final class ShaderSourceProvider implements ShaderSource {
 		}
 	}
 
-	public void register(final @NonNull Identifier identifier, final @NonNull ShaderType type, final @NonNull String source) {
+	public void register(final Identifier identifier, final ShaderType type, final String source) {
 		this.sourceMap.get(type).put(identifier, source);
 	}
 
-	public void unregister(final @NonNull Identifier identifier) {
+	public void unregister(final Identifier identifier) {
 		for (final Map<Identifier, String> sources : this.sourceMap.values()) {
 			sources.remove(identifier);
 		}

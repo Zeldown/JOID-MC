@@ -18,7 +18,7 @@ public final class GuiFrameCounter {
 		return GuiFrameCounter.INSTANCE;
 	}
 
-	public long getFrame(final @NonNull GuiGraphicsExtractor graphics) {
+	public long getFrame(final GuiGraphicsExtractor graphics) {
 		if (graphics != this.graphics) {
 			this.graphics = graphics;
 			this.frame++;

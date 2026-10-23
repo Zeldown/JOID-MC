@@ -20,7 +20,7 @@ public final class MinecraftRenderTargetPool {
 		this.frame      = -1L;
 	}
 
-	public @NonNull MinecraftRenderTarget acquire(final @NonNull GuiGraphicsExtractor graphics, final int width, final int height) {
+	public @NonNull MinecraftRenderTarget acquire(final GuiGraphicsExtractor graphics, final int width, final int height) {
 		final long frame = GuiFrameCounter.inst().getFrame(graphics);
 		if (frame != this.frame) {
 			this.frame = frame;
