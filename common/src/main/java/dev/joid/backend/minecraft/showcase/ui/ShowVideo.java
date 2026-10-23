@@ -43,8 +43,8 @@ public class ShowVideo extends UI implements IShowFocus {
 	private final DoubleSignal  hover;
 	private final TweenAnimator reveal;
 
-	@Getter private ResourcePlayerNode player;
 	@Getter private Node               timeline;
+	@Getter private ResourcePlayerNode player;
 
 	private Node   button;
 	private double start;
