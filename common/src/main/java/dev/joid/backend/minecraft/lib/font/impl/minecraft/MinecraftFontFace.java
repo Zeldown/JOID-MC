@@ -19,7 +19,7 @@ public final class MinecraftFontFace implements IFontFace {
 	private final FontDescription.Resource description;
 	private final FontWeight               weight;
 
-	public static @NonNull MinecraftFontFace create(final @NonNull Identifier identifier, final @NonNull FontWeight weight) {
+	public static @NonNull MinecraftFontFace of(final @NonNull Identifier identifier, final @NonNull FontWeight weight) {
 		return new MinecraftFontFace(new FontDescription.Resource(identifier), weight);
 	}
 

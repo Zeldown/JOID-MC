@@ -5,7 +5,6 @@ import dev.joid.backend.minecraft.bridge.render.MinecraftRenderTarget;
 import dev.joid.backend.minecraft.bridge.render.texture.MinecraftTexture;
 import dev.joid.lib.bridge.render.framebuffer.FrameBufferHandle;
 import lombok.Getter;
-import lombok.NonNull;
 
 @Getter
 public final class MinecraftFrameBuffer extends FrameBufferHandle<MinecraftTexture> {
@@ -17,8 +16,8 @@ public final class MinecraftFrameBuffer extends FrameBufferHandle<MinecraftTextu
 		this.target = target;
 	}
 
-	public static @NonNull MinecraftFrameBuffer create(final @NonNull MinecraftRenderBridge bridge, final int width, final int height) {
-		return new MinecraftFrameBuffer(MinecraftRenderTarget.create(bridge, width, height, false));
+	public MinecraftFrameBuffer(final MinecraftRenderBridge bridge, final int width, final int height) {
+		this(new MinecraftRenderTarget(bridge, width, height, false));
 	}
 
 	@Override

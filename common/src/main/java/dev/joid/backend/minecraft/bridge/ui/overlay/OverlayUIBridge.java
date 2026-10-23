@@ -30,17 +30,13 @@ public final class OverlayUIBridge extends UIBridge {
 	private long    frame;
 	private boolean layerPass;
 
-	private OverlayUIBridge(final MinecraftRenderBridge render, final MinecraftWindowBridge window) {
+	public OverlayUIBridge(final MinecraftRenderBridge render, final MinecraftWindowBridge window) {
 		this.window       = window;
-		this.compositor   = GuiCompositor.create(render);
-		this.tooltipQueue = TooltipQueue.create();
+		this.compositor   = new GuiCompositor(render);
+		this.tooltipQueue = new TooltipQueue();
 		this.width        = window.getWidth();
 		this.height       = window.getHeight();
 		this.frame        = -1L;
-	}
-
-	public static @NonNull OverlayUIBridge create(final @NonNull MinecraftRenderBridge render, final @NonNull MinecraftWindowBridge window) {
-		return new OverlayUIBridge(render, window);
 	}
 
 	@Override

@@ -16,13 +16,9 @@ public class UIScreen extends Screen {
 
 	private final ScreenUIBridge bridge;
 
-	protected UIScreen(final ScreenUIBridge bridge) {
+	public UIScreen(final ScreenUIBridge bridge) {
 		super(Component.empty());
 		this.bridge = bridge;
-	}
-
-	public static @NonNull UIScreen create(final @NonNull ScreenUIBridge bridge) {
-		return new UIScreen(bridge);
 	}
 
 	@Override

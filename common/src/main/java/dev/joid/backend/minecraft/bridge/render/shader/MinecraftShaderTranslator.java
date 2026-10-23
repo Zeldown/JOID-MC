@@ -8,12 +8,8 @@ import lombok.NonNull;
 
 public final class MinecraftShaderTranslator extends GlslShaderTranslator {
 
-	private MinecraftShaderTranslator() {
+	public MinecraftShaderTranslator() {
 		super(GlslDialect.GLSL_330, UniformLayout.BLOCK);
-	}
-
-	public static @NonNull MinecraftShaderTranslator create() {
-		return new MinecraftShaderTranslator();
 	}
 
 	@Override

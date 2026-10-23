@@ -66,9 +66,9 @@ public final class MinecraftRenderBridge extends RenderBridge {
 	public MinecraftRenderBridge() {
 		this.device                 = RenderSystem.getDevice();
 		this.zeroToOne              = this.device.getDeviceInfo().isZZeroToOne();
-		this.passEncoder            = PassEncoder.create(this.device);
-		this.sourceProvider         = ShaderSourceProvider.create();
-		this.pipelineCache          = PipelineCache.create(this.device, this.sourceProvider);
+		this.passEncoder            = new PassEncoder(this.device);
+		this.sourceProvider         = new ShaderSourceProvider();
+		this.pipelineCache          = new PipelineCache(this.device, this.sourceProvider);
 		this.rasterProjection       = new Matrix4f();
 		this.rasterProjectionBuffer = new ProjectionMatrixBuffer("JOID Raster");
 		this.scratch                = ByteBuffer.allocateDirect(1 << 16).order(ByteOrder.nativeOrder());
@@ -115,7 +115,7 @@ public final class MinecraftRenderBridge extends RenderBridge {
 
 	@Override
 	public @NonNull IFrameBuffer createFrameBuffer(final int width, final int height) {
-		return MinecraftFrameBuffer.create(this, width, height);
+		return new MinecraftFrameBuffer(this, width, height);
 	}
 
 	@Override

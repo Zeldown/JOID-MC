@@ -4,22 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import dev.joid.lib.font.converter.TextConverter;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class TooltipQueue {
 
 	private Object content;
-
-	public static @NonNull TooltipQueue create() {
-		return new TooltipQueue();
-	}
 
 	public void push(final @NonNull Object content) {
 		this.content = content;

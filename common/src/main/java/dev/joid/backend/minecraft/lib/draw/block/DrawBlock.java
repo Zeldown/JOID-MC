@@ -37,7 +37,7 @@ public final class DrawBlock {
 			return;
 		}
 
-		DrawUtils.RASTER.drawRaster(x, y, size, size, FeatureDrawableRaster.create(Lighting.Entry.ITEMS_3D, (pose, collector) -> {
+		DrawUtils.RASTER.drawRaster(x, y, size, size, FeatureDrawableRaster.of(Lighting.Entry.ITEMS_3D, (pose, collector) -> {
 			pose.mulPose(new Quaternionf().rotationXYZ((float) Math.toRadians(rotationPitch), (float) Math.toRadians(rotationYaw), 0F));
 			pose.scale(0.625F, 0.625F, 0.625F);
 			pose.translate(-0.5F, -0.5F, -0.5F);

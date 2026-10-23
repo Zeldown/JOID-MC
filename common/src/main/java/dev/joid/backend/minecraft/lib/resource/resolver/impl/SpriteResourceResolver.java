@@ -20,7 +20,7 @@ public class SpriteResourceResolver implements IResourceResolver {
 	public @NonNull Resource resolve(final @NonNull ResourceBuilder builder, final @NonNull Object input) {
 		final SpriteId spriteId = input instanceof SpriteId ? (SpriteId) input : new SpriteId(((TextureAtlasSprite) input).atlasLocation(), ((TextureAtlasSprite) input).contents().name());
 		final String uniqueId = "sprite:" + spriteId.atlasLocation() + "#" + spriteId.texture();
-		return builder.compute(uniqueId, () -> ResourceData.create(uniqueId, new SpriteResourceDecoder(spriteId))).nearest();
+		return builder.compute(uniqueId, () -> ResourceData.create(uniqueId, SpriteResourceDecoder.create(spriteId))).nearest();
 	}
 
 }

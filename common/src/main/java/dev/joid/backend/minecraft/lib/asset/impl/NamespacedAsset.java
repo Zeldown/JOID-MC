@@ -22,7 +22,7 @@ public final class NamespacedAsset extends Asset {
 		this.id = id;
 	}
 
-	public static @NonNull NamespacedAsset create(final @NonNull Identifier id) {
+	public static @NonNull NamespacedAsset of(final @NonNull Identifier id) {
 		return new NamespacedAsset(id);
 	}
 

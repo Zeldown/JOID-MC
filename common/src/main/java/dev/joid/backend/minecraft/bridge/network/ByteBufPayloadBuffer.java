@@ -4,18 +4,13 @@ import java.util.UUID;
 
 import dev.joid.backend.minecraft.loader.network.IPayloadReader;
 import dev.joid.backend.minecraft.loader.network.IPayloadWriter;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import net.minecraft.network.FriendlyByteBuf;
 
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor
 public final class ByteBufPayloadBuffer implements IPayloadReader, IPayloadWriter {
 
 	private final FriendlyByteBuf buffer;
-
-	public static ByteBufPayloadBuffer create(final FriendlyByteBuf buffer) {
-		return new ByteBufPayloadBuffer(buffer);
-	}
 
 	@Override
 	public int readInt() {

@@ -8,11 +8,10 @@ import com.mojang.blaze3d.systems.GpuDevice;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.textures.GpuTextureView;
 
-import lombok.AccessLevel;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+@RequiredArgsConstructor
 public final class PassEncoder {
 
 	private final GpuDevice device;
@@ -20,10 +19,6 @@ public final class PassEncoder {
 	private RenderPass     pass;
 	private GpuTextureView color;
 	private GpuTextureView depth;
-
-	public static @NonNull PassEncoder create(final @NonNull GpuDevice device) {
-		return new PassEncoder(device);
-	}
 
 	public @NonNull RenderPass begin(final @NonNull GpuTextureView color, final GpuTextureView depth) {
 		if (this.pass != null && this.color == color && this.depth == depth) {

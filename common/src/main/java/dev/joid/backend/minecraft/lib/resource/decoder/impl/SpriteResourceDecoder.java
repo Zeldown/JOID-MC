@@ -5,22 +5,25 @@ import com.mojang.blaze3d.textures.GpuTextureView;
 import dev.joid.backend.minecraft.bridge.render.texture.GpuBorrowedTexture;
 import dev.joid.lib.resource.ResourceData;
 import dev.joid.lib.resource.decoder.IResourceDecoder;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.sprite.SpriteId;
 
 @Getter
+@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class SpriteResourceDecoder implements IResourceDecoder {
 
 	private final SpriteId spriteId;
 
 	private TextureAtlasSprite sprite;
 
-	public SpriteResourceDecoder(final @NonNull SpriteId spriteId) {
-		this.spriteId = spriteId;
+	public static @NonNull SpriteResourceDecoder create(final @NonNull SpriteId spriteId) {
+		return new SpriteResourceDecoder(spriteId);
 	}
 
 	@Override
@@ -33,7 +36,7 @@ public class SpriteResourceDecoder implements IResourceDecoder {
 			throw new IllegalArgumentException("No sprite " + this.spriteId.texture() + " in the atlas " + this.spriteId.atlasLocation());
 		}
 
-		resource.texture(GpuBorrowedTexture.create(this::getAtlas));
+		resource.texture(GpuBorrowedTexture.of(this::getAtlas));
 		this.region(resource, sprite);
 	}
 

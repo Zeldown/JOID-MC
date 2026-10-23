@@ -42,7 +42,7 @@ public final class MinecraftTextRenderer extends BitmapTextRenderer<MinecraftFon
 		final GpuTextureView view = renderable.textureView();
 		if (view != this.view) {
 			this.view    = view;
-			this.texture = GpuBorrowedTexture.create(view);
+			this.texture = GpuBorrowedTexture.of(view);
 		}
 
 		final GlyphVertexCapture capture = this.capture.reset();

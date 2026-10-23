@@ -14,14 +14,10 @@ public final class MinecraftRenderTargetPool {
 	private int  index;
 	private long frame;
 
-	private MinecraftRenderTargetPool(final MinecraftRenderBridge bridge) {
+	public MinecraftRenderTargetPool(final MinecraftRenderBridge bridge) {
 		this.bridge     = bridge;
 		this.targetList = new ArrayList<>();
 		this.frame      = -1L;
-	}
-
-	public static @NonNull MinecraftRenderTargetPool create(final @NonNull MinecraftRenderBridge bridge) {
-		return new MinecraftRenderTargetPool(bridge);
 	}
 
 	public @NonNull MinecraftRenderTarget acquire(final @NonNull GuiGraphicsExtractor graphics, final int width, final int height) {
@@ -32,13 +28,13 @@ public final class MinecraftRenderTargetPool {
 		}
 
 		if (this.index == this.targetList.size()) {
-			this.targetList.add(MinecraftRenderTarget.create(this.bridge, width, height, true));
+			this.targetList.add(new MinecraftRenderTarget(this.bridge, width, height, true));
 		}
 
 		MinecraftRenderTarget target = this.targetList.get(this.index);
 		if (target.getWidth() != width || target.getHeight() != height) {
 			target.delete();
-			target = MinecraftRenderTarget.create(this.bridge, width, height, true);
+			target = new MinecraftRenderTarget(this.bridge, width, height, true);
 			this.targetList.set(this.index, target);
 		}
 

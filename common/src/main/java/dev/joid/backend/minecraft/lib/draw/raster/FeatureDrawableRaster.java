@@ -22,7 +22,7 @@ public final class FeatureDrawableRaster implements DrawableRaster {
 	private final Lighting.Entry                             lighting;
 	private final BiConsumer<PoseStack, SubmitNodeCollector> submit;
 
-	public static @NonNull FeatureDrawableRaster create(final @NonNull Lighting.Entry lighting, final @NonNull BiConsumer<PoseStack, SubmitNodeCollector> submit) {
+	public static @NonNull FeatureDrawableRaster of(final @NonNull Lighting.Entry lighting, final @NonNull BiConsumer<PoseStack, SubmitNodeCollector> submit) {
 		return new FeatureDrawableRaster(lighting, submit);
 	}
 

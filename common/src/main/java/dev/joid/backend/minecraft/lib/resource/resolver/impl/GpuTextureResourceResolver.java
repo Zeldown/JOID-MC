@@ -25,7 +25,7 @@ public class GpuTextureResourceResolver implements IResourceResolver {
 	@Override
 	public @NonNull Resource resolve(final @NonNull ResourceBuilder builder, final @NonNull Object input) {
 		final String uniqueId = "gpu_texture_" + System.identityHashCode(input);
-		return builder.compute(uniqueId, () -> ResourceData.create(uniqueId, null).texture(GpuBorrowedTexture.create(GpuTextureResourceResolver.getView(input)))).nearest();
+		return builder.compute(uniqueId, () -> ResourceData.create(uniqueId, null).texture(GpuBorrowedTexture.of(GpuTextureResourceResolver.getView(input)))).nearest();
 	}
 
 	private static Supplier<GpuTextureView> getView(final Object input) {

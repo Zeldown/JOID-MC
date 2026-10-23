@@ -68,9 +68,9 @@ public final class MinecraftBackend extends Backend {
 
 	@Override
 	protected void registerDefaults() {
-		BridgeHandler.UI.register(ScreenUIBridge.create(this.render, this.window), -30);
-		BridgeHandler.UI.register(OverlayUIBridge.create(this.render, this.window), -10);
-		BridgeHandler.UI.register(ContainerUIBridge.create(this.render, this.window), -20);
+		BridgeHandler.UI.register(new ScreenUIBridge(this.render, this.window), -30);
+		BridgeHandler.UI.register(new OverlayUIBridge(this.render, this.window), -10);
+		BridgeHandler.UI.register(new ContainerUIBridge(this.render, this.window), -20);
 		TextMarkup.register(LegacyTextMarkup.inst());
 		KeyResolver.register(new KeyBindKeyResolver());
 		TextConverter.register(ChatTextConverter.inst());

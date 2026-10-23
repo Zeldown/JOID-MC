@@ -27,7 +27,7 @@ public final class MinecraftSnapshotBackend implements ISnapshotBackend {
 	@Override
 	public void create(final int width, final int height) {
 		final MinecraftRenderBridge render = (MinecraftRenderBridge) BridgeHandler.RENDER.get();
-		this.target = MinecraftRenderTarget.create(render, width, height, true);
+		this.target = new MinecraftRenderTarget(render, width, height, true);
 		render.screenTarget(this.target);
 	}
 

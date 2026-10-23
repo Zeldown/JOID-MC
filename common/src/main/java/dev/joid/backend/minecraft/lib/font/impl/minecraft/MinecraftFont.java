@@ -26,7 +26,7 @@ public final class MinecraftFont extends BitmapFont<MinecraftFontFace> {
 	private final Identifier id;
 
 	private MinecraftFont(final Identifier id) {
-		super(FontFamily.of(MinecraftFontFace.create(id, FontWeight.REGULAR), MinecraftFontFace.create(id, FontWeight.BOLD)), 8);
+		super(FontFamily.of(MinecraftFontFace.of(id, FontWeight.REGULAR), MinecraftFontFace.of(id, FontWeight.BOLD)), 8);
 		this.id = id;
 	}
 

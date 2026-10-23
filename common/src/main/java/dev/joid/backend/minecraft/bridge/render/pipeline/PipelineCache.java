@@ -24,20 +24,19 @@ import dev.joid.backend.minecraft.bridge.render.shader.ShaderSourceProvider;
 import dev.joid.lib.bridge.render.state.BlendState;
 import dev.joid.lib.bridge.render.state.PipelineKey;
 import dev.joid.lib.bridge.render.vertex.Primitive;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import net.minecraft.resources.Identifier;
 
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public final class PipelineCache {
 
 	private final GpuDevice                        device;
 	private final ShaderSourceProvider             sourceProvider;
 	private final Map<PipelineKey, RenderPipeline> pipelineMap;
 
-	public static @NonNull PipelineCache create(final @NonNull GpuDevice device, final @NonNull ShaderSourceProvider sourceProvider) {
-		return new PipelineCache(device, sourceProvider, new HashMap<>());
+	public PipelineCache(final GpuDevice device, final ShaderSourceProvider sourceProvider) {
+		this.device         = device;
+		this.sourceProvider = sourceProvider;
+		this.pipelineMap    = new HashMap<>();
 	}
 
 	public RenderPipeline get(final @NonNull PipelineKey key) {

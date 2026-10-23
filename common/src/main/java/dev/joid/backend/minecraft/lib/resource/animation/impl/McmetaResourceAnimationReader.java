@@ -12,21 +12,16 @@ import dev.joid.lib.resource.animation.IResourceAnimationReader;
 import dev.joid.lib.resource.animation.ResourceAnimation;
 import dev.joid.lib.resource.animation.ResourceAnimationFrame;
 import dev.joid.lib.utils.image.ImageUtils;
-import lombok.AccessLevel;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.client.resources.metadata.animation.AnimationFrame;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
 import net.minecraft.client.resources.metadata.animation.FrameSize;
 
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+@RequiredArgsConstructor
 public final class McmetaResourceAnimationReader implements IResourceAnimationReader {
 
 	private final AnimationMetadataSection metadata;
-
-	public static @NonNull McmetaResourceAnimationReader create(final @NonNull AnimationMetadataSection metadata) {
-		return new McmetaResourceAnimationReader(metadata);
-	}
 
 	@Override
 	public @NonNull ResourceAnimation read(final @NonNull InputStream stream) throws IOException {

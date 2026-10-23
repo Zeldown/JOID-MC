@@ -22,14 +22,10 @@ public final class ScreenUIBridge extends StackUIBridge {
 
 	private UIScreen screen;
 
-	private ScreenUIBridge(final MinecraftRenderBridge render, final MinecraftWindowBridge window) {
+	public ScreenUIBridge(final MinecraftRenderBridge render, final MinecraftWindowBridge window) {
 		this.window       = window;
-		this.compositor   = GuiCompositor.create(render);
-		this.tooltipQueue = TooltipQueue.create();
-	}
-
-	public static @NonNull ScreenUIBridge create(final @NonNull MinecraftRenderBridge render, final @NonNull MinecraftWindowBridge window) {
-		return new ScreenUIBridge(render, window);
+		this.compositor   = new GuiCompositor(render);
+		this.tooltipQueue = new TooltipQueue();
 	}
 
 	public void removed(final @NonNull UIScreen screen) {
@@ -79,7 +75,7 @@ public final class ScreenUIBridge extends StackUIBridge {
 	@Override
 	protected void attachScreen() {
 		if (this.screen == null) {
-			this.screen = UIScreen.create(this);
+			this.screen = new UIScreen(this);
 			Minecraft.getInstance().gui.setScreen(this.screen);
 		}
 	}

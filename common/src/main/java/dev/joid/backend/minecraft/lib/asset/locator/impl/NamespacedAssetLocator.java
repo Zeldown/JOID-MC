@@ -15,12 +15,12 @@ public class NamespacedAssetLocator implements IAssetLocator {
 		}
 
 		final Identifier identifier = NamespacedAssetLocator.parse(handle);
-		return identifier != null && NamespacedAsset.create(identifier).exists();
+		return identifier != null && NamespacedAsset.of(identifier).exists();
 	}
 
 	@Override
 	public @NonNull Asset locate(final @NonNull Object handle) {
-		return NamespacedAsset.create(NamespacedAssetLocator.parse(handle));
+		return NamespacedAsset.of(NamespacedAssetLocator.parse(handle));
 	}
 
 	public static Identifier parse(final @NonNull Object handle) {

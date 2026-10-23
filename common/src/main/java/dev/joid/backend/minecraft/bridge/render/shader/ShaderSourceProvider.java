@@ -7,22 +7,18 @@ import java.util.Map;
 import com.mojang.blaze3d.shaders.ShaderSource;
 import com.mojang.blaze3d.shaders.ShaderType;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import net.minecraft.resources.Identifier;
 
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ShaderSourceProvider implements ShaderSource {
 
 	private final Map<ShaderType, Map<Identifier, String>> sourceMap;
 
-	public static @NonNull ShaderSourceProvider create() {
-		final Map<ShaderType, Map<Identifier, String>> sourceMap = new EnumMap<>(ShaderType.class);
+	public ShaderSourceProvider() {
+		this.sourceMap = new EnumMap<>(ShaderType.class);
 		for (final ShaderType type : ShaderType.values()) {
-			sourceMap.put(type, new HashMap<>());
+			this.sourceMap.put(type, new HashMap<>());
 		}
-		return new ShaderSourceProvider(sourceMap);
 	}
 
 	public void register(final @NonNull Identifier identifier, final @NonNull ShaderType type, final @NonNull String source) {

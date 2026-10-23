@@ -39,7 +39,7 @@ public final class MinecraftShader extends Shader {
 	private Boolean active;
 
 	private MinecraftShader(final MinecraftRenderBridge bridge, final ShaderSource vertex, final ShaderSource fragment, final BlendState blend) {
-		super(bridge, MinecraftShaderTranslator.create().stencil(StencilEmulation.Pass.TEST), vertex, fragment, blend);
+		super(bridge, new MinecraftShaderTranslator().stencil(StencilEmulation.Pass.TEST), vertex, fragment, blend);
 		this.device = bridge.getDevice();
 	}
 

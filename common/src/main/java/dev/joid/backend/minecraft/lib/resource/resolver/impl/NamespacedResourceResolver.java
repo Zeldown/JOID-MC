@@ -26,24 +26,24 @@ public class NamespacedResourceResolver implements IResourceResolver {
 		}
 
 		final Identifier identifier = NamespacedAssetLocator.parse(input);
-		return identifier != null && (NamespacedResourceResolver.isLoaded(identifier) || NamespacedAsset.create(identifier).exists());
+		return identifier != null && (NamespacedResourceResolver.isLoaded(identifier) || NamespacedAsset.of(identifier).exists());
 	}
 
 	@Override
 	public @NonNull Resource resolve(final @NonNull ResourceBuilder builder, final @NonNull Object input) {
-		final NamespacedAsset asset = NamespacedAsset.create(NamespacedAssetLocator.parse(input));
+		final NamespacedAsset asset = NamespacedAsset.of(NamespacedAssetLocator.parse(input));
 		return builder.compute(asset.getUniqueId(), () -> NamespacedResourceResolver.read(asset)).nearest();
 	}
 
 	public static @NonNull IResourceDecoder decoder(final @NonNull NamespacedAsset asset) {
 		final AnimationMetadataSection animation = asset.getAnimation();
-		return animation == null ? ResourceFormat.decoder(asset) : AnimatedResourceDecoder.create(asset, McmetaResourceAnimationReader.create(animation));
+		return animation == null ? ResourceFormat.decoder(asset) : AnimatedResourceDecoder.create(asset, new McmetaResourceAnimationReader(animation));
 	}
 
 	private static @NonNull ResourceData read(final @NonNull NamespacedAsset asset) {
 		final Identifier identifier = asset.getId();
 		if (NamespacedResourceResolver.isLoaded(identifier) && asset.getAnimation() == null) {
-			return ResourceReloader.inst().track(ResourceData.create(asset.getUniqueId(), null).texture(GpuBorrowedTexture.create(() -> Minecraft.getInstance().getTextureManager().getTexture(identifier).getTextureView())), asset);
+			return ResourceReloader.inst().track(ResourceData.create(asset.getUniqueId(), null).texture(GpuBorrowedTexture.of(() -> Minecraft.getInstance().getTextureManager().getTexture(identifier).getTextureView())), asset);
 		}
 
 		try {

@@ -19,7 +19,7 @@ public record PayloadPacket<T extends IPayload>(T payload) implements CustomPack
 	}
 
 	public static <T extends IPayload> StreamCodec<RegistryFriendlyByteBuf, PayloadPacket<T>> codec(final PayloadType<T> type) {
-		return StreamCodec.of((buffer, packet) -> packet.payload().write(ByteBufPayloadBuffer.create(buffer)), buffer -> new PayloadPacket<>(type.getReader().apply(ByteBufPayloadBuffer.create(buffer))));
+		return StreamCodec.of((buffer, packet) -> packet.payload().write(new ByteBufPayloadBuffer(buffer)), buffer -> new PayloadPacket<>(type.getReader().apply(new ByteBufPayloadBuffer(buffer))));
 	}
 
 }

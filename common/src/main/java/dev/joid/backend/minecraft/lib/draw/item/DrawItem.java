@@ -37,7 +37,7 @@ public final class DrawItem {
 		final Minecraft minecraft = Minecraft.getInstance();
 		final ItemStackRenderState state = new ItemStackRenderState();
 		minecraft.getItemModelResolver().updateForTopItem(state, stack, ItemDisplayContext.GUI, minecraft.level, minecraft.player, 0);
-		DrawUtils.RASTER.drawRaster(x, y, size, size, FeatureDrawableRaster.create(state.usesBlockLight() ? Lighting.Entry.ITEMS_3D : Lighting.Entry.ITEMS_FLAT, (pose, collector) -> state.submit(pose, collector, LightCoordsUtil.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0)));
+		DrawUtils.RASTER.drawRaster(x, y, size, size, FeatureDrawableRaster.of(state.usesBlockLight() ? Lighting.Entry.ITEMS_3D : Lighting.Entry.ITEMS_FLAT, (pose, collector) -> state.submit(pose, collector, LightCoordsUtil.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0)));
 	}
 
 	public void drawItemBar(final double x, final double y, final double size, final @NonNull ItemStack stack) {

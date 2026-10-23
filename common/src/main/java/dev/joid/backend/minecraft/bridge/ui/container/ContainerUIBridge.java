@@ -25,14 +25,10 @@ public final class ContainerUIBridge extends StackUIBridge {
 	@Getter
 	private ContainerUIScreen<?> screen;
 
-	private ContainerUIBridge(final MinecraftRenderBridge render, final MinecraftWindowBridge window) {
+	public ContainerUIBridge(final MinecraftRenderBridge render, final MinecraftWindowBridge window) {
 		this.window       = window;
-		this.compositor   = GuiCompositor.create(render);
-		this.tooltipQueue = TooltipQueue.create();
-	}
-
-	public static @NonNull ContainerUIBridge create(final @NonNull MinecraftRenderBridge render, final @NonNull MinecraftWindowBridge window) {
-		return new ContainerUIBridge(render, window);
+		this.compositor   = new GuiCompositor(render);
+		this.tooltipQueue = new TooltipQueue();
 	}
 
 	@Override

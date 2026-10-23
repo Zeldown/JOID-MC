@@ -9,13 +9,10 @@ import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.textures.GpuTextureView;
 
 import dev.joid.backend.minecraft.bridge.render.texture.MinecraftTexture;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
 
 @Getter
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MinecraftRenderTarget {
 
 	private final MinecraftTexture texture;
@@ -26,18 +23,20 @@ public final class MinecraftRenderTarget {
 	private final GpuTexture       stencilCopy;
 	private final GpuTextureView   stencilCopyView;
 
-	public static @NonNull MinecraftRenderTarget create(final @NonNull MinecraftRenderBridge bridge, final int width, final int height, final boolean stencil) {
+	public MinecraftRenderTarget(final MinecraftRenderBridge bridge, final int width, final int height, final boolean stencil) {
 		final GpuDevice device = bridge.getDevice();
-		final MinecraftTexture texture = MinecraftTexture.create(bridge);
-		final GpuTexture depth = device.createTexture("JOID Depth", GpuTexture.USAGE_COPY_DST | GpuTexture.USAGE_RENDER_ATTACHMENT,GpuFormat.D32_FLOAT, width, height, 1, 1);
-		final GpuTexture stencilTexture = stencil ? MinecraftRenderTarget.createStencil(device, "JOID Stencil", width, height) : null;
-		final GpuTexture stencilCopy = stencil ? MinecraftRenderTarget.createStencil(device, "JOID Stencil Copy", width, height) : null;
-		texture.allocate(width, height);
+		this.texture     = MinecraftTexture.create(bridge);
+		this.depth       = device.createTexture("JOID Depth", GpuTexture.USAGE_COPY_DST | GpuTexture.USAGE_RENDER_ATTACHMENT,GpuFormat.D32_FLOAT, width, height, 1, 1);
+		this.stencil     = stencil ? MinecraftRenderTarget.createStencil(device, "JOID Stencil", width, height) : null;
+		this.stencilCopy = stencil ? MinecraftRenderTarget.createStencil(device, "JOID Stencil Copy", width, height) : null;
+		this.texture.allocate(width, height);
 
 		final CommandEncoder encoder = bridge.getPassEncoder().encoder();
-		encoder.clearColorTexture(texture.getTexture(), new Vector4f(0F));
-		encoder.clearDepthTexture(depth, 1D);
-		return new MinecraftRenderTarget(texture, depth, device.createTextureView(depth), stencilTexture, stencil ? device.createTextureView(stencilTexture) : null, stencilCopy, stencil ? device.createTextureView(stencilCopy) : null);
+		encoder.clearColorTexture(this.texture.getTexture(), new Vector4f(0F));
+		encoder.clearDepthTexture(this.depth, 1D);
+		this.depthView       = device.createTextureView(this.depth);
+		this.stencilView     = stencil ? device.createTextureView(this.stencil) : null;
+		this.stencilCopyView = stencil ? device.createTextureView(this.stencilCopy) : null;
 	}
 
 	public int getWidth() {

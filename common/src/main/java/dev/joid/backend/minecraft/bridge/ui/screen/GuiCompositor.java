@@ -15,8 +15,6 @@ import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.bridge.render.texture.TextureFilter;
 import dev.joid.lib.bridge.render.texture.TextureSampling;
 import dev.joid.lib.bridge.render.texture.TextureWrap;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -24,7 +22,6 @@ import net.minecraft.client.gui.render.TextureSetup;
 import net.minecraft.client.renderer.BindGroupLayouts;
 import net.minecraft.resources.Identifier;
 
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public final class GuiCompositor {
 
 	private static final RenderPipeline PIPELINE = RenderPipeline.builder()
@@ -41,8 +38,8 @@ public final class GuiCompositor {
 
 	private final MinecraftRenderTargetPool targetPool;
 
-	public static @NonNull GuiCompositor create(final @NonNull MinecraftRenderBridge bridge) {
-		return new GuiCompositor(MinecraftRenderTargetPool.create(bridge));
+	public GuiCompositor(final MinecraftRenderBridge bridge) {
+		this.targetPool = new MinecraftRenderTargetPool(bridge);
 	}
 
 	public void composite(final @NonNull GuiGraphicsExtractor graphics, final @NonNull Runnable draw) {

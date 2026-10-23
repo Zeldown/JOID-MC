@@ -114,7 +114,7 @@ public class MinecraftShaderTranslatorTest {
 	}
 
 	private static MinecraftShaderTranslator color() {
-		return MinecraftShaderTranslator.create().stencil(StencilEmulation.Pass.TEST);
+		return new MinecraftShaderTranslator().stencil(StencilEmulation.Pass.TEST);
 	}
 
 	private static String translate(final CoreShader shader) {

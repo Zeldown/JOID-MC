@@ -13,11 +13,11 @@ public final class GpuBorrowedTexture extends BorrowedTexture<GpuTextureView> im
 		super(view);
 	}
 
-	public static @NonNull GpuBorrowedTexture create(final @NonNull GpuTextureView view) {
+	public static @NonNull GpuBorrowedTexture of(final @NonNull GpuTextureView view) {
 		return new GpuBorrowedTexture(() -> view);
 	}
 
-	public static @NonNull GpuBorrowedTexture create(final @NonNull Supplier<GpuTextureView> view) {
+	public static @NonNull GpuBorrowedTexture of(final @NonNull Supplier<GpuTextureView> view) {
 		return new GpuBorrowedTexture(view);
 	}
 
