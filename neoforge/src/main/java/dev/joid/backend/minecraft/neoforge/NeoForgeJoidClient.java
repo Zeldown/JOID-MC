@@ -19,6 +19,7 @@ public final class NeoForgeJoidClient {
 
 	public NeoForgeJoidClient(final IEventBus modBus) {
 		MinecraftJoid.init();
+
 		NeoForge.EVENT_BUS.addListener(NeoForgeClientEvents::tick);
 		NeoForge.EVENT_BUS.addListener(NeoForgeScreenEvents::render);
 		NeoForge.EVENT_BUS.addListener(NeoForgeScreenEvents::charTyped);
@@ -28,12 +29,14 @@ public final class NeoForgeJoidClient {
 		NeoForge.EVENT_BUS.addListener(NeoForgeScreenEvents::mousePressed);
 		NeoForge.EVENT_BUS.addListener(NeoForgeScreenEvents::mouseReleased);
 		NeoForge.EVENT_BUS.addListener(NeoForgeScreenEvents::mouseScrolled);
+
 		modBus.addListener(NeoForgePayloads::register);
 		modBus.addListener(NeoForgeKeyBindRegistry::register);
 		modBus.addListener(NeoForgeContainerUIRegistry::register);
 		modBus.addListener(NeoForgeOverlayLayerRegistry::register);
 		modBus.addListener(NeoForgeContainerTypeRegistry::register);
 		modBus.addListener(NeoForgeReloadListenerRegistry::register);
+
 		NeoForgePayloads.registerSender();
 	}
 

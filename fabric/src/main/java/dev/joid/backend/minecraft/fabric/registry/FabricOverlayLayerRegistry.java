@@ -23,8 +23,8 @@ public final class FabricOverlayLayerRegistry {
 			});
 		}
 
-		HudElementRegistry.attachElementAfter(MinecraftOverlayEvents.getId(OverlayLayer.PLAYER_LIST, true), MinecraftOverlayEvents.getId(), (graphics, _) -> MinecraftOverlayEvents.fireHud(graphics));
 		HudElementRegistry.attachElementAfter(VanillaHudElements.SLEEP, MinecraftOverlayEvents.getHiddenHudId(), (graphics, _) -> MinecraftOverlayEvents.fireHiddenHud(graphics));
+		HudElementRegistry.attachElementAfter(MinecraftOverlayEvents.getId(OverlayLayer.PLAYER_LIST, true), MinecraftOverlayEvents.getId(), (graphics, _) -> MinecraftOverlayEvents.fireHud(graphics));
 	}
 
 	private static Identifier getElement(final OverlayLayer layer) {

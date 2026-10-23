@@ -12,8 +12,8 @@ public final class ForgeJoid {
 	public ForgeJoid(final FMLJavaModLoadingContext context) {
 		MinecraftJoid.init();
 		ForgePayloads.register();
-		ForgeContainerTypeRegistry.register(context.getModBusGroup());
 		ForgeJoidClient.register(context.getModBusGroup());
+		ForgeContainerTypeRegistry.register(context.getModBusGroup());
 	}
 
 }
