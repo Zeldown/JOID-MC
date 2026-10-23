@@ -5,6 +5,7 @@ import java.util.UUID;
 import dev.joid.backend.minecraft.loader.network.IPayloadReader;
 import dev.joid.backend.minecraft.loader.network.IPayloadWriter;
 import lombok.AllArgsConstructor;
+import lombok.NonNull;
 import net.minecraft.network.FriendlyByteBuf;
 
 @AllArgsConstructor
@@ -43,59 +44,59 @@ public final class ByteBufPayloadBuffer implements IPayloadReader, IPayloadWrite
 	}
 
 	@Override
-	public UUID readUuid() {
+	public @NonNull UUID readUuid() {
 		return this.buffer.readUUID();
 	}
 
 	@Override
-	public String readString() {
+	public @NonNull String readString() {
 		return this.buffer.readUtf();
 	}
 
 	@Override
-	public IPayloadWriter writeInt(final int value) {
+	public @NonNull IPayloadWriter writeInt(final int value) {
 		this.buffer.writeInt(value);
 		return this;
 	}
 
 	@Override
-	public IPayloadWriter writeLong(final long value) {
+	public @NonNull IPayloadWriter writeLong(final long value) {
 		this.buffer.writeLong(value);
 		return this;
 	}
 
 	@Override
-	public IPayloadWriter writeFloat(final float value) {
+	public @NonNull IPayloadWriter writeFloat(final float value) {
 		this.buffer.writeFloat(value);
 		return this;
 	}
 
 	@Override
-	public IPayloadWriter writeDouble(final double value) {
+	public @NonNull IPayloadWriter writeDouble(final double value) {
 		this.buffer.writeDouble(value);
 		return this;
 	}
 
 	@Override
-	public IPayloadWriter writeBoolean(final boolean value) {
+	public @NonNull IPayloadWriter writeBoolean(final boolean value) {
 		this.buffer.writeBoolean(value);
 		return this;
 	}
 
 	@Override
-	public IPayloadWriter writeBytes(final byte[] value) {
+	public @NonNull IPayloadWriter writeBytes(final byte[] value) {
 		this.buffer.writeByteArray(value);
 		return this;
 	}
 
 	@Override
-	public IPayloadWriter writeUuid(final UUID value) {
+	public @NonNull IPayloadWriter writeUuid(final @NonNull UUID value) {
 		this.buffer.writeUUID(value);
 		return this;
 	}
 
 	@Override
-	public IPayloadWriter writeString(final String value) {
+	public @NonNull IPayloadWriter writeString(final @NonNull String value) {
 		this.buffer.writeUtf(value);
 		return this;
 	}
