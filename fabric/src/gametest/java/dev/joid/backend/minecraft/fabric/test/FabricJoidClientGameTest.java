@@ -1054,6 +1054,23 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		}
 
 		context.waitTicks(20);
+		context.getInput().setCursorPos(entry.x, entry.y);
+		context.waitTicks(2);
+		context.getInput().pressMouse(GLFW.GLFW_MOUSE_BUTTON_LEFT);
+		context.waitForScreen(ContainerUIScreen.class);
+		context.waitTicks(20);
+		context.getInput().pressKey(GLFW.GLFW_KEY_E);
+		context.waitForScreen(UIScreen.class);
+		context.waitTicks(5);
+		if (!server.computeOnServer(minecraftServer -> FabricJoidClientGameTest.player(minecraftServer).containerMenu == FabricJoidClientGameTest.player(minecraftServer).inventoryMenu)) {
+			failures.add("the inventory key does not close the container on the server");
+		}
+
+		if (!context.computeOnClient(_ -> JOID.isOpen(UIDemoMinecraftChoice.class) && !JOID.isOpen(UIDemoContainer.class))) {
+			failures.add("the inventory key on the container does not come back to UIDemoMinecraftChoice");
+		}
+
+		context.waitTicks(20);
 		context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
 		context.waitForScreen(null);
 

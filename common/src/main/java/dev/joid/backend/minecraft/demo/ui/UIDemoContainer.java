@@ -14,6 +14,7 @@ import dev.joid.lib.ui.core.UI;
 import dev.joid.lib.ui.core.data.UIDataPopup;
 import dev.joid.lib.ui.node.impl.shape.RectNode;
 import dev.joid.lib.ui.node.impl.text.TextNode;
+import dev.joid.lib.ui.shortcut.Shortcut;
 import dev.joid.lib.utils.align.Align;
 import net.minecraft.client.Minecraft;
 
@@ -68,6 +69,8 @@ public class UIDemoContainer extends ContainerUI<DemoContainer> {
 		.attach(this);
 
 		TextNode.create(960, 944).text(Text.create("Click outside drops", caption).alignX(Align.CENTER)).anchorX(Align.CENTER).attach(this);
+
+		Shortcut.create(Minecraft.getInstance().options.keyInventory).onTrigger(_ -> JOID.close(this)).attach(this);
 	}
 
 	@UIDataPopup(active = true)
