@@ -1,8 +1,10 @@
+import java.lang.reflect.InvocationTargetException
+import java.util.regex.Pattern
 import java.util.zip.ZipFile
 
-import groovy.json.JsonSlurper
-
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
+import groovy.json.JsonSlurper
 
 plugins {
     id 'joid-java'
@@ -116,7 +118,7 @@ def prodJar = tasks.register('prodJar', ShadowJar) {
 
 def loaderName = project.name
 
-def verifyJar = { String kind, File archive, List<String> patterns, java.util.regex.Pattern references, List<String> words, boolean devMode ->
+def verifyJar = { String kind, File archive, List<String> patterns, Pattern references, List<String> words, boolean devMode ->
     def found = []
     zipTree(archive).matching { include(patterns) }.visit { if (!it.directory) found << it.relativePath.pathString }
     if (!found.isEmpty()) {
@@ -213,7 +215,7 @@ def verifyJar = { String kind, File archive, List<String> patterns, java.util.re
                 try {
                     environment.getMethod(mode, Boolean.TYPE).invoke(null, true)
                     throw new GradleException("The ${kind} jar accepts JOIDEnv.${mode}(true)")
-                } catch (final java.lang.reflect.InvocationTargetException e) {
+                } catch (final InvocationTargetException e) {
                     if (!(e.cause instanceof IllegalStateException)) {
                         throw e
                     }
