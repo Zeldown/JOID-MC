@@ -20,10 +20,10 @@ import com.mojang.blaze3d.textures.GpuTextureView;
 
 import dev.joid.backend.minecraft.bridge.render.framebuffer.MinecraftFrameBuffer;
 import dev.joid.backend.minecraft.bridge.render.pass.PassEncoder;
-import dev.joid.backend.minecraft.bridge.render.pipeline.PipelineCache;
+import dev.joid.backend.minecraft.bridge.render.pipeline.MinecraftPipelineCache;
 import dev.joid.backend.minecraft.bridge.render.shader.MinecraftShader;
 import dev.joid.backend.minecraft.bridge.render.shader.ShaderSourceProvider;
-import dev.joid.backend.minecraft.bridge.render.texture.IGpuTexture;
+import dev.joid.backend.minecraft.bridge.render.texture.IMinecraftTexture;
 import dev.joid.backend.minecraft.bridge.render.texture.MinecraftTexture;
 import dev.joid.lib.bridge.render.RenderBridge;
 import dev.joid.lib.bridge.render.framebuffer.IFrameBuffer;
@@ -55,8 +55,8 @@ public final class MinecraftRenderBridge extends RenderBridge {
 	private final boolean                zeroToOne;
 	private final PassEncoder            passEncoder;
 	private final Matrix4f               rasterProjection;
-	private final PipelineCache          pipelineCache;
 	private final ShaderSourceProvider   sourceProvider;
+	private final MinecraftPipelineCache pipelineCache;
 	private final ProjectionMatrixBuffer rasterProjectionBuffer;
 
 	private ByteBuffer            scratch;
@@ -68,7 +68,7 @@ public final class MinecraftRenderBridge extends RenderBridge {
 		this.zeroToOne              = this.device.getDeviceInfo().isZZeroToOne();
 		this.passEncoder            = new PassEncoder(this.device);
 		this.sourceProvider         = new ShaderSourceProvider();
-		this.pipelineCache          = new PipelineCache(this.device, this.sourceProvider);
+		this.pipelineCache          = new MinecraftPipelineCache(this.device, this.sourceProvider);
 		this.rasterProjection       = new Matrix4f();
 		this.rasterProjectionBuffer = new ProjectionMatrixBuffer("JOID Raster");
 		this.scratch                = ByteBuffer.allocateDirect(1 << 16).order(ByteOrder.nativeOrder());
@@ -223,7 +223,7 @@ public final class MinecraftRenderBridge extends RenderBridge {
 		for (final UniformSampler sampler : shader.getSamplerMap().values()) {
 			if (!sampler.getName().equals(GlslShaderTranslator.STENCIL)) {
 				final SamplerBinding binding = super.resolveSampler(sampler);
-				pass.bindTexture(sampler.getName(), ((IGpuTexture) binding.getTexture()).getView(), MinecraftRenderBridge.getSampler(binding.getSampling()));
+				pass.bindTexture(sampler.getName(), ((IMinecraftTexture) binding.getTexture()).getView(), MinecraftRenderBridge.getSampler(binding.getSampling()));
 			}
 		}
 		pass.bindTexture(GlslShaderTranslator.STENCIL, stencil, MinecraftRenderBridge.getSampler(TextureSampling.of(TextureFilter.NEAREST, TextureWrap.CLAMP_TO_EDGE, false)));

@@ -20,7 +20,7 @@ import lombok.NonNull;
 import net.minecraft.client.renderer.RenderPipelines;
 
 @Getter
-public final class MinecraftTexture extends Texture implements IGpuTexture {
+public final class MinecraftTexture extends Texture implements IMinecraftTexture {
 
 	private final MinecraftRenderBridge bridge;
 

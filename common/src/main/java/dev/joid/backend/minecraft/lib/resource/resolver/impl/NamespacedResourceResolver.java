@@ -1,6 +1,6 @@
 package dev.joid.backend.minecraft.lib.resource.resolver.impl;
 
-import dev.joid.backend.minecraft.bridge.render.texture.GpuBorrowedTexture;
+import dev.joid.backend.minecraft.bridge.render.texture.MinecraftBorrowedTexture;
 import dev.joid.backend.minecraft.bridge.resource.ResourceReloader;
 import dev.joid.backend.minecraft.lib.asset.impl.NamespacedAsset;
 import dev.joid.backend.minecraft.lib.asset.locator.impl.NamespacedAssetLocator;
@@ -43,7 +43,7 @@ public class NamespacedResourceResolver implements IResourceResolver {
 	private static @NonNull ResourceData read(final NamespacedAsset asset) {
 		final Identifier identifier = asset.getId();
 		if (NamespacedResourceResolver.isLoaded(identifier) && asset.getAnimation() == null) {
-			return ResourceReloader.inst().track(ResourceData.create(asset.getUniqueId(), null).texture(GpuBorrowedTexture.of(() -> Minecraft.getInstance().getTextureManager().getTexture(identifier).getTextureView())), asset);
+			return ResourceReloader.inst().track(ResourceData.create(asset.getUniqueId(), null).texture(MinecraftBorrowedTexture.of(() -> Minecraft.getInstance().getTextureManager().getTexture(identifier).getTextureView())), asset);
 		}
 
 		try {

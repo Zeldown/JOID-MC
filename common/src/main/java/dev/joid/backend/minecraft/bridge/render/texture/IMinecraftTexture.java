@@ -4,7 +4,7 @@ import com.mojang.blaze3d.textures.GpuTextureView;
 
 import dev.joid.lib.bridge.render.texture.ITexture;
 
-public interface IGpuTexture extends ITexture {
+public interface IMinecraftTexture extends ITexture {
 
 	public GpuTextureView getView();
 

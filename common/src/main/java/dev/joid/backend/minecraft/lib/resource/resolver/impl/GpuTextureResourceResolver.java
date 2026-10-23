@@ -7,7 +7,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.textures.GpuTextureView;
 
-import dev.joid.backend.minecraft.bridge.render.texture.GpuBorrowedTexture;
+import dev.joid.backend.minecraft.bridge.render.texture.MinecraftBorrowedTexture;
 import dev.joid.lib.resource.Resource;
 import dev.joid.lib.resource.ResourceBuilder;
 import dev.joid.lib.resource.ResourceData;
@@ -25,7 +25,7 @@ public class GpuTextureResourceResolver implements IResourceResolver {
 	@Override
 	public @NonNull Resource resolve(final @NonNull ResourceBuilder builder, final @NonNull Object input) {
 		final String uniqueId = "gpu_texture_" + System.identityHashCode(input);
-		return builder.compute(uniqueId, () -> ResourceData.create(uniqueId, null).texture(GpuBorrowedTexture.of(GpuTextureResourceResolver.getView(input)))).nearest();
+		return builder.compute(uniqueId, () -> ResourceData.create(uniqueId, null).texture(MinecraftBorrowedTexture.of(GpuTextureResourceResolver.getView(input)))).nearest();
 	}
 
 	private static Supplier<GpuTextureView> getView(final Object input) {

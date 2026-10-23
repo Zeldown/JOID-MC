@@ -27,13 +27,13 @@ import dev.joid.lib.bridge.render.vertex.Primitive;
 import lombok.NonNull;
 import net.minecraft.resources.Identifier;
 
-public final class PipelineCache {
+public final class MinecraftPipelineCache {
 
 	private final GpuDevice                        device;
 	private final ShaderSourceProvider             sourceProvider;
 	private final Map<PipelineKey, RenderPipeline> pipelineMap;
 
-	public PipelineCache(final GpuDevice device, final ShaderSourceProvider sourceProvider) {
+	public MinecraftPipelineCache(final GpuDevice device, final ShaderSourceProvider sourceProvider) {
 		this.device         = device;
 		this.sourceProvider = sourceProvider;
 		this.pipelineMap    = new HashMap<>();
@@ -42,7 +42,7 @@ public final class PipelineCache {
 	public RenderPipeline get(final @NonNull PipelineKey key) {
 		RenderPipeline pipeline = this.pipelineMap.get(key);
 		if (pipeline == null) {
-			pipeline = PipelineCache.build(key, this.pipelineMap.size());
+			pipeline = MinecraftPipelineCache.build(key, this.pipelineMap.size());
 			this.pipelineMap.put(key, pipeline);
 		}
 
@@ -61,7 +61,7 @@ public final class PipelineCache {
 				.withBindGroupLayout(layout)
 				.withVertexBinding(0, vertexFormat)
 				.withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
-				.withColorTargetState(new ColorTargetState(PipelineCache.getBlendFunction(blend), GpuFormat.RGBA8_UNORM, ColorTargetState.WRITE_ALL))
+				.withColorTargetState(new ColorTargetState(MinecraftPipelineCache.getBlendFunction(blend), GpuFormat.RGBA8_UNORM, ColorTargetState.WRITE_ALL))
 				.build());
 	}
 
@@ -78,8 +78,8 @@ public final class PipelineCache {
 				.withBindGroupLayout(shader.getLayout())
 				.withVertexBinding(0, shader.getVertexFormat())
 				.withPrimitiveTopology(key.getPrimitive() == Primitive.LINES ? PrimitiveTopology.DEBUG_LINES : PrimitiveTopology.TRIANGLES)
-				.withColorTargetState(new ColorTargetState(PipelineCache.getBlendFunction(key.getBlend()), key.isStencil() ? GpuFormat.R8_UNORM : GpuFormat.RGBA8_UNORM, key.isColorWrite() ? ColorTargetState.WRITE_ALL : ColorTargetState.WRITE_NONE))
-				.withDepthStencilState(PipelineCache.getDepthStencilState(key))
+				.withColorTargetState(new ColorTargetState(MinecraftPipelineCache.getBlendFunction(key.getBlend()), key.isStencil() ? GpuFormat.R8_UNORM : GpuFormat.RGBA8_UNORM, key.isColorWrite() ? ColorTargetState.WRITE_ALL : ColorTargetState.WRITE_NONE))
+				.withDepthStencilState(MinecraftPipelineCache.getDepthStencilState(key))
 				.withCull(key.isCull())
 				.build();
 	}
