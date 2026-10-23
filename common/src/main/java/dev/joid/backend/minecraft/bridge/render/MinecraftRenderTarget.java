@@ -26,7 +26,7 @@ public final class MinecraftRenderTarget {
 	public MinecraftRenderTarget(final MinecraftRenderBridge bridge, final int width, final int height, final boolean stencil) {
 		final GpuDevice device = bridge.getDevice();
 		this.texture     = MinecraftTexture.create(bridge);
-		this.depth       = device.createTexture("JOID Depth", GpuTexture.USAGE_COPY_DST | GpuTexture.USAGE_RENDER_ATTACHMENT,GpuFormat.D32_FLOAT, width, height, 1, 1);
+		this.depth       = device.createTexture("JOID Depth", GpuTexture.USAGE_COPY_DST | GpuTexture.USAGE_RENDER_ATTACHMENT, GpuFormat.D32_FLOAT, width, height, 1, 1);
 		this.stencil     = stencil ? MinecraftRenderTarget.createStencil(device, "JOID Stencil", width, height) : null;
 		this.stencilCopy = stencil ? MinecraftRenderTarget.createStencil(device, "JOID Stencil Copy", width, height) : null;
 		this.texture.allocate(width, height);
