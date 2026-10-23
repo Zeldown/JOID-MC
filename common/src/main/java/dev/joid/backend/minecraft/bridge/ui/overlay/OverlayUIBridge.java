@@ -46,7 +46,7 @@ public final class OverlayUIBridge extends UIBridge {
 
 	@Override
 	public void close(final @NonNull UI ui) {
-		this.remove(ui);
+		super.remove(ui);
 	}
 
 	@Override

@@ -15,7 +15,7 @@ import lombok.NonNull;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class VertexLayout {
 
-	public static @NonNull VertexFormat create(final @NonNull Collection<@NonNull ShaderBuiltin> builtins) {
+	public static @NonNull VertexFormat create(final Collection<ShaderBuiltin> builtins) {
 		final VertexFormat.Builder builder = VertexFormat.builder(0);
 		for (final VertexAttribute attribute : VertexAttribute.values()) {
 			if (attribute == VertexAttribute.POSITION || builtins.contains(attribute.getBuiltin())) {
