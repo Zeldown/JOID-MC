@@ -63,8 +63,6 @@ public enum ShowcaseScene {
 
 	public static final String SEED = "1700";
 
-	private static final double[] SPOT = {384.5D, -239.5D, 180D, 6D};
-
 	private static boolean prepared;
 
 	private final Runnable action;
@@ -84,7 +82,7 @@ public enum ShowcaseScene {
 
 		ShowcaseScene.prepared = true;
 		final String spot = System.getProperty("joid.showcase.spot");
-		final double[] place = spot == null ? ShowcaseScene.SPOT : List.of(spot.split(" ")).stream().mapToDouble(Double::parseDouble).toArray();
+		final double[] place = spot == null ? new double[] {384.5D, -239.5D, 180D, 6D} : List.of(spot.split(" ")).stream().mapToDouble(Double::parseDouble).toArray();
 		ShowcaseDirector.command("tick unfreeze");
 		ShowcaseDirector.command("gamemode survival @a");
 		ShowcaseDirector.command("time set 4000");

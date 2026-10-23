@@ -26,18 +26,17 @@ import net.minecraft.network.chat.Component;
 @UIDataMinecraft(title = "Fonts", pause = false)
 public class ShowFonts extends UI {
 
-	private static final double PIVOT_X = 168D;
-	private static final double PIVOT_Y = 258D;
-
 	private double start;
 
 	@Override
 	public void init() {
+		final double pivotX = 168D;
+		final double pivotY = 258D;
 		this.start = ShowTheme.now();
 
 		ContainerNode
 		.create(0, 0, 1920, 1080)
-		.effect(TransformNodeEffect.create(Transformation.create().translate(Vector.create(() -> this.zoom() * (270D - ShowFonts.PIVOT_X), () -> this.zoom() * (540D - ShowFonts.PIVOT_Y))).scale(Scale.create(() -> 1D + 5D * this.zoom(), () -> 1D + 5D * this.zoom(), () -> 1D), Vector.create(ShowFonts.PIVOT_X, ShowFonts.PIVOT_Y))).scope(NodeEffectScope.CHILDREN))
+		.effect(TransformNodeEffect.create(Transformation.create().translate(Vector.create(() -> this.zoom() * (270D - pivotX), () -> this.zoom() * (540D - pivotY))).scale(Scale.create(() -> 1D + 5D * this.zoom(), () -> 1D + 5D * this.zoom(), () -> 1D), Vector.create(pivotX, pivotY))).scope(NodeEffectScope.CHILDREN))
 		.body(container -> {
 			this.sizes(container);
 			this.styles(container);
