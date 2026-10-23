@@ -1,5 +1,12 @@
 package dev.joid.backend.minecraft.bridge.ui.screen;
 
+import com.mojang.blaze3d.PrimitiveTopology;
+import com.mojang.blaze3d.pipeline.BlendFunction;
+import com.mojang.blaze3d.pipeline.ColorTargetState;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.platform.Window;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+
 import dev.joid.backend.minecraft.MinecraftJoid;
 import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
 import dev.joid.backend.minecraft.bridge.render.MinecraftRenderTarget;
@@ -11,14 +18,6 @@ import dev.joid.lib.bridge.render.texture.TextureWrap;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
-
-import com.mojang.blaze3d.PrimitiveTopology;
-import com.mojang.blaze3d.pipeline.BlendFunction;
-import com.mojang.blaze3d.pipeline.ColorTargetState;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.render.TextureSetup;

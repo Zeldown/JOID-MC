@@ -14,7 +14,6 @@ import dev.joid.lib.ui.node.impl.dev.DevNode;
 import dev.joid.lib.ui.node.impl.layout.ContainerNode;
 import lombok.Getter;
 import lombok.NonNull;
-
 import net.minecraft.client.gui.screens.MenuScreens.ScreenConstructor;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;

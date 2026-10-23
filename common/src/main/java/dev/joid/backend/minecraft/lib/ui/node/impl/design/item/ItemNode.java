@@ -9,7 +9,6 @@ import dev.joid.lib.ui.node.Node;
 import dev.joid.lib.ui.node.hover.IHoverElement;
 import lombok.Getter;
 import lombok.NonNull;
-
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 

@@ -4,7 +4,6 @@ import dev.joid.backend.minecraft.lib.asset.impl.NamespacedAsset;
 import dev.joid.lib.asset.Asset;
 import dev.joid.lib.asset.locator.IAssetLocator;
 import lombok.NonNull;
-
 import net.minecraft.resources.Identifier;
 
 public class NamespacedAssetLocator implements IAssetLocator {

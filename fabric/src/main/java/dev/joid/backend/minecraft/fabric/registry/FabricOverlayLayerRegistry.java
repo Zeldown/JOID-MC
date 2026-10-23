@@ -4,7 +4,6 @@ import dev.joid.backend.minecraft.lib.ui.core.data.overlay.layer.OverlayLayer;
 import dev.joid.backend.minecraft.loader.event.MinecraftOverlayEvents;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.minecraft.resources.Identifier;

@@ -14,7 +14,6 @@ import dev.joid.lib.signal.Signal;
 import dev.joid.lib.ui.node.Node;
 import lombok.Getter;
 import lombok.NonNull;
-
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.resources.model.sprite.SpriteId;

@@ -8,7 +8,6 @@ import dev.joid.backend.minecraft.lib.ui.core.data.overlay.layer.OverlayLayer;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.Identifier;
 

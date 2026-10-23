@@ -8,7 +8,6 @@ import dev.joid.backend.minecraft.loader.registry.ReloadListenerRegistry;
 import dev.joid.internal.JOIDEnv;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-
 import net.minecraft.client.Minecraft;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)

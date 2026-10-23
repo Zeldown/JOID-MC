@@ -3,13 +3,6 @@ package dev.joid.backend.minecraft.bridge.render.texture;
 import java.nio.ByteBuffer;
 import java.util.Optional;
 
-import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
-import dev.joid.lib.bridge.render.texture.MipmapChain;
-import dev.joid.lib.bridge.render.texture.Texture;
-import dev.joid.lib.utils.image.PixelLayout;
-import lombok.Getter;
-import lombok.NonNull;
-
 import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.systems.DeviceInfo;
 import com.mojang.blaze3d.systems.RenderPass;
@@ -18,6 +11,12 @@ import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.textures.GpuTextureView;
 
+import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
+import dev.joid.lib.bridge.render.texture.MipmapChain;
+import dev.joid.lib.bridge.render.texture.Texture;
+import dev.joid.lib.utils.image.PixelLayout;
+import lombok.Getter;
+import lombok.NonNull;
 import net.minecraft.client.renderer.RenderPipelines;
 
 @Getter

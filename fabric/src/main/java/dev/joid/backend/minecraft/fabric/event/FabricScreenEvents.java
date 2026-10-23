@@ -3,7 +3,6 @@ package dev.joid.backend.minecraft.fabric.event;
 import dev.joid.backend.minecraft.loader.event.MinecraftScreenEvents;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;

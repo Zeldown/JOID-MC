@@ -3,7 +3,6 @@ package dev.joid.backend.minecraft.fabric.registry;
 import dev.joid.backend.minecraft.loader.registry.ContainerTypeRegistry;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;

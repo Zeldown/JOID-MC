@@ -12,7 +12,6 @@ import dev.joid.backend.minecraft.showcase.ui.ShowChest;
 import dev.joid.internal.JOID;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.MenuScreens.ScreenConstructor;
 import net.minecraft.world.SimpleContainer;

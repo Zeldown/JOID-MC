@@ -2,15 +2,15 @@ package dev.joid.backend.minecraft.bridge.render.vertex;
 
 import java.util.Collection;
 
+import com.mojang.blaze3d.GpuFormat;
+import com.mojang.blaze3d.vertex.VertexFormat;
+
 import dev.joid.lib.bridge.render.shader.source.ShaderBuiltin;
 import dev.joid.lib.bridge.render.vertex.VertexAttribute;
 import dev.joid.lib.bridge.render.vertex.VertexBuffer;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-
-import com.mojang.blaze3d.GpuFormat;
-import com.mojang.blaze3d.vertex.VertexFormat;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class VertexLayout {

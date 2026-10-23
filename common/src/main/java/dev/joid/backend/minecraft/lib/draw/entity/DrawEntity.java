@@ -3,15 +3,14 @@ package dev.joid.backend.minecraft.lib.draw.entity;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
+import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.vertex.PoseStack;
+
 import dev.joid.backend.minecraft.lib.draw.raster.FeatureDrawableRaster;
 import dev.joid.lib.draw.DrawUtils;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-
-import com.mojang.blaze3d.platform.Lighting;
-import com.mojang.blaze3d.vertex.PoseStack;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;

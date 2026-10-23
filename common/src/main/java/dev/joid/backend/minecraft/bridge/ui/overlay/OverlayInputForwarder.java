@@ -5,7 +5,6 @@ import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.input.mouse.MouseButton;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-
 import net.minecraft.util.StringUtil;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)

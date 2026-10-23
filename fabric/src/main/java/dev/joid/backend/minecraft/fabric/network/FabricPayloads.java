@@ -5,7 +5,6 @@ import dev.joid.backend.minecraft.loader.network.IPayload;
 import dev.joid.backend.minecraft.loader.network.PayloadType;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;

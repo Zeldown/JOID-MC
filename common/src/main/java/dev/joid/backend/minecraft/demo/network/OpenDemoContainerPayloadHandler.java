@@ -7,7 +7,6 @@ import java.util.UUID;
 import dev.joid.backend.minecraft.demo.container.DemoContainer;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.Permissions;

@@ -32,7 +32,6 @@ import dev.joid.lib.ui.node.impl.text.TextNode;
 import dev.joid.lib.utils.align.Align;
 import dev.joid.lib.utils.geom.Point;
 import lombok.Getter;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.sounds.SoundSource;
 

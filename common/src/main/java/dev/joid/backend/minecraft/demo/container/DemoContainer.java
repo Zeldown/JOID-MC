@@ -1,7 +1,6 @@
 package dev.joid.backend.minecraft.demo.container;
 
 import lombok.Getter;
-
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;

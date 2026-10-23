@@ -2,6 +2,14 @@ package dev.joid.backend.minecraft.bridge.render.shader;
 
 import java.util.Collection;
 
+import com.mojang.blaze3d.buffers.GpuBuffer;
+import com.mojang.blaze3d.buffers.GpuBufferSlice;
+import com.mojang.blaze3d.pipeline.BindGroupLayout;
+import com.mojang.blaze3d.shaders.ShaderType;
+import com.mojang.blaze3d.shaders.UniformType;
+import com.mojang.blaze3d.systems.GpuDevice;
+import com.mojang.blaze3d.vertex.VertexFormat;
+
 import dev.joid.backend.minecraft.MinecraftJoid;
 import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
 import dev.joid.backend.minecraft.bridge.render.vertex.VertexLayout;
@@ -15,15 +23,6 @@ import dev.joid.lib.bridge.render.state.StencilEmulation;
 import dev.joid.lib.bridge.render.vertex.VertexBuffer;
 import lombok.Getter;
 import lombok.NonNull;
-
-import com.mojang.blaze3d.buffers.GpuBuffer;
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
-import com.mojang.blaze3d.pipeline.BindGroupLayout;
-import com.mojang.blaze3d.shaders.ShaderType;
-import com.mojang.blaze3d.shaders.UniformType;
-import com.mojang.blaze3d.systems.GpuDevice;
-import com.mojang.blaze3d.vertex.VertexFormat;
-
 import net.minecraft.resources.Identifier;
 
 public final class MinecraftShader extends Shader {

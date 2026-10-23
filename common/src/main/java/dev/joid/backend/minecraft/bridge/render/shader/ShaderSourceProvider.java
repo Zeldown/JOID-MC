@@ -4,13 +4,12 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.NonNull;
-
 import com.mojang.blaze3d.shaders.ShaderSource;
 import com.mojang.blaze3d.shaders.ShaderType;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.NonNull;
 import net.minecraft.resources.Identifier;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE)

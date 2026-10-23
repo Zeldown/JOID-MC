@@ -4,7 +4,6 @@ import dev.joid.backend.minecraft.lib.ui.core.container.ContainerUI;
 import dev.joid.backend.minecraft.loader.registry.ContainerUIRegistry;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraftforge.eventbus.api.bus.BusGroup;

@@ -2,17 +2,17 @@ package dev.joid.backend.minecraft.bridge.render;
 
 import org.joml.Vector4f;
 
-import dev.joid.backend.minecraft.bridge.render.texture.MinecraftTexture;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NonNull;
-
 import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.systems.CommandEncoder;
 import com.mojang.blaze3d.systems.GpuDevice;
 import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.textures.GpuTextureView;
+
+import dev.joid.backend.minecraft.bridge.render.texture.MinecraftTexture;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NonNull;
 
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)

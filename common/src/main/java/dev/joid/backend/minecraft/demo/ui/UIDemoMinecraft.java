@@ -2,6 +2,9 @@ package dev.joid.backend.minecraft.demo.ui;
 
 import java.util.UUID;
 
+import com.mojang.authlib.GameProfile;
+import com.mojang.blaze3d.platform.NativeImage;
+
 import dev.joid.backend.minecraft.lib.draw.block.DrawBlock;
 import dev.joid.backend.minecraft.lib.draw.entity.DrawEntity;
 import dev.joid.backend.minecraft.lib.draw.item.DrawItem;
@@ -33,10 +36,6 @@ import dev.joid.lib.ui.node.impl.text.TextNode;
 import dev.joid.lib.ui.node.property.OverflowProperty;
 import dev.joid.lib.ui.shortcut.Shortcut;
 import dev.joid.lib.utils.align.Align;
-
-import com.mojang.authlib.GameProfile;
-import com.mojang.blaze3d.platform.NativeImage;
-
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Sheets;

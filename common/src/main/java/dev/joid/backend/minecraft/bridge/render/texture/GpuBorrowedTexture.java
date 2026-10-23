@@ -2,10 +2,10 @@ package dev.joid.backend.minecraft.bridge.render.texture;
 
 import java.util.function.Supplier;
 
+import com.mojang.blaze3d.textures.GpuTextureView;
+
 import dev.joid.lib.bridge.render.texture.BorrowedTexture;
 import lombok.NonNull;
-
-import com.mojang.blaze3d.textures.GpuTextureView;
 
 public final class GpuBorrowedTexture extends BorrowedTexture<GpuTextureView> implements IGpuTexture {
 

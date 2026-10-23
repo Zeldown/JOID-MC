@@ -3,7 +3,6 @@ package dev.joid.backend.minecraft.fabric.event;
 import dev.joid.backend.minecraft.loader.event.MinecraftClientEvents;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)

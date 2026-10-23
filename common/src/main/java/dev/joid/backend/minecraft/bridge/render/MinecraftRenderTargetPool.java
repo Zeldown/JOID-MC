@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import lombok.NonNull;
-
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 public final class MinecraftRenderTargetPool {

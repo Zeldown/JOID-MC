@@ -3,7 +3,6 @@ package dev.joid.backend.minecraft.forge.event;
 import dev.joid.backend.minecraft.loader.event.MinecraftScreenEvents;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-
 import net.minecraftforge.client.event.ScreenEvent;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)

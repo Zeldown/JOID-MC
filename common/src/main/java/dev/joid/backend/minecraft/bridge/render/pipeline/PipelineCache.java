@@ -4,16 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import dev.joid.backend.minecraft.MinecraftJoid;
-import dev.joid.backend.minecraft.bridge.render.shader.MinecraftShader;
-import dev.joid.backend.minecraft.bridge.render.shader.ShaderSourceProvider;
-import dev.joid.lib.bridge.render.state.BlendState;
-import dev.joid.lib.bridge.render.state.PipelineKey;
-import dev.joid.lib.bridge.render.vertex.Primitive;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.NonNull;
-
 import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.PrimitiveTopology;
 import com.mojang.blaze3d.pipeline.BindGroupLayout;
@@ -28,6 +18,15 @@ import com.mojang.blaze3d.platform.CompareOp;
 import com.mojang.blaze3d.systems.GpuDevice;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
+import dev.joid.backend.minecraft.MinecraftJoid;
+import dev.joid.backend.minecraft.bridge.render.shader.MinecraftShader;
+import dev.joid.backend.minecraft.bridge.render.shader.ShaderSourceProvider;
+import dev.joid.lib.bridge.render.state.BlendState;
+import dev.joid.lib.bridge.render.state.PipelineKey;
+import dev.joid.lib.bridge.render.vertex.Primitive;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.NonNull;
 import net.minecraft.resources.Identifier;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE)

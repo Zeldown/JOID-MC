@@ -1,7 +1,6 @@
 package dev.joid.backend.minecraft.bridge.thread;
 
 import dev.joid.lib.bridge.thread.IThreadBridge;
-
 import net.minecraft.client.Minecraft;
 
 public final class MinecraftThreadBridge implements IThreadBridge {

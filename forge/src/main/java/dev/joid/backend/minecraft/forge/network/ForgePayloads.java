@@ -6,7 +6,6 @@ import dev.joid.backend.minecraft.loader.network.IPayload;
 import dev.joid.backend.minecraft.loader.network.PayloadType;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;

@@ -28,6 +28,11 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.openal.AL10;
 import org.lwjgl.opengl.GL11;
 
+import com.mojang.authlib.GameProfile;
+import com.mojang.blaze3d.platform.cursor.CursorType;
+import com.mojang.blaze3d.platform.cursor.CursorTypes;
+import com.mojang.blaze3d.systems.RenderSystem;
+
 import dev.joid.backend.minecraft.MinecraftBackend;
 import dev.joid.backend.minecraft.bridge.render.texture.MinecraftTexture;
 import dev.joid.backend.minecraft.bridge.snapshot.MinecraftSnapshotBackend;
@@ -96,12 +101,6 @@ import dev.joid.test.snapshot.SnapshotDifference;
 import dev.joid.test.snapshot.SnapshotImage;
 import dev.joid.test.snapshot.SnapshotRunner;
 import lombok.Getter;
-
-import com.mojang.authlib.GameProfile;
-import com.mojang.blaze3d.platform.cursor.CursorType;
-import com.mojang.blaze3d.platform.cursor.CursorTypes;
-import com.mojang.blaze3d.systems.RenderSystem;
-
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;

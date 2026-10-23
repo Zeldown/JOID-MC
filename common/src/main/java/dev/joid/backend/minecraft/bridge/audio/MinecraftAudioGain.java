@@ -4,7 +4,6 @@ import dev.joid.base.openal.AudioGain;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.sounds.SoundSource;
 

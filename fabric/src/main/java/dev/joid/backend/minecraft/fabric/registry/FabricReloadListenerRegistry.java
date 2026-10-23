@@ -3,7 +3,6 @@ package dev.joid.backend.minecraft.fabric.registry;
 import dev.joid.backend.minecraft.loader.registry.ReloadListenerRegistry;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-
 import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;

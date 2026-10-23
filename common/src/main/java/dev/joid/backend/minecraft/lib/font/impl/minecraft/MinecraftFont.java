@@ -9,7 +9,6 @@ import dev.joid.lib.font.impl.bitmap.BitmapFont;
 import dev.joid.lib.font.impl.glyph.FontFamily;
 import lombok.Getter;
 import lombok.NonNull;
-
 import net.minecraft.resources.Identifier;
 
 @Getter

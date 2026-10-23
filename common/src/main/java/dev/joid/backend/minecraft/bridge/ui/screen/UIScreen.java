@@ -4,7 +4,6 @@ import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
 import dev.joid.base.glfw.input.GlfwKeys;
 import dev.joid.lib.input.mouse.MouseButton;
 import lombok.NonNull;
-
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.CharacterEvent;

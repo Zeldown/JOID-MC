@@ -6,7 +6,6 @@ import dev.joid.lib.resource.ResourceBuilder;
 import dev.joid.lib.resource.ResourceData;
 import dev.joid.lib.resource.resolver.IResourceResolver;
 import lombok.NonNull;
-
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.sprite.SpriteId;
 

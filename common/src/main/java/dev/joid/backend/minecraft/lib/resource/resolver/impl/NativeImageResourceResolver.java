@@ -2,14 +2,14 @@ package dev.joid.backend.minecraft.lib.resource.resolver.impl;
 
 import java.awt.image.BufferedImage;
 
+import com.mojang.blaze3d.platform.NativeImage;
+
 import dev.joid.lib.resource.Resource;
 import dev.joid.lib.resource.ResourceBuilder;
 import dev.joid.lib.resource.ResourceData;
 import dev.joid.lib.resource.decoder.impl.RasterResourceDecoder;
 import dev.joid.lib.resource.resolver.IResourceResolver;
 import lombok.NonNull;
-
-import com.mojang.blaze3d.platform.NativeImage;
 
 public class NativeImageResourceResolver implements IResourceResolver {
 

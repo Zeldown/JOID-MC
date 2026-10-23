@@ -1,13 +1,12 @@
 package dev.joid.backend.minecraft.lib.resource.decoder.impl;
 
+import com.mojang.blaze3d.textures.GpuTextureView;
+
 import dev.joid.backend.minecraft.bridge.render.texture.GpuBorrowedTexture;
 import dev.joid.lib.resource.ResourceData;
 import dev.joid.lib.resource.decoder.IResourceDecoder;
 import lombok.Getter;
 import lombok.NonNull;
-
-import com.mojang.blaze3d.textures.GpuTextureView;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;

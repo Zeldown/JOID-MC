@@ -2,14 +2,13 @@ package dev.joid.backend.minecraft.lib.draw.block;
 
 import org.joml.Quaternionf;
 
+import com.mojang.blaze3d.platform.Lighting;
+
 import dev.joid.backend.minecraft.lib.draw.raster.FeatureDrawableRaster;
 import dev.joid.lib.draw.DrawUtils;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-
-import com.mojang.blaze3d.platform.Lighting;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.BlockModelRenderState;
 import net.minecraft.client.renderer.block.BlockModelResolver;

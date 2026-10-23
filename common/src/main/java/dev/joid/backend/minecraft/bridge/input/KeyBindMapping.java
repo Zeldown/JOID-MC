@@ -8,7 +8,6 @@ import dev.joid.backend.minecraft.loader.registry.KeyBindRegistry;
 import dev.joid.base.glfw.input.GlfwKeys;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-
 import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.Identifier;
 

@@ -6,7 +6,6 @@ import dev.joid.backend.minecraft.lib.ui.core.data.overlay.layer.OverlayLayer;
 import dev.joid.backend.minecraft.loader.event.MinecraftOverlayEvents;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-
 import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;

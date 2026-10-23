@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import com.mojang.datafixers.util.Pair;
+
 import dev.joid.backend.minecraft.showcase.ui.IShowFocus;
 import dev.joid.backend.minecraft.showcase.ui.ShowAnvil;
 import dev.joid.backend.minecraft.showcase.ui.ShowBestiary;
@@ -19,9 +21,6 @@ import dev.joid.lib.ui.core.UI;
 import dev.joid.lib.ui.node.Node;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-
-import com.mojang.datafixers.util.Pair;
-
 import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;

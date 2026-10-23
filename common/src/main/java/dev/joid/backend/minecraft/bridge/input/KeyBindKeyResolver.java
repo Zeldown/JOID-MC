@@ -1,11 +1,10 @@
 package dev.joid.backend.minecraft.bridge.input;
 
+import com.mojang.blaze3d.platform.InputConstants;
+
 import dev.joid.base.glfw.input.GlfwKeys;
 import dev.joid.lib.input.key.Key;
 import dev.joid.lib.input.key.resolver.IKeyResolver;
-
-import com.mojang.blaze3d.platform.InputConstants;
-
 import net.minecraft.client.KeyMapping;
 
 public final class KeyBindKeyResolver implements IKeyResolver {

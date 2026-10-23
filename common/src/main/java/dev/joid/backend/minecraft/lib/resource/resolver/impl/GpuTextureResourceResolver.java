@@ -2,18 +2,17 @@ package dev.joid.backend.minecraft.lib.resource.resolver.impl;
 
 import java.util.function.Supplier;
 
+import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.GpuTexture;
+import com.mojang.blaze3d.textures.GpuTextureView;
+
 import dev.joid.backend.minecraft.bridge.render.texture.GpuBorrowedTexture;
 import dev.joid.lib.resource.Resource;
 import dev.joid.lib.resource.ResourceBuilder;
 import dev.joid.lib.resource.ResourceData;
 import dev.joid.lib.resource.resolver.IResourceResolver;
 import lombok.NonNull;
-
-import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.GpuTexture;
-import com.mojang.blaze3d.textures.GpuTextureView;
-
 import net.minecraft.client.renderer.texture.AbstractTexture;
 
 public class GpuTextureResourceResolver implements IResourceResolver {

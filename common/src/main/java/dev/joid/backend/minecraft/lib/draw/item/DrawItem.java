@@ -1,5 +1,7 @@
 package dev.joid.backend.minecraft.lib.draw.item;
 
+import com.mojang.blaze3d.platform.Lighting;
+
 import dev.joid.backend.minecraft.lib.draw.raster.FeatureDrawableRaster;
 import dev.joid.backend.minecraft.lib.font.impl.minecraft.MinecraftFont;
 import dev.joid.lib.color.Color;
@@ -9,9 +11,6 @@ import dev.joid.lib.utils.align.Align;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-
-import com.mojang.blaze3d.platform.Lighting;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;

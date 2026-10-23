@@ -2,15 +2,14 @@ package dev.joid.backend.minecraft.lib.ui.node.impl.design.entity;
 
 import java.util.function.Supplier;
 
+import com.mojang.authlib.GameProfile;
+
 import dev.joid.backend.minecraft.lib.draw.entity.DrawEntity;
 import dev.joid.lib.signal.Signal;
 import dev.joid.lib.ui.node.Node;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
-
-import com.mojang.authlib.GameProfile;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;

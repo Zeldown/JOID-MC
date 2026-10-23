@@ -48,11 +48,9 @@ import dev.joid.lib.input.key.Key;
 import dev.joid.lib.input.key.resolver.KeyResolver;
 import dev.joid.lib.ui.node.Node;
 import dev.joid.lib.ui.node.impl.shape.RectNode;
+import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-
-import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
-
 import net.minecraft.CrashReport;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;

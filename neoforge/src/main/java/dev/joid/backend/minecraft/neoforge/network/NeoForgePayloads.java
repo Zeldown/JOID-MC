@@ -5,7 +5,6 @@ import dev.joid.backend.minecraft.loader.network.IPayload;
 import dev.joid.backend.minecraft.loader.network.PayloadType;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;

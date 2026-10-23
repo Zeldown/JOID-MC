@@ -9,7 +9,6 @@ import dev.joid.backend.minecraft.fabric.registry.FabricContainerUIRegistry;
 import dev.joid.backend.minecraft.fabric.registry.FabricKeyBindRegistry;
 import dev.joid.backend.minecraft.fabric.registry.FabricOverlayLayerRegistry;
 import dev.joid.backend.minecraft.fabric.registry.FabricReloadListenerRegistry;
-
 import net.fabricmc.api.ClientModInitializer;
 
 public final class FabricJoidClient implements ClientModInitializer {

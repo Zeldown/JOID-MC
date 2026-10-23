@@ -4,7 +4,6 @@ import dev.joid.backend.minecraft.bridge.input.KeyBindMapping;
 import dev.joid.backend.minecraft.loader.registry.KeyBindRegistry;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)

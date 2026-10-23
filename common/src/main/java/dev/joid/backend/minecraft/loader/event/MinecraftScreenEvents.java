@@ -5,7 +5,6 @@ import dev.joid.backend.minecraft.bridge.ui.overlay.OverlayLayerRenderer;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)

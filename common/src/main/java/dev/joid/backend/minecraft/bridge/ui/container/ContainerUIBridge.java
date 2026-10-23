@@ -13,7 +13,6 @@ import dev.joid.lib.ui.core.data.UIDataOverlayObject;
 import dev.joid.lib.utils.annotation.AnnotationValues;
 import lombok.Getter;
 import lombok.NonNull;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 

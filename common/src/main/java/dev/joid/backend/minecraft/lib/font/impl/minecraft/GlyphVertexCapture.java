@@ -2,10 +2,10 @@ package dev.joid.backend.minecraft.lib.font.impl.minecraft;
 
 import org.joml.Matrix4fc;
 
+import com.mojang.blaze3d.vertex.VertexConsumer;
+
 import lombok.Getter;
 import lombok.NonNull;
-
-import com.mojang.blaze3d.vertex.VertexConsumer;
 
 @Getter
 public final class GlyphVertexCapture implements VertexConsumer {

@@ -7,7 +7,6 @@ import java.io.InputStream;
 import dev.joid.lib.asset.Asset;
 import lombok.Getter;
 import lombok.NonNull;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
 import net.minecraft.resources.Identifier;

@@ -9,7 +9,6 @@ import dev.joid.backend.minecraft.neoforge.registry.NeoForgeContainerUIRegistry;
 import dev.joid.backend.minecraft.neoforge.registry.NeoForgeKeyBindRegistry;
 import dev.joid.backend.minecraft.neoforge.registry.NeoForgeOverlayLayerRegistry;
 import dev.joid.backend.minecraft.neoforge.registry.NeoForgeReloadListenerRegistry;
-
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;

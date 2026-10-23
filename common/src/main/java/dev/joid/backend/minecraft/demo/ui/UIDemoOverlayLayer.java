@@ -18,7 +18,6 @@ import dev.joid.lib.ui.node.impl.text.TextNode;
 import dev.joid.lib.utils.align.Align;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-
 import net.minecraft.client.Minecraft;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)

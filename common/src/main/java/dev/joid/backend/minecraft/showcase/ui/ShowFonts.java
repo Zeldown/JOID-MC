@@ -20,7 +20,6 @@ import dev.joid.lib.ui.node.impl.layout.ContainerNode;
 import dev.joid.lib.ui.node.impl.shape.RectNode;
 import dev.joid.lib.ui.node.impl.text.TextNode;
 import dev.joid.lib.utils.align.Align;
-
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 

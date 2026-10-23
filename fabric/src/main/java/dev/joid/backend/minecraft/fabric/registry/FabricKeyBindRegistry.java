@@ -4,7 +4,6 @@ import dev.joid.backend.minecraft.bridge.input.KeyBindMapping;
 import dev.joid.backend.minecraft.loader.registry.KeyBindRegistry;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.Identifier;

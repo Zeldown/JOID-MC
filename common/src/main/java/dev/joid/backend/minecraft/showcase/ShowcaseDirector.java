@@ -27,11 +27,9 @@ import org.lwjgl.glfw.GLFWWindowFocusCallback;
 
 import dev.joid.internal.JOID;
 import dev.joid.lib.ui.node.Node;
+import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-
-import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
-
 import net.minecraft.CrashReport;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;

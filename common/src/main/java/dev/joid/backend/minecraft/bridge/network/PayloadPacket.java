@@ -2,7 +2,6 @@ package dev.joid.backend.minecraft.bridge.network;
 
 import dev.joid.backend.minecraft.loader.network.IPayload;
 import dev.joid.backend.minecraft.loader.network.PayloadType;
-
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;

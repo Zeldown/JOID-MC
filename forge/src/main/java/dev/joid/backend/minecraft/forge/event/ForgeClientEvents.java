@@ -3,7 +3,6 @@ package dev.joid.backend.minecraft.forge.event;
 import dev.joid.backend.minecraft.loader.event.MinecraftClientEvents;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-
 import net.minecraftforge.event.TickEvent;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)

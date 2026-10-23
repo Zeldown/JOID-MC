@@ -6,7 +6,6 @@ import dev.joid.backend.minecraft.loader.network.IPayloadReader;
 import dev.joid.backend.minecraft.loader.network.IPayloadWriter;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-
 import net.minecraft.network.FriendlyByteBuf;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE)

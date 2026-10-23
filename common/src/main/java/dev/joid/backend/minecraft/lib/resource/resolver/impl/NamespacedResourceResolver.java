@@ -13,7 +13,6 @@ import dev.joid.lib.resource.decoder.impl.AnimatedResourceDecoder;
 import dev.joid.lib.resource.format.ResourceFormat;
 import dev.joid.lib.resource.resolver.IResourceResolver;
 import lombok.NonNull;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
 import net.minecraft.resources.Identifier;

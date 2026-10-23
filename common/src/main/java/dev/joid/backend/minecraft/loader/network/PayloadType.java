@@ -9,7 +9,6 @@ import java.util.function.Function;
 
 import lombok.Getter;
 import lombok.NonNull;
-
 import net.minecraft.server.level.ServerPlayer;
 
 @Getter

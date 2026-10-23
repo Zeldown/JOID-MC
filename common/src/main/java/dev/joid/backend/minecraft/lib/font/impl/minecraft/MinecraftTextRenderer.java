@@ -3,6 +3,9 @@ package dev.joid.backend.minecraft.lib.font.impl.minecraft;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
 
+import com.mojang.blaze3d.GpuFormat;
+import com.mojang.blaze3d.textures.GpuTextureView;
+
 import dev.joid.backend.minecraft.bridge.render.texture.GpuBorrowedTexture;
 import dev.joid.lib.font.impl.bitmap.BitmapCell;
 import dev.joid.lib.font.impl.bitmap.BitmapTextRenderer;
@@ -10,10 +13,6 @@ import dev.joid.lib.font.impl.glyph.TextGlyph;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-
-import com.mojang.blaze3d.GpuFormat;
-import com.mojang.blaze3d.textures.GpuTextureView;
-
 import net.minecraft.client.gui.font.TextRenderable;
 import net.minecraft.network.chat.Style;
 

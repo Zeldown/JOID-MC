@@ -4,7 +4,6 @@ import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.bridge.clock.ManualClockBridge;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-
 import net.minecraft.util.Util;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)

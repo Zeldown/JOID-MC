@@ -9,7 +9,6 @@ import dev.joid.backend.minecraft.forge.registry.ForgeOverlayLayerRegistry;
 import dev.joid.backend.minecraft.forge.registry.ForgeReloadListenerRegistry;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-
 import net.minecraftforge.eventbus.api.bus.BusGroup;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)

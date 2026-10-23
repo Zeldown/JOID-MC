@@ -3,7 +3,6 @@ package dev.joid.backend.minecraft.forge;
 import dev.joid.backend.minecraft.MinecraftJoid;
 import dev.joid.backend.minecraft.forge.network.ForgePayloads;
 import dev.joid.backend.minecraft.forge.registry.ForgeContainerTypeRegistry;
-
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
