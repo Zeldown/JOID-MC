@@ -13,6 +13,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.joid.backend.minecraft.MinecraftJoid;
 import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
 import dev.joid.backend.minecraft.bridge.render.vertex.VertexLayout;
+import dev.joid.internal.JOIDLog;
 import dev.joid.lib.bridge.render.matrix.MatrixStack;
 import dev.joid.lib.bridge.render.shader.Shader;
 import dev.joid.lib.bridge.render.shader.source.GlslShaderTranslator;
@@ -52,6 +53,9 @@ public final class MinecraftShader extends Shader {
 	protected boolean isProgramActive() {
 		if (this.active == null) {
 			this.active = ((MinecraftRenderBridge) super.getBridge()).getPipelineCache().isValid(this.identifier, this.layout, this.vertexFormat, super.getBlend());
+			if (!this.active) {
+				JOIDLog.warn("Minecraft cannot compile the shader " + this.identifier + ", fix its source at the line the game log reports for it");
+			}
 		}
 
 		return this.active;
