@@ -18,12 +18,12 @@ public final class MinecraftOverlayEvents {
 		OverlayLayerRenderer.extract(graphics);
 	}
 
-	public static void fireHiddenHud(final GuiGraphicsExtractor graphics) {
-		OverlayLayerRenderer.extractHiddenHud(graphics);
-	}
-
 	public static void fireLayer(final GuiGraphicsExtractor graphics, final OverlayLayer layer, final boolean post) {
 		OverlayLayerRenderer.extract(graphics, layer, post);
+	}
+
+	public static void fireHiddenHud(final GuiGraphicsExtractor graphics) {
+		OverlayLayerRenderer.extractHiddenHud(graphics);
 	}
 
 	public static boolean isCancelled(final OverlayLayer layer) {

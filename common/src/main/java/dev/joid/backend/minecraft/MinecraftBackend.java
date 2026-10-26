@@ -45,11 +45,6 @@ public final class MinecraftBackend extends Backend {
 	}
 
 	@Override
-	protected @NonNull IAudioBridge createAudioBridge() {
-		return AlAudioBridge.create(Lwjgl3AlBinding.inst()).ownContext(false).gain(MinecraftAudioGain.inst());
-	}
-
-	@Override
 	protected @NonNull IWindowBridge createWindowBridge() {
 		this.window = new MinecraftWindowBridge();
 		return this.window;
@@ -59,6 +54,11 @@ public final class MinecraftBackend extends Backend {
 	protected @NonNull IRenderBridge createRenderBridge() {
 		this.render = new MinecraftRenderBridge();
 		return this.render;
+	}
+
+	@Override
+	protected @NonNull IAudioBridge createAudioBridge() {
+		return AlAudioBridge.create(Lwjgl3AlBinding.inst()).ownContext(false).gain(MinecraftAudioGain.inst());
 	}
 
 	@Override

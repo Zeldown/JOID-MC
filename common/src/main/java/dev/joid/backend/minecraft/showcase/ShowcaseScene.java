@@ -223,32 +223,6 @@ public enum ShowcaseScene {
 		ShowcaseDirector.frames(5);
 	}
 
-	private static void bestiary() {
-		final ShowBestiary ui = new ShowBestiary();
-		ShowcaseScene.open(ui, "bestiary", () -> {
-			ShowcaseDirector.glide(ui.getCard(1), 15);
-			ShowcaseDirector.frames(25);
-			ShowcaseDirector.glide(ui.getCard(4), 15);
-			ShowcaseDirector.frames(25);
-			ShowcaseDirector.glide(ui.getCard(6), 15);
-			ShowcaseDirector.frames(25);
-		});
-	}
-
-	private static void fonts() {
-		final ShowFonts ui = new ShowFonts();
-		ShowcaseDirector.frames(3);
-		ShowcaseDirector.begin("fonts");
-		ShowcaseDirector.frames(5);
-		ShowcaseDirector.runOnClient(() -> JOID.open(ui));
-		ShowcaseDirector.frames(135);
-		ShowcaseDirector.capture("fonts");
-		ShowcaseDirector.frames(85);
-		ShowcaseDirector.end();
-		ShowcaseDirector.runOnClient(() -> JOID.close(ui));
-		ShowcaseDirector.frames(20);
-	}
-
 	private static void anvil() {
 		ShowcaseDirector.frames(3);
 		ShowcaseDirector.begin("anvil");
@@ -293,55 +267,17 @@ public enum ShowcaseScene {
 		ShowcaseDirector.frames(5);
 	}
 
-	private static void servers() {
-		final ShowServers ui = new ShowServers();
-		ShowcaseScene.open(ui, "servers", () -> {
-			final double[] top = ShowcaseDirector.computeOnClient(() -> ShowcaseDirector.bounds(ui.getRow(0)));
-			ShowcaseDirector.press();
-			ShowcaseDirector.frames(4);
-			ShowcaseDirector.glide(top[0] + top[2] / 2D, top[1] + top[3] / 2D, 30);
-			ShowcaseDirector.frames(6);
-			ShowcaseDirector.release();
-			ShowcaseDirector.frames(15);
-			for (int notch = 0; notch < 6; notch++) {
-				ShowcaseDirector.scroll(-1D);
-				ShowcaseDirector.frames(3);
-			}
-			ShowcaseDirector.frames(10);
-			for (int notch = 0; notch < 6; notch++) {
-				ShowcaseDirector.scroll(1D);
-				ShowcaseDirector.frames(3);
-			}
-			ShowcaseDirector.frames(15);
-		});
-	}
-
-	private static void daylight() {
-		final ShowDaylight ui = new ShowDaylight();
-		ShowcaseScene.hideHud(true);
+	private static void fonts() {
+		final ShowFonts ui = new ShowFonts();
 		ShowcaseDirector.frames(3);
-		ShowcaseDirector.begin("daylight");
+		ShowcaseDirector.begin("fonts");
 		ShowcaseDirector.frames(5);
 		ShowcaseDirector.runOnClient(() -> JOID.open(ui));
-		ShowcaseDirector.frames(30);
-		ShowcaseDirector.animate(66, progress -> ui.getTime().set(Math.round((4000D + 10500D * progress) / 50D) * 50D));
-		ShowcaseDirector.frames(10);
-		ShowcaseDirector.capture("daylight");
-		final double[] slider = ShowcaseDirector.computeOnClient(() -> ShowcaseDirector.bounds(ui.getFocus()));
-		ShowcaseDirector.move(1700D, 900D);
-		ShowcaseDirector.glide(slider[0] + slider[2] * (18D + 14500D / 48000D * 468D) / 504D, slider[1] + slider[3] / 2D, 22);
-		ShowcaseDirector.frames(6);
-		ShowcaseDirector.press();
-		ShowcaseDirector.frames(3);
-		ShowcaseDirector.glide(slider[0] + slider[2] * (18D + 30000D / 48000D * 468D) / 504D, slider[1] + slider[3] / 2D, 50);
-		ShowcaseDirector.frames(6);
-		ShowcaseDirector.release();
-		ShowcaseDirector.frames(30);
+		ShowcaseDirector.frames(135);
+		ShowcaseDirector.capture("fonts");
+		ShowcaseDirector.frames(85);
 		ShowcaseDirector.end();
-		ShowcaseDirector.hidePointer();
 		ShowcaseDirector.runOnClient(() -> JOID.close(ui));
-		ShowcaseDirector.command("time set 4000");
-		ShowcaseScene.hideHud(false);
 		ShowcaseDirector.frames(20);
 	}
 
@@ -402,53 +338,6 @@ public enum ShowcaseScene {
 		ShowcaseDirector.hidePointer();
 		ShowcaseDirector.runOnClient(() -> JOID.close(ui));
 		ShowcaseDirector.frames(10);
-	}
-
-	private static void open(final UI ui, final String name, final Runnable script) {
-		ShowcaseDirector.frames(3);
-		ShowcaseDirector.begin(name);
-		ShowcaseDirector.frames(5);
-		ShowcaseDirector.runOnClient(() -> JOID.open(ui));
-		ShowcaseDirector.frames(35);
-		ShowcaseDirector.move(1700D, 900D);
-		ShowcaseDirector.glide(ShowcaseDirector.computeOnClient(((IShowFocus) ui)::getFocus), 20);
-		ShowcaseDirector.frames(20);
-		ShowcaseDirector.capture(name);
-		script.run();
-		ShowcaseDirector.end();
-		ShowcaseDirector.hidePointer();
-		ShowcaseDirector.runOnClient(() -> JOID.close(ui));
-		ShowcaseDirector.frames(20);
-	}
-
-	private static void hideHud(final boolean hidden) {
-		ShowcaseDirector.runOnClient(() -> {
-			if (Minecraft.getInstance().gui.hud.isHidden() != hidden) {
-				Minecraft.getInstance().gui.hud.toggle();
-			}
-		});
-	}
-
-	private static Node slot(final int index) {
-		return ShowcaseDirector.computeOnClient(() -> ShowcaseScene.slotNode(index));
-	}
-
-	private static Node slotNode(final int index) {
-		return JOID.getUi(ShowChest.class).getSlotNode(index);
-	}
-
-	private static void openHud() {
-		JOID.open(new ShowHud());
-		JOID.open(new ShowHud.Food());
-		JOID.open(new ShowHud.Level());
-		JOID.open(new ShowHud.Experience());
-	}
-
-	private static void closeHud() {
-		JOID.close(JOID.getUi(ShowHud.class));
-		JOID.close(JOID.getUi(ShowHud.Food.class));
-		JOID.close(JOID.getUi(ShowHud.Level.class));
-		JOID.close(JOID.getUi(ShowHud.Experience.class));
 	}
 
 	private static void explore() {
@@ -514,6 +403,117 @@ public enum ShowcaseScene {
 				ShowcaseDirector.capture("explore/" + index + "-" + yaw);
 			}
 		}
+	}
+
+	private static void servers() {
+		final ShowServers ui = new ShowServers();
+		ShowcaseScene.open(ui, "servers", () -> {
+			final double[] top = ShowcaseDirector.computeOnClient(() -> ShowcaseDirector.bounds(ui.getRow(0)));
+			ShowcaseDirector.press();
+			ShowcaseDirector.frames(4);
+			ShowcaseDirector.glide(top[0] + top[2] / 2D, top[1] + top[3] / 2D, 30);
+			ShowcaseDirector.frames(6);
+			ShowcaseDirector.release();
+			ShowcaseDirector.frames(15);
+			for (int notch = 0; notch < 6; notch++) {
+				ShowcaseDirector.scroll(-1D);
+				ShowcaseDirector.frames(3);
+			}
+			ShowcaseDirector.frames(10);
+			for (int notch = 0; notch < 6; notch++) {
+				ShowcaseDirector.scroll(1D);
+				ShowcaseDirector.frames(3);
+			}
+			ShowcaseDirector.frames(15);
+		});
+	}
+
+	private static void bestiary() {
+		final ShowBestiary ui = new ShowBestiary();
+		ShowcaseScene.open(ui, "bestiary", () -> {
+			ShowcaseDirector.glide(ui.getCard(1), 15);
+			ShowcaseDirector.frames(25);
+			ShowcaseDirector.glide(ui.getCard(4), 15);
+			ShowcaseDirector.frames(25);
+			ShowcaseDirector.glide(ui.getCard(6), 15);
+			ShowcaseDirector.frames(25);
+		});
+	}
+
+	private static void daylight() {
+		final ShowDaylight ui = new ShowDaylight();
+		ShowcaseScene.hideHud(true);
+		ShowcaseDirector.frames(3);
+		ShowcaseDirector.begin("daylight");
+		ShowcaseDirector.frames(5);
+		ShowcaseDirector.runOnClient(() -> JOID.open(ui));
+		ShowcaseDirector.frames(30);
+		ShowcaseDirector.animate(66, progress -> ui.getTime().set(Math.round((4000D + 10500D * progress) / 50D) * 50D));
+		ShowcaseDirector.frames(10);
+		ShowcaseDirector.capture("daylight");
+		final double[] slider = ShowcaseDirector.computeOnClient(() -> ShowcaseDirector.bounds(ui.getFocus()));
+		ShowcaseDirector.move(1700D, 900D);
+		ShowcaseDirector.glide(slider[0] + slider[2] * (18D + 14500D / 48000D * 468D) / 504D, slider[1] + slider[3] / 2D, 22);
+		ShowcaseDirector.frames(6);
+		ShowcaseDirector.press();
+		ShowcaseDirector.frames(3);
+		ShowcaseDirector.glide(slider[0] + slider[2] * (18D + 30000D / 48000D * 468D) / 504D, slider[1] + slider[3] / 2D, 50);
+		ShowcaseDirector.frames(6);
+		ShowcaseDirector.release();
+		ShowcaseDirector.frames(30);
+		ShowcaseDirector.end();
+		ShowcaseDirector.hidePointer();
+		ShowcaseDirector.runOnClient(() -> JOID.close(ui));
+		ShowcaseDirector.command("time set 4000");
+		ShowcaseScene.hideHud(false);
+		ShowcaseDirector.frames(20);
+	}
+
+	private static void open(final UI ui, final String name, final Runnable script) {
+		ShowcaseDirector.frames(3);
+		ShowcaseDirector.begin(name);
+		ShowcaseDirector.frames(5);
+		ShowcaseDirector.runOnClient(() -> JOID.open(ui));
+		ShowcaseDirector.frames(35);
+		ShowcaseDirector.move(1700D, 900D);
+		ShowcaseDirector.glide(ShowcaseDirector.computeOnClient(((IShowFocus) ui)::getFocus), 20);
+		ShowcaseDirector.frames(20);
+		ShowcaseDirector.capture(name);
+		script.run();
+		ShowcaseDirector.end();
+		ShowcaseDirector.hidePointer();
+		ShowcaseDirector.runOnClient(() -> JOID.close(ui));
+		ShowcaseDirector.frames(20);
+	}
+
+	private static void hideHud(final boolean hidden) {
+		ShowcaseDirector.runOnClient(() -> {
+			if (Minecraft.getInstance().gui.hud.isHidden() != hidden) {
+				Minecraft.getInstance().gui.hud.toggle();
+			}
+		});
+	}
+
+	private static Node slot(final int index) {
+		return ShowcaseDirector.computeOnClient(() -> ShowcaseScene.slotNode(index));
+	}
+
+	private static Node slotNode(final int index) {
+		return JOID.getUi(ShowChest.class).getSlotNode(index);
+	}
+
+	private static void openHud() {
+		JOID.open(new ShowHud());
+		JOID.open(new ShowHud.Food());
+		JOID.open(new ShowHud.Level());
+		JOID.open(new ShowHud.Experience());
+	}
+
+	private static void closeHud() {
+		JOID.close(JOID.getUi(ShowHud.class));
+		JOID.close(JOID.getUi(ShowHud.Food.class));
+		JOID.close(JOID.getUi(ShowHud.Level.class));
+		JOID.close(JOID.getUi(ShowHud.Experience.class));
 	}
 
 	private static void teleport(final double[] place) {

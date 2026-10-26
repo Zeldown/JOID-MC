@@ -80,6 +80,21 @@ public final class MinecraftRenderBridge extends RenderBridge {
 	}
 
 	@Override
+	public @NonNull ITexture createTexture() {
+		return MinecraftTexture.create(this);
+	}
+
+	@Override
+	public @NonNull IFrameBuffer createFrameBuffer(final int width, final int height) {
+		return new MinecraftFrameBuffer(this, width, height);
+	}
+
+	@Override
+	public @NonNull IShader createShader(final @NonNull ShaderSource vertex, final @NonNull ShaderSource fragment, final @NonNull BlendState blend) {
+		return MinecraftShader.create(this, vertex, fragment, blend);
+	}
+
+	@Override
 	public void raster(final @NonNull IFrameBuffer target, final int width, final int height, final @NonNull Runnable draw) {
 		super.requireFrame();
 		final MinecraftRenderTarget renderTarget = ((MinecraftFrameBuffer) target).getTarget();
@@ -106,21 +121,6 @@ public final class MinecraftRenderBridge extends RenderBridge {
 	@Override
 	public boolean canWrap(final @NonNull TextureWrap wrap) {
 		return wrap != TextureWrap.CLAMP_TO_BORDER;
-	}
-
-	@Override
-	public @NonNull ITexture createTexture() {
-		return MinecraftTexture.create(this);
-	}
-
-	@Override
-	public @NonNull IFrameBuffer createFrameBuffer(final int width, final int height) {
-		return new MinecraftFrameBuffer(this, width, height);
-	}
-
-	@Override
-	public @NonNull IShader createShader(final @NonNull ShaderSource vertex, final @NonNull ShaderSource fragment, final @NonNull BlendState blend) {
-		return MinecraftShader.create(this, vertex, fragment, blend);
 	}
 
 	public @NonNull ByteBuffer getScratch(final int size) {

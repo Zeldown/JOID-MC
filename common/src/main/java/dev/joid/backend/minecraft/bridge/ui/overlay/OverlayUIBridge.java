@@ -76,13 +76,13 @@ public final class OverlayUIBridge extends UIBridge {
 	}
 
 	@Override
-	public double getInterfaceScale(final @NonNull UI ui) {
-		return this.window.getInterfaceScale();
+	public void drawHover(final @NonNull UI ui, final @NonNull Object content, final double mouseX, final double mouseY) {
+		this.tooltipQueue.push(content);
 	}
 
 	@Override
-	public void drawHover(final @NonNull UI ui, final @NonNull Object content, final double mouseX, final double mouseY) {
-		this.tooltipQueue.push(content);
+	public double getInterfaceScale(final @NonNull UI ui) {
+		return this.window.getInterfaceScale();
 	}
 
 	public void extract(final GuiGraphicsExtractor graphics) {

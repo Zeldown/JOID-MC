@@ -114,17 +114,17 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 	}
 
 	@Override
-	public boolean mouseDragged(final MouseButtonEvent event, final double dx, final double dy) {
-		return this.consumedButtons.contains(event.button()) || super.mouseDragged(event, dx, dy);
-	}
-
-	@Override
 	public boolean mouseReleased(final MouseButtonEvent event) {
 		final boolean consumed = this.bridge.mouseReleased(MouseButton.of(event.button()));
 		if (this.consumedButtons.remove(event.button())) {
 			return true;
 		}
 		return super.mouseReleased(event) || consumed;
+	}
+
+	@Override
+	public boolean mouseDragged(final MouseButtonEvent event, final double dx, final double dy) {
+		return this.consumedButtons.contains(event.button()) || super.mouseDragged(event, dx, dy);
 	}
 
 	@Override
