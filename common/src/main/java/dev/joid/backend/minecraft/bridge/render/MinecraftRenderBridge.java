@@ -74,70 +74,6 @@ public final class MinecraftRenderBridge extends RenderBridge {
 		this.scratch                = ByteBuffer.allocateDirect(1 << 16).order(ByteOrder.nativeOrder());
 	}
 
-	public @NonNull MinecraftRenderBridge screenTarget(final MinecraftRenderTarget screenTarget) {
-		this.screenTarget = screenTarget;
-		return this;
-	}
-
-	@Override
-	public @NonNull ITexture createTexture() {
-		return MinecraftTexture.create(this);
-	}
-
-	@Override
-	public @NonNull IFrameBuffer createFrameBuffer(final int width, final int height) {
-		return new MinecraftFrameBuffer(this, width, height);
-	}
-
-	@Override
-	public @NonNull IShader createShader(final @NonNull ShaderSource vertex, final @NonNull ShaderSource fragment, final @NonNull BlendState blend) {
-		return MinecraftShader.create(this, vertex, fragment, blend);
-	}
-
-	@Override
-	public void raster(final @NonNull IFrameBuffer target, final int width, final int height, final @NonNull Runnable draw) {
-		super.requireFrame();
-		final MinecraftRenderTarget renderTarget = ((MinecraftFrameBuffer) target).getTarget();
-		final GpuTextureView color = RenderSystem.outputColorTextureOverride;
-		final GpuTextureView depth = RenderSystem.outputDepthTextureOverride;
-		final float range = Math.max(1000F, Math.max(width, height));
-		this.passEncoder.encoder().clearDepthTexture(renderTarget.getDepth(), 0D);
-		RenderSystem.outputColorTextureOverride = renderTarget.getView();
-		RenderSystem.outputDepthTextureOverride = renderTarget.getDepthView();
-		RenderSystem.backupProjectionMatrix();
-		this.rasterProjection.setOrtho(0F, renderTarget.getWidth(), height, height - renderTarget.getHeight(), range, -range, this.zeroToOne);
-		RenderSystem.setProjectionMatrix(this.rasterProjectionBuffer.getBuffer(this.rasterProjection), ProjectionType.ORTHOGRAPHIC);
-		RenderSystem.enableScissorForRenderTypeDraws(0, 0, width, height);
-		try {
-			draw.run();
-		} finally {
-			RenderSystem.disableScissorForRenderTypeDraws();
-			RenderSystem.restoreProjectionMatrix();
-			RenderSystem.outputColorTextureOverride = color;
-			RenderSystem.outputDepthTextureOverride = depth;
-		}
-	}
-
-	@Override
-	public boolean canWrap(final @NonNull TextureWrap wrap) {
-		return wrap != TextureWrap.CLAMP_TO_BORDER;
-	}
-
-	public @NonNull ByteBuffer getScratch(final int size) {
-		if (this.scratch.capacity() < size) {
-			this.scratch = ByteBuffer.allocateDirect(Math.max(size, this.scratch.capacity() * 2)).order(ByteOrder.nativeOrder());
-		}
-
-		this.scratch.clear().limit(size);
-		return this.scratch;
-	}
-
-	public static @NonNull GpuSampler getSampler(final TextureSampling sampling) {
-		final AddressMode address = sampling.getWrap() == TextureWrap.REPEAT ? AddressMode.REPEAT : AddressMode.CLAMP_TO_EDGE;
-		final FilterMode mode = sampling.getFilter() == TextureFilter.LINEAR ? FilterMode.LINEAR : FilterMode.NEAREST;
-		return RenderSystem.getSamplerCache().getSampler(address, address, mode, mode, sampling.isMipmapFiltered());
-	}
-
 	@Override
 	protected void beginFrameCommands() {
 		if (this.screenTarget == null) {
@@ -204,6 +140,70 @@ public final class MinecraftRenderBridge extends RenderBridge {
 			this.passEncoder.encoder().copyTextureToTexture(target.getStencil(), target.getStencilCopy(), 0, 0, 0, 0, 0, target.getWidth(), target.getHeight());
 			this.record(PipelineKey.stencil(shader, state, primitive), target.getStencilView(), null, target.getStencilCopyView(), blazeShader, vertices, uniforms, buffer.getCount());
 		}
+	}
+
+	@Override
+	public @NonNull ITexture createTexture() {
+		return MinecraftTexture.create(this);
+	}
+
+	@Override
+	public @NonNull IFrameBuffer createFrameBuffer(final int width, final int height) {
+		return new MinecraftFrameBuffer(this, width, height);
+	}
+
+	@Override
+	public @NonNull IShader createShader(final @NonNull ShaderSource vertex, final @NonNull ShaderSource fragment, final @NonNull BlendState blend) {
+		return MinecraftShader.create(this, vertex, fragment, blend);
+	}
+
+	@Override
+	public void raster(final @NonNull IFrameBuffer target, final int width, final int height, final @NonNull Runnable draw) {
+		super.requireFrame();
+		final MinecraftRenderTarget renderTarget = ((MinecraftFrameBuffer) target).getTarget();
+		final GpuTextureView color = RenderSystem.outputColorTextureOverride;
+		final GpuTextureView depth = RenderSystem.outputDepthTextureOverride;
+		final float range = Math.max(1000F, Math.max(width, height));
+		this.passEncoder.encoder().clearDepthTexture(renderTarget.getDepth(), 0D);
+		RenderSystem.outputColorTextureOverride = renderTarget.getView();
+		RenderSystem.outputDepthTextureOverride = renderTarget.getDepthView();
+		RenderSystem.backupProjectionMatrix();
+		this.rasterProjection.setOrtho(0F, renderTarget.getWidth(), height, height - renderTarget.getHeight(), range, -range, this.zeroToOne);
+		RenderSystem.setProjectionMatrix(this.rasterProjectionBuffer.getBuffer(this.rasterProjection), ProjectionType.ORTHOGRAPHIC);
+		RenderSystem.enableScissorForRenderTypeDraws(0, 0, width, height);
+		try {
+			draw.run();
+		} finally {
+			RenderSystem.disableScissorForRenderTypeDraws();
+			RenderSystem.restoreProjectionMatrix();
+			RenderSystem.outputColorTextureOverride = color;
+			RenderSystem.outputDepthTextureOverride = depth;
+		}
+	}
+
+	@Override
+	public boolean canWrap(final @NonNull TextureWrap wrap) {
+		return wrap != TextureWrap.CLAMP_TO_BORDER;
+	}
+
+	public @NonNull MinecraftRenderBridge screenTarget(final MinecraftRenderTarget screenTarget) {
+		this.screenTarget = screenTarget;
+		return this;
+	}
+
+	public @NonNull ByteBuffer getScratch(final int size) {
+		if (this.scratch.capacity() < size) {
+			this.scratch = ByteBuffer.allocateDirect(Math.max(size, this.scratch.capacity() * 2)).order(ByteOrder.nativeOrder());
+		}
+
+		this.scratch.clear().limit(size);
+		return this.scratch;
+	}
+
+	public static @NonNull GpuSampler getSampler(final TextureSampling sampling) {
+		final AddressMode address = sampling.getWrap() == TextureWrap.REPEAT ? AddressMode.REPEAT : AddressMode.CLAMP_TO_EDGE;
+		final FilterMode mode = sampling.getFilter() == TextureFilter.LINEAR ? FilterMode.LINEAR : FilterMode.NEAREST;
+		return RenderSystem.getSamplerCache().getSampler(address, address, mode, mode, sampling.isMipmapFiltered());
 	}
 
 	private MinecraftRenderTarget getTarget(final RenderState state) {

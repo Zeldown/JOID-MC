@@ -44,16 +44,16 @@ public class SpriteResourceDecoder implements IResourceDecoder {
 	public void upload(final @NonNull ResourceData resource) {}
 
 	@Override
+	public void clear(final @NonNull ResourceData resource) {
+		this.sprite = null;
+	}
+
+	@Override
 	public void update(final @NonNull ResourceData resource) {
 		final TextureAtlasSprite sprite = Minecraft.getInstance().getAtlasManager().get(this.spriteId);
 		if (this.sprite != null && sprite != this.sprite) {
 			this.region(resource, sprite);
 		}
-	}
-
-	@Override
-	public void clear(final @NonNull ResourceData resource) {
-		this.sprite = null;
 	}
 
 	private void region(final ResourceData resource, final TextureAtlasSprite sprite) {
