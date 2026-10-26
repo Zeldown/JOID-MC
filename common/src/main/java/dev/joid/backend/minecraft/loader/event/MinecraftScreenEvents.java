@@ -13,18 +13,6 @@ public final class MinecraftScreenEvents {
 		OverlayLayerRenderer.extractScreen(graphics);
 	}
 
-	public static boolean fireKeyPressed(final int code) {
-		return OverlayInputForwarder.keyPressed(code);
-	}
-
-	public static boolean fireKeyReleased(final int code) {
-		return OverlayInputForwarder.keyReleased(code);
-	}
-
-	public static boolean fireCharTyped(final int codepoint) {
-		return OverlayInputForwarder.charTyped(codepoint);
-	}
-
 	public static boolean fireMouseMoved() {
 		return OverlayInputForwarder.mouseMoved();
 	}
@@ -39,6 +27,18 @@ public final class MinecraftScreenEvents {
 
 	public static boolean fireMouseScrolled(final double notchesX, final double notchesY) {
 		return OverlayInputForwarder.mouseScrolled(notchesX, notchesY);
+	}
+
+	public static boolean fireCharTyped(final int codepoint) {
+		return OverlayInputForwarder.charTyped(codepoint);
+	}
+
+	public static boolean fireKeyPressed(final int code) {
+		return OverlayInputForwarder.keyPressed(code);
+	}
+
+	public static boolean fireKeyReleased(final int code) {
+		return OverlayInputForwarder.keyReleased(code);
 	}
 
 }

@@ -31,13 +31,13 @@ public final class KeyBindRegistry {
 		return new KeyBindRegistry(id, key);
 	}
 
-	public @NonNull KeyBindRegistry onPress(final @NonNull Runnable onPress) {
-		this.onPress = onPress;
+	public @NonNull KeyBindRegistry category(final @NonNull String category) {
+		this.category = category;
 		return this;
 	}
 
-	public @NonNull KeyBindRegistry category(final @NonNull String category) {
-		this.category = category;
+	public @NonNull KeyBindRegistry onPress(final @NonNull Runnable onPress) {
+		this.onPress = onPress;
 		return this;
 	}
 

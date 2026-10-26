@@ -12,24 +12,6 @@ public final class NeoForgeScreenEvents {
 		MinecraftScreenEvents.fireRender(event.getGuiGraphics());
 	}
 
-	public static void keyPressed(final ScreenEvent.KeyPressed.Pre event) {
-		if (MinecraftScreenEvents.fireKeyPressed(event.getKeyCode())) {
-			event.setCanceled(true);
-		}
-	}
-
-	public static void keyReleased(final ScreenEvent.KeyReleased.Pre event) {
-		if (MinecraftScreenEvents.fireKeyReleased(event.getKeyCode())) {
-			event.setCanceled(true);
-		}
-	}
-
-	public static void charTyped(final ScreenEvent.CharacterTyped.Pre event) {
-		if (MinecraftScreenEvents.fireCharTyped(event.getCodePoint())) {
-			event.setCanceled(true);
-		}
-	}
-
 	public static void mouseMoved(final ScreenEvent.MouseDragged.Pre event) {
 		if (MinecraftScreenEvents.fireMouseMoved()) {
 			event.setCanceled(true);
@@ -50,6 +32,24 @@ public final class NeoForgeScreenEvents {
 
 	public static void mouseScrolled(final ScreenEvent.MouseScrolled.Pre event) {
 		if (MinecraftScreenEvents.fireMouseScrolled(event.getScrollDeltaX(), event.getScrollDeltaY())) {
+			event.setCanceled(true);
+		}
+	}
+
+	public static void charTyped(final ScreenEvent.CharacterTyped.Pre event) {
+		if (MinecraftScreenEvents.fireCharTyped(event.getCodePoint())) {
+			event.setCanceled(true);
+		}
+	}
+
+	public static void keyPressed(final ScreenEvent.KeyPressed.Pre event) {
+		if (MinecraftScreenEvents.fireKeyPressed(event.getKeyCode())) {
+			event.setCanceled(true);
+		}
+	}
+
+	public static void keyReleased(final ScreenEvent.KeyReleased.Pre event) {
+		if (MinecraftScreenEvents.fireKeyReleased(event.getKeyCode())) {
 			event.setCanceled(true);
 		}
 	}

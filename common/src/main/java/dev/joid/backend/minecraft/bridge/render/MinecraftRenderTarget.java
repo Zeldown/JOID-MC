@@ -42,18 +42,6 @@ public final class MinecraftRenderTarget {
 		this.stencilCopyView = stencil ? device.createTextureView(this.stencilCopy) : null;
 	}
 
-	public int getWidth() {
-		return this.texture.getWidth();
-	}
-
-	public int getHeight() {
-		return this.texture.getHeight();
-	}
-
-	public @NonNull GpuTextureView getView() {
-		return this.texture.getView();
-	}
-
 	public void delete() {
 		this.texture.delete();
 		this.depthView.close();
@@ -64,6 +52,18 @@ public final class MinecraftRenderTarget {
 			this.stencilCopyView.close();
 			this.stencilCopy.close();
 		}
+	}
+
+	public int getWidth() {
+		return this.texture.getWidth();
+	}
+
+	public int getHeight() {
+		return this.texture.getHeight();
+	}
+
+	public @NonNull GpuTextureView getView() {
+		return this.texture.getView();
 	}
 
 	private static GpuTexture createStencil(final GpuDevice device, final String label, final int width, final int height) {

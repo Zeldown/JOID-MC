@@ -421,10 +421,6 @@ public final class ClientSmokeTest {
 		}
 	}
 
-	private static int[] bounds(final Node node) {
-		return new int[] {(int) Math.round(node.getUi().getView().toScreenX(node.getAbsoluteX())), (int) Math.round(node.getUi().getView().toScreenY(node.getAbsoluteY())), (int) Math.round(node.getUi().getView().toScreenWidth(node.getWidth())), (int) Math.round(node.getUi().getView().toScreenHeight(node.getHeight()))};
-	}
-
 	private static void click(final int[] bounds) {
 		ClientSmokeTest.runOnClient(() -> {
 			final long window = Minecraft.getInstance().getWindow().handle();
@@ -463,17 +459,6 @@ public final class ClientSmokeTest {
 		ClientSmokeTest.sleep(200);
 	}
 
-	private static void waitFor(final String label, final BooleanSupplier condition, final int seconds) {
-		final long end = System.nanoTime() + TimeUnit.SECONDS.toNanos(seconds);
-		while (!ClientSmokeTest.computeOnClient(condition::getAsBoolean)) {
-			if (System.nanoTime() > end) {
-				throw new AssertionError("Timed out after " + seconds + " s waiting for " + label + " on the screen " + ClientSmokeTest.computeOnClient(() -> Minecraft.getInstance().gui.screen()));
-			}
-
-			ClientSmokeTest.sleep(250);
-		}
-	}
-
 	private static <T> T computeOnServer(final MinecraftServer server, final Function<ServerPlayer, T> function) {
 		return ClientSmokeTest.await(server.submit(() -> function.apply(server.getPlayerList().getPlayers().getFirst())), "computing on the server");
 	}
@@ -484,6 +469,17 @@ public final class ClientSmokeTest {
 
 	private static <T> T computeOnClient(final Supplier<T> supplier) {
 		return ClientSmokeTest.await(Minecraft.getInstance().submit(supplier), "computing on the client");
+	}
+
+	private static void waitFor(final String label, final BooleanSupplier condition, final int seconds) {
+		final long end = System.nanoTime() + TimeUnit.SECONDS.toNanos(seconds);
+		while (!ClientSmokeTest.computeOnClient(condition::getAsBoolean)) {
+			if (System.nanoTime() > end) {
+				throw new AssertionError("Timed out after " + seconds + " s waiting for " + label + " on the screen " + ClientSmokeTest.computeOnClient(() -> Minecraft.getInstance().gui.screen()));
+			}
+
+			ClientSmokeTest.sleep(250);
+		}
 	}
 
 	private static <T> T await(final CompletableFuture<T> future, final String label) {
@@ -506,6 +502,10 @@ public final class ClientSmokeTest {
 			Thread.currentThread().interrupt();
 			throw new AssertionError("Interrupted while sleeping", exception);
 		}
+	}
+
+	private static int[] bounds(final Node node) {
+		return new int[] {(int) Math.round(node.getUi().getView().toScreenX(node.getAbsoluteX())), (int) Math.round(node.getUi().getView().toScreenY(node.getAbsoluteY())), (int) Math.round(node.getUi().getView().toScreenWidth(node.getWidth())), (int) Math.round(node.getUi().getView().toScreenHeight(node.getHeight()))};
 	}
 
 	private static Object field(final Object target, final String name) {

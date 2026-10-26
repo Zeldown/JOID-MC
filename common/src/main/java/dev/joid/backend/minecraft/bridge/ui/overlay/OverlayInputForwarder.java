@@ -10,21 +10,6 @@ import net.minecraft.util.StringUtil;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class OverlayInputForwarder {
 
-	public static boolean keyPressed(final int code) {
-		final OverlayUIBridge bridge = BridgeHandler.UI.getBridge(OverlayUIBridge.class);
-		return bridge != null && bridge.keyPressed(GlfwKeys.getPhysicalKey(code), GlfwKeys.getKey(code));
-	}
-
-	public static boolean keyReleased(final int code) {
-		final OverlayUIBridge bridge = BridgeHandler.UI.getBridge(OverlayUIBridge.class);
-		return bridge != null && bridge.keyReleased(GlfwKeys.getPhysicalKey(code), GlfwKeys.getKey(code));
-	}
-
-	public static boolean charTyped(final int codepoint) {
-		final OverlayUIBridge bridge = BridgeHandler.UI.getBridge(OverlayUIBridge.class);
-		return bridge != null && StringUtil.isAllowedChatCharacter(codepoint) && bridge.charTyped(codepoint);
-	}
-
 	public static boolean mouseMoved() {
 		final OverlayUIBridge bridge = BridgeHandler.UI.getBridge(OverlayUIBridge.class);
 		return bridge != null && bridge.mouseMoved();
@@ -43,6 +28,21 @@ public final class OverlayInputForwarder {
 	public static boolean mouseScrolled(final double notchesX, final double notchesY) {
 		final OverlayUIBridge bridge = BridgeHandler.UI.getBridge(OverlayUIBridge.class);
 		return bridge != null && bridge.mouseScroll(notchesX, notchesY);
+	}
+
+	public static boolean charTyped(final int codepoint) {
+		final OverlayUIBridge bridge = BridgeHandler.UI.getBridge(OverlayUIBridge.class);
+		return bridge != null && StringUtil.isAllowedChatCharacter(codepoint) && bridge.charTyped(codepoint);
+	}
+
+	public static boolean keyPressed(final int code) {
+		final OverlayUIBridge bridge = BridgeHandler.UI.getBridge(OverlayUIBridge.class);
+		return bridge != null && bridge.keyPressed(GlfwKeys.getPhysicalKey(code), GlfwKeys.getKey(code));
+	}
+
+	public static boolean keyReleased(final int code) {
+		final OverlayUIBridge bridge = BridgeHandler.UI.getBridge(OverlayUIBridge.class);
+		return bridge != null && bridge.keyReleased(GlfwKeys.getPhysicalKey(code), GlfwKeys.getKey(code));
 	}
 
 }

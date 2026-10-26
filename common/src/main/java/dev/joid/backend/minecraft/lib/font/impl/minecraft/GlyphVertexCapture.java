@@ -46,21 +46,21 @@ public final class GlyphVertexCapture implements VertexConsumer {
 	}
 
 	@Override
-	public @NonNull GlyphVertexCapture setUv(final float u, final float v) {
-		this.minU = Math.min(this.minU, u);
-		this.minV = Math.min(this.minV, v);
-		this.maxU = Math.max(this.maxU, u);
-		this.maxV = Math.max(this.maxV, v);
-		return this;
-	}
-
-	@Override
 	public @NonNull GlyphVertexCapture setColor(final int color) {
 		return this;
 	}
 
 	@Override
 	public @NonNull GlyphVertexCapture setColor(final int r, final int g, final int b, final int a) {
+		return this;
+	}
+
+	@Override
+	public @NonNull GlyphVertexCapture setUv(final float u, final float v) {
+		this.minU = Math.min(this.minU, u);
+		this.minV = Math.min(this.minV, v);
+		this.maxU = Math.max(this.maxU, u);
+		this.maxV = Math.max(this.maxV, v);
 		return this;
 	}
 

@@ -19,18 +19,6 @@ public final class ForgeScreenEvents {
 		ScreenEvent.Render.Post.BUS.addListener(event -> MinecraftScreenEvents.fireRender(event.getGuiGraphics()));
 	}
 
-	private static boolean keyPressed(final ScreenEvent.KeyPressed.Pre event) {
-		return MinecraftScreenEvents.fireKeyPressed(event.getInfo().key());
-	}
-
-	private static boolean keyReleased(final ScreenEvent.KeyReleased.Pre event) {
-		return MinecraftScreenEvents.fireKeyReleased(event.getInfo().key());
-	}
-
-	private static boolean charTyped(final ScreenEvent.CharacterTyped.Pre event) {
-		return MinecraftScreenEvents.fireCharTyped(event.getInfo().codepoint());
-	}
-
 	private static boolean mouseMoved(final ScreenEvent.MouseDragged.Pre event) {
 		return MinecraftScreenEvents.fireMouseMoved();
 	}
@@ -45,6 +33,18 @@ public final class ForgeScreenEvents {
 
 	private static boolean mouseScrolled(final ScreenEvent.MouseScrolled.Pre event) {
 		return MinecraftScreenEvents.fireMouseScrolled(event.getDeltaX(), event.getDeltaY());
+	}
+
+	private static boolean charTyped(final ScreenEvent.CharacterTyped.Pre event) {
+		return MinecraftScreenEvents.fireCharTyped(event.getInfo().codepoint());
+	}
+
+	private static boolean keyPressed(final ScreenEvent.KeyPressed.Pre event) {
+		return MinecraftScreenEvents.fireKeyPressed(event.getInfo().key());
+	}
+
+	private static boolean keyReleased(final ScreenEvent.KeyReleased.Pre event) {
+		return MinecraftScreenEvents.fireKeyReleased(event.getInfo().key());
 	}
 
 }
