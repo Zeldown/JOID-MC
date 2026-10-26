@@ -56,16 +56,6 @@ public final class OverlayUIBridge extends UIBridge {
 	}
 
 	@Override
-	public boolean isScreenOpen() {
-		return !this.layerPass && Minecraft.getInstance().gui.screen() != null;
-	}
-
-	@Override
-	public boolean isOverlayHidden() {
-		return Minecraft.getInstance().gui.hud.isHidden();
-	}
-
-	@Override
 	public boolean canHandle(final @NonNull UI ui) {
 		return ui.getOverlay().active();
 	}
@@ -78,6 +68,16 @@ public final class OverlayUIBridge extends UIBridge {
 	@Override
 	public void drawHover(final @NonNull UI ui, final @NonNull Object content, final double mouseX, final double mouseY) {
 		this.tooltipQueue.push(content);
+	}
+
+	@Override
+	public boolean isScreenOpen() {
+		return !this.layerPass && Minecraft.getInstance().gui.screen() != null;
+	}
+
+	@Override
+	public boolean isOverlayHidden() {
+		return Minecraft.getInstance().gui.hud.isHidden();
 	}
 
 	@Override

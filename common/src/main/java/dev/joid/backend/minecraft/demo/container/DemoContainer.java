@@ -37,6 +37,12 @@ public class DemoContainer extends AbstractContainerMenu {
 	}
 
 	@Override
+	public void removed(final Player player) {
+		super.removed(player);
+		this.storage.stopOpen(player);
+	}
+
+	@Override
 	public boolean stillValid(final Player player) {
 		return this.storage.stillValid(player);
 	}
@@ -60,12 +66,6 @@ public class DemoContainer extends AbstractContainerMenu {
 			slot.setChanged();
 		}
 		return moved;
-	}
-
-	@Override
-	public void removed(final Player player) {
-		super.removed(player);
-		this.storage.stopOpen(player);
 	}
 
 }

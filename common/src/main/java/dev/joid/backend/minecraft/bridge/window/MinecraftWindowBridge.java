@@ -35,12 +35,6 @@ public final class MinecraftWindowBridge implements IWindowBridge {
 		return Minecraft.getInstance().getWindow().getHeight();
 	}
 
-	public double getInterfaceScale() {
-		final Minecraft minecraft = Minecraft.getInstance();
-		final Window window = minecraft.getWindow();
-		return window.getGuiScale() / (double) window.calculateScale(0, minecraft.isEnforceUnicode());
-	}
-
 	@Override
 	public double getMouseX() {
 		if (this.isMouseGrabbed()) {
@@ -85,6 +79,12 @@ public final class MinecraftWindowBridge implements IWindowBridge {
 	@Override
 	public void setCursor(final @NonNull Cursor cursor) {
 		this.cursor = cursor;
+	}
+
+	public double getInterfaceScale() {
+		final Minecraft minecraft = Minecraft.getInstance();
+		final Window window = minecraft.getWindow();
+		return window.getGuiScale() / (double) window.calculateScale(0, minecraft.isEnforceUnicode());
 	}
 
 	public void requestCursor(final GuiGraphicsExtractor graphics, final Cursor cursor) {

@@ -132,6 +132,12 @@ public final class MinecraftRenderBridge extends RenderBridge {
 		return this.scratch;
 	}
 
+	public static @NonNull GpuSampler getSampler(final TextureSampling sampling) {
+		final AddressMode address = sampling.getWrap() == TextureWrap.REPEAT ? AddressMode.REPEAT : AddressMode.CLAMP_TO_EDGE;
+		final FilterMode mode = sampling.getFilter() == TextureFilter.LINEAR ? FilterMode.LINEAR : FilterMode.NEAREST;
+		return RenderSystem.getSamplerCache().getSampler(address, address, mode, mode, sampling.isMipmapFiltered());
+	}
+
 	@Override
 	protected void beginFrameCommands() {
 		if (this.screenTarget == null) {
@@ -198,12 +204,6 @@ public final class MinecraftRenderBridge extends RenderBridge {
 			this.passEncoder.encoder().copyTextureToTexture(target.getStencil(), target.getStencilCopy(), 0, 0, 0, 0, 0, target.getWidth(), target.getHeight());
 			this.record(PipelineKey.stencil(shader, state, primitive), target.getStencilView(), null, target.getStencilCopyView(), blazeShader, vertices, uniforms, buffer.getCount());
 		}
-	}
-
-	public static @NonNull GpuSampler getSampler(final TextureSampling sampling) {
-		final AddressMode address = sampling.getWrap() == TextureWrap.REPEAT ? AddressMode.REPEAT : AddressMode.CLAMP_TO_EDGE;
-		final FilterMode mode = sampling.getFilter() == TextureFilter.LINEAR ? FilterMode.LINEAR : FilterMode.NEAREST;
-		return RenderSystem.getSamplerCache().getSampler(address, address, mode, mode, sampling.isMipmapFiltered());
 	}
 
 	private MinecraftRenderTarget getTarget(final RenderState state) {
