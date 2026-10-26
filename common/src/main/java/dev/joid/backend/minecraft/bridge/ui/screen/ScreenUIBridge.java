@@ -28,22 +28,6 @@ public final class ScreenUIBridge extends StackUIBridge {
 		this.tooltipQueue = new TooltipQueue();
 	}
 
-	public void removed(final UIScreen screen) {
-		if (this.screen == screen) {
-			this.screen = null;
-			super.closeAll();
-		}
-	}
-
-	public UIDataMinecraft getMinecraftData() {
-		for (final UI ui : super.getUiList()) {
-			if (!ui.getOverlay().active()) {
-				return ui.getClass().getAnnotation(UIDataMinecraft.class);
-			}
-		}
-		return null;
-	}
-
 	@Override
 	public boolean canHandle(final @NonNull UI ui) {
 		return !ui.getOverlay().active();
@@ -62,14 +46,6 @@ public final class ScreenUIBridge extends StackUIBridge {
 	@Override
 	public double getInterfaceScale(final @NonNull UI ui) {
 		return this.window.getInterfaceScale();
-	}
-
-	public void frame(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY) {
-		GuiFrameCounter.inst().getFrame(graphics);
-		super.update();
-		this.compositor.composite(graphics, super::draw);
-		this.window.requestCursor(graphics, this.window.getCursor());
-		this.tooltipQueue.flush(graphics, mouseX, mouseY);
 	}
 
 	@Override
@@ -91,6 +67,30 @@ public final class ScreenUIBridge extends StackUIBridge {
 		if (Minecraft.getInstance().gui.screen() == screen) {
 			Minecraft.getInstance().gui.setScreen(null);
 		}
+	}
+
+	public void removed(final UIScreen screen) {
+		if (this.screen == screen) {
+			this.screen = null;
+			super.closeAll();
+		}
+	}
+
+	public UIDataMinecraft getMinecraftData() {
+		for (final UI ui : super.getUiList()) {
+			if (!ui.getOverlay().active()) {
+				return ui.getClass().getAnnotation(UIDataMinecraft.class);
+			}
+		}
+		return null;
+	}
+
+	public void frame(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY) {
+		GuiFrameCounter.inst().getFrame(graphics);
+		super.update();
+		this.compositor.composite(graphics, super::draw);
+		this.window.requestCursor(graphics, this.window.getCursor());
+		this.tooltipQueue.flush(graphics, mouseX, mouseY);
 	}
 
 }

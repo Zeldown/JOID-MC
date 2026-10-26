@@ -20,6 +20,11 @@ public final class ShaderSourceProvider implements ShaderSource {
 		}
 	}
 
+	@Override
+	public String get(final Identifier identifier, final ShaderType type) {
+		return this.sourceMap.get(type).get(identifier);
+	}
+
 	public void register(final Identifier identifier, final ShaderType type, final String source) {
 		this.sourceMap.get(type).put(identifier, source);
 	}
@@ -28,11 +33,6 @@ public final class ShaderSourceProvider implements ShaderSource {
 		for (final Map<Identifier, String> sources : this.sourceMap.values()) {
 			sources.remove(identifier);
 		}
-	}
-
-	@Override
-	public String get(final Identifier identifier, final ShaderType type) {
-		return this.sourceMap.get(type).get(identifier);
 	}
 
 }

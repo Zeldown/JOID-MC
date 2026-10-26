@@ -40,22 +40,6 @@ public final class ContainerUIBridge extends StackUIBridge {
 		super.open(ui);
 	}
 
-	public void added(final ContainerUIScreen<?> screen) {
-		this.screen = screen;
-		super.add(screen.getUi());
-	}
-
-	public void removed(final ContainerUIScreen<?> screen) {
-		if (this.screen == screen) {
-			this.screen = null;
-			super.closeAll();
-		}
-	}
-
-	public ContainerUIScreen<?> getScreen(final ContainerUI<?> ui) {
-		return this.screen != null && this.screen.getUi() == ui ? this.screen : null;
-	}
-
 	@Override
 	public boolean canHandle(final @NonNull UI ui) {
 		return !ui.getOverlay().active() && (ui instanceof ContainerUI || this.screen != null);
@@ -81,14 +65,6 @@ public final class ContainerUIBridge extends StackUIBridge {
 		return this.window.getInterfaceScale();
 	}
 
-	public void frame(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY) {
-		GuiFrameCounter.inst().getFrame(graphics);
-		super.update();
-		this.compositor.composite(graphics, super::draw);
-		this.window.requestCursor(graphics, this.window.getCursor());
-		this.tooltipQueue.flush(graphics, mouseX, mouseY);
-	}
-
 	@Override
 	protected void detachScreen() {
 		final Minecraft minecraft = Minecraft.getInstance();
@@ -96,6 +72,30 @@ public final class ContainerUIBridge extends StackUIBridge {
 			this.screen = null;
 			minecraft.player.closeContainer();
 		}
+	}
+
+	public void added(final ContainerUIScreen<?> screen) {
+		this.screen = screen;
+		super.add(screen.getUi());
+	}
+
+	public void removed(final ContainerUIScreen<?> screen) {
+		if (this.screen == screen) {
+			this.screen = null;
+			super.closeAll();
+		}
+	}
+
+	public ContainerUIScreen<?> getScreen(final ContainerUI<?> ui) {
+		return this.screen != null && this.screen.getUi() == ui ? this.screen : null;
+	}
+
+	public void frame(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY) {
+		GuiFrameCounter.inst().getFrame(graphics);
+		super.update();
+		this.compositor.composite(graphics, super::draw);
+		this.window.requestCursor(graphics, this.window.getCursor());
+		this.tooltipQueue.flush(graphics, mouseX, mouseY);
 	}
 
 }
