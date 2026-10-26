@@ -43,11 +43,6 @@ public class DemoContainer extends AbstractContainerMenu {
 	}
 
 	@Override
-	public boolean stillValid(final Player player) {
-		return this.storage.stillValid(player);
-	}
-
-	@Override
 	public ItemStack quickMoveStack(final Player player, final int slotIndex) {
 		final Slot slot = super.slots.get(slotIndex);
 		if (!slot.hasItem()) {
@@ -66,6 +61,11 @@ public class DemoContainer extends AbstractContainerMenu {
 			slot.setChanged();
 		}
 		return moved;
+	}
+
+	@Override
+	public boolean stillValid(final Player player) {
+		return this.storage.stillValid(player);
 	}
 
 }
