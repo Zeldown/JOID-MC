@@ -35,6 +35,11 @@ public final class MinecraftTexture extends Texture implements IMinecraftTexture
 	}
 
 	@Override
+	protected int getMaxLevels(final int width, final int height) {
+		return 32 - Integer.numberOfLeadingZeros(Math.max(1, Math.min(width, height)));
+	}
+
+	@Override
 	protected void allocateStorage(final @NonNull MipmapChain chain) {
 		final DeviceInfo info = this.bridge.getDevice().getDeviceInfo();
 		final int maxSize = info.limits().maxTextureSizeForFormat(GpuFormat.RGBA8_UNORM);
@@ -67,11 +72,6 @@ public final class MinecraftTexture extends Texture implements IMinecraftTexture
 		}
 
 		this.generateLevels(chain);
-	}
-
-	@Override
-	protected int getMaxLevels(final int width, final int height) {
-		return 32 - Integer.numberOfLeadingZeros(Math.max(1, Math.min(width, height)));
 	}
 
 	@Override

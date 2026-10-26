@@ -19,8 +19,9 @@ import net.minecraft.network.chat.Style;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MinecraftTextRenderer extends BitmapTextRenderer<MinecraftFontFace> {
 
-	private static final Matrix4fc             IDENTITY = new Matrix4f();
 	private static final MinecraftTextRenderer INSTANCE = new MinecraftTextRenderer();
+
+	private static final Matrix4fc IDENTITY = new Matrix4f();
 
 	private final GlyphVertexCapture capture = new GlyphVertexCapture();
 
