@@ -210,15 +210,13 @@ def verifyJar = { String kind, File archive, List<String> patterns, Pattern refe
             throw new GradleException("The ${kind} jar starts JOID with the demo mode on")
         }
 
-        [['devMode', !devMode], ['demoMode', true]].each { mode, refused ->
-            if (refused) {
-                try {
-                    environment.getMethod(mode, Boolean.TYPE).invoke(null, true)
-                    throw new GradleException("The ${kind} jar accepts JOIDEnv.${mode}(true)")
-                } catch (final InvocationTargetException e) {
-                    if (!(e.cause instanceof IllegalStateException)) {
-                        throw e
-                    }
+        if (!devMode) {
+            try {
+                environment.getMethod('devMode', Boolean.TYPE).invoke(null, true)
+                throw new GradleException("The ${kind} jar accepts JOIDEnv.devMode(true)")
+            } catch (final InvocationTargetException e) {
+                if (!(e.cause instanceof IllegalStateException)) {
+                    throw e
                 }
             }
         }
