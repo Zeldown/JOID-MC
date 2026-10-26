@@ -57,12 +57,6 @@ public final class MinecraftShader extends Shader {
 		return this.active;
 	}
 
-	public @NonNull GpuBufferSlice upload(final RenderState state, final VertexBuffer buffer, final float[] projection, final MatrixStack modelView, final StencilEmulation stencil) {
-		stencil.write(super.builtins(state, buffer, projection, modelView));
-		super.getBlock().pack();
-		return this.device.createCommandEncoder().transientMemory().uploadGpu(super.getBlock().getData().slice(0, super.getBlock().getSize()), this.device.getDeviceInfo().limits().minUniformOffsetAlignment(), GpuBuffer.USAGE_UNIFORM);
-	}
-
 	@Override
 	protected void compileProgram(final @NonNull ShaderTranslation translation) {
 		final MinecraftRenderBridge bridge = (MinecraftRenderBridge) super.getBridge();
@@ -82,6 +76,12 @@ public final class MinecraftShader extends Shader {
 		bridge.getSourceProvider().unregister(this.identifier);
 		bridge.getSourceProvider().unregister(this.stencilIdentifier);
 		this.active = null;
+	}
+
+	public @NonNull GpuBufferSlice upload(final RenderState state, final VertexBuffer buffer, final float[] projection, final MatrixStack modelView, final StencilEmulation stencil) {
+		stencil.write(super.builtins(state, buffer, projection, modelView));
+		super.getBlock().pack();
+		return this.device.createCommandEncoder().transientMemory().uploadGpu(super.getBlock().getData().slice(0, super.getBlock().getSize()), this.device.getDeviceInfo().limits().minUniformOffsetAlignment(), GpuBuffer.USAGE_UNIFORM);
 	}
 
 	private static BindGroupLayout createLayout(final Collection<String> samplers) {

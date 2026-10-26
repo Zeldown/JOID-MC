@@ -147,10 +147,6 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 		return StringUtil.isAllowedChatCharacter(event.codepoint()) && this.bridge.charTyped(event.codepoint()) || super.charTyped(event);
 	}
 
-	public boolean isQuickCrafting() {
-		return super.isQuickCrafting;
-	}
-
 	public Slot getHoveredSlot() {
 		return super.hoveredSlot;
 	}
@@ -164,6 +160,10 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 	public SlotNode getHoveredSlotNode() {
 		final Minecraft minecraft = Minecraft.getInstance();
 		return this.getSlotNode(minecraft.mouseHandler.getScaledXPos(minecraft.getWindow()), minecraft.mouseHandler.getScaledYPos(minecraft.getWindow()));
+	}
+
+	public boolean isQuickCrafting() {
+		return super.isQuickCrafting;
 	}
 
 	public int getQuickCraftType() {

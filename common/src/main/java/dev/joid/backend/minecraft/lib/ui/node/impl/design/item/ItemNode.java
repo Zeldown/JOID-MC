@@ -66,14 +66,6 @@ public class ItemNode extends Node {
 		return super.follow("stack", stack, value -> this.stack = value);
 	}
 
-	public final <T extends ItemNode> @NonNull T count(final boolean count) {
-		return this.count(Signal.from(count));
-	}
-
-	public final <T extends ItemNode> @NonNull T count(final @NonNull Supplier<Boolean> count) {
-		return super.follow("count", count, value -> this.count = value);
-	}
-
 	public final <T extends ItemNode> @NonNull T bar(final boolean bar) {
 		return this.bar(Signal.from(bar));
 	}
@@ -82,12 +74,20 @@ public class ItemNode extends Node {
 		return super.follow("bar", bar, value -> this.bar = value);
 	}
 
-	public final <T extends ItemNode> @NonNull T cooldown(final boolean cooldown) {
-		return this.cooldown(Signal.from(cooldown));
+	public final <T extends ItemNode> @NonNull T count(final boolean count) {
+		return this.count(Signal.from(count));
 	}
 
-	public final <T extends ItemNode> @NonNull T cooldown(final @NonNull Supplier<Boolean> cooldown) {
-		return super.follow("cooldown", cooldown, value -> this.cooldown = value);
+	public final <T extends ItemNode> @NonNull T count(final @NonNull Supplier<Boolean> count) {
+		return super.follow("count", count, value -> this.count = value);
+	}
+
+	public final <T extends ItemNode> @NonNull T glint(final boolean glint) {
+		return this.glint(Signal.from(glint));
+	}
+
+	public final <T extends ItemNode> @NonNull T glint(final @NonNull Supplier<Boolean> glint) {
+		return super.follow("glint", glint, value -> this.glint = value);
 	}
 
 	public final <T extends ItemNode> @NonNull T tooltip(final boolean tooltip) {
@@ -104,12 +104,12 @@ public class ItemNode extends Node {
 		});
 	}
 
-	public final <T extends ItemNode> @NonNull T glint(final boolean glint) {
-		return this.glint(Signal.from(glint));
+	public final <T extends ItemNode> @NonNull T cooldown(final boolean cooldown) {
+		return this.cooldown(Signal.from(cooldown));
 	}
 
-	public final <T extends ItemNode> @NonNull T glint(final @NonNull Supplier<Boolean> glint) {
-		return super.follow("glint", glint, value -> this.glint = value);
+	public final <T extends ItemNode> @NonNull T cooldown(final @NonNull Supplier<Boolean> cooldown) {
+		return super.follow("cooldown", cooldown, value -> this.cooldown = value);
 	}
 
 	private void drawTooltip(final double mouseX, final double mouseY) {

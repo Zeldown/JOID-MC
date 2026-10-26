@@ -44,11 +44,6 @@ public class UIScreen extends Screen {
 	}
 
 	@Override
-	public boolean shouldCloseOnEsc() {
-		return false;
-	}
-
-	@Override
 	public boolean isInGameUi() {
 		return !this.hasBackground() || super.isInGameUi();
 	}
@@ -57,6 +52,11 @@ public class UIScreen extends Screen {
 	public boolean isPauseScreen() {
 		final UIDataMinecraft data = this.bridge.getMinecraftData();
 		return data == null || data.pause();
+	}
+
+	@Override
+	public boolean shouldCloseOnEsc() {
+		return false;
 	}
 
 	@Override
