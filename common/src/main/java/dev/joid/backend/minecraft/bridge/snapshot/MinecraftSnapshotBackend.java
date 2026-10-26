@@ -19,16 +19,16 @@ public final class MinecraftSnapshotBackend implements ISnapshotBackend {
 	private MinecraftRenderTarget target;
 
 	@Override
-	public void destroy() {
-		this.target.delete();
-		this.target = null;
-	}
-
-	@Override
 	public void create(final int width, final int height) {
 		final MinecraftRenderBridge render = (MinecraftRenderBridge) BridgeHandler.RENDER.get();
 		this.target = new MinecraftRenderTarget(render, width, height, true);
 		render.screenTarget(this.target);
+	}
+
+	@Override
+	public void destroy() {
+		this.target.delete();
+		this.target = null;
 	}
 
 	@Override

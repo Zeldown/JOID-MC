@@ -32,17 +32,17 @@ public final class GlyphVertexCapture implements VertexConsumer {
 	}
 
 	@Override
-	public @NonNull GlyphVertexCapture addVertex(final Matrix4fc pose, final float x, final float y, final float z) {
-		return this.addVertex(x, y, z);
-	}
-
-	@Override
 	public @NonNull GlyphVertexCapture addVertex(final float x, final float y, final float z) {
 		this.minX = Math.min(this.minX, x);
 		this.minY = Math.min(this.minY, y);
 		this.maxX = Math.max(this.maxX, x);
 		this.maxY = Math.max(this.maxY, y);
 		return this;
+	}
+
+	@Override
+	public @NonNull GlyphVertexCapture addVertex(final Matrix4fc pose, final float x, final float y, final float z) {
+		return this.addVertex(x, y, z);
 	}
 
 	@Override
@@ -55,12 +55,12 @@ public final class GlyphVertexCapture implements VertexConsumer {
 	}
 
 	@Override
-	public @NonNull GlyphVertexCapture setColor(final int r, final int g, final int b, final int a) {
+	public @NonNull GlyphVertexCapture setColor(final int color) {
 		return this;
 	}
 
 	@Override
-	public @NonNull GlyphVertexCapture setColor(final int color) {
+	public @NonNull GlyphVertexCapture setColor(final int r, final int g, final int b, final int a) {
 		return this;
 	}
 

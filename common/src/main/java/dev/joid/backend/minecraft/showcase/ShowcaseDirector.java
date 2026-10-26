@@ -98,6 +98,11 @@ public final class ShowcaseDirector {
 		ShowcaseDirector.clip = null;
 	}
 
+	public static void glide(final Node node, final int count) {
+		final double[] bounds = ShowcaseDirector.computeOnClient(() -> ShowcaseDirector.bounds(node));
+		ShowcaseDirector.glide(bounds[0] + bounds[2] / 2D, bounds[1] + bounds[3] / 2D, count);
+	}
+
 	public static void glide(final double x, final double y, final int count) {
 		final double fromX = ShowcaseDirector.pointer ? ShowcaseDirector.mouseX : x;
 		final double fromY = ShowcaseDirector.pointer ? ShowcaseDirector.mouseY : y;
@@ -107,11 +112,6 @@ public final class ShowcaseDirector {
 			ShowcaseDirector.move(fromX + (x - fromX) * eased, fromY + (y - fromY) * eased);
 			ShowcaseDirector.step(null);
 		}
-	}
-
-	public static void glide(final Node node, final int count) {
-		final double[] bounds = ShowcaseDirector.computeOnClient(() -> ShowcaseDirector.bounds(node));
-		ShowcaseDirector.glide(bounds[0] + bounds[2] / 2D, bounds[1] + bounds[3] / 2D, count);
 	}
 
 	public static void animate(final int count, final DoubleConsumer action) {
@@ -129,6 +129,11 @@ public final class ShowcaseDirector {
 		ShowcaseDirector.release();
 	}
 
+	public static void move(final Node node) {
+		final double[] bounds = ShowcaseDirector.computeOnClient(() -> ShowcaseDirector.bounds(node));
+		ShowcaseDirector.move(bounds[0] + bounds[2] / 2D, bounds[1] + bounds[3] / 2D);
+	}
+
 	public static void move(final double x, final double y) {
 		ShowcaseDirector.mouseX  = x;
 		ShowcaseDirector.mouseY  = y;
@@ -139,11 +144,6 @@ public final class ShowcaseDirector {
 			GLFW.glfwSetCursorPosCallback(window, callback);
 			callback.invoke(window, x, y);
 		});
-	}
-
-	public static void move(final Node node) {
-		final double[] bounds = ShowcaseDirector.computeOnClient(() -> ShowcaseDirector.bounds(node));
-		ShowcaseDirector.move(bounds[0] + bounds[2] / 2D, bounds[1] + bounds[3] / 2D);
 	}
 
 	public static void hidePointer() {

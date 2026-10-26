@@ -1737,6 +1737,11 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		context.waitTicks(40);
 	}
 
+	private static int[] bounds(final Node node) {
+		final UI ui = node.getUi();
+		return new int[] {(int) Math.round(ui.getView().toScreenX(node.getAbsoluteX())), (int) Math.round(ui.getView().toScreenY(node.getAbsoluteY())), (int) Math.round(ui.getView().toScreenWidth(node.getWidth())), (int) Math.round(ui.getView().toScreenHeight(node.getHeight()))};
+	}
+
 	private static List<int[]> bounds(final Class<? extends Node> clazz) {
 		return FabricJoidClientGameTest.bounds(JOID.getUi(UIDemoMinecraft.class), clazz);
 	}
@@ -1747,11 +1752,6 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			FabricJoidClientGameTest.bounds(ui, node, clazz, bounds);
 		}
 		return bounds;
-	}
-
-	private static int[] bounds(final Node node) {
-		final UI ui = node.getUi();
-		return new int[] {(int) Math.round(ui.getView().toScreenX(node.getAbsoluteX())), (int) Math.round(ui.getView().toScreenY(node.getAbsoluteY())), (int) Math.round(ui.getView().toScreenWidth(node.getWidth())), (int) Math.round(ui.getView().toScreenHeight(node.getHeight()))};
 	}
 
 	private static void bounds(final UI ui, final Node node, final Class<? extends Node> clazz, final List<int[]> bounds) {
@@ -1801,10 +1801,6 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		return count;
 	}
 
-	private static void expectChange(final List<String> failures, final String label, final List<BufferedImage> captures, final int x, final int y, final int size, final boolean same) {
-		FabricJoidClientGameTest.expectChange(failures, label, captures, new int[] {x, y, size, size}, same);
-	}
-
 	private static void expectChange(final List<String> failures, final String label, final List<BufferedImage> captures, final int[] bounds, final boolean same) {
 		final int x = bounds[0];
 		final int y = bounds[1];
@@ -1820,6 +1816,10 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		if (changed == same) {
 			failures.add(label + (same ? " changed" : " did not change") + " between the captures");
 		}
+	}
+
+	private static void expectChange(final List<String> failures, final String label, final List<BufferedImage> captures, final int x, final int y, final int size, final boolean same) {
+		FabricJoidClientGameTest.expectChange(failures, label, captures, new int[] {x, y, size, size}, same);
 	}
 
 	private static void expectTexture(final ClientGameTestContext context, final List<String> failures, final String label, final BufferedImage image, final int x, final int y, final String path) {

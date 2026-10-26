@@ -16,12 +16,15 @@ import lombok.NonNull;
 public final class MinecraftRenderTarget {
 
 	private final MinecraftTexture texture;
-	private final GpuTexture       depth;
-	private final GpuTextureView   depthView;
-	private final GpuTexture       stencil;
-	private final GpuTextureView   stencilView;
-	private final GpuTexture       stencilCopy;
-	private final GpuTextureView   stencilCopyView;
+
+	private final GpuTexture     depth;
+	private final GpuTextureView depthView;
+
+	private final GpuTexture     stencil;
+	private final GpuTextureView stencilView;
+
+	private final GpuTexture     stencilCopy;
+	private final GpuTextureView stencilCopyView;
 
 	public MinecraftRenderTarget(final MinecraftRenderBridge bridge, final int width, final int height, final boolean stencil) {
 		final GpuDevice device = bridge.getDevice();

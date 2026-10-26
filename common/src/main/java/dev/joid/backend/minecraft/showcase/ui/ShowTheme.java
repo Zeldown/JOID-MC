@@ -23,11 +23,11 @@ public final class ShowTheme {
 	public static final Color GRASS    = Color.decode("#7ED957").lock();
 	public static final Color MUTED    = Color.decode("#A3ACBD").lock();
 	public static final Color FAINT    = Color.decode("#6E7789").lock();
+	public static final Color EMBER    = Color.decode("#FF8A5C").lock();
 	public static final Color DIAMOND  = Color.decode("#4FE3E6").lock();
 	public static final Color EMERALD  = Color.decode("#2BD67B").lock();
 	public static final Color REDSTONE = Color.decode("#FF4D5E").lock();
 	public static final Color AMETHYST = Color.decode("#B284FF").lock();
-	public static final Color EMBER    = Color.decode("#FF8A5C").lock();
 
 	public static final Color PANEL_TOP    = Color.decode("#1B2130").lock();
 	public static final Color PANEL_BOTTOM = Color.decode("#11151E").lock();

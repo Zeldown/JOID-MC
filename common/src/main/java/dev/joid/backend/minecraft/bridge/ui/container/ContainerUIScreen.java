@@ -155,13 +155,15 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 		return super.hoveredSlot;
 	}
 
+	@Override
+	protected Slot getHoveredSlot(final double x, final double y) {
+		final SlotNode node = this.getSlotNode(x, y);
+		return node != null && node.getSlot().isActive() ? node.getSlot() : null;
+	}
+
 	public SlotNode getHoveredSlotNode() {
 		final Minecraft minecraft = Minecraft.getInstance();
 		return this.getSlotNode(minecraft.mouseHandler.getScaledXPos(minecraft.getWindow()), minecraft.mouseHandler.getScaledYPos(minecraft.getWindow()));
-	}
-
-	public @NonNull Set<@NonNull Slot> getQuickCraftSlots() {
-		return Collections.unmodifiableSet(super.quickCraftSlots);
 	}
 
 	public int getQuickCraftType() {
@@ -172,10 +174,8 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 		return super.quickCraftingRemainder;
 	}
 
-	@Override
-	protected Slot getHoveredSlot(final double x, final double y) {
-		final SlotNode node = this.getSlotNode(x, y);
-		return node != null && node.getSlot().isActive() ? node.getSlot() : null;
+	public @NonNull Set<@NonNull Slot> getQuickCraftSlots() {
+		return Collections.unmodifiableSet(super.quickCraftSlots);
 	}
 
 	private UIDataMinecraft getMinecraftData() {
