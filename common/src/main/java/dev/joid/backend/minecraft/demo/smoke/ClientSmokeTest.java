@@ -474,16 +474,16 @@ public final class ClientSmokeTest {
 		}
 	}
 
+	private static <T> T computeOnServer(final MinecraftServer server, final Function<ServerPlayer, T> function) {
+		return ClientSmokeTest.await(server.submit(() -> function.apply(server.getPlayerList().getPlayers().getFirst())), "computing on the server");
+	}
+
 	private static void runOnClient(final Runnable runnable) {
 		ClientSmokeTest.await(Minecraft.getInstance().submit(runnable), "running on the client");
 	}
 
 	private static <T> T computeOnClient(final Supplier<T> supplier) {
 		return ClientSmokeTest.await(Minecraft.getInstance().submit(supplier), "computing on the client");
-	}
-
-	private static <T> T computeOnServer(final MinecraftServer server, final Function<ServerPlayer, T> function) {
-		return ClientSmokeTest.await(server.submit(() -> function.apply(server.getPlayerList().getPlayers().getFirst())), "computing on the server");
 	}
 
 	private static <T> T await(final CompletableFuture<T> future, final String label) {

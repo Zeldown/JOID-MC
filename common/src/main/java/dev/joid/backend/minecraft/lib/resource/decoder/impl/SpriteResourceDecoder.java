@@ -27,9 +27,6 @@ public class SpriteResourceDecoder implements IResourceDecoder {
 	}
 
 	@Override
-	public void init(final @NonNull ResourceData resource) {}
-
-	@Override
 	public void prepare(final @NonNull ResourceData resource) {
 		final TextureAtlasSprite sprite = Minecraft.getInstance().getAtlasManager().get(this.spriteId);
 		if (sprite.contents().name().equals(MissingTextureAtlasSprite.getLocation()) && !this.spriteId.texture().equals(MissingTextureAtlasSprite.getLocation())) {

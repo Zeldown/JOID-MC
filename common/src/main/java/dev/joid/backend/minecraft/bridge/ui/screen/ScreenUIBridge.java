@@ -35,6 +35,15 @@ public final class ScreenUIBridge extends StackUIBridge {
 		}
 	}
 
+	public UIDataMinecraft getMinecraftData() {
+		for (final UI ui : super.getUiList()) {
+			if (!ui.getOverlay().active()) {
+				return ui.getClass().getAnnotation(UIDataMinecraft.class);
+			}
+		}
+		return null;
+	}
+
 	@Override
 	public boolean canHandle(final @NonNull UI ui) {
 		return !ui.getOverlay().active();
@@ -43,15 +52,6 @@ public final class ScreenUIBridge extends StackUIBridge {
 	@Override
 	public boolean canHandle(final @NonNull Class<? extends UI> clazz) {
 		return !AnnotationValues.read(clazz.getAnnotation(UIDataOverlay.class), UIDataOverlayObject.create()).active();
-	}
-
-	public UIDataMinecraft getMinecraftData() {
-		for (final UI ui : super.getUiList()) {
-			if (!ui.getOverlay().active()) {
-				return ui.getClass().getAnnotation(UIDataMinecraft.class);
-			}
-		}
-		return null;
 	}
 
 	@Override

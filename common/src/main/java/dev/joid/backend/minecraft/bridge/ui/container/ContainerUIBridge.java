@@ -67,13 +67,13 @@ public final class ContainerUIBridge extends StackUIBridge {
 	}
 
 	@Override
-	public boolean canReplace(final @NonNull UI ui) {
-		return !(ui instanceof ContainerUI);
+	public void drawHover(final @NonNull UI ui, final @NonNull Object content, final double mouseX, final double mouseY) {
+		this.tooltipQueue.push(content);
 	}
 
 	@Override
-	public void drawHover(final @NonNull UI ui, final @NonNull Object content, final double mouseX, final double mouseY) {
-		this.tooltipQueue.push(content);
+	public boolean canReplace(final @NonNull UI ui) {
+		return !(ui instanceof ContainerUI);
 	}
 
 	@Override
