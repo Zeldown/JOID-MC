@@ -9,7 +9,7 @@ import dev.joid.demo.ui.DemoEntry;
 import dev.joid.demo.ui.UIDemoChoice;
 import dev.joid.demo.ui.core.transition.DemoPushTransition;
 import dev.joid.demo.ui.popup.UIDemoPopup;
-import dev.joid.internal.JOID;
+import dev.joid.lib.JOID;
 import dev.joid.lib.color.Color;
 import dev.joid.lib.draw.text.Text;
 import dev.joid.lib.font.TextInfo;

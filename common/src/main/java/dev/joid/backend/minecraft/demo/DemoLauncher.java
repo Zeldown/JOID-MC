@@ -12,7 +12,7 @@ import dev.joid.backend.minecraft.loader.registry.ContainerUIRegistry;
 import dev.joid.backend.minecraft.loader.registry.KeyBindRegistry;
 import dev.joid.backend.minecraft.showcase.ShowcaseLauncher;
 import dev.joid.demo.ui.UIDemoChoice;
-import dev.joid.internal.JOID;
+import dev.joid.lib.JOID;
 import dev.joid.lib.input.key.Key;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

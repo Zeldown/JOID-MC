@@ -201,7 +201,7 @@ def verifyJar = { String kind, File archive, List<String> patterns, Pattern refe
 
     def loader = new URLClassLoader([archive.toURI().toURL()] as URL[], ClassLoader.platformClassLoader)
     try {
-        def environment = loader.loadClass('dev.joid.internal.JOIDEnv')
+        def environment = loader.loadClass('dev.joid.lib.JOIDEnv')
         if (environment.getMethod('isDevMode').invoke(null) != devMode) {
             throw new GradleException("The ${kind} jar starts JOID with the dev mode ${devMode ? 'off' : 'on'}")
         }

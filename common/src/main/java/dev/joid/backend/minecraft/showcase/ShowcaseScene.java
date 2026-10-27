@@ -16,7 +16,7 @@ import dev.joid.backend.minecraft.showcase.ui.ShowHud;
 import dev.joid.backend.minecraft.showcase.ui.ShowQuests;
 import dev.joid.backend.minecraft.showcase.ui.ShowServers;
 import dev.joid.backend.minecraft.showcase.ui.ShowVideo;
-import dev.joid.internal.JOID;
+import dev.joid.lib.JOID;
 import dev.joid.lib.ui.core.UI;
 import dev.joid.lib.ui.node.Node;
 import lombok.AccessLevel;

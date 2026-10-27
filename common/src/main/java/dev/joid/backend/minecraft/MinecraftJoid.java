@@ -5,7 +5,7 @@ import java.io.File;
 import dev.joid.backend.minecraft.bridge.resource.ResourceReloader;
 import dev.joid.backend.minecraft.demo.DemoLauncher;
 import dev.joid.backend.minecraft.loader.registry.ReloadListenerRegistry;
-import dev.joid.internal.JOIDEnv;
+import dev.joid.lib.JOIDEnv;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.minecraft.client.Minecraft;

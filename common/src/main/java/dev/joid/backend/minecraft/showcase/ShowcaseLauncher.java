@@ -9,7 +9,7 @@ import dev.joid.backend.minecraft.loader.registry.ContainerTypeRegistry;
 import dev.joid.backend.minecraft.loader.registry.ContainerUIRegistry;
 import dev.joid.backend.minecraft.showcase.ui.ShowAnvil;
 import dev.joid.backend.minecraft.showcase.ui.ShowChest;
-import dev.joid.internal.JOID;
+import dev.joid.lib.JOID;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.minecraft.client.gui.screens.MenuScreens;

@@ -158,6 +158,12 @@ public final class MinecraftRenderBridge extends RenderBridge {
 	}
 
 	@Override
+	public void suspend(final @NonNull Runnable draw) {
+		this.passEncoder.end();
+		draw.run();
+	}
+
+	@Override
 	public void raster(final @NonNull IFrameBuffer target, final int width, final int height, final @NonNull Runnable draw) {
 		super.requireFrame();
 		final MinecraftRenderTarget renderTarget = ((MinecraftFrameBuffer) target).getTarget();

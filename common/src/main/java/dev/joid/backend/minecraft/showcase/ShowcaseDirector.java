@@ -25,7 +25,7 @@ import org.lwjgl.glfw.GLFWMouseButtonCallback;
 import org.lwjgl.glfw.GLFWScrollCallback;
 import org.lwjgl.glfw.GLFWWindowFocusCallback;
 
-import dev.joid.internal.JOID;
+import dev.joid.lib.JOID;
 import dev.joid.lib.ui.node.Node;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import lombok.AccessLevel;
