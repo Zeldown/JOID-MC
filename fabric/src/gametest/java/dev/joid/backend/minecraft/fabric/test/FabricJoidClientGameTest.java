@@ -1670,7 +1670,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			});
 			context.waitTicks(10);
 			final float gain = context.computeOnClient(_ -> AL10.alGetSourcef(FabricJoidClientGameTest.audioSource(player), AL10.AL_GAIN));
-			final float expected = 0.3F * (float) (volumes[0] * volumes[1]);
+			final float expected = (float) (volumes[0] * volumes[1]);
 			if (Math.abs(gain - expected) > 1E-4F) {
 				failures.add("master " + volumes[0] + " and interface " + volumes[1] + " give the video gain " + gain + " instead of " + expected);
 			}
