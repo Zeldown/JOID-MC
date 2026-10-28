@@ -206,6 +206,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			FabricJoidClientGameTest.verifyContainerServer(context, singleplayer.getServer());
 			FabricJoidClientGameTest.verifyBlockLighting(context, singleplayer.getServer());
 			FabricJoidClientGameTest.verifyNestedRaster(context);
+			FabricJoidClientGameTest.verifyNestedFeatureRaster(context);
 			FabricJoidClientGameTest.verifyCursor(context);
 			FabricJoidClientGameTest.verifyDebugKey(context);
 			FabricJoidClientGameTest.verifyFrameCounter(context);
@@ -1655,11 +1656,71 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 		}
 	}
 
+	private static void verifyNestedFeatureRaster(final ClientGameTestContext context) {
+		final ItemStack apple = new ItemStack(Items.APPLE);
+		final ItemStack stone = new ItemStack(Items.STONE);
+		final RectNode nested = RectNode.create(400, 300, 256, 256).color(Color.rgb(0x202020)).onDraw(event -> {
+			final Node node = event.getNode();
+			final ItemStackRenderState state = FabricJoidClientGameTest.itemState(stone);
+			DrawUtils.RASTER.drawRaster(node.getX(), node.getY(), node.getWidth(), node.getHeight(), (width, height) -> FeatureDrawableRaster.of(Lighting.Entry.ITEMS_3D, (pose, collector) -> {
+				state.submit(pose, collector, LightCoordsUtil.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0);
+				DrawItem.inst().drawItem(0D, 0D, 32D * width / node.getWidth(), apple);
+			}).draw(width, height));
+		});
+		final RectNode flat = RectNode.create(1000, 300, 256, 256).color(Color.rgb(0x202020)).onDraw(event -> {
+			final Node node = event.getNode();
+			DrawItem.inst().drawItem(node.getX(), node.getY(), 32D, apple);
+			DrawUtils.RASTER.drawRaster(node.getX(), node.getY(), node.getWidth(), node.getHeight(), FabricJoidClientGameTest.itemRaster(stone));
+		});
+		context.runOnClient(_ -> JOID.open(new UI() {
+
+			@Override
+			public void init() {
+				nested.attach(this);
+
+				flat.attach(this);
+			}
+
+		}));
+		context.waitForScreen(UIScreen.class);
+		context.waitTicks(20);
+		final List<int[]> nodes = context.computeOnClient(_ -> List.of(FabricJoidClientGameTest.bounds(nested), FabricJoidClientGameTest.bounds(flat)));
+		final BufferedImage image = FabricJoidClientGameTest.read(context.takeScreenshot("joid-nested-feature-raster"));
+		context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
+		context.waitForScreen(null);
+		final List<String> failures = new ArrayList<>();
+		FabricJoidClientGameTest.expectDrawn(failures, "the stone around a nested item raster", image, nodes.get(0));
+		FabricJoidClientGameTest.expectDrawn(failures, "the stone drawn without nesting", image, nodes.get(1));
+		final int width = Math.min(nodes.get(0)[2], nodes.get(1)[2]);
+		final int height = Math.min(nodes.get(0)[3], nodes.get(1)[3]);
+		int different = 0;
+		for (int row = 0; row < height; row++) {
+			for (int column = 0; column < width; column++) {
+				if (FabricJoidClientGameTest.delta(image.getRGB(nodes.get(1)[0] + column, nodes.get(1)[1] + row), image.getRGB(nodes.get(0)[0] + column, nodes.get(0)[1] + row)) > 16) {
+					different++;
+				}
+			}
+		}
+
+		if (different > width * height / 200) {
+			failures.add("the stone around a nested item raster differs from the same drawing without nesting on " + different + " pixels");
+		}
+
+		if (!failures.isEmpty()) {
+			throw new AssertionError(failures.size() + " nested feature raster checks failed:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
+		}
+	}
+
 	private static DrawableRaster itemRaster(final ItemStack stack) {
+		final ItemStackRenderState state = FabricJoidClientGameTest.itemState(stack);
+		return FeatureDrawableRaster.of(Lighting.Entry.ITEMS_3D, (pose, collector) -> state.submit(pose, collector, LightCoordsUtil.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0));
+	}
+
+	private static ItemStackRenderState itemState(final ItemStack stack) {
 		final Minecraft minecraft = Minecraft.getInstance();
 		final ItemStackRenderState state = new ItemStackRenderState();
 		minecraft.getItemModelResolver().updateForTopItem(state, stack, ItemDisplayContext.GUI, minecraft.level, minecraft.player, 0);
-		return FeatureDrawableRaster.of(Lighting.Entry.ITEMS_3D, (pose, collector) -> state.submit(pose, collector, LightCoordsUtil.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0));
+		return state;
 	}
 
 	private static void verifySound(final ClientGameTestContext context) {
