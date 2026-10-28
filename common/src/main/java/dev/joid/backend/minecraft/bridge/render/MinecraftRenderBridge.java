@@ -60,6 +60,7 @@ public final class MinecraftRenderBridge extends RenderBridge {
 	private final MinecraftPipelineCache pipelineCache;
 	private final ProjectionMatrixBuffer rasterProjectionBuffer;
 
+	private int                   hostDepth;
 	private ByteBuffer            scratch;
 	private MinecraftRenderTarget target;
 	private MinecraftRenderTarget screenTarget;
@@ -141,6 +142,10 @@ public final class MinecraftRenderBridge extends RenderBridge {
 			this.passEncoder.encoder().copyTextureToTexture(target.getStencil(), target.getStencilCopy(), 0, 0, 0, 0, 0, target.getWidth(), target.getHeight());
 			this.record(PipelineKey.stencil(shader, state, primitive), target.getStencilView(), null, target.getStencilCopyView(), blazeShader, vertices, uniforms, buffer.getCount());
 		}
+
+		if (this.hostDepth > 0) {
+			this.passEncoder.end();
+		}
 	}
 
 	@Override
@@ -161,7 +166,12 @@ public final class MinecraftRenderBridge extends RenderBridge {
 	@Override
 	public void suspend(final @NonNull Runnable draw) {
 		this.passEncoder.end();
-		draw.run();
+		this.hostDepth++;
+		try {
+			draw.run();
+		} finally {
+			this.hostDepth--;
+		}
 	}
 
 	@Override
@@ -179,9 +189,11 @@ public final class MinecraftRenderBridge extends RenderBridge {
 		this.rasterProjection.setOrtho(0F, renderTarget.getWidth(), height, height - renderTarget.getHeight(), range, -range, this.zeroToOne);
 		RenderSystem.setProjectionMatrix(this.rasterProjectionBuffer.getBuffer(this.rasterProjection), ProjectionType.ORTHOGRAPHIC);
 		RenderSystem.enableScissorForRenderTypeDraws(0, 0, width, height);
+		this.hostDepth++;
 		try {
 			draw.run();
 		} finally {
+			this.hostDepth--;
 			RenderSystem.getScissorStateForRenderTypeDraws().setFrom(scissor);
 			RenderSystem.restoreProjectionMatrix();
 			RenderSystem.outputColorTextureOverride = color;
