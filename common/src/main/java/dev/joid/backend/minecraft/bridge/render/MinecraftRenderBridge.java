@@ -13,6 +13,7 @@ import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.systems.GpuDevice;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.systems.ScissorState;
 import com.mojang.blaze3d.textures.AddressMode;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuSampler;
@@ -169,6 +170,7 @@ public final class MinecraftRenderBridge extends RenderBridge {
 		final MinecraftRenderTarget renderTarget = ((MinecraftFrameBuffer) target).getTarget();
 		final GpuTextureView color = RenderSystem.outputColorTextureOverride;
 		final GpuTextureView depth = RenderSystem.outputDepthTextureOverride;
+		final ScissorState scissor = new ScissorState(RenderSystem.getScissorStateForRenderTypeDraws());
 		final float range = Math.max(1000F, Math.max(width, height));
 		this.passEncoder.encoder().clearDepthTexture(renderTarget.getDepth(), 0D);
 		RenderSystem.outputColorTextureOverride = renderTarget.getView();
@@ -180,7 +182,7 @@ public final class MinecraftRenderBridge extends RenderBridge {
 		try {
 			draw.run();
 		} finally {
-			RenderSystem.disableScissorForRenderTypeDraws();
+			RenderSystem.getScissorStateForRenderTypeDraws().setFrom(scissor);
 			RenderSystem.restoreProjectionMatrix();
 			RenderSystem.outputColorTextureOverride = color;
 			RenderSystem.outputDepthTextureOverride = depth;
