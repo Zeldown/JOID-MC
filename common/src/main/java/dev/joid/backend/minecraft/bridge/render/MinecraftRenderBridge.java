@@ -2,6 +2,8 @@ package dev.joid.backend.minecraft.bridge.render;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
@@ -45,6 +47,7 @@ import dev.joid.lib.bridge.render.texture.TextureWrap;
 import dev.joid.lib.bridge.render.vertex.Primitive;
 import dev.joid.lib.bridge.render.vertex.VertexBuffer;
 import dev.joid.lib.bridge.render.vertex.VertexFill;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import net.minecraft.client.renderer.ProjectionMatrixBuffer;
@@ -58,22 +61,25 @@ public final class MinecraftRenderBridge extends RenderBridge {
 	private final Matrix4f               rasterProjection;
 	private final ShaderSourceProvider   sourceProvider;
 	private final MinecraftPipelineCache pipelineCache;
-	private final ProjectionMatrixBuffer rasterProjectionBuffer;
+
+	@Getter(AccessLevel.NONE)
+	private final List<ProjectionMatrixBuffer> rasterProjectionBufferList;
 
 	private int                   hostDepth;
+	private int                   rasterDepth;
 	private ByteBuffer            scratch;
 	private MinecraftRenderTarget target;
 	private MinecraftRenderTarget screenTarget;
 
 	public MinecraftRenderBridge() {
-		this.device                 = RenderSystem.getDevice();
-		this.zeroToOne              = this.device.getDeviceInfo().isZZeroToOne();
-		this.passEncoder            = new PassEncoder(this.device);
-		this.sourceProvider         = new ShaderSourceProvider();
-		this.pipelineCache          = new MinecraftPipelineCache(this.device, this.sourceProvider);
-		this.rasterProjection       = new Matrix4f();
-		this.rasterProjectionBuffer = new ProjectionMatrixBuffer("JOID Raster");
-		this.scratch                = ByteBuffer.allocateDirect(1 << 16).order(ByteOrder.nativeOrder());
+		this.device                     = RenderSystem.getDevice();
+		this.zeroToOne                  = this.device.getDeviceInfo().isZZeroToOne();
+		this.passEncoder                = new PassEncoder(this.device);
+		this.sourceProvider             = new ShaderSourceProvider();
+		this.pipelineCache              = new MinecraftPipelineCache(this.device, this.sourceProvider);
+		this.rasterProjection           = new Matrix4f();
+		this.rasterProjectionBufferList = new ArrayList<>();
+		this.scratch                    = ByteBuffer.allocateDirect(1 << 16).order(ByteOrder.nativeOrder());
 	}
 
 	@Override
@@ -181,21 +187,24 @@ public final class MinecraftRenderBridge extends RenderBridge {
 		final GpuTextureView color = RenderSystem.outputColorTextureOverride;
 		final GpuTextureView depth = RenderSystem.outputDepthTextureOverride;
 		final ScissorState scissor = new ScissorState(RenderSystem.getScissorStateForRenderTypeDraws());
+		final GpuBufferSlice projection = RenderSystem.getProjectionMatrixBuffer();
+		final ProjectionType projectionType = RenderSystem.getProjectionType();
 		final float range = Math.max(1000F, Math.max(width, height));
 		this.passEncoder.encoder().clearDepthTexture(renderTarget.getDepth(), 0D);
 		RenderSystem.outputColorTextureOverride = renderTarget.getView();
 		RenderSystem.outputDepthTextureOverride = renderTarget.getDepthView();
-		RenderSystem.backupProjectionMatrix();
 		this.rasterProjection.setOrtho(0F, renderTarget.getWidth(), height, height - renderTarget.getHeight(), range, -range, this.zeroToOne);
-		RenderSystem.setProjectionMatrix(this.rasterProjectionBuffer.getBuffer(this.rasterProjection), ProjectionType.ORTHOGRAPHIC);
+		RenderSystem.setProjectionMatrix(this.getRasterProjectionBuffer(this.rasterDepth).getBuffer(this.rasterProjection), ProjectionType.ORTHOGRAPHIC);
 		RenderSystem.enableScissorForRenderTypeDraws(0, 0, width, height);
 		this.hostDepth++;
+		this.rasterDepth++;
 		try {
 			draw.run();
 		} finally {
+			this.rasterDepth--;
 			this.hostDepth--;
 			RenderSystem.getScissorStateForRenderTypeDraws().setFrom(scissor);
-			RenderSystem.restoreProjectionMatrix();
+			RenderSystem.setProjectionMatrix(projection, projectionType);
 			RenderSystem.outputColorTextureOverride = color;
 			RenderSystem.outputDepthTextureOverride = depth;
 		}
@@ -280,6 +289,14 @@ public final class MinecraftRenderBridge extends RenderBridge {
 			matrix[column * 4 + 1] = scaleY * matrix[column * 4 + 1] + offsetY * matrix[column * 4 + 3];
 		}
 		return this.zeroToOne ? DepthRange.toZeroToOne(matrix) : matrix;
+	}
+
+	private ProjectionMatrixBuffer getRasterProjectionBuffer(final int depth) {
+		if (depth == this.rasterProjectionBufferList.size()) {
+			this.rasterProjectionBufferList.add(new ProjectionMatrixBuffer("JOID Raster " + depth));
+		}
+
+		return this.rasterProjectionBufferList.get(depth);
 	}
 
 	private static boolean isVisible(final RenderState state, final MinecraftRenderTarget target) {

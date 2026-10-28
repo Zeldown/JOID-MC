@@ -29,6 +29,7 @@ import org.lwjgl.openal.AL10;
 import org.lwjgl.opengl.GL11;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.cursor.CursorType;
 import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -50,6 +51,8 @@ import dev.joid.backend.minecraft.demo.ui.UIDemoContainer;
 import dev.joid.backend.minecraft.demo.ui.UIDemoMinecraft;
 import dev.joid.backend.minecraft.demo.ui.UIDemoMinecraftChoice;
 import dev.joid.backend.minecraft.demo.ui.UIDemoOverlayLayer;
+import dev.joid.backend.minecraft.lib.draw.item.DrawItem;
+import dev.joid.backend.minecraft.lib.draw.raster.FeatureDrawableRaster;
 import dev.joid.backend.minecraft.lib.font.impl.minecraft.MinecraftFont;
 import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
 import dev.joid.backend.minecraft.lib.ui.core.data.overlay.layer.OverlayLayer;
@@ -76,6 +79,8 @@ import dev.joid.lib.bridge.clock.IClockBridge;
 import dev.joid.lib.bridge.render.texture.ITexture;
 import dev.joid.lib.bridge.thread.DirectThreadBridge;
 import dev.joid.lib.color.Color;
+import dev.joid.lib.draw.DrawUtils;
+import dev.joid.lib.draw.raster.DrawableRaster;
 import dev.joid.lib.draw.text.Text;
 import dev.joid.lib.font.TextInfo;
 import dev.joid.lib.font.converter.TextConverter;
@@ -119,7 +124,9 @@ import net.minecraft.client.gui.screens.options.controls.KeyBindsList;
 import net.minecraft.client.gui.screens.options.controls.KeyBindsScreen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.MouseButtonInfo;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.state.gui.GuiRenderState;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.language.ClientLanguage;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundEventListener;
@@ -132,11 +139,13 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.LevelBasedPermissionSet;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.player.PlayerModelType;
 import net.minecraft.world.entity.player.PlayerSkin;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerInput;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
@@ -196,6 +205,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			FabricJoidClientGameTest.verifyContainer(context, singleplayer.getServer());
 			FabricJoidClientGameTest.verifyContainerServer(context, singleplayer.getServer());
 			FabricJoidClientGameTest.verifyBlockLighting(context, singleplayer.getServer());
+			FabricJoidClientGameTest.verifyNestedRaster(context);
 			FabricJoidClientGameTest.verifyCursor(context);
 			FabricJoidClientGameTest.verifyDebugKey(context);
 			FabricJoidClientGameTest.verifyFrameCounter(context);
@@ -1589,6 +1599,67 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			faces[face] = sum / 9;
 		}
 		return faces;
+	}
+
+	private static void verifyNestedRaster(final ClientGameTestContext context) {
+		final ItemStack apple = new ItemStack(Items.APPLE);
+		final ItemStack stone = new ItemStack(Items.STONE);
+		final RectNode nested = RectNode.create(400, 300, 256, 256).color(Color.rgb(0x202020)).onDraw(event -> {
+			final Node node = event.getNode();
+			final DrawableRaster raster = FabricJoidClientGameTest.itemRaster(stone);
+			DrawUtils.RASTER.drawRaster(node.getX(), node.getY(), node.getWidth(), node.getHeight(), (width, height) -> {
+				DrawItem.inst().drawItem(0D, 0D, 64D * width / node.getWidth(), apple);
+				raster.draw(width, height);
+			});
+		});
+		final RectNode flat = RectNode.create(1000, 300, 256, 256).color(Color.rgb(0x202020)).onDraw(event -> {
+			final Node node = event.getNode();
+			DrawItem.inst().drawItem(node.getX(), node.getY(), 64D, apple);
+			DrawUtils.RASTER.drawRaster(node.getX(), node.getY(), node.getWidth(), node.getHeight(), FabricJoidClientGameTest.itemRaster(stone));
+		});
+		context.runOnClient(_ -> JOID.open(new UI() {
+
+			@Override
+			public void init() {
+				nested.attach(this);
+
+				flat.attach(this);
+			}
+
+		}));
+		context.waitForScreen(UIScreen.class);
+		context.waitTicks(20);
+		final List<int[]> nodes = context.computeOnClient(_ -> List.of(FabricJoidClientGameTest.bounds(nested), FabricJoidClientGameTest.bounds(flat)));
+		final BufferedImage image = FabricJoidClientGameTest.read(context.takeScreenshot("joid-nested-raster"));
+		context.getInput().pressKey(GLFW.GLFW_KEY_ESCAPE);
+		context.waitForScreen(null);
+		final List<String> failures = new ArrayList<>();
+		FabricJoidClientGameTest.expectDrawn(failures, "the stone drawn without nesting", image, nodes.get(1));
+		final int width = Math.min(nodes.get(0)[2], nodes.get(1)[2]);
+		final int height = Math.min(nodes.get(0)[3], nodes.get(1)[3]);
+		int different = 0;
+		for (int row = 0; row < height; row++) {
+			for (int column = 0; column < width; column++) {
+				if (FabricJoidClientGameTest.delta(image.getRGB(nodes.get(1)[0] + column, nodes.get(1)[1] + row), image.getRGB(nodes.get(0)[0] + column, nodes.get(0)[1] + row)) > 16) {
+					different++;
+				}
+			}
+		}
+
+		if (different > width * height / 200) {
+			failures.add("the stone drawn after a nested DrawItem differs from the same drawing without nesting on " + different + " pixels");
+		}
+
+		if (!failures.isEmpty()) {
+			throw new AssertionError(failures.size() + " nested raster checks failed:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
+		}
+	}
+
+	private static DrawableRaster itemRaster(final ItemStack stack) {
+		final Minecraft minecraft = Minecraft.getInstance();
+		final ItemStackRenderState state = new ItemStackRenderState();
+		minecraft.getItemModelResolver().updateForTopItem(state, stack, ItemDisplayContext.GUI, minecraft.level, minecraft.player, 0);
+		return FeatureDrawableRaster.of(Lighting.Entry.ITEMS_3D, (pose, collector) -> state.submit(pose, collector, LightCoordsUtil.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0));
 	}
 
 	private static void verifySound(final ClientGameTestContext context) {
