@@ -1,0 +1,342 @@
+import java.lang.reflect.InvocationTargetException
+import java.util.regex.Pattern
+import java.util.zip.ZipFile
+import java.util.zip.ZipInputStream
+
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
+apply plugin: 'forge'
+apply plugin: 'com.github.johnrengelman.shadow'
+apply from: rootProject.file('gradle/joid-packaging.gradle')
+
+archivesBaseName = "${mod_id}-backend-minecraft-${project.name}-${minecraft_version}"
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+minecraft {
+    version = "${minecraft_version}-${forge_version}-${minecraft_version}"
+    runDir = 'runs/client'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir rootProject.file('common/src/main/java')
+        }
+        resources {
+            srcDir rootProject.file('common/src/main/resources')
+        }
+        output.resourcesDir = output.classesDir
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    embed {
+        transitive = false
+    }
+    joidDemo
+    joidDev
+    joidProd
+    compile.extendsFrom(embed, joidDemo)
+}
+
+dependencies {
+    joidDemo files(rootProject.file("libs/joid-core-${joid_version}-demo.jar"), rootProject.file("libs/joid-backend-minecraft-common-${common_version}-dev.jar"))
+    joidDev files(rootProject.file("libs/joid-core-${joid_version}-dev.jar"), rootProject.file("libs/joid-backend-minecraft-common-${common_version}-dev.jar"))
+    joidProd files(rootProject.file("libs/joid-core-${joid_version}-prod.jar"), rootProject.file("libs/joid-backend-minecraft-common-${common_version}-prod.jar"))
+    embed files(rootProject.file("libs/joid-base-opengl-${joid_version}.jar"), rootProject.file("libs/joid-base-openal-${joid_version}.jar"), rootProject.file("libs/joid-base-lwjgl2-${joid_version}.jar"))
+    embed "net.java.dev.jna:jna:${jna_version}"
+    compileOnly "org.projectlombok:lombok:${lombok_version}"
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+tasks.withType(Jar) {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from(rootProject.file('LICENSE')) {
+        rename { "${it}_${mod_name}" }
+    }
+}
+
+processResources {
+    def properties = [
+            'version'          : version,
+            'minecraft_version': minecraft_version,
+            'mod_name'         : mod_name,
+            'mod_author'       : mod_author,
+            'mod_id'           : mod_id,
+            'credits'          : credits,
+            'description'      : project.description,
+            'joid_version'     : joid_version
+    ]
+
+    inputs.properties(properties)
+    filesMatching(['mcmod.info', 'dev/joid/backend/minecraft/backend.properties']) {
+        expand properties
+    }
+}
+
+jar {
+    classifier = 'slim'
+    excludeDemo(it)
+    manifest {
+        attributes([
+                'Specification-Title'   : mod_name,
+                'Specification-Vendor'  : mod_author,
+                'Specification-Version' : version,
+                'Implementation-Title'  : project.name,
+                'Implementation-Version': version,
+                'Implementation-Vendor' : mod_author,
+                'Built-On-Minecraft'    : minecraft_version
+        ])
+    }
+}
+
+shadowJar {
+    enabled = false
+}
+
+task devJar(type: ShadowJar) {
+    group = 'build'
+    description = 'Builds the dev jar of the mod, with the dev mode of JOID and no demo.'
+    classifier = 'dev'
+    from(sourceSets.main.output)
+    configurations = [project.configurations.embed, project.configurations.joidDev]
+    exclude(moduleDescriptors)
+    excludeDemo(it)
+    manifest.inheritFrom(jar.manifest)
+}
+
+task prodJar(type: ShadowJar) {
+    group = 'build'
+    description = 'Builds the prod jar of the mod, without any code or asset of the dev and demo modes.'
+    classifier = 'prod'
+    from(sourceSets.main.output)
+    configurations = [project.configurations.embed, project.configurations.joidProd]
+    exclude(moduleDescriptors)
+    excludeDevelopment(it)
+    manifest.inheritFrom(jar.manifest)
+}
+
+task sourcesJar(type: Jar) {
+    group = 'build'
+    description = 'Builds the sources jar of the mod, without demo.'
+    classifier = 'sources'
+    from(sourceSets.main.allSource)
+    from(zipTree(rootProject.file("libs/joid-backend-minecraft-common-${common_version}-sources.jar"))) {
+        exclude('META-INF/**')
+    }
+    excludeDemo(it)
+}
+
+reobf {
+    reobf(devJar.archivePath) { spec ->
+        spec.classpath = configurations.compile
+    }
+    reobf(prodJar.archivePath) { spec ->
+        spec.classpath = configurations.compile
+    }
+}
+
+reobf.dependsOn(devJar, prodJar)
+
+runClient {
+    args('--width', '1280', '--height', '720')
+    if (project.hasProperty('joid.smoke')) {
+        systemProperty('joid.smoke', 'true')
+    }
+}
+
+eclipse {
+    project.name = "JOID-MC-${project.name}"
+}
+
+def readClass = { byte[] bytes ->
+    def input = new DataInputStream(new ByteArrayInputStream(bytes))
+    input.readInt()
+    input.readUnsignedShort()
+    def major = input.readUnsignedShort()
+    def count = input.readUnsignedShort()
+    def texts = [:]
+    def classes = [:]
+    def nameTypes = [:]
+    def members = []
+    for (int index = 1; index < count; index++) {
+        def tag = input.readUnsignedByte()
+        if (tag == 1) {
+            texts[index] = input.readUTF()
+        } else if (tag == 7) {
+            classes[index] = input.readUnsignedShort()
+        } else if (tag in [9, 10, 11]) {
+            members << [input.readUnsignedShort(), input.readUnsignedShort()]
+        } else if (tag == 12) {
+            nameTypes[index] = input.readUnsignedShort()
+            input.readUnsignedShort()
+        } else if (tag in [3, 4, 17, 18]) {
+            input.readInt()
+        } else if (tag in [5, 6]) {
+            input.readLong()
+            index++
+        } else if (tag in [8, 16, 19, 20]) {
+            input.readUnsignedShort()
+        } else if (tag == 15) {
+            input.readUnsignedByte()
+            input.readUnsignedShort()
+        } else {
+            throw new GradleException("[JOID] Unknown constant tag ${tag} in a class file")
+        }
+    }
+
+    def references = [] as Set
+    classes.values().each { references << texts[it].replaceAll(/^\[*L?|;$/, '') }
+    texts.values().each { text -> (text =~ /L([\w$\/]+);/).each { references << it[1] } }
+    return [major: major, references: references, members: members.collect { "${texts[classes[it[0]]]}/${texts[nameTypes[it[1]]]}".toString() }]
+}
+
+def verifyJar = { String kind, File archive, File common, List<String> patterns, Pattern references, List<String> words, boolean devMode ->
+    def failures = []
+    def names = []
+    new ZipInputStream(new FileInputStream(archive)).withCloseable { zip ->
+        for (def entry = zip.nextEntry; entry != null; entry = zip.nextEntry) {
+            names << entry.name
+        }
+    }
+    names.countBy { it }.findAll { it.value > 1 }.each { failures << "${it.key} is ${it.value} times in the jar" }
+    def entries = names as Set
+
+    zipTree(archive).matching { include(patterns) }.visit { if (!it.directory) failures << "${it.relativePath.pathString} must not ship in the ${kind} jar" }
+    names.findAll { it.endsWith('module-info.class') || it.startsWith('META-INF/versions/') }.each { failures << "${it} is an entry of Java 9 or later, which the ASM of FML cannot read" }
+    names.findAll { it.startsWith('org/lwjgl/') || it ==~ /(.*\/)?(lib)?lwjgl[^\/]*\.(dll|so|dylib|jnilib)/ }.each { failures << "${it} is LWJGL, which the game provides" }
+    if (names.count { it == 'com/sun/jna/Native.class' } != 1 || names.any { it.endsWith('/com/sun/jna/Native.class') }) {
+        failures << 'JNA must be embedded once and unrelocated, the native cursors of JOID load it'
+    }
+
+    new ZipFile(common).withCloseable { source ->
+        source.entries().findAll { it.name.endsWith('.class') && !entries.contains(it.name) }.each { failures << "${it.name} of ${common.name} is missing" }
+    }
+
+    def mcpNames = [] as Set
+    tasks.genSrgs.mcpToSrg.eachLine { line ->
+        def parts = line.split(' ')
+        if (parts[0] in ['MD:', 'FD:'] && parts[1].tokenize('/').last() != parts[parts[0] == 'MD:' ? 3 : 2].tokenize('/').last()) {
+            mcpNames << parts[1]
+        }
+    }
+
+    new ZipFile(archive).withCloseable { zip ->
+        zip.entries().findAll { it.name.endsWith('.class') }.each { entry ->
+            def bytes = zip.getInputStream(entry).bytes
+            def major = ((bytes[6] & 0xFF) << 8) | (bytes[7] & 0xFF)
+            if (major > 52) {
+                failures << "${entry.name} is compiled for Java ${major - 44}, Minecraft 1.7.10 runs on Java 8"
+            }
+
+            if (!entry.name.startsWith('dev/joid/backend/minecraft/')) {
+                return
+            }
+
+            def parsed = readClass(bytes)
+            parsed.references.findAll { it ==~ references }.each { reference ->
+                if (!demoCallSites.contains("${entry.name} -> ${reference}".toString())) {
+                    failures << "${entry.name} references ${reference}, which the ${kind} jar does not ship"
+                }
+            }
+
+            if (!devMode) {
+                parsed.references.findAll { it.startsWith('dev/joid/') && !entries.contains("${it}.class".toString()) && !(it ==~ references) }.each { reference ->
+                    failures << "${entry.name} links ${reference}, absent from the ${kind} jar, which throws NoClassDefFoundError at run time"
+                }
+            }
+
+            parsed.members.findAll { mcpNames.contains(it) }.each { member ->
+                failures << "${entry.name} calls ${member} by its MCP name, the jar is not reobfuscated"
+            }
+        }
+
+        def split = { String text -> text.split(/[^A-Za-z0-9]+|(?<=[a-z0-9])(?=[A-Z])/)*.toLowerCase() }
+        zip.entries().findAll { !it.directory }.each { entry ->
+            if (!entry.name.startsWith('dev/joid/shaded/') && split(entry.name).any { it in words }) {
+                failures << "${entry.name} is named after ${words}"
+            }
+
+            if (entry.name ==~ /assets\/[^\/]+\/lang\/[^\/]+\.lang/) {
+                zip.getInputStream(entry).getText('UTF-8').readLines().collect { it.tokenize('=')[0] ?: '' }.findAll { key -> split(key).any { it in words } }.each { key ->
+                    failures << "${entry.name} translates ${key}, named after ${words}"
+                }
+            }
+
+            if (entry.name ==~ /mcmod\.info|(assets|data)\/.+\.(json|mcmeta)/ && zip.getInputStream(entry).getText('UTF-8').readLines().any { line -> split(line).any { it in words } }) {
+                failures << "${entry.name} declares content named after ${words}"
+            }
+        }
+
+        def mod = zip.getEntry('dev/joid/backend/minecraft/forge/ForgeJoid.class')
+        if (mod == null || !new String(zip.getInputStream(mod).bytes, 'ISO-8859-1').contains('acceptableRemoteVersions')) {
+            failures << 'ForgeJoid does not declare acceptableRemoteVersions, so servers without the mod refuse the client'
+        }
+    }
+
+    def loader = new URLClassLoader([archive.toURI().toURL()] as URL[], (ClassLoader) null)
+    try {
+        def environment = loader.loadClass('dev.joid.lib.JOIDEnv')
+        if (environment.getMethod('isDevMode').invoke(null) != devMode) {
+            failures << "the ${kind} jar starts JOID with the dev mode ${devMode ? 'off' : 'on'}"
+        }
+
+        if (environment.getMethod('isDemoMode').invoke(null)) {
+            failures << "the ${kind} jar starts JOID with the demo mode on"
+        }
+
+        if (!devMode) {
+            try {
+                environment.getMethod('devMode', Boolean.TYPE).invoke(null, true)
+                failures << "the ${kind} jar accepts JOIDEnv.devMode(true)"
+            } catch (final InvocationTargetException exception) {
+                if (!(exception.cause instanceof IllegalStateException)) {
+                    throw exception
+                }
+            }
+        }
+    } finally {
+        loader.close()
+    }
+
+    if (!failures.isEmpty()) {
+        throw new GradleException("[JOID] The ${kind} jar ${archive.name} is not fit for Minecraft ${minecraft_version}:\n" + failures.unique().join('\n'))
+    }
+}
+
+task verifyProdJar {
+    group = 'verification'
+    description = 'Checks that the prod jar holds no code, asset or reference of the dev and demo modes, and runs on Minecraft 1.7.10.'
+    dependsOn(reobf)
+    doLast {
+        verifyJar('prod', prodJar.archivePath, rootProject.file("libs/joid-backend-minecraft-common-${common_version}-prod.jar"), demoPatterns + devPatterns, developmentReferences, developmentWords, false)
+    }
+}
+
+task verifyDevJar {
+    group = 'verification'
+    description = 'Checks that the dev jar starts JOID in dev mode, holds no code, asset or reference of the demos, and runs on Minecraft 1.7.10.'
+    dependsOn(reobf)
+    doLast {
+        new ZipFile(devJar.archivePath).withCloseable { zip ->
+            ['dev/joid/lib/ui/node/impl/dev/DevNode.class', 'dev/joid/internal/font/DevFont.class'].each { entry ->
+                if (zip.getEntry(entry) == null) {
+                    throw new GradleException("[JOID] The dev jar misses ${entry}")
+                }
+            }
+        }
+        verifyJar('dev', devJar.archivePath, rootProject.file("libs/joid-backend-minecraft-common-${common_version}-dev.jar"), demoPatterns, demoReferences, demoWords, true)
+    }
+}
+
+verifyNoDemo.dependsOn(reobf)
+assemble.dependsOn(reobf, sourcesJar)
+check.dependsOn(verifyProdJar, verifyDevJar)

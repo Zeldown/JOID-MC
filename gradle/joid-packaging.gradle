@@ -1,0 +1,60 @@
+ext {
+    demoPatterns = [
+            'assets/demo/**',
+            'dev/joid/demo/**',
+            'dev/joid/backend/minecraft/**/demo/**',
+            'assets/joid/demo/**',
+            'assets/joid/lang/**'
+    ]
+
+    devPatterns = [
+            'assets/dev/**',
+            'dev/joid/internal/font/**',
+            'dev/joid/lib/ui/node/impl/dev/**'
+    ]
+
+    demoReferences = ~/dev\/joid\/(demo|backend\/minecraft\/([\w$]+\/)*demo)\/[\w$\/]+/
+
+    developmentReferences = ~/dev\/joid\/(demo|test|lib\/ui\/node\/impl\/dev|backend\/minecraft\/([\w$]+\/)*demo)\/[\w$\/]+/
+
+    demoWords = ['demo', 'demos']
+
+    developmentWords = ['demo', 'demos', 'test', 'tests', 'snapshot', 'snapshots', 'testkit']
+
+    demoCallSites = [
+            'dev/joid/backend/minecraft/MinecraftJoid.class -> dev/joid/backend/minecraft/demo/DemoLauncher'
+    ]
+
+    moduleDescriptors = [
+            'module-info.class',
+            'META-INF/versions/*/module-info.class'
+    ]
+
+    excludeDemo = { task ->
+        task.exclude(demoPatterns)
+    }
+
+    excludeDevelopment = { task ->
+        task.exclude(demoPatterns + devPatterns)
+    }
+}
+
+task verifyNoDemo {
+    group = 'verification'
+    description = 'Checks that no jar built by this project holds a demo of JOID or of the mod.'
+    def archives = tasks.withType(Jar).matching { it.group == 'build' }
+    dependsOn(archives)
+    doLast {
+        archives.findAll { it.enabled }.each { archive ->
+            def found = []
+            zipTree(archive.archivePath).matching { include(demoPatterns) }.visit { if (!it.directory) found << it.relativePath.pathString }
+            if (!found.isEmpty()) {
+                throw new GradleException("${archive.archivePath.name} holds demo entries: ${found.take(10)}")
+            }
+        }
+    }
+}
+
+plugins.withId('java') {
+    check.dependsOn(verifyNoDemo)
+}

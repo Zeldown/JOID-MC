@@ -1,0 +1,57 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - version/1.7.10
+  pull_request:
+    branches:
+      - version/1.7.10
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          lfs: true
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '8'
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-1.7.10-${{ hashFiles('build.gradle', 'forge/build.gradle', 'gradle.properties', 'gradle/wrapper/gradle-wrapper.properties') }}
+
+      - name: Build
+        run: ./gradlew setupCIWorkspace build --max-workers=2
+
+      - name: Check the jars
+        run: |
+          for KIND in dev prod sources; do
+            JAR=$(ls forge/build/libs/joid-backend-minecraft-forge-*-"$KIND".jar 2>/dev/null | head -n 1)
+            if [ -z "$JAR" ]; then
+              echo "::error::The $KIND jar is missing"
+              exit 1
+            fi
+          done
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: jars
+          path: |
+            forge/build/libs/*-dev.jar
+            forge/build/libs/*-prod.jar
+            forge/build/libs/*-sources.jar
+
+      - uses: actions/upload-artifact@v6
+        if: failure()
+        with:
+          name: reports
+          path: forge/build/reports/

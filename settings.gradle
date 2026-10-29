@@ -1,0 +1,2 @@
+rootProject.name = 'JOID-MC'
+include('forge')

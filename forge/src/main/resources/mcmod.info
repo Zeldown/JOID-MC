@@ -1,0 +1,16 @@
+[
+  {
+    "modid": "${mod_id}",
+    "name": "${mod_name}",
+    "description": "${description}",
+    "version": "${version}",
+    "mcversion": "${minecraft_version}",
+    "url": "https://github.com/Zeldown/JOID-MC",
+    "updateUrl": "",
+    "authorList": ["${mod_author}"],
+    "credits": "${credits}",
+    "logoFile": "assets/joid/icon.png",
+    "screenshots": [],
+    "dependencies": []
+  }
+]
