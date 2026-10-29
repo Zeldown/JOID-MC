@@ -1,6 +1,8 @@
 package dev.joid.backend.minecraft.forge;
 
 import dev.joid.backend.minecraft.forge.event.ForgeClientEvents;
+import dev.joid.backend.minecraft.forge.event.ForgeOverlayEvents;
+import dev.joid.backend.minecraft.forge.event.ForgeScreenEvents;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -9,6 +11,8 @@ public final class ForgeJoidClient {
 
 	public static void register() {
 		ForgeClientEvents.register();
+		ForgeScreenEvents.register();
+		ForgeOverlayEvents.register();
 	}
 
 }

@@ -6,6 +6,7 @@ import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import cpw.mods.fml.common.gameevent.TickEvent.RenderTickEvent;
 import dev.joid.backend.minecraft.loader.event.MinecraftClientEvents;
+import dev.joid.backend.minecraft.loader.event.MinecraftOverlayEvents;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -27,6 +28,8 @@ public final class ForgeClientEvents {
 	public void render(final RenderTickEvent event) {
 		if (event.phase == Phase.START) {
 			MinecraftClientEvents.fireFrame();
+		} else {
+			MinecraftOverlayEvents.fireHiddenHud();
 		}
 	}
 
