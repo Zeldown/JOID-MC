@@ -186,7 +186,7 @@ public class WelcomeUI extends UI {
 JOID.open(new WelcomeUI());
 ```
 
-The UI is laid out on JOID's design canvas (1920×1080 by default) and scaled to the window. To learn UIs, nodes, layout and signals, start with the [JOID Quick Start](https://documentation.joid.dev/#/getting-started/quick-start).
+The UI is laid out on JOID's design canvas (1920×1080 by default) and scaled to the window. To learn UIs, nodes, layout and signals, start with the [JOID Quick Start](https://documentation.joid.dev/use/get-started/quick-start/).
 
 ## Development
 
@@ -194,17 +194,17 @@ The `dev` jar of [Installation](#installation) starts JOID in dev mode by itself
 
 | Dev mode | |
 |---|---|
-| Inspector | `F3` shows or hides the inspector panel of the UI on top: the hierarchy of its nodes, and the bounds, properties and callbacks of the selected node. |
+| Dev panel | `F3` shows or hides the dev panel of the UI on top: Inspect outlines the node under the pointer and lists the bounds, listeners, hierarchy and fields of the clicked node, Grid measures the canvas from the pointer. |
 | Reload | `Ctrl` + `R` or `F5` reloads the UI (its `init()` runs again), `Shift` on top replaces it with a new instance of its class. |
 | Hot reload | A UI reloads itself when the folder or the jar of its classes changes, for example after a recompilation from your IDE while the game runs. |
-| Zoom | `Alt` + scroll zooms the UI, `Shift` on top zooms faster. |
+| Zoom | `Ctrl` or `Alt` with `=` or `-` zooms the UI by steps, `Alt` + scroll by small steps, `Shift` on top for larger ones. |
 | Profiler | The console logs how long each UI takes to load and every frame of a UI that takes longer than 16.66 ms. |
-| Warnings | `[JOID]` lines in the console point at what is wrong: a container UI without `bounds(...)`, a text that a signal cannot follow, a missing font weight, a shader beyond the baseline. |
+| Warnings | `[JOID]` lines in the console point at what is wrong: a container UI without `bounds(...)`, a text that a signal cannot follow, a missing font weight, a shader that breaks a rule of JOID GLSL or that the driver refuses. |
 | Missing textures | A resource that fails to load shows the missing texture instead of nothing. |
 
 `@UIDataDebug(profiler = false, hotreload = false)` on a UI turns its profiler or its hot reload off. The keys go to JOID first: Minecraft does not see an `F3` or an `F5` that JOID used.
 
-None of this is in the `prod` jar: no inspector, no dev font, no profiler, no warning, and the dev mode cannot be turned on. Start the game once with the `prod` jar before publishing.
+None of this is in the `prod` jar: no dev panel, no dev font, no profiler, most warnings stay silent, and the dev mode cannot be turned on. Start the game once with the `prod` jar before publishing. See [Dev tools](https://documentation.joid.dev/use/get-started/dev-tools/).
 
 ## Screens
 
@@ -223,14 +223,14 @@ public class WelcomeUI extends UI {
 | `pause` | `true` | Pauses a singleplayer game while the screen is open. Container UIs never pause. |
 | `background` | `true` | Draws the Minecraft menu background behind the UI, screens and containers alike: the blurred world in game, the panorama on the title screen. `false` draws no Minecraft background. |
 
-The Minecraft background and the dark fill of JOID (`@UIData(background)`, default `false`, see [UIs](https://documentation.joid.dev/#/concepts/uis)) are independent: add `@UIData(background = true)` to draw the JOID fill as well.
+The Minecraft background and the UI backdrop of JOID (`@UIData(background)`, default `false`, see [UIs](https://documentation.joid.dev/use/learn/describing-the-ui/uis/)) are independent: add `@UIData(background = true)` to draw the backdrop as well.
 
 - `JOID.open(ui)` opens the screen, `JOID.close(ui)` closes it, and `Escape` closes the top UI unless it is `@UIData(closeable = false)`. Several UIs open at once share one screen, which closes with the last of them.
 - When the game or another mod opens its own screen, the JOID UIs of the screen close.
 - Over an open container, `JOID.open` opens the UI above it: the container stays open underneath.
-- UIs follow the GUI Scale option: at `Auto` they are at full size, at half that scale they are at half size. `@UIDataScale` caps or ignores it ([Canvas and Scaling](https://documentation.joid.dev/#/concepts/canvas)).
+- UIs follow the GUI Scale option: at `Auto` they are at full size, at half that scale they are at half size. `@UIDataScale` caps or ignores it ([The design canvas](https://documentation.joid.dev/use/learn/describing-the-ui/design-canvas/)).
 
-Everything else about UIs works as in [UIs](https://documentation.joid.dev/#/concepts/uis).
+Everything else about UIs works as in [UIs](https://documentation.joid.dev/use/learn/describing-the-ui/uis/).
 
 ## Containers
 
@@ -332,7 +332,7 @@ for (int index = 0; index < 9; index++) {
 }
 ```
 
-Lay out the slots like any node ([Layout](https://documentation.joid.dev/#/concepts/layout)); the rest of the input works as in [Input](https://documentation.joid.dev/#/concepts/input).
+Lay out the slots like any node ([Layout](https://documentation.joid.dev/use/learn/describing-the-ui/layout/)); the rest of the input works as in [Events](https://documentation.joid.dev/use/learn/interactivity/events/).
 
 ## HUD overlays
 
@@ -356,7 +356,7 @@ public class HealthBarUI extends UI {
 JOID.open(new HealthBarUI());
 ```
 
-`@UIDataOverlay(active = true)` makes the UI an overlay: without it, `JOID.open` opens a screen. Its other options are in [UIs](https://documentation.joid.dev/#/concepts/uis); in game, the mouse is free only while a screen is open, so an overlay that takes clicks needs `interaction` and `render.aboveScreens`. `anchorY = Align.END` keeps the bottom of the canvas on the bottom of the window, next to the vanilla bars, whatever the window ratio.
+`@UIDataOverlay(active = true)` makes the UI an overlay: without it, `JOID.open` opens a screen. Its other options are in [UIs](https://documentation.joid.dev/use/learn/describing-the-ui/uis/); in game, the mouse is free only while a screen is open, so an overlay that takes clicks needs `interaction` and `render.aboveScreens`. `anchorY = Align.END` keeps the bottom of the canvas on the bottom of the window, next to the vanilla bars, whatever the window ratio.
 
 ### @UIDataOverlayLayer
 
@@ -400,7 +400,7 @@ An overlay without `@UIDataOverlayLayer` is drawn above the whole HUD; an open s
 | `EntityNode` | An entity or a player skin in 3D, which can follow the mouse. |
 | `SlotNode` | A slot of a container (see [SlotNode](#slotnode)). |
 
-Items, blocks and entities are lit like in the vanilla inventory. Every setter also takes a signal or a lambda, like any JOID node ([Signals and State](https://documentation.joid.dev/#/concepts/state)).
+Items, blocks and entities are lit like in the vanilla inventory. Every setter also takes a signal or a lambda, like any JOID node ([Signals](https://documentation.joid.dev/use/learn/interactivity/signals/)).
 
 ### ItemNode
 
@@ -498,7 +498,7 @@ The vanilla shadow is `shadowTint(0.25F)`, the color of each glyph at 25 %, with
 
 `LegacyTextColor` gives the 16 colors as JOID colors: `LegacyTextColor.GOLD.getColor()`.
 
-A chat `Component` keeps its colors, hex colors included, its styles, and translates its `translatable` parts in the language of the game. The `§` codes and the `Component`s work with every JOID font, and the Minecraft fonts with everything else of [Text and Fonts](https://documentation.joid.dev/#/concepts/text): markup, effects, alignment, wrapping. Like the vanilla text boxes, JOID text fields drop a typed `§`: the codes come from your code, never from the player.
+A chat `Component` keeps its colors, hex colors included, its styles, and translates its `translatable` parts in the language of the game. The `§` codes and the `Component`s work with every JOID font, and the Minecraft fonts with everything else of [Text](https://documentation.joid.dev/use/learn/describing-the-ui/text/): markup, effects, alignment, wrapping. Like the vanilla text boxes, JOID text fields drop a typed `§`: the codes come from your code, never from the player.
 
 ## Textures and resources
 
@@ -521,7 +521,7 @@ ResourceNode.create(560, 100, 64, 64).resource(Resource.of(Minecraft.getInstance
 | An `AbstractTexture`, a `RenderTarget`, a `GpuTexture` or a `GpuTextureView` | A texture already on the GPU, such as a whole atlas, live. |
 | A `NativeImage` | A copy of the image, made when the resource is created. |
 
-Animated sprites and `.mcmeta` animations play like in game, and the resources follow resource pack reloads. Pixel art stays sharp: these resources use nearest filtering. Other files work the same way: `MsdfFontLoader.load("yourmod:fonts/inter.ttf")` loads a font of your mod. See [Images and Media](https://documentation.joid.dev/#/concepts/media).
+Animated sprites and `.mcmeta` animations play like in game, and the resources follow resource pack reloads. Pixel art stays sharp: these resources use nearest filtering. Other files work the same way: `MsdfFontLoader.load("yourmod:fonts/inter.ttf")` loads a font of your mod. See [Images and media](https://documentation.joid.dev/use/learn/describing-the-ui/media/).
 
 ## Sound and key bindings
 
@@ -567,7 +567,7 @@ public void draw(final double mouseX, final double mouseY) {
 | `drawEntity(x, y, width, height, entity, scale, rotationYaw, rotationPitch, lookX, lookY)` | With its scale, and the head turned toward the point `lookX`, `lookY`. |
 | `DrawEntity.inst().drawPlayer(...)` | The same three forms with a `PlayerSkin` in place of the entity. |
 
-Draw the item, then its bar, cooldown and count, to match a slot. `toDrawX` and `toDrawY` turn the mouse into the coordinates of `draw`. See [Custom Nodes](https://documentation.joid.dev/#/nodes/custom-nodes) and [Drawing](https://documentation.joid.dev/#/drawing/drawing).
+Draw the item, then its bar, cooldown and count, to match a slot. `toDrawX` and `toDrawY` turn the mouse into the coordinates of `draw`. See [Custom nodes](https://documentation.joid.dev/use/learn/going-further/custom-nodes/) and [Drawing shapes and text](https://documentation.joid.dev/use/learn/going-further/drawing/).
 
 ## Community
 
