@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import dev.joid.backend.minecraft.loader.registry.KeyBindRegistry;
-import dev.joid.base.glfw.input.GlfwKeys;
+import dev.joid.base.lwjgl3.glfw.input.GlfwKeys;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.minecraft.client.KeyMapping;

@@ -15,7 +15,7 @@ import dev.joid.backend.minecraft.lib.resource.resolver.impl.GpuTextureResourceR
 import dev.joid.backend.minecraft.lib.resource.resolver.impl.NamespacedResourceResolver;
 import dev.joid.backend.minecraft.lib.resource.resolver.impl.NativeImageResourceResolver;
 import dev.joid.backend.minecraft.lib.resource.resolver.impl.SpriteResourceResolver;
-import dev.joid.base.glfw.binding.Lwjgl3AlBinding;
+import dev.joid.base.lwjgl3.openal.Lwjgl3AlBinding;
 import dev.joid.base.openal.AlAudioBridge;
 import dev.joid.lib.asset.locator.AssetLocator;
 import dev.joid.lib.bridge.BridgeHandler;

@@ -2,7 +2,7 @@ package dev.joid.backend.minecraft.bridge.input;
 
 import com.mojang.blaze3d.platform.InputConstants;
 
-import dev.joid.base.glfw.input.GlfwKeys;
+import dev.joid.base.lwjgl3.glfw.input.GlfwKeys;
 import dev.joid.lib.input.key.Key;
 import dev.joid.lib.input.key.resolver.IKeyResolver;
 import lombok.NonNull;

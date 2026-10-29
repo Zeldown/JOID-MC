@@ -7,7 +7,7 @@ import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.platform.cursor.CursorType;
 import com.mojang.blaze3d.platform.cursor.CursorTypes;
 
-import dev.joid.base.glfw.input.GlfwKeys;
+import dev.joid.base.lwjgl3.glfw.input.GlfwKeys;
 import dev.joid.lib.bridge.window.IWindowBridge;
 import dev.joid.lib.input.cursor.Cursor;
 import dev.joid.lib.input.key.Key;

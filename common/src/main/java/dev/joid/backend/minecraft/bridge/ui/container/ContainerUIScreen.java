@@ -11,7 +11,7 @@ import com.mojang.blaze3d.platform.Window;
 import dev.joid.backend.minecraft.lib.ui.core.container.ContainerUI;
 import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
 import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
-import dev.joid.base.glfw.input.GlfwKeys;
+import dev.joid.base.lwjgl3.glfw.input.GlfwKeys;
 import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.input.mouse.MouseButton;
 import dev.joid.lib.ui.core.UI;

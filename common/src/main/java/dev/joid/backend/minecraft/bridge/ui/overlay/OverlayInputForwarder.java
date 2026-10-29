@@ -1,6 +1,6 @@
 package dev.joid.backend.minecraft.bridge.ui.overlay;
 
-import dev.joid.base.glfw.input.GlfwKeys;
+import dev.joid.base.lwjgl3.glfw.input.GlfwKeys;
 import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.input.mouse.MouseButton;
 import lombok.AccessLevel;
