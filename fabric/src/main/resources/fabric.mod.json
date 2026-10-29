@@ -10,6 +10,7 @@
     "contact": {
         "homepage": "https://github.com/Zeldown/JOID-MC",
         "issues": "https://github.com/Zeldown/JOID-MC/issues",
+        "sources": "https://github.com/Zeldown/JOID-MC",
         "discord": "https://discord.joid.dev"
     },
     "license": "${license}",
