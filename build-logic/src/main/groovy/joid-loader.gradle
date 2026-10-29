@@ -2,6 +2,11 @@ import java.lang.reflect.InvocationTargetException
 import java.util.regex.Pattern
 import java.util.zip.ZipFile
 
+import org.objectweb.asm.ClassReader
+import org.objectweb.asm.ClassWriter
+import org.objectweb.asm.commons.ClassRemapper
+import org.objectweb.asm.commons.Remapper
+
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 import groovy.json.JsonSlurper
@@ -140,6 +145,32 @@ def verifyJar = { String kind, File archive, List<String> patterns, Pattern refe
     }
     if (!referencing.isEmpty()) {
         throw new GradleException("The ${kind} jar references classes it does not ship: ${referencing.take(10)}")
+    }
+
+    def missing = [] as SortedSet
+    if (!devMode) {
+        new ZipFile(archive).withCloseable { zip ->
+            zip.entries().findAll { it.name.startsWith('dev/joid/backend/minecraft/') && it.name.endsWith('.class') }.each { entry ->
+                def names = [] as Set
+                def remapper = new Remapper() {
+                    @Override
+                    String map(final String internalName) {
+                        names << internalName
+                        return internalName
+                    }
+                }
+                new ClassReader(zip.getInputStream(entry).bytes).accept(new ClassRemapper(new ClassWriter(0), remapper), 0)
+                names.findAll { it.startsWith('dev/joid/') && zip.getEntry("${it}.class") == null }.each { name ->
+                    def reference = "${entry.name} -> ${name}".toString()
+                    if (!demoCallSites.contains(reference)) {
+                        missing << reference
+                    }
+                }
+            }
+        }
+    }
+    if (!missing.isEmpty()) {
+        throw new GradleException("[JOID] The ${kind} jar links classes of JOID it does not ship, which throws NoClassDefFoundError at run time: ${missing.take(10)}")
     }
 
     def named = [] as SortedSet
