@@ -3,6 +3,7 @@ package dev.joid.backend.minecraft.demo.ui;
 import java.util.ArrayList;
 import java.util.List;
 
+import dev.joid.backend.minecraft.demo.network.OpenDemoContainerPayload;
 import dev.joid.demo.DemoFont;
 import dev.joid.demo.ui.DemoEntry;
 import dev.joid.demo.ui.UIDemoChoice;
@@ -32,6 +33,7 @@ public class UIDemoMinecraftChoice extends UI {
 	static {
 		UIDemoMinecraftChoice.LIST.add(DemoEntry.create(UIDemoMinecraft.class));
 		UIDemoMinecraftChoice.LIST.add(DemoEntry.create("UIDemoOverlayLayer", UIDemoOverlayLayer::toggle).state(UIDemoOverlayLayer::isOpen).hover(UIDemoOverlayLayer.class.getName()));
+		UIDemoMinecraftChoice.LIST.add(DemoEntry.create("UIDemoContainer", OpenDemoContainerPayload.INSTANCE::sendToServer).hover(UIDemoContainer.class.getName()));
 	}
 
 	@Override
