@@ -151,6 +151,9 @@ runClient {
     if (project.hasProperty('joid.smoke')) {
         systemProperty('joid.smoke', 'true')
     }
+    doFirst {
+        classpath = classpath.filter { it != jar.archivePath } + sourceSets.main.output
+    }
 }
 
 eclipse {
