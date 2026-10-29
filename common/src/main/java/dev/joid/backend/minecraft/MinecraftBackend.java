@@ -2,12 +2,14 @@ package dev.joid.backend.minecraft;
 
 import dev.joid.backend.minecraft.bridge.audio.MinecraftAudioGain;
 import dev.joid.backend.minecraft.bridge.thread.MinecraftThreadBridge;
+import dev.joid.backend.minecraft.bridge.ui.screen.ScreenUIBridge;
 import dev.joid.backend.minecraft.bridge.window.MinecraftWindowBridge;
 import dev.joid.backend.minecraft.lib.font.markup.impl.LegacyTextMarkup;
 import dev.joid.base.lwjgl2.openal.Lwjgl2AlBinding;
 import dev.joid.base.lwjgl2.opengl.Lwjgl2GlBinding;
 import dev.joid.base.openal.AlAudioBridge;
 import dev.joid.base.opengl.render.GlRenderBridge;
+import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.bridge.audio.IAudioBridge;
 import dev.joid.lib.bridge.backend.Backend;
 import dev.joid.lib.bridge.render.IRenderBridge;
@@ -54,6 +56,8 @@ public final class MinecraftBackend extends Backend {
 
 	@Override
 	protected void registerDefaults() {
+		BridgeHandler.UI.register(new ScreenUIBridge(this.render, this.window), -30);
+
 		TextMarkup.register(LegacyTextMarkup.inst());
 	}
 
