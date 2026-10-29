@@ -1,83 +1,26 @@
 package dev.joid.backend.minecraft.bridge.ui.overlay;
 
-import java.util.function.Predicate;
-
 import dev.joid.backend.minecraft.bridge.render.GuiFrameCounter;
 import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
-import dev.joid.backend.minecraft.bridge.ui.TooltipQueue;
+import dev.joid.backend.minecraft.bridge.ui.TooltipRenderer;
 import dev.joid.backend.minecraft.bridge.ui.screen.GuiCompositor;
 import dev.joid.backend.minecraft.bridge.window.MinecraftWindowBridge;
 import dev.joid.backend.minecraft.lib.ui.core.data.overlay.layer.OverlayLayer;
 import dev.joid.backend.minecraft.lib.ui.core.data.overlay.layer.UIDataOverlayLayer;
-import dev.joid.lib.bridge.ui.UIBridge;
 import dev.joid.lib.ui.core.UI;
-import dev.joid.lib.ui.core.data.UIDataOverlay;
-import dev.joid.lib.ui.core.data.UIDataOverlayObject;
-import dev.joid.lib.ui.core.data.UIDataOverlayRenderObject;
-import dev.joid.lib.utils.annotation.AnnotationValues;
 import lombok.NonNull;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 
-public final class OverlayUIBridge extends UIBridge {
+public final class OverlayUIBridge extends BaseOverlayUIBridge<GuiGraphicsExtractor, OverlayLayer> {
 
 	private final GuiCompositor         compositor;
-	private final TooltipQueue          tooltipQueue;
 	private final MinecraftWindowBridge window;
 
-	private int     width;
-	private int     height;
-	private long    frame;
-	private boolean layerPass;
-
 	public OverlayUIBridge(final MinecraftRenderBridge render, final MinecraftWindowBridge window) {
-		this.window       = window;
-		this.compositor   = new GuiCompositor(render);
-		this.tooltipQueue = new TooltipQueue();
-		this.width        = window.getWidth();
-		this.height       = window.getHeight();
-		this.frame        = -1L;
-	}
-
-	@Override
-	public void open(final @NonNull UI ui) {
-		this.add(ui);
-	}
-
-	@Override
-	public void close(final @NonNull UI ui) {
-		super.remove(ui);
-	}
-
-	@Override
-	public void add(final @NonNull UI ui) {
-		super.add(ui);
-		ui.load(this.window.getWidth(), this.window.getHeight());
-	}
-
-	@Override
-	public boolean canHandle(final @NonNull UI ui) {
-		return ui.getOverlay().active();
-	}
-
-	@Override
-	public boolean canHandle(final @NonNull Class<? extends UI> clazz) {
-		return AnnotationValues.read(clazz.getAnnotation(UIDataOverlay.class), UIDataOverlayObject.create()).active();
-	}
-
-	@Override
-	public void drawHover(final @NonNull UI ui, final @NonNull Object content, final double mouseX, final double mouseY) {
-		this.tooltipQueue.push(content);
-	}
-
-	@Override
-	public boolean isScreenOpen() {
-		return !this.layerPass && Minecraft.getInstance().gui.screen() != null;
-	}
-
-	@Override
-	public boolean isOverlayHidden() {
-		return Minecraft.getInstance().gui.hud.isHidden();
+		super(window);
+		this.window     = window;
+		this.compositor = new GuiCompositor(render);
 	}
 
 	@Override
@@ -85,89 +28,65 @@ public final class OverlayUIBridge extends UIBridge {
 		return this.window.getInterfaceScale();
 	}
 
-	public void extract(final GuiGraphicsExtractor graphics) {
-		if (!this.isOverlayHidden()) {
-			this.extract(graphics, ui -> OverlayUIBridge.getLayer(ui) == null && !this.isAboveScreen(ui));
-		}
+	@Override
+	protected long countFrame(final GuiGraphicsExtractor graphics) {
+		return GuiFrameCounter.inst().getFrame(graphics);
 	}
 
-	public void extract(final GuiGraphicsExtractor graphics, final OverlayLayer layer, final boolean post) {
-		if (this.isOverlayHidden()) {
-			return;
-		}
-
-		this.layerPass = true;
-		try {
-			this.extract(graphics, ui -> OverlayUIBridge.isLayer(ui, layer) && OverlayUIBridge.getLayer(ui).post() == post);
-		} finally {
-			this.layerPass = false;
-		}
+	@Override
+	protected void requestCursor(final GuiGraphicsExtractor graphics) {
+		this.window.requestCursor(graphics, this.window.getCursor());
 	}
 
-	public void extractScreen(final GuiGraphicsExtractor graphics) {
-		if (this.isScreenOpen()) {
-			this.extract(graphics, ui -> OverlayUIBridge.getLayer(ui) == null && ui.getOverlay().render().aboveScreens());
-			this.window.requestCursor(graphics, this.window.getCursor());
-		}
+	@Override
+	protected void compositeFrame(final GuiGraphicsExtractor graphics, final Runnable draw) {
+		this.compositor.composite(graphics, draw);
 	}
 
-	public void extractHiddenHud(final GuiGraphicsExtractor graphics) {
-		if (this.isOverlayHidden()) {
-			this.extract(graphics, ui -> !this.isAboveScreen(ui));
-		}
+	@Override
+	protected void drawTooltip(final GuiGraphicsExtractor graphics, final Object content, final int mouseX, final int mouseY) {
+		TooltipRenderer.draw(graphics, content, mouseX, mouseY);
 	}
 
-	public boolean isCancelled(final OverlayLayer layer) {
-		for (final UI ui : super.getUiList()) {
-			if (OverlayUIBridge.isLayer(ui, layer) && OverlayUIBridge.getLayer(ui).cancel() && this.isShown(ui)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private void extract(final GuiGraphicsExtractor graphics, final Predicate<UI> filter) {
-		this.prepareFrame(graphics);
-		if (super.getUiList().stream().noneMatch(ui -> filter.test(ui) && this.isShown(ui))) {
-			return;
-		}
-
+	@Override
+	protected int getGuiMouseX() {
 		final Minecraft minecraft = Minecraft.getInstance();
-		this.compositor.composite(graphics, () -> super.draw(filter));
-		this.tooltipQueue.flush(graphics, (int) minecraft.mouseHandler.getScaledXPos(minecraft.getWindow()), (int) minecraft.mouseHandler.getScaledYPos(minecraft.getWindow()));
+		return (int) minecraft.mouseHandler.getScaledXPos(minecraft.getWindow());
 	}
 
-	private void prepareFrame(final GuiGraphicsExtractor graphics) {
-		final long frame = GuiFrameCounter.inst().getFrame(graphics);
-		if (frame == this.frame || super.getUiList().isEmpty()) {
-			return;
-		}
-
-		this.frame = frame;
-		if (this.window.getWidth() != this.width || this.window.getHeight() != this.height) {
-			this.width  = this.window.getWidth();
-			this.height = this.window.getHeight();
-			super.load();
-		}
-
-		super.update();
+	@Override
+	protected int getGuiMouseY() {
+		final Minecraft minecraft = Minecraft.getInstance();
+		return (int) minecraft.mouseHandler.getScaledYPos(minecraft.getWindow());
 	}
 
-	private boolean isShown(final UI ui) {
-		final UIDataOverlayRenderObject render = ui.getOverlay().render();
-		return ui.getData().visible() && (render.always() || !this.isOverlayHidden());
+	@Override
+	protected boolean isHudHidden() {
+		return Minecraft.getInstance().gui.hud.isHidden();
 	}
 
-	private boolean isAboveScreen(final UI ui) {
-		return this.isScreenOpen() && ui.getOverlay().render().aboveScreens();
+	@Override
+	protected boolean isScreenDisplayed() {
+		return Minecraft.getInstance().gui.screen() != null;
 	}
 
-	private static boolean isLayer(final UI ui, final OverlayLayer layer) {
-		final UIDataOverlayLayer data = OverlayUIBridge.getLayer(ui);
-		return data != null && data.layer() == layer;
+	@Override
+	protected OverlayLayer getLayer(final UI ui) {
+		final UIDataOverlayLayer data = OverlayUIBridge.getLayerData(ui);
+		return data != null ? data.layer() : null;
 	}
 
-	private static UIDataOverlayLayer getLayer(final UI ui) {
+	@Override
+	protected boolean isPostLayer(final UI ui) {
+		return OverlayUIBridge.getLayerData(ui).post();
+	}
+
+	@Override
+	protected boolean isCancellingLayer(final UI ui) {
+		return OverlayUIBridge.getLayerData(ui).cancel();
+	}
+
+	private static UIDataOverlayLayer getLayerData(final UI ui) {
 		return ui.getClass().getAnnotation(UIDataOverlayLayer.class);
 	}
 

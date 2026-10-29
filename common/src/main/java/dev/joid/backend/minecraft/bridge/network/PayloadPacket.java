@@ -14,11 +14,11 @@ public record PayloadPacket<T extends IPayload>(T payload) implements CustomPack
 		return PayloadPacket.getType(this.payload.getType());
 	}
 
-	public static <T extends IPayload> CustomPacketPayload.Type<PayloadPacket<T>> getType(final PayloadType<?> type) {
+	public static <T extends IPayload> CustomPacketPayload.Type<PayloadPacket<T>> getType(final PayloadType<?, ?> type) {
 		return new CustomPacketPayload.Type<>(Identifier.parse(type.getId()));
 	}
 
-	public static <T extends IPayload> StreamCodec<RegistryFriendlyByteBuf, PayloadPacket<T>> codec(final PayloadType<T> type) {
+	public static <T extends IPayload> StreamCodec<RegistryFriendlyByteBuf, PayloadPacket<T>> codec(final PayloadType<T, ?> type) {
 		return StreamCodec.of((buffer, packet) -> packet.payload().write(new ByteBufPayloadBuffer(buffer)), buffer -> new PayloadPacket<>(type.getReader().apply(new ByteBufPayloadBuffer(buffer))));
 	}
 

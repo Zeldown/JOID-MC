@@ -12,28 +12,28 @@ public final class OverlayLayerRenderer {
 	public static void extract(final GuiGraphicsExtractor graphics) {
 		final OverlayUIBridge bridge = BridgeHandler.UI.getBridge(OverlayUIBridge.class);
 		if (bridge != null) {
-			bridge.extract(graphics);
+			bridge.drawHud(graphics);
 		}
 	}
 
 	public static void extract(final GuiGraphicsExtractor graphics, final OverlayLayer layer, final boolean post) {
 		final OverlayUIBridge bridge = BridgeHandler.UI.getBridge(OverlayUIBridge.class);
 		if (bridge != null) {
-			bridge.extract(graphics, layer, post);
+			bridge.drawLayer(graphics, layer, post);
 		}
 	}
 
 	public static void extractScreen(final GuiGraphicsExtractor graphics) {
 		final OverlayUIBridge bridge = BridgeHandler.UI.getBridge(OverlayUIBridge.class);
 		if (bridge != null) {
-			bridge.extractScreen(graphics);
+			bridge.drawAboveScreen(graphics);
 		}
 	}
 
 	public static void extractHiddenHud(final GuiGraphicsExtractor graphics) {
 		final OverlayUIBridge bridge = BridgeHandler.UI.getBridge(OverlayUIBridge.class);
 		if (bridge != null) {
-			bridge.extractHiddenHud(graphics);
+			bridge.drawHiddenHud(graphics);
 		}
 	}
 

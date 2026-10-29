@@ -25,7 +25,7 @@ public final class ForgePayloads {
 		}
 
 		PayloadFlow<RegistryFriendlyByteBuf, CustomPacketPayload> flow = ChannelBuilder.named(Identifier.fromNamespaceAndPath(MinecraftJoid.MOD_ID, "main")).networkProtocolVersion(1).optional().payloadChannel().play().serverbound();
-		for (final PayloadType<?> type : PayloadType.getRegistered()) {
+		for (final PayloadType<?, ?> type : PayloadType.getRegistered()) {
 			flow = ForgePayloads.add(flow, type);
 		}
 		ForgePayloads.channel = flow.build();
@@ -37,8 +37,8 @@ public final class ForgePayloads {
 		}
 	}
 
-	private static <T extends IPayload> PayloadFlow<RegistryFriendlyByteBuf, CustomPacketPayload> add(final PayloadFlow<RegistryFriendlyByteBuf, CustomPacketPayload> flow, final PayloadType<T> type) {
-		return flow.addMain(PayloadPacket.getType(type), PayloadPacket.codec(type), (packet, context) -> type.getOnServer().accept(packet.payload(), context.getSender()));
+	private static <T extends IPayload> PayloadFlow<RegistryFriendlyByteBuf, CustomPacketPayload> add(final PayloadFlow<RegistryFriendlyByteBuf, CustomPacketPayload> flow, final PayloadType<T, ?> type) {
+		return flow.addMain(PayloadPacket.getType(type), PayloadPacket.codec(type), (packet, context) -> type.fireServer(packet.payload(), context.getSender()));
 	}
 
 }

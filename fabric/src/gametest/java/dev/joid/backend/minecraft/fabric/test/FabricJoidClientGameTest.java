@@ -830,7 +830,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 			final int updates = overlay.getUpdates();
 			final int size = targets.size();
 			for (int frame = 0; frame < 3; frame++) {
-				bridge.extract(new GuiGraphicsExtractor(minecraft, (GuiRenderState) FabricJoidClientGameTest.field(minecraft.gui, "guiRenderState"), 0, 0));
+				bridge.drawHud(new GuiGraphicsExtractor(minecraft, (GuiRenderState) FabricJoidClientGameTest.field(minecraft.gui, "guiRenderState"), 0, 0));
 			}
 			return new int[] {overlay.getUpdates() - updates, targets.size() - size};
 		});

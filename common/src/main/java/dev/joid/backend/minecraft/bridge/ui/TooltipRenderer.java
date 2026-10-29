@@ -4,29 +4,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 import dev.joid.lib.font.converter.TextConverter;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
-public final class TooltipQueue {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class TooltipRenderer {
 
-	private Object content;
-
-	public void push(final Object content) {
-		this.content = content;
-	}
-
-	public void flush(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY) {
-		final Object content = this.content;
-		this.content = null;
+	public static void draw(final GuiGraphicsExtractor graphics, final Object content, final int mouseX, final int mouseY) {
 		if (content instanceof final ItemStack stack) {
 			graphics.setTooltipForNextFrame(Minecraft.getInstance().font, stack, mouseX, mouseY);
-		} else if (content != null) {
-			final List<Component> lines = TooltipQueue.getLines(content);
-			if (!lines.isEmpty()) {
-				graphics.setComponentTooltipForNextFrame(Minecraft.getInstance().font, lines, mouseX, mouseY);
-			}
+			return;
+		}
+
+		final List<Component> lines = TooltipRenderer.getLines(content);
+		if (!lines.isEmpty()) {
+			graphics.setComponentTooltipForNextFrame(Minecraft.getInstance().font, lines, mouseX, mouseY);
 		}
 	}
 
@@ -38,10 +34,10 @@ public final class TooltipQueue {
 		final List<Component> lines = new ArrayList<>();
 		if (content instanceof final Iterable<?> iterable) {
 			for (final Object line : iterable) {
-				lines.add(TooltipQueue.getLine(line));
+				lines.add(TooltipRenderer.getLine(line));
 			}
 		} else {
-			lines.add(TooltipQueue.getLine(content));
+			lines.add(TooltipRenderer.getLine(content));
 		}
 		return lines;
 	}

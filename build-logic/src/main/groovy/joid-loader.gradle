@@ -45,8 +45,11 @@ dependencies {
     commonJava(project(path: ':common', configuration: 'commonJava'))
     commonResources(project(path: ':common', configuration: 'commonResources'))
     joidDemo(files(rootProject.file("libs/joid-core-${joid_version}-demo.jar")))
+    joidDemo(files(rootProject.file("libs/joid-backend-minecraft-common-${common_version}-dev.jar")))
     joidDev(files(rootProject.file("libs/joid-core-${joid_version}-dev.jar")))
+    joidDev(files(rootProject.file("libs/joid-backend-minecraft-common-${common_version}-dev.jar")))
     joidProd(files(rootProject.file("libs/joid-core-${joid_version}-prod.jar")))
+    joidProd(files(rootProject.file("libs/joid-backend-minecraft-common-${common_version}-prod.jar")))
     compileOnly(files(rootProject.file("libs/joid-tool-testkit-${joid_version}.jar")))
     embed(files(rootProject.file("libs/joid-base-lwjgl3-glfw-${joid_version}.jar")))
     embed(files(rootProject.file("libs/joid-base-lwjgl3-openal-${joid_version}.jar")))
@@ -88,6 +91,9 @@ tasks.named('javadoc', Javadoc) {
 tasks.named('sourcesJar', Jar) {
     dependsOn(configurations.commonJava, configurations.commonResources)
     from(configurations.commonJava, configurations.commonResources)
+    from(zipTree(rootProject.file("libs/joid-backend-minecraft-common-${common_version}-sources.jar"))) {
+        exclude('META-INF/**')
+    }
     excludeDemo(it)
 }
 
@@ -124,7 +130,17 @@ def prodJar = tasks.register('prodJar', ShadowJar) {
 
 def loaderName = project.name
 
-def verifyJar = { String kind, File archive, List<String> patterns, Pattern references, List<String> words, boolean devMode ->
+def verifyJar = { String kind, File archive, File common, List<String> patterns, Pattern references, List<String> words, boolean devMode ->
+    def absent = [] as SortedSet
+    new ZipFile(common).withCloseable { source ->
+        new ZipFile(archive).withCloseable { zip ->
+            source.entries().findAll { it.name.endsWith('.class') && zip.getEntry(it.name) == null }.each { absent << it.name }
+        }
+    }
+    if (!absent.isEmpty()) {
+        throw new GradleException("The ${kind} jar misses classes of ${common.name}: ${absent.take(10)}")
+    }
+
     def found = []
     zipTree(archive).matching { include(patterns) }.visit { if (!it.directory) found << it.relativePath.pathString }
     if (!found.isEmpty()) {
@@ -261,12 +277,14 @@ def verifyProdJar = tasks.register('verifyProdJar') {
     group = 'verification'
     description = 'Checks that the prod jar holds no code, asset or reference of the dev and demo modes.'
     def archive = prodJar.flatMap { it.archiveFile }
+    def common = rootProject.file("libs/joid-backend-minecraft-common-${common_version}-prod.jar")
     def patterns = demoPatterns + devPatterns
     def references = developmentReferences
     def words = developmentWords
     inputs.file(archive)
+    inputs.file(common)
     doLast {
-        verifyJar('prod', archive.get().asFile, patterns, references, words, false)
+        verifyJar('prod', archive.get().asFile, common, patterns, references, words, false)
     }
 }
 
@@ -274,10 +292,12 @@ def verifyDevJar = tasks.register('verifyDevJar') {
     group = 'verification'
     description = 'Checks that the dev jar starts JOID in dev mode and holds no code, asset or reference of the demos.'
     def archive = devJar.flatMap { it.archiveFile }
+    def common = rootProject.file("libs/joid-backend-minecraft-common-${common_version}-dev.jar")
     def patterns = demoPatterns
     def references = demoReferences
     def words = demoWords
     inputs.file(archive)
+    inputs.file(common)
     doLast {
         new ZipFile(archive.get().asFile).withCloseable { zip ->
             ['dev/joid/lib/ui/node/impl/dev/DevNode.class', 'dev/joid/internal/font/DevFont.class'].each { entry ->
@@ -286,7 +306,7 @@ def verifyDevJar = tasks.register('verifyDevJar') {
                 }
             }
         }
-        verifyJar('dev', archive.get().asFile, patterns, references, words, true)
+        verifyJar('dev', archive.get().asFile, common, patterns, references, words, true)
     }
 }
 

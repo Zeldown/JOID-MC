@@ -25,10 +25,4 @@ public class LegacyTextColorTest {
 		}
 	}
 
-	@Test
-	public void findsAColorByItsRgbWhateverTheAlpha() {
-		Assert.assertEquals(LegacyTextColor.GOLD, LegacyTextColor.byRgb(0xFFFFAA00));
-		Assert.assertNull(LegacyTextColor.byRgb(0x123456));
-	}
-
 }

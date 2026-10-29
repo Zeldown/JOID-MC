@@ -1,9 +1,7 @@
 package dev.joid.backend.minecraft.bridge.ui.container;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import com.mojang.blaze3d.platform.Window;
@@ -14,8 +12,6 @@ import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
 import dev.joid.base.lwjgl3.glfw.input.GlfwKeys;
 import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.input.mouse.MouseButton;
-import dev.joid.lib.ui.core.UI;
-import dev.joid.lib.ui.node.Node;
 import lombok.Getter;
 import lombok.NonNull;
 import net.minecraft.client.Minecraft;
@@ -210,34 +206,8 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 	}
 
 	private SlotNode getSlotNode(final double x, final double y) {
-		for (final Node node : this.getNodeList(x, y)) {
-			if (node instanceof final SlotNode slotNode) {
-				return slotNode;
-			}
-		}
-		return null;
-	}
-
-	private List<Node> getNodeList(final double x, final double y) {
 		final Window window = Minecraft.getInstance().getWindow();
-		final List<UI> uiList = new ArrayList<>(this.bridge.getUiList());
-		for (int index = uiList.size() - 1; index >= 0; index--) {
-			final UI ui = uiList.get(index);
-			if (ui != this.ui && (!ui.getData().active() || !ui.getData().visible())) {
-				continue;
-			}
-
-			final double uiX = ui.getView().toUiX(x * window.getGuiScale());
-			final double uiY = ui.getView().toUiY(y * window.getGuiScale());
-			if (ui == this.ui) {
-				return ui.getNodeListAt(uiX, uiY);
-			}
-
-			if (ui.getNodeAt(uiX, uiY) != null || ui.getPopup().active()) {
-				return Collections.emptyList();
-			}
-		}
-		return Collections.emptyList();
+		return this.bridge.getNodeAt(this.ui, x * window.getGuiScale(), y * window.getGuiScale(), SlotNode.class);
 	}
 
 	private static Component toTitle(final ContainerUI<?> ui) {

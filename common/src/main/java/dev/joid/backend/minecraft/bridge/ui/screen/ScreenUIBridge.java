@@ -2,45 +2,24 @@ package dev.joid.backend.minecraft.bridge.ui.screen;
 
 import dev.joid.backend.minecraft.bridge.render.GuiFrameCounter;
 import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
-import dev.joid.backend.minecraft.bridge.ui.TooltipQueue;
+import dev.joid.backend.minecraft.bridge.ui.TooltipRenderer;
 import dev.joid.backend.minecraft.bridge.window.MinecraftWindowBridge;
 import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
-import dev.joid.lib.bridge.ui.StackUIBridge;
 import dev.joid.lib.ui.core.UI;
-import dev.joid.lib.ui.core.data.UIDataOverlay;
-import dev.joid.lib.ui.core.data.UIDataOverlayObject;
-import dev.joid.lib.utils.annotation.AnnotationValues;
 import lombok.NonNull;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 
-public final class ScreenUIBridge extends StackUIBridge {
+public final class ScreenUIBridge extends BaseScreenUIBridge<GuiGraphicsExtractor> {
 
 	private final GuiCompositor         compositor;
-	private final TooltipQueue          tooltipQueue;
 	private final MinecraftWindowBridge window;
 
 	private UIScreen screen;
 
 	public ScreenUIBridge(final MinecraftRenderBridge render, final MinecraftWindowBridge window) {
-		this.window       = window;
-		this.compositor   = new GuiCompositor(render);
-		this.tooltipQueue = new TooltipQueue();
-	}
-
-	@Override
-	public boolean canHandle(final @NonNull UI ui) {
-		return !ui.getOverlay().active();
-	}
-
-	@Override
-	public boolean canHandle(final @NonNull Class<? extends UI> clazz) {
-		return !AnnotationValues.read(clazz.getAnnotation(UIDataOverlay.class), UIDataOverlayObject.create()).active();
-	}
-
-	@Override
-	public void drawHover(final @NonNull UI ui, final @NonNull Object content, final double mouseX, final double mouseY) {
-		this.tooltipQueue.push(content);
+		this.window     = window;
+		this.compositor = new GuiCompositor(render);
 	}
 
 	@Override
@@ -85,12 +64,24 @@ public final class ScreenUIBridge extends StackUIBridge {
 		return null;
 	}
 
-	public void frame(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY) {
-		GuiFrameCounter.inst().getFrame(graphics);
-		super.update();
-		this.compositor.composite(graphics, super::draw);
+	@Override
+	protected long countFrame(final GuiGraphicsExtractor graphics) {
+		return GuiFrameCounter.inst().getFrame(graphics);
+	}
+
+	@Override
+	protected void requestCursor(final GuiGraphicsExtractor graphics) {
 		this.window.requestCursor(graphics, this.window.getCursor());
-		this.tooltipQueue.flush(graphics, mouseX, mouseY);
+	}
+
+	@Override
+	protected void compositeFrame(final GuiGraphicsExtractor graphics, final Runnable draw) {
+		this.compositor.composite(graphics, draw);
+	}
+
+	@Override
+	protected void drawTooltip(final GuiGraphicsExtractor graphics, final Object content, final int mouseX, final int mouseY) {
+		TooltipRenderer.draw(graphics, content, mouseX, mouseY);
 	}
 
 }
