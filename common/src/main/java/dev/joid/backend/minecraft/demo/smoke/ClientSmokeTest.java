@@ -38,6 +38,7 @@ import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
 import dev.joid.backend.minecraft.MinecraftBackend;
 import dev.joid.backend.minecraft.bridge.audio.MinecraftAudioGain;
 import dev.joid.backend.minecraft.bridge.thread.MinecraftThreadBridge;
+import dev.joid.backend.minecraft.bridge.ui.container.ContainerUIBridge;
 import dev.joid.backend.minecraft.bridge.ui.overlay.OverlayUIBridge;
 import dev.joid.backend.minecraft.bridge.ui.screen.ScreenUIBridge;
 import dev.joid.backend.minecraft.bridge.ui.screen.UIScreen;
@@ -187,8 +188,8 @@ public final class ClientSmokeTest {
 			}
 
 			final List<UIBridge> bridges = BridgeHandler.UI.getBridgeList();
-			if (bridges.size() != 2 || !(bridges.get(0) instanceof ScreenUIBridge) || !(bridges.get(1) instanceof OverlayUIBridge)) {
-				names.add("UI bridges [ScreenUIBridge, OverlayUIBridge]");
+			if (bridges.size() != 3 || !(bridges.get(0) instanceof ScreenUIBridge) || !(bridges.get(1) instanceof ContainerUIBridge) || !(bridges.get(2) instanceof OverlayUIBridge)) {
+				names.add("UI bridges [ScreenUIBridge, ContainerUIBridge, OverlayUIBridge]");
 			}
 
 			if (!JOIDEnv.isDevMode() || !JOIDEnv.isDemoMode()) {

@@ -19,7 +19,7 @@ public final class ForgeJoid {
 	@EventHandler
 	public void init(final FMLInitializationEvent event) {
 		if (event.getSide().isClient()) {
-			ForgeJoidClient.register();
+			ForgeJoidClient.register(this);
 		}
 	}
 

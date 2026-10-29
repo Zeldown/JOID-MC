@@ -3,6 +3,7 @@ package dev.joid.backend.minecraft;
 import dev.joid.backend.minecraft.bridge.audio.MinecraftAudioGain;
 import dev.joid.backend.minecraft.bridge.input.KeyBindKeyResolver;
 import dev.joid.backend.minecraft.bridge.thread.MinecraftThreadBridge;
+import dev.joid.backend.minecraft.bridge.ui.container.ContainerUIBridge;
 import dev.joid.backend.minecraft.bridge.ui.overlay.OverlayUIBridge;
 import dev.joid.backend.minecraft.bridge.ui.screen.ScreenUIBridge;
 import dev.joid.backend.minecraft.bridge.window.MinecraftWindowBridge;
@@ -69,6 +70,7 @@ public final class MinecraftBackend extends Backend {
 	protected void registerDefaults() {
 		BridgeHandler.UI.register(new ScreenUIBridge(this.render, this.window), -30);
 		BridgeHandler.UI.register(new OverlayUIBridge(this.render, this.window), -10);
+		BridgeHandler.UI.register(new ContainerUIBridge(this.render, this.window), -20);
 
 		TextMarkup.register(LegacyTextMarkup.inst());
 		KeyResolver.register(new KeyBindKeyResolver());
