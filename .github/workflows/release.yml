@@ -100,6 +100,7 @@ jobs:
           path: |
             ${{ matrix.loader }}/build/libs/*-${{ needs.version.outputs.version }}-dev.jar
             ${{ matrix.loader }}/build/libs/*-${{ needs.version.outputs.version }}-prod.jar
+            ${{ matrix.loader }}/build/libs/*-${{ needs.version.outputs.version }}-sources.jar
 
       - name: Upload the jars
         if: github.event_name == 'release' || inputs.upload
@@ -108,4 +109,4 @@ jobs:
           TAG: ${{ github.event.release.tag_name || inputs.tag }}
           LOADER: ${{ matrix.loader }}
           VERSION: ${{ needs.version.outputs.version }}
-        run: gh release upload "$TAG" "$LOADER"/build/libs/*-"$VERSION"-dev.jar "$LOADER"/build/libs/*-"$VERSION"-prod.jar --clobber
+        run: gh release upload "$TAG" "$LOADER"/build/libs/*-"$VERSION"-dev.jar "$LOADER"/build/libs/*-"$VERSION"-prod.jar "$LOADER"/build/libs/*-"$VERSION"-sources.jar --clobber

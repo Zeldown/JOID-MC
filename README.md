@@ -91,12 +91,13 @@ JOID-MC is a JOID backend: everything in the [JOID documentation](https://docume
 
 ## Installation
 
-Each release has two jars per loader, built from the same code:
+Each release has three jars per loader, built from the same code:
 
 | Jar | Contains | For |
 |---|---|---|
 | `dev` | JOID-MC and JOID, with the dev mode of JOID ([Development](#development)). | Your development environment only. |
 | `prod` | JOID-MC and JOID, without the dev mode. | Players. This is the jar on CurseForge and Modrinth. |
+| `sources` | The sources of JOID-MC, without JOID. | Your IDE: attach it to the `dev` jar. |
 
 ### In your workspace
 
