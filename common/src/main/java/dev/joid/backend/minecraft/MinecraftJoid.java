@@ -3,9 +3,11 @@ package dev.joid.backend.minecraft;
 import java.io.File;
 
 import dev.joid.backend.minecraft.bridge.render.MinecraftStencil;
+import dev.joid.backend.minecraft.demo.DemoLauncher;
 import dev.joid.base.lwjgl2.opengl.Lwjgl2GlBinding;
 import dev.joid.base.opengl.capability.GlCapabilities;
 import dev.joid.internal.JOIDLog;
+import dev.joid.lib.JOIDEnv;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.minecraft.client.Minecraft;
@@ -16,6 +18,12 @@ public final class MinecraftJoid {
 	public static final String MOD_ID = "joid";
 
 	private static boolean unsupported;
+
+	public static void init() {
+		if (JOIDEnv.isDemoMode()) {
+			DemoLauncher.init();
+		}
+	}
 
 	public static void register() {
 		if (MinecraftJoid.unsupported || MinecraftBackend.inst().isRegistered()) {
