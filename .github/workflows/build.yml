@@ -1,0 +1,54 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - common
+  pull_request:
+    branches:
+      - common
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          lfs: true
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '8'
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-common-${{ hashFiles('build.gradle', 'gradle.properties', 'gradle/wrapper/gradle-wrapper.properties') }}
+
+      - name: Build
+        run: ./gradlew build --max-workers=2
+
+      - name: Check the jars
+        run: |
+          for KIND in dev prod sources; do
+            JAR=$(ls build/libs/joid-backend-minecraft-common-*-"$KIND".jar 2>/dev/null | head -n 1)
+            if [ -z "$JAR" ]; then
+              echo "::error::The $KIND jar is missing"
+              exit 1
+            fi
+          done
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: jars
+          path: build/libs/*.jar
+
+      - uses: actions/upload-artifact@v6
+        if: failure()
+        with:
+          name: reports
+          path: build/reports/

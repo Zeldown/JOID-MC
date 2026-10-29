@@ -1,0 +1,153 @@
+import java.util.zip.ZipFile
+
+import org.objectweb.asm.ClassReader
+import org.objectweb.asm.ClassWriter
+import org.objectweb.asm.commons.ClassRemapper
+import org.objectweb.asm.commons.Remapper
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.ow2.asm:asm-commons:${asm_version}"
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+ext {
+    demoPatterns = [
+            'dev/joid/backend/minecraft/**/demo/**',
+            'dev/joid/backend/minecraft/showcase/**'
+    ]
+
+    devPatterns = [
+            'dev/joid/backend/minecraft/bridge/snapshot/**'
+    ]
+
+    gameReferences = ['net/minecraft/', 'com/mojang/', 'net/fabricmc/', 'net/minecraftforge/', 'net/neoforged/', 'cpw/mods/', 'org/lwjgl/']
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compileOnly files("libs/joid-core-${joid_version}-dev.jar")
+    compileOnly "org.projectlombok:lombok:${lombok_version}"
+
+    testCompile files("libs/joid-core-${joid_version}-dev.jar")
+    testCompile "junit:junit:${junit_version}"
+    testCompileOnly "org.projectlombok:lombok:${lombok_version}"
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+javadoc {
+    options.encoding = 'UTF-8'
+}
+
+test {
+    systemProperty 'joid.data', file("$buildDir/joid").absolutePath
+}
+
+tasks.withType(Jar) {
+    from(file('LICENSE')) {
+        into 'META-INF'
+        rename { "${it}_${archivesBaseName}" }
+    }
+}
+
+jar {
+    classifier = 'prod'
+    exclude demoPatterns + devPatterns
+}
+
+task devJar(type: Jar) {
+    group = 'build'
+    description = 'Builds the dev jar, for the dev jars of the version branches.'
+    classifier = 'dev'
+    from sourceSets.main.output
+    exclude demoPatterns
+}
+
+task sourcesJar(type: Jar) {
+    group = 'build'
+    description = 'Builds the sources jar, merged into the sources jars of the version branches.'
+    classifier = 'sources'
+    from sourceSets.main.allSource
+    exclude demoPatterns
+}
+
+artifacts {
+    archives devJar, sourcesJar
+}
+
+def verifyJar = { String kind, File archive, File joid, List<String> patterns ->
+    def failures = []
+    zipTree(archive).matching { include(patterns) }.visit { if (!it.directory) failures << "${it.relativePath.pathString} must not ship in the ${kind} jar" }
+
+    def joidEntries = new ZipFile(joid).withCloseable { zip -> zip.entries().collect { it.name } as Set }
+    new ZipFile(archive).withCloseable { zip ->
+        def entries = zip.entries().collect { it.name } as Set
+        entries.findAll { !it.endsWith('/') && !it.startsWith('META-INF/') && !it.startsWith('dev/joid/backend/minecraft/') }.each { name ->
+            failures << "${name} is outside dev/joid/backend/minecraft"
+        }
+
+        entries.findAll { it.endsWith('.class') }.each { name ->
+            def bytes = zip.getInputStream(zip.getEntry(name)).bytes
+            def major = ((bytes[6] & 0xFF) << 8) | (bytes[7] & 0xFF)
+            if (major > 52) {
+                failures << "${name} is compiled for Java ${major - 44}, the version branches run on Java 8"
+            }
+
+            def references = [] as Set
+            def remapper = new Remapper() {
+                @Override
+                String map(final String internalName) {
+                    references << internalName
+                    return internalName
+                }
+            }
+            new ClassReader(bytes).accept(new ClassRemapper(new ClassWriter(0), remapper), 0)
+            references.findAll { reference -> gameReferences.any { reference.startsWith(it) } }.each { reference ->
+                failures << "${name} links ${reference}, a class of a version of the game"
+            }
+            references.findAll { it.startsWith('dev/joid/') && !entries.contains(it + '.class') && !joidEntries.contains(it + '.class') }.each { reference ->
+                failures << "${name} links ${reference}, absent from ${joid.name}, which throws NoClassDefFoundError at run time"
+            }
+        }
+    }
+
+    if (!failures.isEmpty()) {
+        throw new GradleException("[JOID] The ${kind} jar ${archive.name} is not fit for the version branches:\n" + failures.join('\n'))
+    }
+}
+
+task verifyProdJar {
+    group = 'verification'
+    description = 'Checks that the prod jar holds Java 8 classes of JOID-MC only, with no class of the game, and links only classes of the prod jar of JOID.'
+    dependsOn jar
+    doLast {
+        verifyJar('prod', jar.archivePath, file("libs/joid-core-${joid_version}-prod.jar"), demoPatterns + devPatterns)
+    }
+}
+
+task verifyDevJar {
+    group = 'verification'
+    description = 'Checks that the dev jar holds Java 8 classes of JOID-MC only, with no class of the game, and links only classes of the dev jar of JOID.'
+    dependsOn devJar
+    doLast {
+        verifyJar('dev', devJar.archivePath, file("libs/joid-core-${joid_version}-dev.jar"), demoPatterns)
+    }
+}
+
+assemble.dependsOn devJar, sourcesJar
+check.dependsOn verifyProdJar, verifyDevJar
