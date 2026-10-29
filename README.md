@@ -52,6 +52,16 @@ JDK 8 is required, since Gradle 3.5 runs on Java 8 only.
 
 `build` also runs the tests and checks both jars: Java 8 classes only, nothing outside `dev/joid/backend/minecraft`, no link to a class of the game, and no link to a class of JOID that the matching jar of JOID does not ship.
 
+## Updating a version branch
+
+`scripts/update-libs.sh` builds the jars, then copies them into the `libs/` folder of each checkout of a version branch given to it, in place of the previous ones, and sets `common_version` in its `gradle.properties`:
+
+```sh
+scripts/update-libs.sh ../JOID-MC-26.2 ../JOID-MC-1.7.10
+```
+
+Then build each version branch, commit its `libs/` folder and push it: its continuous integration checks the update.
+
 ## License
 
 JOID-MC is released under the [Apache 2.0 license](LICENSE).
