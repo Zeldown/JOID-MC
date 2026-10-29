@@ -177,10 +177,9 @@ def readClass = { byte[] bytes ->
         } else if (tag == 7) {
             classes[index] = input.readUnsignedShort()
         } else if (tag in [9, 10, 11]) {
-            members << [input.readUnsignedShort(), input.readUnsignedShort()]
+            members << [tag, input.readUnsignedShort(), input.readUnsignedShort()]
         } else if (tag == 12) {
-            nameTypes[index] = input.readUnsignedShort()
-            input.readUnsignedShort()
+            nameTypes[index] = [input.readUnsignedShort(), input.readUnsignedShort()]
         } else if (tag in [3, 4, 17, 18]) {
             input.readInt()
         } else if (tag in [5, 6]) {
@@ -199,7 +198,7 @@ def readClass = { byte[] bytes ->
     def references = [] as Set
     classes.values().each { references << texts[it].replaceAll(/^\[*L?|;$/, '') }
     texts.values().each { text -> (text =~ /L([\w$\/]+);/).each { references << it[1] } }
-    return [major: major, references: references, members: members.collect { "${texts[classes[it[0]]]}/${texts[nameTypes[it[1]]]}".toString() }]
+    return [major: major, references: references, members: members.collect { "${texts[classes[it[1]]]}/${texts[nameTypes[it[2]][0]]}${it[0] == 9 ? '' : ' ' + texts[nameTypes[it[2]][1]]}".toString() }]
 }
 
 def verifyJar = { String kind, File archive, File common, List<String> patterns, Pattern references, List<String> words, boolean devMode ->
@@ -228,7 +227,7 @@ def verifyJar = { String kind, File archive, File common, List<String> patterns,
     tasks.genSrgs.mcpToSrg.eachLine { line ->
         def parts = line.split(' ')
         if (parts[0] in ['MD:', 'FD:'] && parts[1].tokenize('/').last() != parts[parts[0] == 'MD:' ? 3 : 2].tokenize('/').last()) {
-            mcpNames << parts[1]
+            mcpNames << (parts[0] == 'MD:' ? "${parts[1]} ${parts[2]}".toString() : parts[1])
         }
     }
 
