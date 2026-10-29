@@ -388,6 +388,8 @@ public final class ClientSmokeTest {
 		ClientSmokeTest.xdotool("keyup", "F3");
 		ClientSmokeTest.waitFrames(5);
 		ClientSmokeTest.sleep(3000);
+		ClientSmokeTest.press("Escape");
+		ClientSmokeTest.waitFor("the chat opened by T to close", () -> Minecraft.getMinecraft().currentScreen == null, 30);
 		ClientSmokeTest.press("F3");
 		ClientSmokeTest.sleep(1000);
 
