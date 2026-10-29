@@ -6,6 +6,7 @@ import dev.joid.backend.minecraft.bridge.thread.MinecraftThreadBridge;
 import dev.joid.backend.minecraft.bridge.ui.overlay.OverlayUIBridge;
 import dev.joid.backend.minecraft.bridge.ui.screen.ScreenUIBridge;
 import dev.joid.backend.minecraft.bridge.window.MinecraftWindowBridge;
+import dev.joid.backend.minecraft.lib.font.converter.impl.ChatTextConverter;
 import dev.joid.backend.minecraft.lib.font.markup.impl.LegacyTextMarkup;
 import dev.joid.base.lwjgl2.openal.Lwjgl2AlBinding;
 import dev.joid.base.lwjgl2.opengl.Lwjgl2GlBinding;
@@ -17,6 +18,7 @@ import dev.joid.lib.bridge.backend.Backend;
 import dev.joid.lib.bridge.render.IRenderBridge;
 import dev.joid.lib.bridge.thread.IThreadBridge;
 import dev.joid.lib.bridge.window.IWindowBridge;
+import dev.joid.lib.font.converter.TextConverter;
 import dev.joid.lib.font.markup.TextMarkup;
 import dev.joid.lib.input.key.resolver.KeyResolver;
 import lombok.AccessLevel;
@@ -64,6 +66,7 @@ public final class MinecraftBackend extends Backend {
 
 		TextMarkup.register(LegacyTextMarkup.inst());
 		KeyResolver.register(new KeyBindKeyResolver());
+		TextConverter.register(ChatTextConverter.inst());
 	}
 
 }
