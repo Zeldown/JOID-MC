@@ -7,6 +7,7 @@ import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import cpw.mods.fml.common.gameevent.TickEvent.RenderTickEvent;
 import dev.joid.backend.minecraft.loader.event.MinecraftClientEvents;
 import dev.joid.backend.minecraft.loader.event.MinecraftOverlayEvents;
+import dev.joid.backend.minecraft.loader.event.MinecraftScreenEvents;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -19,7 +20,9 @@ public final class ForgeClientEvents {
 
 	@SubscribeEvent
 	public void tick(final ClientTickEvent event) {
-		if (event.phase == Phase.END) {
+		if (event.phase == Phase.START) {
+			MinecraftScreenEvents.fireInput();
+		} else {
 			MinecraftClientEvents.fireTick();
 		}
 	}

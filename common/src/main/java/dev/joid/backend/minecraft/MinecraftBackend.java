@@ -1,6 +1,7 @@
 package dev.joid.backend.minecraft;
 
 import dev.joid.backend.minecraft.bridge.audio.MinecraftAudioGain;
+import dev.joid.backend.minecraft.bridge.input.KeyBindKeyResolver;
 import dev.joid.backend.minecraft.bridge.thread.MinecraftThreadBridge;
 import dev.joid.backend.minecraft.bridge.ui.overlay.OverlayUIBridge;
 import dev.joid.backend.minecraft.bridge.ui.screen.ScreenUIBridge;
@@ -17,6 +18,7 @@ import dev.joid.lib.bridge.render.IRenderBridge;
 import dev.joid.lib.bridge.thread.IThreadBridge;
 import dev.joid.lib.bridge.window.IWindowBridge;
 import dev.joid.lib.font.markup.TextMarkup;
+import dev.joid.lib.input.key.resolver.KeyResolver;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -61,6 +63,7 @@ public final class MinecraftBackend extends Backend {
 		BridgeHandler.UI.register(new OverlayUIBridge(this.render, this.window), -10);
 
 		TextMarkup.register(LegacyTextMarkup.inst());
+		KeyResolver.register(new KeyBindKeyResolver());
 	}
 
 }

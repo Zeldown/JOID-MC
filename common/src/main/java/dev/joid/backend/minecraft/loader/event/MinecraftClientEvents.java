@@ -1,6 +1,7 @@
 package dev.joid.backend.minecraft.loader.event;
 
 import dev.joid.backend.minecraft.MinecraftJoid;
+import dev.joid.backend.minecraft.bridge.input.KeyBindMapping;
 import dev.joid.backend.minecraft.bridge.render.GuiFrameCounter;
 import dev.joid.backend.minecraft.bridge.window.MinecraftWindowBridge;
 import dev.joid.lib.bridge.BridgeHandler;
@@ -12,6 +13,7 @@ public final class MinecraftClientEvents {
 
 	public static void fireTick() {
 		MinecraftJoid.register();
+		KeyBindMapping.firePresses();
 	}
 
 	public static void fireFrame() {
