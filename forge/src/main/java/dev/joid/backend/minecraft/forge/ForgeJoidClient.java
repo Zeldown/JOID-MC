@@ -4,6 +4,7 @@ import dev.joid.backend.minecraft.forge.event.ForgeClientEvents;
 import dev.joid.backend.minecraft.forge.event.ForgeOverlayEvents;
 import dev.joid.backend.minecraft.forge.event.ForgeScreenEvents;
 import dev.joid.backend.minecraft.forge.registry.ForgeKeyBindRegistry;
+import dev.joid.backend.minecraft.forge.registry.ForgeReloadListenerRegistry;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -15,6 +16,7 @@ public final class ForgeJoidClient {
 		ForgeScreenEvents.register();
 		ForgeOverlayEvents.register();
 		ForgeKeyBindRegistry.register();
+		ForgeReloadListenerRegistry.register();
 	}
 
 }

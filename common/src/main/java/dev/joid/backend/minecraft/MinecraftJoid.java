@@ -3,7 +3,9 @@ package dev.joid.backend.minecraft;
 import java.io.File;
 
 import dev.joid.backend.minecraft.bridge.render.MinecraftStencil;
+import dev.joid.backend.minecraft.bridge.resource.ResourceReloader;
 import dev.joid.backend.minecraft.demo.DemoLauncher;
+import dev.joid.backend.minecraft.loader.registry.ReloadListenerRegistry;
 import dev.joid.base.lwjgl2.opengl.Lwjgl2GlBinding;
 import dev.joid.base.opengl.capability.GlCapabilities;
 import dev.joid.internal.JOIDLog;
@@ -20,6 +22,7 @@ public final class MinecraftJoid {
 	private static boolean unsupported;
 
 	public static void init() {
+		ReloadListenerRegistry.create(MinecraftJoid.MOD_ID + ":resources").onReload(ResourceReloader.inst()::reload).register();
 		if (JOIDEnv.isDemoMode()) {
 			DemoLauncher.init();
 		}
