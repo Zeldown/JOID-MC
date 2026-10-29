@@ -10,7 +10,6 @@ import dev.joid.internal.JOIDLog;
 import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.ui.core.UI;
 import dev.joid.lib.ui.node.Node;
-import dev.joid.lib.ui.node.impl.dev.DevNode;
 import dev.joid.lib.ui.node.impl.layout.ContainerNode;
 import lombok.Getter;
 import lombok.NonNull;
@@ -70,7 +69,7 @@ public abstract class ContainerUI<M extends AbstractContainerMenu> extends UI {
 		double right = Double.NEGATIVE_INFINITY;
 		double bottom = Double.NEGATIVE_INFINITY;
 		for (final Node node : super.getNodeList()) {
-			if (node == this.carriedNode || node instanceof DevNode || !node.isVisible()) {
+			if (node == this.carriedNode || node == super.getDevNode() || !node.isVisible()) {
 				continue;
 			}
 
