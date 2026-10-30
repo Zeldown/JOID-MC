@@ -26,6 +26,9 @@ public final class MinecraftRenderTarget {
 	private final GpuTexture     stencilCopy;
 	private final GpuTextureView stencilCopyView;
 
+	private boolean               pending;
+	private MinecraftRenderTarget viewport;
+
 	public MinecraftRenderTarget(final MinecraftRenderBridge bridge, final int width, final int height, final boolean stencil) {
 		final GpuDevice device = bridge.getDevice();
 		this.texture     = MinecraftTexture.create(bridge);
@@ -43,6 +46,9 @@ public final class MinecraftRenderTarget {
 	}
 
 	public void delete() {
+		if (this.viewport != null) {
+			this.viewport.delete();
+		}
 		this.texture.delete();
 		this.depthView.close();
 		this.depth.close();
@@ -51,6 +57,31 @@ public final class MinecraftRenderTarget {
 			this.stencil.close();
 			this.stencilCopyView.close();
 			this.stencilCopy.close();
+		}
+	}
+
+	public @NonNull MinecraftRenderTarget viewport(final MinecraftRenderBridge bridge, final int width, final int height) {
+		if (this.viewport == null || this.viewport.getWidth() != width || this.viewport.getHeight() != height) {
+			if (this.viewport != null) {
+				this.viewport.delete();
+			}
+			this.viewport = new MinecraftRenderTarget(bridge, width, height, this.stencil != null);
+		}
+		return this.viewport;
+	}
+
+	public void markPending() {
+		this.pending = true;
+	}
+
+	public void clearPending() {
+		this.pending = false;
+	}
+
+	public void resolve(final CommandEncoder encoder) {
+		if (this.viewport != null && this.viewport.pending) {
+			encoder.copyTextureToTexture(this.viewport.getTexture().getTexture(), this.texture.getTexture(), 0, 0, 0, 0, 0, this.viewport.getWidth(), this.viewport.getHeight());
+			this.viewport.pending = false;
 		}
 	}
 
