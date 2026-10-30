@@ -4,7 +4,12 @@ import java.nio.ByteBuffer;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL15;
+import org.lwjgl.opengl.GL21;
+import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.GL33;
 
+import dev.joid.base.opengl.capability.GlCapabilities;
 import dev.joid.base.opengl.render.GlRenderBridge;
 import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.utils.image.PixelLayout;
@@ -24,7 +29,9 @@ public final class MinecraftSnapshotBackend implements ISnapshotBackend {
 
 	@Override
 	public void create(final int width, final int height) {
-		this.bridge      = BridgeHandler.RENDER.getBridge(GlRenderBridge.class);
+		this.bridge = BridgeHandler.RENDER.getBridge(GlRenderBridge.class);
+		GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
+		GL11.glPushClientAttrib(GL11.GL_ALL_CLIENT_ATTRIB_BITS);
 		this.framebuffer = new Framebuffer(width, height, true);
 		this.framebuffer.bindFramebuffer(true);
 	}
@@ -33,6 +40,9 @@ public final class MinecraftSnapshotBackend implements ISnapshotBackend {
 	public void destroy() {
 		this.framebuffer.deleteFramebuffer();
 		this.framebuffer = null;
+		this.unbindObjects();
+		GL11.glPopClientAttrib();
+		GL11.glPopAttrib();
 		Minecraft.getMinecraft().getFramebuffer().bindFramebuffer(true);
 	}
 
@@ -51,6 +61,28 @@ public final class MinecraftSnapshotBackend implements ISnapshotBackend {
 	@Override
 	public @NonNull String getRenderer() {
 		return GL11.glGetString(GL11.GL_RENDERER);
+	}
+
+	private void unbindObjects() {
+		final GlCapabilities capabilities = this.bridge.getCapabilities();
+		if (capabilities.hasVertexArrays()) {
+			GL30.glBindVertexArray(0);
+		}
+
+		if (capabilities.hasSamplerObjects()) {
+			for (int unit = 0; unit < 4; unit++) {
+				GL33.glBindSampler(unit, 0);
+			}
+		}
+
+		if (capabilities.hasPixelBuffers()) {
+			GL15.glBindBuffer(GL21.GL_PIXEL_PACK_BUFFER, 0);
+			GL15.glBindBuffer(GL21.GL_PIXEL_UNPACK_BUFFER, 0);
+		}
+
+		if (capabilities.hasFrameBufferBlit()) {
+			GL30.glBindRenderbuffer(GL30.GL_RENDERBUFFER, 0);
+		}
 	}
 
 }
