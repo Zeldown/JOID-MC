@@ -1,0 +1,221 @@
+name: Version
+
+on:
+  workflow_call:
+    inputs:
+      java-version:
+        description: The JDK that builds and runs the version.
+        type: string
+        required: true
+      loaders:
+        description: The mod loaders of the version, as a JSON array.
+        type: string
+        required: true
+      vulkan:
+        description: Whether the version runs its client tests on Vulkan too.
+        type: boolean
+        default: false
+      setup-tasks:
+        description: The Gradle tasks that prepare the workspace before the build.
+        type: string
+        default: ''
+      client-setup-tasks:
+        description: The Gradle tasks that prepare the workspace before a client run.
+        type: string
+        default: ''
+      gradle-args:
+        description: The arguments given to every Gradle run.
+        type: string
+        default: ''
+
+jobs:
+  build:
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          lfs: true
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: ${{ inputs.java-version }}
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Build
+        run: ./gradlew ${{ inputs.setup-tasks }} build ${{ inputs.gradle-args }}
+
+      - name: Check the jars
+        env:
+          LOADERS: ${{ join(fromJSON(inputs.loaders), ' ') }}
+        run: |
+          for LOADER in $LOADERS; do
+            for KIND in dev prod sources; do
+              JAR=$(ls "$LOADER"/build/libs/joid-backend-minecraft-"$LOADER"-*-"$KIND".jar 2>/dev/null | head -n 1)
+              if [ -z "$JAR" ]; then
+                echo "::error::The $KIND jar of $LOADER is missing"
+                exit 1
+              fi
+            done
+          done
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: jars
+          path: |
+            */build/libs/*-dev.jar
+            */build/libs/*-prod.jar
+            */build/libs/*-sources.jar
+
+      - uses: actions/upload-artifact@v6
+        if: failure()
+        with:
+          name: reports
+          path: '*/build/reports/'
+
+  client-tests:
+    needs: build
+    runs-on: ubuntu-26.04
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        loader: ${{ fromJSON(inputs.loaders) }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          lfs: true
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: ${{ inputs.java-version }}
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Install Xvfb and Mesa
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb xdotool x11-xserver-utils libgl1-mesa-dri libglx-mesa0 mesa-utils mesa-vulkan-drivers libvulkan1 vulkan-tools libxrandr2 libxxf86vm1 libxcursor1 libxi6
+
+      - name: Report the OpenGL renderer
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: xvfb-run -a -s "-screen 0 1920x1080x24" glxinfo -B | grep -E "OpenGL (renderer|version|core profile version)" || true
+
+      - name: Set up the client workspace
+        if: inputs.client-setup-tasks != ''
+        run: ./gradlew ${{ inputs.client-setup-tasks }} ${{ inputs.gradle-args }}
+
+      - name: Client tests
+        shell: bash
+        env:
+          LOADER: ${{ matrix.loader }}
+          LIBGL_ALWAYS_SOFTWARE: '1'
+          ALSOFT_DRIVERS: 'null'
+        run: |
+          mkdir -p "$LOADER"/runs
+          xvfb-run -a -s "-screen 0 1920x1080x24" ./gradlew ":$LOADER:runClient" -Pjoid.test ${{ inputs.gradle-args }} 2>&1 | tee "$LOADER"/runs/client-tests.log
+          if ! grep -q "\[JOID\] Client tests passed" "$LOADER"/runs/client-tests.log; then
+            echo "::error::The client tests of $LOADER did not pass"
+            exit 1
+          fi
+
+      - name: Report the snapshot references
+        if: always()
+        run: |
+          RECORDED=$(git status --porcelain --untracked-files=all .snapshots/references/opengl | wc -l)
+          echo "::notice::OpenGL snapshot renderers: $(ls .snapshots/references/opengl 2>/dev/null | xargs), $RECORDED references recorded by this run"
+
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: client-tests-${{ matrix.loader }}
+          path: |
+            ${{ matrix.loader }}/runs/client-tests.log
+            ${{ matrix.loader }}/runs/client/screenshots/
+            ${{ matrix.loader }}/runs/client/logs/
+            ${{ matrix.loader }}/runs/client/crash-reports/
+            ${{ matrix.loader }}/runs/snapshots/
+            .snapshots/references/opengl/
+
+  client-tests-vulkan:
+    needs: build
+    if: inputs.vulkan
+    runs-on: ubuntu-26.04
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        loader: ${{ fromJSON(inputs.loaders) }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          lfs: true
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: ${{ inputs.java-version }}
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Install Xvfb and Mesa
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb xdotool x11-xserver-utils libgl1-mesa-dri libglx-mesa0 mesa-utils mesa-vulkan-drivers libvulkan1 vulkan-tools libxrandr2 libxxf86vm1 libxcursor1 libxi6
+
+      - name: Report the Vulkan device
+        run: vulkaninfo --summary | grep -E "deviceName|driverName|driverInfo" || true
+
+      - name: Set up the client workspace
+        if: inputs.client-setup-tasks != ''
+        run: ./gradlew ${{ inputs.client-setup-tasks }} ${{ inputs.gradle-args }}
+
+      - name: Client tests
+        shell: bash
+        env:
+          LOADER: ${{ matrix.loader }}
+          ALSOFT_DRIVERS: 'null'
+        run: |
+          mkdir -p "$LOADER"/runs
+          xvfb-run -a -s "-screen 0 1920x1080x24" ./gradlew ":$LOADER:runClient" -Pjoid.test -Pjoid.graphicsBackend=vulkan ${{ inputs.gradle-args }} 2>&1 | tee "$LOADER"/runs/client-tests.log
+          if ! grep -q "Using graphics backend Vulkan" "$LOADER"/runs/client/logs/latest.log; then
+            echo "::error::Minecraft did not run on Vulkan: $(grep -m 1 'Using graphics backend' "$LOADER"/runs/client/logs/latest.log)"
+            exit 1
+          fi
+
+          if ! grep -q "\[JOID\] Client tests passed" "$LOADER"/runs/client-tests.log; then
+            echo "::error::The client tests of $LOADER on Vulkan did not pass"
+            exit 1
+          fi
+
+      - name: Report the snapshot references
+        if: always()
+        run: |
+          RECORDED=$(git status --porcelain --untracked-files=all .snapshots/references/vulkan | wc -l)
+          echo "::notice::Vulkan snapshot renderers: $(ls .snapshots/references/vulkan 2>/dev/null | xargs), $RECORDED references recorded by this run"
+
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: client-tests-vulkan-${{ matrix.loader }}
+          path: |
+            ${{ matrix.loader }}/runs/client-tests.log
+            ${{ matrix.loader }}/runs/client/screenshots/
+            ${{ matrix.loader }}/runs/client/logs/
+            ${{ matrix.loader }}/runs/client/crash-reports/
+            ${{ matrix.loader }}/runs/snapshots/
+            .snapshots/references/vulkan/
+
+  parity:
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: common
+          fetch-depth: 0
+
+      - name: Check the parity of the version branches
+        run: scripts/check-parity.sh

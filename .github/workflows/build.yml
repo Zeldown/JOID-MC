@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v7
         with:
@@ -34,7 +34,7 @@ jobs:
 
       - name: Check the jars
         run: |
-          for KIND in dev prod sources; do
+          for KIND in dev prod sources demo; do
             JAR=$(ls build/libs/joid-backend-minecraft-common-*-"$KIND".jar 2>/dev/null | head -n 1)
             if [ -z "$JAR" ]; then
               echo "::error::The $KIND jar is missing"
@@ -52,3 +52,13 @@ jobs:
         with:
           name: reports
           path: build/reports/
+
+  parity:
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Check the parity of the version branches
+        run: scripts/check-parity.sh
