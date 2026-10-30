@@ -74,7 +74,6 @@ import dev.joid.lib.JOID;
 import dev.joid.lib.JOIDEnv;
 import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.bridge.audio.IAudioSource;
-import dev.joid.lib.bridge.thread.DirectThreadBridge;
 import dev.joid.lib.bridge.ui.UIBridge;
 import dev.joid.lib.color.Color;
 import dev.joid.lib.draw.text.Text;
@@ -605,7 +604,6 @@ public final class ClientSmokeTest {
 		final List<String> differences = ClientSmokeTest.computeOnClient(() -> {
 			final List<String> found = new ArrayList<>();
 			final SnapshotRunner runner = SnapshotRunner.start(new MinecraftSnapshotBackend());
-			BridgeHandler.THREAD.register(new DirectThreadBridge());
 			try {
 				final File folder = new File(new File(references, "opengl"), runner.getRenderer());
 				for (final String scenario : SnapshotRunner.getScenarios()) {

@@ -16,17 +16,14 @@ import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.utils.image.PixelLayout;
 import dev.joid.test.snapshot.ISnapshotBackend;
 import dev.joid.test.snapshot.SnapshotImage;
-import lombok.Getter;
 import lombok.NonNull;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.shader.Framebuffer;
 
 public final class MinecraftSnapshotBackend implements ISnapshotBackend {
 
-	@Getter
 	private GlRenderBridge bridge;
-
-	private Framebuffer framebuffer;
+	private Framebuffer    framebuffer;
 
 	@Override
 	public void create(final int width, final int height) {

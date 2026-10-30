@@ -52,7 +52,7 @@ dependencies {
     joidProd files(rootProject.file("libs/joid-core-${joid_version}-prod.jar"), rootProject.file("libs/joid-backend-minecraft-common-${common_version}-prod.jar"))
     embed files(rootProject.file("libs/joid-base-opengl-${joid_version}.jar"), rootProject.file("libs/joid-base-openal-${joid_version}.jar"), rootProject.file("libs/joid-base-lwjgl2-${joid_version}.jar"))
     embed "net.java.dev.jna:jna:${jna_version}"
-    smoke files(rootProject.file("libs/joid-tool-testkit-${joid_version}.jar"))
+    smoke files(rootProject.file("libs/joid-tool-testkit-${joid_version}.jar"), rootProject.file("libs/joid-base-opengl-${joid_version}-snapshot.jar"), rootProject.file("libs/joid-base-lwjgl2-${joid_version}-snapshot.jar"))
     smoke "junit:junit:${junit_version}"
     compileOnly "org.projectlombok:lombok:${lombok_version}"
 }
