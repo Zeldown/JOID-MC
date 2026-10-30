@@ -8,6 +8,11 @@ on:
     branches:
       - version/1.7.10
   workflow_dispatch:
+    inputs:
+      showcase:
+        description: The showcase scenes to render, comma separated
+        type: string
+        default: ''
 
 jobs:
   version:
@@ -19,3 +24,4 @@ jobs:
       setup-tasks: setupCIWorkspace
       client-setup-tasks: setupDevWorkspace
       gradle-args: --max-workers=2
+      showcase: ${{ inputs.showcase || '' }}
