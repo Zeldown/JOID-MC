@@ -148,6 +148,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	private final Set<Key>    heldKeys = new HashSet<>();
 	private final List<String> sounds  = new ArrayList<>();
 
+	private String             graphicsBackend;
 	private SoundEventListener soundListener;
 	private DemoContainer      demoContainer;
 
@@ -167,7 +168,10 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	@Override
 	public String getGraphicsBackend() {
-		return this.computeOnClient(() -> RenderSystem.getDevice().getDeviceInfo().backendName().toLowerCase(Locale.ROOT), 120);
+		if (this.graphicsBackend == null) {
+			this.graphicsBackend = this.computeOnClient(() -> RenderSystem.getDevice().getDeviceInfo().backendName().toLowerCase(Locale.ROOT), 120);
+		}
+		return this.graphicsBackend;
 	}
 
 	@Override
@@ -321,6 +325,16 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 		this.waitFor("the singleplayer world", () -> Minecraft.getInstance().level != null && Minecraft.getInstance().player != null && Minecraft.getInstance().gui.screen() == null && Minecraft.getInstance().gui.overlay() == null, 600);
 		this.sleep(5000L);
+	}
+
+	@Override
+	public void clearInventory() {
+		this.computeOnServer(player -> {
+			player.getInventory().clearContent();
+			player.containerMenu.setCarried(ItemStack.EMPTY);
+			player.containerMenu.broadcastChanges();
+			return null;
+		});
 	}
 
 	@Override
