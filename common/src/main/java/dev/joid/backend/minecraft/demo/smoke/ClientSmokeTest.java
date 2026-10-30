@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -27,6 +28,9 @@ import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 
+import org.junit.runner.JUnitCore;
+import org.junit.runner.Result;
+import org.junit.runner.notification.Failure;
 import org.lwjgl.openal.AL10;
 import org.lwjgl.opengl.GL11;
 
@@ -39,13 +43,27 @@ import dev.joid.backend.minecraft.MinecraftBackend;
 import dev.joid.backend.minecraft.bridge.audio.MinecraftAudioGain;
 import dev.joid.backend.minecraft.bridge.thread.MinecraftThreadBridge;
 import dev.joid.backend.minecraft.bridge.ui.container.ContainerUIBridge;
+import dev.joid.backend.minecraft.bridge.ui.container.ContainerUIScreen;
 import dev.joid.backend.minecraft.bridge.ui.overlay.OverlayUIBridge;
 import dev.joid.backend.minecraft.bridge.ui.screen.ScreenUIBridge;
 import dev.joid.backend.minecraft.bridge.ui.screen.UIScreen;
 import dev.joid.backend.minecraft.bridge.window.MinecraftWindowBridge;
+import dev.joid.backend.minecraft.demo.network.OpenDemoContainerPayloadHandler;
+import dev.joid.backend.minecraft.demo.snapshot.MinecraftBitmapFontContractTest;
+import dev.joid.backend.minecraft.demo.snapshot.MinecraftBorrowedTextureContractTest;
+import dev.joid.backend.minecraft.demo.snapshot.MinecraftRenderBridgeContractTest;
+import dev.joid.backend.minecraft.demo.snapshot.MinecraftSnapshotBackend;
+import dev.joid.backend.minecraft.demo.snapshot.MinecraftStateGuardContractTest;
+import dev.joid.backend.minecraft.demo.ui.UIDemoContainer;
 import dev.joid.backend.minecraft.demo.ui.UIDemoMinecraft;
 import dev.joid.backend.minecraft.demo.ui.UIDemoMinecraftChoice;
 import dev.joid.backend.minecraft.demo.ui.UIDemoOverlayLayer;
+import dev.joid.backend.minecraft.lib.font.impl.minecraft.MinecraftFont;
+import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
+import dev.joid.backend.minecraft.lib.ui.node.impl.design.block.BlockNode;
+import dev.joid.backend.minecraft.lib.ui.node.impl.design.entity.EntityNode;
+import dev.joid.backend.minecraft.lib.ui.node.impl.design.item.ItemNode;
+import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
 import dev.joid.base.lwjgl2.openal.Lwjgl2AlBinding;
 import dev.joid.base.openal.AlAudioBridge;
 import dev.joid.base.opengl.render.GlRenderBridge;
@@ -56,27 +74,44 @@ import dev.joid.lib.JOID;
 import dev.joid.lib.JOIDEnv;
 import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.bridge.audio.IAudioSource;
+import dev.joid.lib.bridge.thread.DirectThreadBridge;
 import dev.joid.lib.bridge.ui.UIBridge;
+import dev.joid.lib.color.Color;
+import dev.joid.lib.draw.text.Text;
+import dev.joid.lib.font.TextInfo;
+import dev.joid.lib.font.converter.TextConverter;
 import dev.joid.lib.input.key.Key;
 import dev.joid.lib.input.key.resolver.KeyResolver;
+import dev.joid.lib.resource.Resource;
 import dev.joid.lib.ui.core.UI;
 import dev.joid.lib.ui.node.Node;
+import dev.joid.lib.ui.node.impl.resource.ResourceNode;
 import dev.joid.lib.ui.node.impl.shape.RectNode;
+import dev.joid.lib.ui.node.impl.text.TextNode;
+import dev.joid.test.snapshot.SnapshotDifference;
+import dev.joid.test.snapshot.SnapshotImage;
+import dev.joid.test.snapshot.SnapshotRunner;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SoundCategory;
+import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.gui.GuiIngameMenu;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.client.shader.Framebuffer;
+import net.minecraft.entity.passive.EntityPig;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatStyle;
+import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ScreenShotHelper;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
@@ -85,6 +120,7 @@ import net.minecraftforge.client.MinecraftForgeClient;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ClientSmokeTest {
 
+	private static final List<String>    ERRORS       = new CopyOnWriteArrayList<>();
 	private static final List<String>    WARNINGS     = new CopyOnWriteArrayList<>();
 	private static final Queue<Runnable> SERVER_TASKS = new ConcurrentLinkedQueue<>();
 	private static final AtomicLong      FRAMES       = new AtomicLong();
@@ -123,15 +159,21 @@ public final class ClientSmokeTest {
 			ClientSmokeTest.joinWorld();
 			ClientSmokeTest.verifyBridges(failures);
 			ClientSmokeTest.verifyAudio(failures, "in the world");
+			ClientSmokeTest.verifyFonts(failures);
 			ClientSmokeTest.verifyKeyBind(failures);
 			ClientSmokeTest.verifyDebugKey(failures);
 			ClientSmokeTest.verifyDemoMenu(failures);
 			ClientSmokeTest.verifyMinecraftDemo(failures);
+			ClientSmokeTest.verifyGameObjects(failures);
 			ClientSmokeTest.verifyTooltip(failures);
 			ClientSmokeTest.verifyOverlays(failures);
 			ClientSmokeTest.verifyScreenInput(failures);
+			ClientSmokeTest.verifyContainer(failures);
 			ClientSmokeTest.verifyReload(failures);
+			ClientSmokeTest.verifyDemos(failures);
 			ClientSmokeTest.verifyWarnings(failures);
+			ClientSmokeTest.verifyContracts(failures);
+			ClientSmokeTest.verifySnapshots(failures);
 		} catch (final Throwable throwable) {
 			throwable.printStackTrace();
 			failures.add("the smoke test stopped on " + throwable);
@@ -295,6 +337,12 @@ public final class ClientSmokeTest {
 		ClientSmokeTest.sleep(2000);
 		final int[] card = ClientSmokeTest.computeOnClient(() -> ClientSmokeTest.bounds(JOID.getUi(UIDemoMinecraft.class).getNodeList().get(0).getChild(0, RectNode.class)));
 		ClientSmokeTest.expectColor(failures, "first card of UIDemoMinecraft", ClientSmokeTest.capture("joid-smoke-minecraft"), card, 0xDDDDDD, true);
+		ClientSmokeTest.move(960, 540);
+		for (int page = 2; page <= 3; page++) {
+			ClientSmokeTest.xdotool("click", "--repeat", "8", "--delay", "50", "5");
+			ClientSmokeTest.sleep(1500);
+			ClientSmokeTest.capture("joid-smoke-minecraft-" + page);
+		}
 		if (ClientSmokeTest.computeOnClient(() -> Minecraft.getMinecraft().isGamePaused())) {
 			failures.add("UIDemoMinecraft, declared with pause = false, pauses the game");
 		}
@@ -408,6 +456,207 @@ public final class ClientSmokeTest {
 		}
 	}
 
+	private static void verifyFonts(final List<String> failures) {
+		final String failure = ClientSmokeTest.computeOnClient(() -> {
+			final Minecraft minecraft = Minecraft.getMinecraft();
+			for (final String text : new String[] {"Hello, JOID! 123", "§lBold§r and plain", "Été über ñ"}) {
+				final double width = TextInfo.create(MinecraftFont.DEFAULT, MinecraftFont.SIZE).getWidth(text);
+				if (Math.abs(width - minecraft.fontRenderer.getStringWidth(text)) > 0.001D) {
+					return "the default Minecraft font measures \"" + text + "\" " + width + " wide instead of " + minecraft.fontRenderer.getStringWidth(text) + " like the game";
+				}
+			}
+
+			final double alt = TextInfo.create(MinecraftFont.ALT, MinecraftFont.SIZE).getWidth("Enchanting table");
+			if (Math.abs(alt - minecraft.standardGalacticFontRenderer.getStringWidth("Enchanting table")) > 0.001D) {
+				return "the alt Minecraft font measures " + alt + " wide instead of " + minecraft.standardGalacticFontRenderer.getStringWidth("Enchanting table");
+			}
+
+			final String converted = TextConverter.convert(new ChatComponentText("A").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.RED)));
+			return converted.equals("§cA§r") ? null : "a red chat component converts to " + converted;
+		});
+		if (failure != null) {
+			failures.add(failure);
+		}
+	}
+
+	private static void verifyGameObjects(final List<String> failures) {
+		ClientSmokeTest.runOnClient(() -> JOID.open(new GameObjects()));
+		ClientSmokeTest.waitFor("the game objects of the smoke test", () -> JOID.isOpen(GameObjects.class), 30);
+		ClientSmokeTest.sleep(2000);
+		final List<int[]> nodes = ClientSmokeTest.computeOnClient(() -> JOID.getUi(GameObjects.class).getNodeList().get(0).getChildren().stream().map(ClientSmokeTest::bounds).collect(Collectors.toList()));
+		final BufferedImage image = ClientSmokeTest.capture("joid-smoke-game-objects");
+		final String[] labels = {"item", "block", "entity", "player skin", "Minecraft text", "sprite", "animated texture"};
+		for (int index = 0; index < labels.length; index++) {
+			final int[] bounds = nodes.get(index);
+			final int drawn = ClientSmokeTest.countDifferent(image, bounds, 0x777777);
+			if (drawn * 20 < bounds[2] * bounds[3]) {
+				failures.add("the " + labels[index] + " of the smoke test covers " + drawn + " of its " + bounds[2] * bounds[3] + " pixels at " + Arrays.toString(bounds));
+			}
+		}
+
+		ClientSmokeTest.press("Escape");
+		ClientSmokeTest.waitFor("UIDemoMinecraftChoice opened again by Escape on the game objects", () -> !JOID.isOpen(GameObjects.class) && JOID.isOpen(UIDemoMinecraftChoice.class), 30);
+		ClientSmokeTest.sleep(1000);
+	}
+
+	private static void verifyContainer(final List<String> failures) {
+		ClientSmokeTest.press("j");
+		ClientSmokeTest.waitFor("UIDemoMinecraftChoice opened by the key J", () -> JOID.isOpen(UIDemoMinecraftChoice.class), 30);
+		ClientSmokeTest.sleep(1000);
+		ClientSmokeTest.click(ClientSmokeTest.entry("UIDemoContainer"));
+		ClientSmokeTest.waitFor("the demo container opened by the server", () -> Minecraft.getMinecraft().currentScreen instanceof ContainerUIScreen && JOID.isOpen(UIDemoContainer.class), 30);
+		ClientSmokeTest.sleep(2000);
+		ClientSmokeTest.capture("joid-smoke-container");
+
+		final int[] hotbar = ClientSmokeTest.slot(54);
+		final int[] storage = ClientSmokeTest.slot(0);
+		ClientSmokeTest.click(hotbar);
+		ClientSmokeTest.expectCarried(failures, "a click on 3 diamonds of the hotbar in the demo container", 3);
+		ClientSmokeTest.click(storage);
+		ClientSmokeTest.expectCarried(failures, "a click on the first slot of the demo storage", 0);
+		ClientSmokeTest.expectStored(failures, "the first slot of the demo storage after a click", 3);
+		ClientSmokeTest.capture("joid-smoke-container-stored");
+		ClientSmokeTest.xdotool("keydown", "shift");
+		ClientSmokeTest.click(storage);
+		ClientSmokeTest.xdotool("keyup", "shift");
+		ClientSmokeTest.expectStored(failures, "the first slot of the demo storage after a shift click", 0);
+
+		ClientSmokeTest.click(ClientSmokeTest.computeOnClient(() -> ClientSmokeTest.bounds(JOID.getUi(UIDemoContainer.class).getNodeList().get(0).getChild(0, RectNode.class))));
+		ClientSmokeTest.waitFor("the popup above the demo container", () -> JOID.isOpen(UIDemoContainer.Popup.class), 30);
+		ClientSmokeTest.sleep(1000);
+		ClientSmokeTest.capture("joid-smoke-container-popup");
+		ClientSmokeTest.press("Escape");
+		ClientSmokeTest.waitFor("the popup to close on Escape", () -> !JOID.isOpen(UIDemoContainer.Popup.class) && JOID.isOpen(UIDemoContainer.class), 30);
+		if (!ClientSmokeTest.computeOnClient(() -> Minecraft.getMinecraft().currentScreen instanceof ContainerUIScreen)) {
+			failures.add("Escape on the popup above the demo container also closes the container");
+		}
+
+		ClientSmokeTest.press("Escape");
+		ClientSmokeTest.waitFor("UIDemoMinecraftChoice opened again by Escape on the demo container", () -> !JOID.isOpen(UIDemoContainer.class) && JOID.isOpen(UIDemoMinecraftChoice.class), 30);
+		ClientSmokeTest.press("Escape");
+		ClientSmokeTest.waitFor("the game without screen", () -> Minecraft.getMinecraft().currentScreen == null, 30);
+		ClientSmokeTest.sleep(1000);
+	}
+
+	private static void verifyDemos(final List<String> failures) {
+		for (final DemoEntry entry : ClientSmokeTest.entries()) {
+			if (entry.getLabel().endsWith("Store") || entry.getState() != null || entry.getLabel().equals("UIDemoContainer")) {
+				continue;
+			}
+
+			ClientSmokeTest.runOnClient(() -> JOID.open(new UIDemoMinecraftChoice()));
+			ClientSmokeTest.waitFor("UIDemoMinecraftChoice before " + entry.getLabel(), () -> JOID.isOpen(UIDemoMinecraftChoice.class), 30);
+			ClientSmokeTest.sleep(500);
+			final int errors = ClientSmokeTest.ERRORS.size();
+			try {
+				ClientSmokeTest.runOnClient(entry.getAction());
+			} catch (final AssertionError error) {
+				failures.add(entry.getLabel() + " cannot open: " + error.getMessage());
+			}
+			ClientSmokeTest.waitFrames(10);
+			ClientSmokeTest.sleep(1500);
+			ClientSmokeTest.capture("joid-demos-" + entry.getLabel());
+			if (!ClientSmokeTest.computeOnClient(() -> JOID.isOpen(Class.forName(entry.getHover()).asSubclass(UI.class)))) {
+				failures.add(entry.getLabel() + " is not shown");
+			}
+
+			if (ClientSmokeTest.ERRORS.size() != errors) {
+				failures.add(entry.getLabel() + " printed errors: " + String.join(System.lineSeparator(), ClientSmokeTest.ERRORS.subList(errors, ClientSmokeTest.ERRORS.size())));
+			}
+
+			for (int attempt = 0; attempt < 6 && ClientSmokeTest.computeOnClient(() -> Minecraft.getMinecraft().currentScreen != null); attempt++) {
+				ClientSmokeTest.press("Escape");
+				ClientSmokeTest.sleep(700);
+			}
+
+			if (ClientSmokeTest.computeOnClient(() -> Minecraft.getMinecraft().currentScreen != null)) {
+				failures.add(entry.getLabel() + " keeps a screen open after Escape");
+				ClientSmokeTest.runOnClient(() -> Minecraft.getMinecraft().displayGuiScreen(null));
+			}
+		}
+		ClientSmokeTest.sleep(1000);
+	}
+
+	private static void verifyContracts(final List<String> failures) {
+		ClientSmokeTest.closeOverlays();
+		final Result result = ClientSmokeTest.computeOnClient(() -> JUnitCore.runClasses(MinecraftRenderBridgeContractTest.class, MinecraftBorrowedTextureContractTest.class, MinecraftBitmapFontContractTest.class, MinecraftStateGuardContractTest.class), 1200);
+		System.out.println("[JOID] " + result.getRunCount() + " contract tests ran, " + result.getIgnoreCount() + " skipped");
+		for (final Failure failure : result.getFailures()) {
+			failures.add("contract " + failure.getTestHeader() + ": " + failure.getMessage());
+		}
+	}
+
+	private static void verifySnapshots(final List<String> failures) {
+		final File output = new File(System.getProperty("joid.snapshot.output", "snapshots/renders"));
+		final File references = new File(System.getProperty("joid.snapshot.references", "snapshots/references"));
+		final List<String> differences = ClientSmokeTest.computeOnClient(() -> {
+			final List<String> found = new ArrayList<>();
+			final SnapshotRunner runner = SnapshotRunner.start(new MinecraftSnapshotBackend());
+			BridgeHandler.THREAD.register(new DirectThreadBridge());
+			try {
+				final File folder = new File(new File(references, "opengl"), runner.getRenderer());
+				for (final String scenario : SnapshotRunner.getScenarios()) {
+					for (final Entry<String, SnapshotImage> shot : runner.run(scenario).entrySet()) {
+						final File reference = new File(folder, shot.getKey() + ".png");
+						shot.getValue().write(new File(output, shot.getKey() + ".png"));
+						if (!reference.exists()) {
+							shot.getValue().write(reference);
+							System.out.println("[JOID] Recorded the snapshot reference " + reference);
+							continue;
+						}
+
+						final SnapshotDifference difference = shot.getValue().compare(SnapshotImage.read(reference), 1);
+						if (difference.getPixels() > 0) {
+							found.add(shot.getKey() + ": " + difference.getPixels() + " pixels differ from the reference, maximum channel delta " + difference.getMaximum());
+						}
+					}
+				}
+			} finally {
+				runner.stop();
+			}
+			return found;
+		}, 1800);
+		failures.addAll(differences);
+	}
+
+	private static void closeOverlays() {
+		if (ClientSmokeTest.computeOnClient(UIDemoOverlayLayer::isOpen)) {
+			ClientSmokeTest.runOnClient(UIDemoOverlayLayer::toggle);
+			ClientSmokeTest.waitFrames(5);
+		}
+	}
+
+	private static void expectStored(final List<String> failures, final String label, final int count) {
+		final int stored = ClientSmokeTest.computeOnServer(player -> ClientSmokeTest.count(OpenDemoContainerPayloadHandler.getStorage(player).getStackInSlot(0)));
+		if (stored != count) {
+			failures.add(label + " holds " + stored + " items on the server instead of " + count);
+		}
+	}
+
+	private static int[] slot(final int index) {
+		return ClientSmokeTest.computeOnClient(() -> {
+			final UIDemoContainer ui = JOID.getUi(UIDemoContainer.class);
+			for (final SlotNode node : ui.getNodeList().get(0).getChildren(SlotNode.class)) {
+				if (node.getSlot() == ui.getContainer().getSlot(index)) {
+					return ClientSmokeTest.bounds(node);
+				}
+			}
+			throw new AssertionError("No slot node shows the slot " + index + " of the demo container");
+		});
+	}
+
+	private static int countDifferent(final BufferedImage image, final int[] bounds, final int background) {
+		int count = 0;
+		for (int y = Math.max(0, bounds[1]); y < Math.min(image.getHeight(), bounds[1] + bounds[3]); y++) {
+			for (int x = Math.max(0, bounds[0]); x < Math.min(image.getWidth(), bounds[0] + bounds[2]); x++) {
+				if ((image.getRGB(x, y) & 0xFFFFFF) != background) {
+					count++;
+				}
+			}
+		}
+		return count;
+	}
+
 	private static void expectCarried(final List<String> failures, final String label, final int count) {
 		final int client = ClientSmokeTest.computeOnClient(() -> ClientSmokeTest.count(Minecraft.getMinecraft().thePlayer.inventory.getItemStack()));
 		final int server = ClientSmokeTest.computeOnServer(player -> ClientSmokeTest.count(player.inventory.getItemStack()));
@@ -510,15 +759,19 @@ public final class ClientSmokeTest {
 				future.completeExceptionally(exception);
 			}
 		});
-		return ClientSmokeTest.await(future, "computing on the server");
+		return ClientSmokeTest.await(future, "computing on the server", 120);
 	}
 
 	private static void runOnClient(final Runnable runnable) {
-		ClientSmokeTest.await(Minecraft.getMinecraft().func_152344_a(runnable), "running on the client");
+		ClientSmokeTest.await(Minecraft.getMinecraft().func_152344_a(runnable), "running on the client", 120);
 	}
 
 	private static <T> T computeOnClient(final Callable<T> callable) {
-		return (T) ClientSmokeTest.await(Minecraft.getMinecraft().func_152343_a(callable), "computing on the client");
+		return ClientSmokeTest.computeOnClient(callable, 120);
+	}
+
+	private static <T> T computeOnClient(final Callable<T> callable, final int seconds) {
+		return (T) ClientSmokeTest.await(Minecraft.getMinecraft().func_152343_a(callable), "computing on the client", seconds);
 	}
 
 	private static void waitFor(final String label, final BooleanSupplier condition, final int seconds) {
@@ -544,9 +797,9 @@ public final class ClientSmokeTest {
 		}
 	}
 
-	private static <T> T await(final Future<T> future, final String label) {
+	private static <T> T await(final Future<T> future, final String label, final int seconds) {
 		try {
-			return future.get(120, TimeUnit.SECONDS);
+			return future.get(seconds, TimeUnit.SECONDS);
 		} catch (final InterruptedException exception) {
 			Thread.currentThread().interrupt();
 			throw new AssertionError("Interrupted while " + label, exception);
@@ -594,6 +847,28 @@ public final class ClientSmokeTest {
 		throw new AssertionError("No field " + name + " in " + type.getName());
 	}
 
+	@UIDataMinecraft(background = false)
+	private static final class GameObjects extends UI {
+
+		@Override
+		public void init() {
+			RectNode
+			.create(0, 0, 1920, 1080)
+			.color(Color.rgb(0x777777))
+			.body(rect -> {
+				ItemNode.create(100, 100, 160, 160).stack(new ItemStack(Items.diamond_sword)).attach(rect);
+				BlockNode.create(400, 100, 160, 160).block(Blocks.grass).attach(rect);
+				EntityNode.create(700, 60, 160, 240).type(EntityPig.class).attach(rect);
+				EntityNode.create(1000, 60, 160, 240).skin(AbstractClientPlayer.locationStevePng).attach(rect);
+				TextNode.create(100, 400).text(Text.create("JOID", TextInfo.create(MinecraftFont.DEFAULT, 64F).color(Color.WHITE))).attach(rect);
+				ResourceNode.create(400, 400, 128, 128).resource(Resource.of(Items.diamond.getIconFromDamage(0))).attach(rect);
+				ResourceNode.create(700, 400, 128, 128).resource(Resource.of("minecraft:textures/blocks/water_still.png")).attach(rect);
+			})
+			.attach(this);
+		}
+
+	}
+
 	private static final class WarningStream extends PrintStream {
 
 		private final PrintStream target;
@@ -608,7 +883,16 @@ public final class ClientSmokeTest {
 			if (line != null && line.startsWith("[JOID]")) {
 				ClientSmokeTest.WARNINGS.add(line);
 			}
+
+			if (line != null && (line.contains("Exception") || line.contains("Error"))) {
+				ClientSmokeTest.ERRORS.add(line);
+			}
 			this.target.println(line);
+		}
+
+		@Override
+		public void println(final Object value) {
+			this.println(String.valueOf(value));
 		}
 
 	}

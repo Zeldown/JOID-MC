@@ -59,7 +59,7 @@ jobs:
   client-smoke-tests:
     needs: build
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 70
     steps:
       - uses: actions/checkout@v7
         with:
@@ -86,7 +86,7 @@ jobs:
         run: ./gradlew setupDevWorkspace --max-workers=2
 
       - name: Client smoke test
-        timeout-minutes: 25
+        timeout-minutes: 55
         shell: bash
         env:
           LIBGL_ALWAYS_SOFTWARE: '1'
@@ -108,3 +108,5 @@ jobs:
             forge/runs/client/screenshots/
             forge/runs/client/logs/
             forge/runs/client/crash-reports/
+            forge/runs/snapshots/
+            .snapshots/references/

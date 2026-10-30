@@ -41,7 +41,9 @@ configurations {
     joidDemo
     joidDev
     joidProd
+    smoke
     compile.extendsFrom(embed, joidDemo)
+    compileOnly.extendsFrom(smoke)
 }
 
 dependencies {
@@ -50,6 +52,8 @@ dependencies {
     joidProd files(rootProject.file("libs/joid-core-${joid_version}-prod.jar"), rootProject.file("libs/joid-backend-minecraft-common-${common_version}-prod.jar"))
     embed files(rootProject.file("libs/joid-base-opengl-${joid_version}.jar"), rootProject.file("libs/joid-base-openal-${joid_version}.jar"), rootProject.file("libs/joid-base-lwjgl2-${joid_version}.jar"))
     embed "net.java.dev.jna:jna:${jna_version}"
+    smoke files(rootProject.file("libs/joid-tool-testkit-${joid_version}.jar"))
+    smoke "junit:junit:${junit_version}"
     compileOnly "org.projectlombok:lombok:${lombok_version}"
 }
 
@@ -158,9 +162,11 @@ runClient {
     args('--width', '1280', '--height', '720')
     if (project.hasProperty('joid.smoke')) {
         systemProperty('joid.smoke', 'true')
+        systemProperty('joid.snapshot.output', file('runs/snapshots').absolutePath)
+        systemProperty('joid.snapshot.references', rootProject.file('.snapshots/references').absolutePath)
     }
     doFirst {
-        classpath = classpath.filter { it != jar.archivePath } + sourceSets.main.output
+        classpath = classpath.filter { it != jar.archivePath } + sourceSets.main.output + configurations.smoke
     }
 }
 
