@@ -169,6 +169,12 @@ runClient {
         systemProperty('joid.snapshot.output', file('runs/snapshots').absolutePath)
         systemProperty('joid.snapshot.references', rootProject.file('.snapshots/references').absolutePath)
         systemProperty('joid.cache', file("$buildDir/joid-cache").absolutePath)
+    }
+    if (project.hasProperty('joid.showcase')) {
+        project.properties.findAll { it.key.startsWith('joid.showcase') }.each { systemProperty(it.key, it.value.toString()) }
+        args('--username', 'JOID')
+    }
+    if (project.hasProperty('joid.test') || project.hasProperty('joid.showcase')) {
         args('--width', '1920', '--height', '1080')
     } else {
         args('--width', '1280', '--height', '720')

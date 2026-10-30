@@ -11,6 +11,7 @@ import dev.joid.backend.minecraft.demo.ui.UIDemoMinecraftChoice;
 import dev.joid.backend.minecraft.loader.registry.ContainerUIRegistry;
 import dev.joid.backend.minecraft.loader.registry.KeyBindRegistry;
 import dev.joid.backend.minecraft.loader.registry.ReloadListenerRegistry;
+import dev.joid.backend.minecraft.showcase.ShowcaseLauncher;
 import dev.joid.demo.ui.UIDemoChoice;
 import dev.joid.lib.JOID;
 import dev.joid.lib.input.key.Key;
@@ -25,6 +26,10 @@ public final class DemoLauncher {
 		ContainerUIRegistry.create(DemoContainer.TYPE, UIDemoContainer::new).register();
 		OpenDemoContainerPayload.TYPE.onServer(OpenDemoContainerPayloadHandler::handle).register();
 		KeyBindRegistry.create("joid.demo", Key.J).onPress(() -> JOID.open(new UIDemoMinecraftChoice())).register();
+		if (ShowcaseLauncher.isActive()) {
+			ShowcaseLauncher.init();
+		}
+
 		if (ClientTestPlan.isActive()) {
 			ReloadListenerRegistry.create(MinecraftJoid.MOD_ID + ":demo/test").onReload(MinecraftClientTestPilot::countReload).register();
 		}

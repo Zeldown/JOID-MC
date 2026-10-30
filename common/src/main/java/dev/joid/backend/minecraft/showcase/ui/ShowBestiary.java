@@ -1,0 +1,211 @@
+package dev.joid.backend.minecraft.showcase.ui;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
+import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
+import dev.joid.backend.minecraft.lib.ui.node.impl.design.block.BlockNode;
+import dev.joid.backend.minecraft.lib.ui.node.impl.design.entity.EntityNode;
+import dev.joid.backend.minecraft.lib.ui.node.impl.design.item.ItemNode;
+import dev.joid.lib.color.Color;
+import dev.joid.lib.draw.text.Text;
+import dev.joid.lib.draw.text.TextMode;
+import dev.joid.lib.font.FontWeight;
+import dev.joid.lib.font.TextInfo;
+import dev.joid.lib.shader.impl.BorderShader.BorderMode;
+import dev.joid.lib.ui.core.UI;
+import dev.joid.lib.ui.node.Node;
+import dev.joid.lib.ui.node.effect.impl.BlurNodeEffect;
+import dev.joid.lib.ui.node.effect.impl.BorderNodeEffect;
+import dev.joid.lib.ui.node.effect.impl.RoundedNodeEffect;
+import dev.joid.lib.ui.node.effect.impl.ShadowNodeEffect;
+import dev.joid.lib.ui.node.impl.layout.ContainerNode;
+import dev.joid.lib.ui.node.impl.shape.CircleNode;
+import dev.joid.lib.ui.node.impl.shape.RectNode;
+import dev.joid.lib.ui.node.impl.text.TextNode;
+import dev.joid.lib.utils.align.Align;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import net.minecraft.entity.monster.EntityCreeper;
+import net.minecraft.entity.passive.EntityBat;
+import net.minecraft.entity.passive.EntityOcelot;
+import net.minecraft.entity.passive.EntityWolf;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
+
+@UIDataMinecraft(pause = false)
+public class ShowBestiary extends UI implements IShowFocus {
+
+	private static final List<Entry> ENTRIES = Arrays.asList(
+		new Entry("Wolf", "MOB", ShowTheme.GRASS, "Forest and taiga", "Tamed with bones, it follows you and fights whatever attacks you.", "4", size -> EntityNode.create(0, 10 * size, 300 * size, 210 * size).type(EntityWolf.class)),
+		new Entry("Ocelot", "MOB", ShowTheme.GRASS, "Jungle", "Shy until you offer it raw fish, then it keeps the creepers away.", "5", size -> EntityNode.create(0, 10 * size, 300 * size, 210 * size).type(EntityOcelot.class)),
+		new Entry("Bat", "MOB", ShowTheme.GRASS, "Dark caves", "Hangs from the ceiling by day and flutters away when you come near.", "3", size -> EntityNode.create(0, 10 * size, 300 * size, 210 * size).type(EntityBat.class)),
+		new Entry("Creeper", "MOB", ShowTheme.GRASS, "Everywhere at night", "Silent, patient and explosive. Keep your distance.", "20", size -> EntityNode.create(0, 10 * size, 300 * size, 210 * size).type(EntityCreeper.class)),
+		new Entry("Diamond Ore", "BLOCK", ShowTheme.DIAMOND, "Deep slate layers", "The rarest ore of the Overworld, mined with an iron pickaxe or better.", "3", size -> BlockNode.create(80 * size, 45 * size, 140 * size, 140 * size).block(Blocks.diamond_ore)),
+		new Entry("Bookshelf", "BLOCK", ShowTheme.DIAMOND, "Villages, strongholds", "Fifteen of them around an enchanting table unlock its best offers.", "1.5", size -> BlockNode.create(80 * size, 45 * size, 140 * size, 140 * size).block(Blocks.bookshelf)),
+		new Entry("Bow", "ITEM", ShowTheme.AMETHYST, "Skeletons", "Draw it longer to shoot farther, and enchant it with Infinity to never run out.", "4.5", size -> ItemNode.create(80 * size, 45 * size, 140 * size, 140 * size).stack(new ItemStack(Items.bow)).glint(true)),
+		new Entry("Nether Star", "ITEM", ShowTheme.AMETHYST, "The Wither", "Dropped by the Wither, it lights up a beacon for good.", "1", size -> ItemNode.create(86 * size, 51 * size, 128 * size, 128 * size).stack(new ItemStack(Items.nether_star)))
+	);
+
+	private final Node[] cards;
+
+	private double start;
+
+	@Getter
+	private int selected;
+
+	public ShowBestiary() {
+		this.cards = new Node[ShowBestiary.ENTRIES.size()];
+	}
+
+	@Override
+	public void init() {
+		this.start    = ShowTheme.now();
+		this.selected = 0;
+
+		TextNode.create(120, 96).text(Text.create("Bestiary", ShowTheme.font(FontWeight.EXTRA_BOLD, 64F, ShowTheme.TEXT))).attach(this);
+
+		TextNode.create(124, 180).text(Text.create("Creatures, blocks and treasures of the Overworld", ShowTheme.font(FontWeight.MEDIUM, 22F, ShowTheme.MUTED))).attach(this);
+
+		this.tabs();
+
+		for (int index = 0; index < ShowBestiary.ENTRIES.size(); index++) {
+			this.card(index);
+		}
+
+		this.detail();
+	}
+
+	@Override
+	public Node getFocus() {
+		return this.cards[0];
+	}
+
+	public Node getCard(final int index) {
+		return this.cards[index];
+	}
+
+	private void tabs() {
+		final String[] names = {"All  8", "Mobs  4", "Blocks  2", "Items  2"};
+		double x = 120D;
+		for (int index = 0; index < names.length; index++) {
+			final String name = names[index];
+			final TextInfo info = ShowTheme.font(FontWeight.BOLD, 17F, index == 0 ? ShowTheme.INK : ShowTheme.MUTED);
+			final double width = info.getWidth(name) + 44D;
+			RectNode
+			.create(x, 238, width, 44)
+			.color(index == 0 ? ShowTheme.horizontal(ShowTheme.GRASS, ShowTheme.EMERALD) : Color.WHITE.withAlpha(0.07F))
+			.effect(RoundedNodeEffect.create(22F))
+			.body(tab -> {
+				TextNode.create(width / 2D, 22).text(Text.create(name, info).alignX(Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(tab);
+			})
+			.attach(this);
+			x += width + 12D;
+		}
+	}
+
+	private void card(final int index) {
+		final Entry entry = ShowBestiary.ENTRIES.get(index);
+		final double x = 120D + index % 4 * 318D;
+		final double y = 318D + index / 4 * 344D;
+		final double delay = 0.15D + index * 0.07D;
+		this.cards[index] = RectNode
+		.create(x, y, 300, 326)
+		.color(ShowTheme.vertical(ShowTheme.PANEL_TOP.withAlpha(0.88F), ShowTheme.INK.withAlpha(0.92F)))
+		.hoveredColor(ShowTheme.vertical(Color.decode("#232B3D").withAlpha(0.92F), ShowTheme.INK.withAlpha(0.94F)))
+		.y(() -> y + 48D * (1D - ShowTheme.ease(this.elapsed(), delay, 0.7D)) - (this.selected == index ? 8D : 0D))
+		.effect(RoundedNodeEffect.create(24F))
+		.effect(BorderNodeEffect.create(Color.WHITE.withAlpha(0.09F), 1.5F).mode(BorderMode.IN))
+		.effect(ShadowNodeEffect.create(Color.BLACK.withAlpha(0.5F), 36F).offsetY(16D))
+		.onHoverStart(event -> this.selected = index)
+		.body(card -> {
+			CircleNode.create(70, 34, 160).color(entry.getColor().withAlpha(0.22F)).effect(BlurNodeEffect.create(36F)).interactive(false).attach(card);
+			final Node render = entry.getRender().apply(1D).interactive(false);
+			if (render instanceof EntityNode) {
+				((EntityNode) render).rotationYaw(() -> -35D + this.elapsed() * 20D + index * 15D);
+			} else if (render instanceof BlockNode) {
+				((BlockNode) render).rotationYaw(() -> 30D + this.elapsed() * 30D + index * 25D);
+			}
+			render.attach(card);
+			TextNode.create(24, 234).text(Text.create(entry.getName(), ShowTheme.font(FontWeight.BOLD, 24F, ShowTheme.TEXT))).attach(card);
+			TextNode.create(24, 272).text(Text.create(entry.getHabitat(), ShowTheme.font(FontWeight.MEDIUM, 15F, ShowTheme.MUTED))).attach(card);
+			final TextInfo chip = ShowTheme.label(12F, entry.getColor());
+			final double width = chip.getWidth(entry.getKind()) + 24D;
+			RectNode
+			.create(276 - width, 236, width, 28)
+			.color(entry.getColor().withAlpha(0.14F))
+			.effect(RoundedNodeEffect.create(14F))
+			.body(tag -> {
+				TextNode.create(width / 2D, 14).text(Text.create(entry.getKind(), chip).alignX(Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(tag);
+			})
+			.attach(card);
+		})
+		.attach(this);
+	}
+
+	private void detail() {
+		ShowTheme
+		.panel(1410, 96, 390, 892)
+		.x(() -> 1410D + 60D * (1D - ShowTheme.ease(this.elapsed(), 0.3D, 0.8D)))
+		.body(panel -> {
+			CircleNode.create(55, 70, 280).color(() -> this.entry().getColor().withAlpha(0.24F)).effect(BlurNodeEffect.create(50F)).interactive(false).attach(panel);
+			for (int index = 0; index < ShowBestiary.ENTRIES.size(); index++) {
+				final int entry = index;
+				final Node render = ShowBestiary.ENTRIES.get(index).getRender().apply(1.3D).interactive(false);
+				if (render instanceof EntityNode) {
+					((EntityNode) render).rotationYaw(() -> -40D + this.elapsed() * 20D);
+				} else if (render instanceof BlockNode) {
+					((BlockNode) render).rotationYaw(() -> 30D + this.elapsed() * 30D);
+				}
+				ContainerNode.create(0, 40, 390, 290).visible(() -> this.selected == entry).interactive(false).body(box -> render.attach(box)).attach(panel);
+			}
+			TextNode.create(36, 420).text(Text.create(() -> this.entry().getKind(), ShowTheme.label(13F, ShowTheme.FAINT))).attach(panel);
+			TextNode.create(36, 446).text(Text.create(() -> this.entry().getName(), ShowTheme.font(FontWeight.EXTRA_BOLD, 40F, ShowTheme.TEXT))).attach(panel);
+			TextNode.create(36, 508, 318, 0).text(Text.create(() -> this.entry().getDescription(), ShowTheme.font(FontWeight.MEDIUM, 18F, ShowTheme.MUTED).lineHeight(1.5F))).mode(TextMode.SPLIT).attach(panel);
+			this.fact(panel, 640, "HABITAT", () -> this.entry().getHabitat());
+			this.fact(panel, 712, "HEALTH", () -> this.entry().getHealth() + " hearts");
+			RectNode
+			.create(36, 800, 318, 60)
+			.color(ShowTheme.horizontal(ShowTheme.GRASS, ShowTheme.EMERALD))
+			.effect(RoundedNodeEffect.create(18F))
+			.effect(ShadowNodeEffect.create(ShowTheme.EMERALD.withAlpha(0.45F), 24F).offsetY(6D))
+			.body(button -> {
+				TextNode.create(159, 30).text(Text.create("Track", ShowTheme.font(FontWeight.EXTRA_BOLD, 20F, ShowTheme.INK)).alignX(Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(button);
+			})
+			.attach(panel);
+		})
+		.attach(this);
+	}
+
+	private void fact(final Node panel, final double y, final String label, final Supplier<String> value) {
+		TextNode.create(36, y).text(Text.create(label, ShowTheme.label(12F, ShowTheme.FAINT))).attach(panel);
+		TextNode.create(36, y + 22).text(Text.create(value, ShowTheme.font(FontWeight.SEMI_BOLD, 20F, ShowTheme.TEXT))).attach(panel);
+	}
+
+	private Entry entry() {
+		return ShowBestiary.ENTRIES.get(this.selected);
+	}
+
+	private double elapsed() {
+		return ShowTheme.now() - this.start;
+	}
+
+	@Getter
+	@AllArgsConstructor(access = AccessLevel.PRIVATE)
+	private static final class Entry {
+
+		private final String                 name;
+		private final String                 kind;
+		private final Color                  color;
+		private final String                 habitat;
+		private final String                 description;
+		private final String                 health;
+		private final Function<Double, Node> render;
+
+	}
+
+}
