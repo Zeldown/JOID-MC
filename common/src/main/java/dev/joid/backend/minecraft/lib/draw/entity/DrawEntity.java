@@ -1,8 +1,11 @@
 package dev.joid.backend.minecraft.lib.draw.entity;
 
+import java.lang.reflect.Method;
+import java.nio.FloatBuffer;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
@@ -33,6 +36,7 @@ public final class DrawEntity {
 	private static final DrawEntity INSTANCE = new DrawEntity();
 
 	private static final ModelBiped PLAYER = new ModelBiped(0F);
+	private static final Method PRE_RENDER = ReflectionHelper.findMethod(RendererLivingEntity.class, null, new String[] {"preRenderCallback", "func_77041_b"}, EntityLivingBase.class, float.class);
 
 	public static @NonNull DrawEntity inst() {
 		return DrawEntity.INSTANCE;
@@ -148,11 +152,28 @@ public final class DrawEntity {
 			return extent;
 		}
 
-		final double factor = Math.max(1D, entity.height / (bounds[2] - bounds[1]));
+		final double scale = DrawEntity.getRenderScale((RendererLivingEntity) render, (EntityLivingBase) entity);
+		final double factor = Math.max(1D, entity.height / (scale * (bounds[2] - bounds[1])));
 		final double center = entity.height / 2D;
-		extent[0] = Math.max(entity.width / 2D, bounds[0] * factor);
-		extent[1] = Math.max(center, Math.max((1.5078125D - bounds[1]) * factor - center, center - (1.5078125D - bounds[2]) * factor));
+		extent[0] = Math.max(entity.width / 2D, scale * bounds[0] * factor);
+		extent[1] = Math.max(center, Math.max(scale * (1.5078125D - bounds[1]) * factor - center, center - scale * (1.5078125D - bounds[2]) * factor));
 		return extent;
+	}
+
+	private static double getRenderScale(final RendererLivingEntity render, final EntityLivingBase entity) {
+		final FloatBuffer matrix = BufferUtils.createFloatBuffer(16);
+		GL11.glPushMatrix();
+		try {
+			GL11.glLoadIdentity();
+			DrawEntity.PRE_RENDER.invoke(render, entity, 1F);
+			GL11.glGetFloat(GL11.GL_MODELVIEW_MATRIX, matrix);
+		} catch (final ReflectiveOperationException exception) {
+			return 1D;
+		} finally {
+			GL11.glPopMatrix();
+		}
+
+		return Math.sqrt(matrix.get(0) * matrix.get(0) + matrix.get(1) * matrix.get(1) + matrix.get(2) * matrix.get(2));
 	}
 
 	private static void visit(final ModelRenderer part, final Matrix4f parent, final double[] bounds) {
