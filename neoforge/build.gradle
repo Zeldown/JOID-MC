@@ -54,6 +54,16 @@ configurations {
     additionalRuntimeClasspath.extendsFrom(embed, joidDemo, clientTest)
 }
 
+if (project.hasProperty('joid.test')) {
+    tasks.matching { it.name == 'runClient' }.configureEach {
+        doFirst {
+            def config = file('runs/client/config/fml.toml')
+            config.parentFile.mkdirs()
+            config.text = 'earlyWindowControl = false'
+        }
+    }
+}
+
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 tasks.named('eclipse') {
