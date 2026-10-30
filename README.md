@@ -31,6 +31,7 @@ The jar depends on `joid-core` only. It holds no class of Minecraft or of a mod 
 | `bridge.ui` | The UI bridges of the game screens, the containers and the overlays (`BaseScreenUIBridge`, `BaseContainerUIBridge`, `BaseOverlayUIBridge`), and their tooltip queue. A version branch only fills their `protected` hooks: drawing, frame counting, cursor, tooltips, game state. |
 | `loader.network` | `IPayload`, its reader and writer, and `PayloadType`, typed by the server player of the version. |
 | `loader.registry` | `KeyBindRegistry` and `ReloadListenerRegistry`, filled by JOID-MC and read by the mod loader of each version. |
+| `demo.test` | The client test plan of every version: its scenarios and assertions, and `IClientTestPilot`, which each version implements to drive its game. Only in the `demo` jar. |
 
 The package names are those of JOID-MC, under `dev.joid.backend.minecraft`: a class keeps its name when it moves between this branch and a version branch.
 
@@ -49,8 +50,9 @@ JDK 8 is required, since Gradle 3.5 runs on Java 8 only.
 | `joid-backend-minecraft-common-<version>-dev.jar` | The `dev` jars of the version branches. |
 | `joid-backend-minecraft-common-<version>-prod.jar` | The `prod` jars of the version branches. |
 | `joid-backend-minecraft-common-<version>-sources.jar` | The `sources` jars of the version branches. |
+| `joid-backend-minecraft-common-<version>-demo.jar` | The dev runs of the version branches: the classes of the `dev` jar, the demos and the client test plan. |
 
-`build` also runs the tests and checks both jars: Java 8 classes only, nothing outside `dev/joid/backend/minecraft`, no link to a class of the game, and no link to a class of JOID that the matching jar of JOID does not ship.
+`build` also runs the tests and checks the jars: Java 8 classes only, nothing outside `dev/joid/backend/minecraft`, no link to a class of the game, and no link to a class of JOID that the matching jar of JOID does not ship.
 
 ## Updating a version branch
 
@@ -61,6 +63,27 @@ scripts/update-libs.sh ../JOID-MC-26.2 ../JOID-MC-1.7.10
 ```
 
 Then build each version branch, commit its `libs/` folder and push it: its continuous integration checks the update.
+
+## Adding a version
+
+Each Minecraft version has its own branch, `version/<Minecraft version>`, made from the closest version branch and never renamed. It joins the shared pipeline with three things:
+
+1. **A pilot.** `MinecraftClientTestPilot`, in `dev.joid.backend.minecraft.demo.test`, implements `IClientTestPilot` for the game of the version: input, captures, game state, and the Minecraft objects that the scenarios use. The version starts `ClientTestPlan.start(new MinecraftClientTestPilot())` when the game runs with `-Pjoid.test`. A scenario whose concept the version lacks goes in `getExclusions()` with its reason, and in the table of the Tests section of the README.
+2. **Its `build.yml`**, which only calls the shared workflow with the parameters of the version:
+
+```yaml
+jobs:
+  version:
+    uses: Zeldown/JOID-MC/.github/workflows/version.yml@common
+    with:
+      java-version: '25'
+      loaders: '["fabric", "neoforge", "forge"]'
+      vulkan: true
+```
+
+3. **Its README**, the README of `version/26.2` with the same sections in the same order: only the sentences and the code that the version changes, the same showcases rendered in the version, and the same Tests section.
+
+The `parity` job of every branch fails as soon as a version branch leaves this model.
 
 ## License
 
