@@ -9,6 +9,7 @@ import org.lwjgl.opengl.GL21;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL33;
 
+import dev.joid.base.opengl.binding.GlConstants;
 import dev.joid.base.opengl.capability.GlCapabilities;
 import dev.joid.base.opengl.render.GlRenderBridge;
 import dev.joid.lib.bridge.BridgeHandler;
@@ -53,7 +54,7 @@ public final class MinecraftSnapshotBackend implements ISnapshotBackend {
 	public @NonNull SnapshotImage capture(final int width, final int height) {
 		final ByteBuffer pixels = BufferUtils.createByteBuffer(width * height * 4);
 		this.bridge.getGuard().run(() -> {
-			this.framebuffer.bindFramebuffer(false);
+			this.bridge.getFrameBufferBinding().bindFramebuffer(GlConstants.FRAMEBUFFER, this.framebuffer.framebufferObject);
 			GL11.glReadPixels(0, 0, width, height, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, pixels);
 		});
 		return SnapshotImage.from(pixels, width, height, true, PixelLayout.RGBA8);
