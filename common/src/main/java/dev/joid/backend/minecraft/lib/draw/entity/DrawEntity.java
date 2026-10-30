@@ -51,7 +51,8 @@ public final class DrawEntity {
 	}
 
 	public void drawEntity(final double x, final double y, final double width, final double height, final @NonNull Entity entity, final double scale, final double rotationYaw, final double rotationPitch, final double lookX, final double lookY) {
-		this.drawModel(x, y, width, height, DrawEntity.getExtent(entity), entity.height, scale, rotationYaw, rotationPitch, lookX, lookY, (lookYaw, lookPitch) -> {
+		final double[] extent = DrawEntity.getExtent(entity);
+		this.drawModel(x, y, width, height, extent, (float) (2D * extent[2]), scale, rotationYaw, rotationPitch, lookX, lookY, (lookYaw, lookPitch) -> {
 			if (!(entity instanceof EntityLivingBase)) {
 				RenderManager.instance.renderEntityWithPosYaw(entity, 0D, 0D, 0D, 0F, 1F);
 				return;
@@ -126,7 +127,7 @@ public final class DrawEntity {
 	}
 
 	private static double[] getExtent(final Entity entity) {
-		final double[] extent = {1.75D * entity.width / 2D, entity.height / 2D};
+		final double[] extent = {1.75D * entity.width / 2D, entity.height / 2D, entity.height / 2D};
 		final Render render = RenderManager.instance.getEntityRenderObject(entity);
 		if (!(render instanceof RendererLivingEntity) || entity.height <= 0F) {
 			return extent;
@@ -153,10 +154,11 @@ public final class DrawEntity {
 		}
 
 		final double scale = DrawEntity.getRenderScale((RendererLivingEntity) render, (EntityLivingBase) entity);
-		final double factor = Math.max(1D, entity.height / (scale * (bounds[2] - bounds[1])));
-		final double center = entity.height / 2D;
-		extent[0] = Math.max(entity.width / 2D, scale * bounds[0] * factor);
-		extent[1] = Math.max(center, Math.max(scale * (1.5078125D - bounds[1]) * factor - center, center - scale * (1.5078125D - bounds[2]) * factor));
+		final double top = scale * (1.5078125D - bounds[1]);
+		final double bottom = scale * (1.5078125D - bounds[2]);
+		extent[0] = scale * bounds[0];
+		extent[1] = (top - bottom) / 2D;
+		extent[2] = (top + bottom) / 2D;
 		return extent;
 	}
 
