@@ -204,6 +204,7 @@ public final class ClientSmokeTest {
 			final Minecraft minecraft = Minecraft.getMinecraft();
 			minecraft.gameSettings.pauseOnLostFocus = false;
 			minecraft.gameSettings.difficulty = EnumDifficulty.PEACEFUL;
+			minecraft.gameSettings.showInventoryAchievementHint = false;
 			minecraft.launchIntegratedServer("joid-smoke", "joid-smoke", new WorldSettings(0L, WorldSettings.GameType.SURVIVAL, false, false, WorldType.FLAT));
 		});
 		ClientSmokeTest.waitFor("the singleplayer world", () -> Minecraft.getMinecraft().thePlayer != null && Minecraft.getMinecraft().theWorld != null && (Minecraft.getMinecraft().currentScreen == null || Minecraft.getMinecraft().currentScreen instanceof GuiIngameMenu), 600);
