@@ -23,3 +23,6 @@ build
 eclipse
 run
 runs
+
+# snapshots
+.snapshots

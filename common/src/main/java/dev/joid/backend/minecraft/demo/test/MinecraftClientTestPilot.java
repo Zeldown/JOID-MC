@@ -175,6 +175,11 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	}
 
 	@Override
+	public String getRenderPipeline() {
+		return "blaze3d-" + this.getGraphicsBackend();
+	}
+
+	@Override
 	public Map<ClientTestScenario, String> getExclusions() {
 		final Map<ClientTestScenario, String> exclusions = new EnumMap<>(ClientTestScenario.class);
 		exclusions.put(ClientTestScenario.STENCIL, "Blaze3D gives no stencil buffer to the screen, JOID emulates it");
