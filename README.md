@@ -1,14 +1,14 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.2/docs/images/logo.png" width="128" alt="JOID logo">
+<img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.7.10/docs/images/logo.png" width="128" alt="JOID logo">
 
 # JOID-MC
-## JOID interfaces inside Minecraft 1.7.10
+## JOID interfaces inside Minecraft
 
 <div align="center">
   <img align="center" src="https://img.shields.io/badge/minecraft-1.7.10-brightgreen">
   <img align="center" src="https://img.shields.io/badge/joid-8.0.0-blue">
-  <img align="center" src="https://img.shields.io/badge/loader-Forge%2010.13.4-orange">
+  <img align="center" src="https://img.shields.io/badge/loader-Forge-orange">
   <img align="center" src="https://img.shields.io/badge/license-Apache--2.0-blue">
   <img align="center" src="https://github.com/Zeldown/JOID-MC/actions/workflows/build.yml/badge.svg?branch=version/1.7.10">
   <a href="https://discord.joid.dev"><img align="center" src="https://img.shields.io/badge/discord-join-5865F2"></a>
@@ -18,7 +18,7 @@
 
 **Beautiful, reactive interfaces for Minecraft. One UI, every version and every loader.**
 
-[**JOID Documentation**](https://documentation.joid.dev/) · [**Releases**](https://github.com/Zeldown/JOID-MC/releases) · [**Discord**](https://discord.joid.dev)
+[**CurseForge**](https://www.curseforge.com/minecraft/mc-mods/joid-mc) · [**Modrinth**](https://modrinth.com/project/joid-mc) · [**JOID Documentation**](https://documentation.joid.dev/) · [**Releases**](https://github.com/Zeldown/JOID-MC/releases) · [**Discord**](https://discord.joid.dev)
 
 </div>
 
@@ -26,36 +26,84 @@
 
 JOID-MC brings [JOID](https://github.com/Zeldown/JOID), the Java UI engine, inside Minecraft, and adds everything a Minecraft interface needs: items, blocks and entities in 3D, the Minecraft font, inventories and the HUD.
 
-This branch is JOID-MC for **Minecraft 1.7.10 on Forge 10.13.4.1614**, with the LWJGL 2 and OpenGL 2.1 of the game. The same interfaces run on the newer versions: see the [README of version/26.2](https://github.com/Zeldown/JOID-MC/tree/version/26.2) for the showcase and the latest version.
-
 ## Why JOID-MC
 
-- **One UI, every version.** The code of your interface stays the same from 1.7.10 to the latest version: only the Minecraft types it shows change.
+- **One UI, every version and loader.** The code of your interface never changes: the same UI runs on Fabric, NeoForge and Forge, and on every Minecraft version JOID-MC supports.
 - **Your mockup, at any size.** Lay out your UI on a fixed design canvas, copy positions, sizes and colors straight from your mockup, and JOID scales it to any window and any GUI scale.
 - **Reactive to your data.** Show your data and forget about it: when a value changes, everything displaying it on screen updates by itself.
+- **Your look, not Minecraft's.** Components handle behavior and input. You draw them in your own UI kit, and another kit gives the same code a whole new design.
 - **Looks great at any size.** Text and shapes stay razor-sharp at any size and any resolution.
 - **Minecraft built in.** Items, blocks and entities in 3D with the game's lighting, the Minecraft fonts and `§` colors, inventories with real slots, and a HUD you can replace layer by layer.
 - **Everything included.** Images, SVG, animated GIF and WebP, video, 3D models, shadows, blur, masks, shaders, animations, and whatever else you can imagine.
+
+## Copy the design
+
+Draw your screen in your design tool, copy each layer's values, and get the same result in the game.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.7.10/docs/images/copy-the-design.webp" alt="A quest panel in its mockup, then the same panel in the Minecraft window, identical" width="100%">
+</p>
+
+## Showcase
+
+Real renders inside the game window, styled for this showcase: JOID ships with no design of its own. Watch them in the [1080p video](https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.7.10/docs/images/showcase.mp4).
+
+<table>
+  <tr>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.7.10/docs/images/showcase-hud.webp" alt="Health, hunger and experience replaced by an animated JOID HUD, in game"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.7.10/docs/images/showcase-chest.webp" alt="A chest redrawn with JOID over the world: real slots, a rotating player, items dragged with the mouse"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub><b>HUD.</b> Replace any layer, in game.</sub></td>
+    <td align="center"><sub><b>Containers.</b> Real slots, synced with the server.</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.7.10/docs/images/showcase-bestiary.webp" alt="Cards of mobs, blocks and items turning in 3D, with a detail panel"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.7.10/docs/images/showcase-fonts.webp" alt="The Minecraft font from 8 to 72 px, chat colors and formats, the enchanting table alphabet decoded, then a 6x zoom that stays pixel-sharp"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub><b>Game objects.</b> Entities, blocks and items, rendered in 3D.</sub></td>
+    <td align="center"><sub><b>Fonts.</b> The Minecraft font, sharp at any size, with § colors.</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.7.10/docs/images/showcase-anvil.webp" alt="A redesigned anvil: a word of the sword name is selected with a double click and retyped, the preview and the cost follow, then the renamed sword is taken"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.7.10/docs/images/showcase-servers.webp" alt="A server list with colored messages of the day: a server is dragged to the top, then the list scrolls"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub><b>Forms.</b> Type, check and preview, in a real anvil.</sub></td>
+    <td align="center"><sub><b>Lists.</b> Drag to reorder, scroll smoothly.</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.7.10/docs/images/showcase-daylight.webp" alt="A daylight panel over the live world: the sun dial, the clock, the sky, the moon phase and the world follow one time value, first as the game advances it, then as the slider is dragged"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.7.10/docs/images/showcase-video.webp" alt="A video with sound inside the game window, paused and resumed with its own controls, then previewed frame by frame while the pointer hovers the timeline"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub><b>Reactive.</b> Bind once, never refresh.</sub></td>
+    <td align="center"><sub><b>Video.</b> Play any video, right in the game.</sub></td>
+  </tr>
+</table>
 
 ---
 
 # Documentation
 
-JOID-MC is a JOID backend: everything in the [JOID documentation](https://documentation.joid.dev/) applies as is. This part only covers what Minecraft 1.7.10 adds.
+JOID-MC is a JOID backend: everything in the [JOID documentation](https://documentation.joid.dev/) applies as is. This part only covers what Minecraft adds.
 
 ## Installation
 
-Each release has three jars:
+Each release has three jars per loader, built from the same code:
 
 | Jar | Contains | For |
 |---|---|---|
-| `dev` | JOID-MC and JOID, with the dev mode of JOID ([Development](#development)) and the MCP names of a ForgeGradle workspace. | Your development workspace only. |
-| `prod` | JOID-MC and JOID, without the dev mode, reobfuscated for the game. | Players. |
+| `dev` | JOID-MC and JOID, with the dev mode of JOID ([Development](#development)) and the MCP names of a ForgeGradle workspace. | Your development environment only. |
+| `prod` | JOID-MC and JOID, without the dev mode, reobfuscated for the game. | Players. This is the jar on CurseForge and Modrinth. |
 | `sources` | The sources of JOID-MC, without JOID. | Your IDE: attach it to the `dev` jar. |
 
 ### In your workspace
 
-Download the `dev` jar from the [releases](https://github.com/Zeldown/JOID-MC/releases), put it in the `libs/` folder of your mod and add it to the dependencies of your `build.gradle`:
+Download the `dev` jar of your loader from the [releases](https://github.com/Zeldown/JOID-MC/releases), put it in the `libs/` folder of your mod and add it to the dependencies of your `build.gradle`:
+
+**Forge**
 
 ```gradle
 dependencies {
@@ -63,14 +111,16 @@ dependencies {
 }
 ```
 
-`runClient` then starts the game with JOID-MC in dev mode. Do not put the `dev` jar in the `mods` folder of a game: it keeps the names of the workspace, and only the `prod` jar runs in a real game.
+`runClient` then starts the game with JOID-MC in dev mode. The `dev` jar keeps the names of a ForgeGradle workspace: only the `prod` jar runs in the `mods` folder of a game.
 
 ### Shipping your mod
 
 JOID-MC is a separate mod that players install next to yours, like any library mod. It runs on the client only: a server does not need it, and a client with JOID-MC joins a server without it.
 
 1. **Do not bundle it** in your jar: no shadow, no copy of its classes.
-2. **Declare it as a dependency** of your mod, with the mod id `joid`, in your `@Mod` and your `mcmod.info`:
+2. **Declare it as required on the client** in the metadata of your mod, with the mod id `joid`:
+
+**Forge** · `@Mod` and `mcmod.info`
 
 ```java
 @Mod(modid = "yourmod", dependencies = "required-after:joid@[1.0.0,)")
@@ -84,9 +134,9 @@ public class YourMod {
 "dependencies": ["joid"]
 ```
 
-A mod that also runs on dedicated servers declares `after:joid` instead of `required-after:joid`, and calls JOID-MC from its client proxy only.
+Forge 1.7.10 has no client-side dependency: use `required-after` when your mod runs on the client only. A mod that also runs on servers declares `after:joid`, since a `required-after` stops a dedicated server that does not have JOID-MC, and calls JOID-MC from its client proxy only.
 
-3. **Tell your players to install JOID-MC** (the `prod` jar) in their `mods` folder.
+3. **Mark JOID-MC as a required dependency** on CurseForge and Modrinth, so that launchers install it with your mod.
 
 ## Getting started
 
@@ -131,7 +181,7 @@ None of this is in the `prod` jar: no dev panel, no dev font, no profiler, most 
 
 ## Screens
 
-A UI opened with `JOID.open` becomes a Minecraft screen (`GuiScreen`). `@UIDataMinecraft` sets how it behaves in the game:
+A UI opened with `JOID.open` becomes a Minecraft screen. `@UIDataMinecraft` sets how it behaves in the game:
 
 ```java
 @UIDataMinecraft(pause = false, background = false)
@@ -145,7 +195,7 @@ public class WelcomeUI extends UI {
 | `pause` | `true` | Pauses a singleplayer game while the screen is open. The paused game also holds the payloads sent to its server until it resumes: a screen that sends one sets `pause = false`. Container UIs never pause. |
 | `background` | `true` | Draws the Minecraft menu background behind the UI, screens and containers alike: the darkened world in game, the dirt on the title screen. `false` draws no Minecraft background. |
 
-The Minecraft background and the UI backdrop of JOID (`@UIData(background)`, default `false`, see [UIs](https://documentation.joid.dev/use/learn/describing-the-ui/uis/)) are independent: add `@UIData(background = true)` to draw the backdrop as well.
+A screen of Minecraft 1.7.10 has no title, so `@UIDataMinecraft` has none. The Minecraft background and the UI backdrop of JOID (`@UIData(background)`, default `false`, see [UIs](https://documentation.joid.dev/use/learn/describing-the-ui/uis/)) are independent: add `@UIData(background = true)` to draw the backdrop as well.
 
 - `JOID.open(ui)` opens the screen, `JOID.close(ui)` closes it, and `Escape` closes the top UI unless it is `@UIData(closeable = false)`. Several UIs open at once share one screen, which closes with the last of them.
 - When the game or another mod opens its own screen, the JOID UIs of the screen close.
@@ -156,7 +206,7 @@ Everything else about UIs works as in [UIs](https://documentation.joid.dev/use/l
 
 ## Containers
 
-A container UI shows a Minecraft `Container` with real, synchronized slots. Extend `ContainerUI` and place a `SlotNode` for each slot:
+A container UI shows a Minecraft container (`Container`) with real, synchronized slots. Extend `ContainerUI` and place a `SlotNode` for each slot:
 
 ```java
 public class BackpackUI extends ContainerUI<BackpackContainer> {
@@ -179,25 +229,18 @@ public class BackpackUI extends ContainerUI<BackpackContainer> {
 }
 ```
 
-Your mod keeps its own `IGuiHandler`: return the screen of the UI from `getClientGuiElement`, and open the container from the server as usual (`player.openGui(...)`), never with `JOID.open`, which throws for a container UI.
+Return its screen with `ContainerUI.screen(...)` where your mod returns its container screens:
+
+**Forge** · in the `IGuiHandler` of your mod
 
 ```java
-public class YourGuiHandler implements IGuiHandler {
-
-	@Override
-	public Object getServerGuiElement(final int id, final EntityPlayer player, final World world, final int x, final int y, final int z) {
-		return new BackpackContainer(player);
-	}
-
-	@Override
-	public Object getClientGuiElement(final int id, final EntityPlayer player, final World world, final int x, final int y, final int z) {
-		return ContainerUI.screen(BackpackUI::new).apply(new BackpackContainer(player));
-	}
-
+@Override
+public Object getClientGuiElement(final int id, final EntityPlayer player, final World world, final int x, final int y, final int z) {
+	return ContainerUI.screen(BackpackUI::new).apply(new BackpackContainer(player));
 }
 ```
 
-`Escape` and the inventory key close it like a vanilla container.
+`ContainerUI.screen(...)` is the only way to get the screen of a container UI. Your mod keeps its own containers, `IGuiHandler` and opening logic: open the container from the server as usual (`player.openGui(...)`), never with `JOID.open`, which throws for a container UI. `Escape` and the inventory key close it like a vanilla container.
 
 ### ContainerUI
 
@@ -210,7 +253,7 @@ public class YourGuiHandler implements IGuiHandler {
 | `bounds(x, y, width, height)` | The panel is this fixed area, in canvas units. |
 | `getBounds()` | The panel used right now: `{x, y, width, height}`. |
 | `getCarriedNode()` | The node that draws the held stack, above every other node. |
-| `ContainerUI.screen(factory)` | The function that turns a container into the `GuiContainer` of its UI, for `getClientGuiElement`. |
+| `ContainerUI.screen(factory)` | The function that turns a container into the screen of its UI, for `getClientGuiElement`. |
 
 The panel is the area of the container: a click outside it drops the held stack, a click inside it on no slot does nothing, like in vanilla. Without `bounds(...)`, the panel is the box around all visible nodes; when that box covers the whole window (a full-screen background, for example), no click can fall outside, and the dev mode warns about it in the console.
 
@@ -233,7 +276,19 @@ SlotNode.create(0, 0, 72, 72).slot(super.getContainer().getSlot(0)).color(Color.
 
 The slot draws its item centered with its count and durability bar, the empty-slot icon of armor slots, the preview of a drag (the count turns yellow when the slot is full) and the vanilla tooltip of the hovered item. Every vanilla slot action works: click, right-click, shift-click, double-click, drag to split, number keys and `Q` to drop. Shift-click moves stacks with the `transferStackInSlot` of your container.
 
-The `xDisplayPosition` and `yDisplayPosition` of a `Slot` are not used to place it: the `SlotNode` places it. Lay out the slots like any node ([Layout](https://documentation.joid.dev/use/learn/describing-the-ui/layout/)); the rest of the input works as in [Events](https://documentation.joid.dev/use/learn/interactivity/events/).
+The `xDisplayPosition` and `yDisplayPosition` of a `Slot` are not used: the `SlotNode` places it. The player inventory comes after your own slots in your container: the 27 slots of the inventory, then the 9 of the hotbar. For a container with 27 slots of its own:
+
+```java
+for (int index = 0; index < 27; index++) {
+	SlotNode.create(48 + index % 9 * 72, 384 + index / 9 * 72, 68, 68).slot(super.getContainer().getSlot(27 + index)).attach(panel);
+}
+
+for (int index = 0; index < 9; index++) {
+	SlotNode.create(48 + index * 72, 624, 68, 68).slot(super.getContainer().getSlot(54 + index)).attach(panel);
+}
+```
+
+Lay out the slots like any node ([Layout](https://documentation.joid.dev/use/learn/describing-the-ui/layout/)); the rest of the input works as in [Events](https://documentation.joid.dev/use/learn/interactivity/events/).
 
 ## HUD overlays
 
@@ -267,11 +322,11 @@ JOID.open(new HealthBarUI());
 | `post` | `false` | `false` draws the overlay just before the vanilla layer, under it; `true` just after, over it. |
 | `cancel` | `false` | Hides the vanilla layer while the overlay is open and visible. |
 
-An overlay without `@UIDataOverlayLayer` is drawn above the whole HUD; an open screen covers it, unless `render.aboveScreens` draws it over the screen. `F1` hides the HUD and its overlays, except with `render.always`.
+An overlay without `@UIDataOverlayLayer` is drawn above the whole HUD; an open screen covers it, unless `render.aboveScreens` draws it over the screen. `F1` hides both, except with `render.always`.
 
-| `OverlayLayer` | Vanilla layer (`ElementType` of Forge) |
+| `OverlayLayer` | Vanilla layer |
 |---|---|
-| `CAMERA_OVERLAYS` | Full-screen effects: the pumpkin and the nether portal (`HELMET`, `PORTAL`). |
+| `CAMERA_OVERLAYS` | Full-screen effects: the pumpkin and the nether portal (`HELMET`, `PORTAL` of Forge). |
 | `CROSSHAIR` | The crosshair (`CROSSHAIRS`). |
 | `BOSS_BAR` | The boss bar (`BOSSHEALTH`). |
 | `HEALTH` | The hearts (`HEALTH`). |
@@ -321,7 +376,7 @@ ItemNode.create(200, 100, 64, 64).stack(() -> Minecraft.getMinecraft().thePlayer
 | `rotationPitch(double)` | `30D` | Tilt toward you, in degrees. The defaults give the inventory view. |
 
 ```java
-BlockNode.create(300, 100, 64, 64).block(Blocks.wool).metadata(14).rotationYaw(() -> System.currentTimeMillis() % 3600L / 10D).attach(this);
+BlockNode.create(300, 100, 64, 64).block(Blocks.furnace).metadata(3).rotationYaw(() -> System.currentTimeMillis() % 3600L / 10D).attach(this);
 ```
 
 ### EntityNode
@@ -331,7 +386,7 @@ BlockNode.create(300, 100, 64, 64).block(Blocks.wool).metadata(14).rotationYaw((
 | `entity(Entity)` | none | An existing entity, drawn as it is: pose, armor, held items. |
 | `type(Class)` | none | A new entity of this class, created in the current world. Nothing is drawn without a world. |
 | `profile(GameProfile)` | none | A player with the skin of this profile. The default skin shows until the skin is downloaded. |
-| `skin(ResourceLocation)` | none | A player with this skin texture. |
+| `skin(ResourceLocation)` | none | A player with this skin. |
 | `scale(double)` | `1D` | Size relative to the node: the entity is fitted to the node and centered. |
 | `rotationYaw(double)` | `0D` | Turn around the vertical axis, in degrees. `0D` faces you. |
 | `rotationPitch(double)` | `0D` | Tilt toward you, in degrees. |
@@ -349,7 +404,7 @@ EntityNode.create(380, 300, 120, 200).profile(new GameProfile(null, "Notch")).at
 EntityNode.create(520, 300, 120, 200).skin(new ResourceLocation("yourmod", "textures/entity/guard.png")).attach(this);
 ```
 
-A skin is a 64×32 texture, like every skin of 1.7.10.
+The last one reads its skin from `assets/yourmod/textures/entity/guard.png`, a 64×32 texture like every skin of 1.7.10.
 
 ### Tooltips
 
@@ -373,11 +428,11 @@ TextNode.create(100, 160).text(Text.create(new ChatComponentTranslation("menu.ga
 
 | Member | Font |
 |---|---|
-| `MinecraftFont.DEFAULT` | The game font, with its bold: `ascii.png` of the resource pack, and the Unicode pages (`glyph_sizes.bin`) for every other character, or for all of them when the language uses the Unicode font. |
-| `MinecraftFont.ALT` | The enchanting table glyphs (`ascii_sga.png`). |
+| `MinecraftFont.DEFAULT` | The game font, with its bold: `ascii.png` of the resource pack, and the Unicode pages for every other character, or for all of them when the language uses the Unicode font. |
+| `MinecraftFont.ALT` | The enchanting table glyphs. |
 | `MinecraftFont.SIZE` | `8F`, the vanilla size: `MinecraftFont.SIZE * 3` draws the font three times larger. |
 
-The fonts place each character where the `FontRenderer` of the game draws it, and follow resource pack reloads. The vanilla shadow is `shadowTint(0.25F)`, the color of each glyph at 25 %, with an offset of a font pixel: `shadow(3F, 3F)` at `SIZE * 3`.
+The vanilla shadow is `shadowTint(0.25F)`, the color of each glyph at 25 %, with an offset of a font pixel: `shadow(3F, 3F)` at `SIZE * 3`.
 
 | Code | Effect |
 |---|---|
@@ -387,7 +442,7 @@ The fonts place each character where the `FontRenderer` of the game draws it, an
 
 `LegacyTextColor` gives the 16 colors as JOID colors: `LegacyTextColor.GOLD.getColor()`.
 
-An `IChatComponent` keeps its colors and styles, and translates its translation parts in the language of the game. The `§` codes and the chat components work with every JOID font, and the Minecraft fonts with everything else of [Text](https://documentation.joid.dev/use/learn/describing-the-ui/text/): markup, effects, alignment, wrapping. Like the vanilla text boxes, JOID text fields drop a typed `§`: the codes come from your code, never from the player.
+A chat `IChatComponent` keeps its colors and styles, and translates its translation parts in the language of the game. The `§` codes and the chat components work with every JOID font, and the Minecraft fonts with everything else of [Text](https://documentation.joid.dev/use/learn/describing-the-ui/text/): markup, effects, alignment, wrapping. Like the vanilla text boxes, JOID text fields drop a typed `§`: the codes come from your code, never from the player.
 
 ## Textures and resources
 
@@ -398,22 +453,22 @@ ResourceNode.create(100, 100, 64, 64).resource(Resource.of("minecraft:textures/b
 
 ResourceNode.create(200, 100, 64, 64).resource(Resource.of(Items.diamond.getIconFromDamage(0))).attach(this);
 
-ResourceNode.create(300, 100, 64, 64).resource(Resource.of(Blocks.stone.getIcon(0, 0))).attach(this);
+ResourceNode.create(300, 100, 64, 64).resource(Resource.of(Blocks.crafting_table.getIcon(1, 0))).attach(this);
 
-ResourceNode.create(400, 100, 64, 64).resource(Resource.of(Minecraft.getMinecraft().getTextureManager().getTexture(TextureMap.locationBlocksTexture))).attach(this);
+ResourceNode.create(560, 100, 64, 64).resource(Resource.of(Minecraft.getMinecraft().getTextureManager().getTexture(TextureMap.locationBlocksTexture))).attach(this);
 ```
 
 | `Resource.of(...)` takes | Draws |
 |---|---|
 | A `"namespace:path"` string or a `ResourceLocation` | A file of the game or of a resource pack. |
-| An `IIcon` | A sprite of the block or the item atlas. |
+| An `IIcon` | A sprite of an atlas: items, blocks. |
 | An `ITextureObject` (a `DynamicTexture`, a `TextureMap`, a loaded texture) or a `Framebuffer` | A texture already on the GPU, such as a whole atlas, live. |
 
-Animated sprites and `.mcmeta` animations play like in game, and the resources follow resource pack reloads (`F3` + `T`). Pixel art stays sharp: these resources use nearest filtering. Other files work the same way: `MsdfFontLoader.load("yourmod:fonts/inter.ttf")` loads a font of your mod. See [Images and media](https://documentation.joid.dev/use/learn/describing-the-ui/media/).
+Animated sprites and `.mcmeta` animations play like in game, and the resources follow resource pack reloads. Pixel art stays sharp: these resources use nearest filtering. Other files work the same way: `MsdfFontLoader.load("yourmod:fonts/inter.ttf")` loads a font of your mod. See [Images and media](https://documentation.joid.dev/use/learn/describing-the-ui/media/).
 
 ## Sound and key bindings
 
-JOID sounds and videos play on the OpenAL context of the game, at its volume: the volume of the `ResourcePlayerNode`, times `Master Volume`. `audioGroup` adds another slider of the Music & Sounds options:
+JOID videos play at the volume of the game: the volume of the `ResourcePlayerNode`, times `Master Volume`. Minecraft 1.7.10 has no `UI` slider; `audioGroup` adds another slider of the Music & Sounds options:
 
 ```java
 ResourcePlayerNode.create(430, 10, 640, 360).resource(Resource.of(new File("videos/intro.mp4"))).audioGroup(SoundCategory.MUSIC).attach(this);
@@ -443,7 +498,7 @@ public void draw(final double mouseX, final double mouseY) {
 
 | Method | Draws |
 |---|---|
-| `DrawItem.inst().drawItem(x, y, size, stack)` | The item in a square of `size`, with the glint of the item. |
+| `DrawItem.inst().drawItem(x, y, size, stack)` | The item model in a square of `size`. |
 | `drawItem(x, y, size, stack, glint)` | With the glint forced on (`true`) or off (`false`), `null` for the glint of the item. |
 | `drawItemBar(x, y, size, stack)` | The durability bar of a damaged item. |
 | `drawItemCount(x, y, size, stack)` | The count, when it is not 1. |
@@ -457,35 +512,34 @@ public void draw(final double mouseX, final double mouseY) {
 
 Draw the item, then its bar and count, to match a slot. `toDrawX` and `toDrawY` turn the mouse into the coordinates of `draw`. See [Custom nodes](https://documentation.joid.dev/use/learn/going-further/custom-nodes/) and [Drawing shapes and text](https://documentation.joid.dev/use/learn/going-further/drawing/).
 
-## What differs from version/26.2
+## Tests
 
-The API is the same as in [version/26.2](https://github.com/Zeldown/JOID-MC/tree/version/26.2) wherever Minecraft 1.7.10 has the concept. Where it does not:
+Every version branch runs the same tests, written once in the [common branch](https://github.com/Zeldown/JOID-MC/tree/common): a version only brings the code that drives its game.
 
-| Topic | 26.2 | 1.7.10 |
+| Job | Runs |
+|---|---|
+| `build` | Builds the jars, runs the unit tests and checks the jars: no demo, no test and no dev mode in the `prod` jar. |
+| `client-tests` | Starts the game of each loader on OpenGL and plays the client test plan: screens, input, containers, HUD overlays, Minecraft components, text, sound, the contract suites of JOID and its snapshots. |
+| `client-tests-vulkan` | The same plan on Vulkan, for the versions that have it. |
+| `parity` | Checks that every version branch runs these jobs and keeps the plan of this README. |
+
+All jobs run on the same pinned image, with the Mesa software renderers (llvmpipe for OpenGL, lavapipe for Vulkan). `./gradlew :<loader>:runClient -Pjoid.test` plays the client test plan in a game window: it takes the mouse and the keyboard of the window until the game closes.
+
+A version skips a scenario only when Minecraft lacks its concept:
+
+| Version | Skipped | Why |
 |---|---|---|
-| Loaders | Fabric, NeoForge, Forge | Forge 10.13.4.1614 |
-| Blocks | `block(BlockState)` | `block(Block)` and `metadata(int)` |
-| Entities | `type(EntityType)`, `skin(PlayerSkin)`, `profile(ResolvableProfile)` | `type(Class)`, `skin(ResourceLocation)`, `profile(GameProfile)` |
-| Items | `cooldown(boolean)`, `drawItemCooldown` | none: 1.7.10 has no item cooldowns |
-| Fonts | `DEFAULT`, `ALT`, `ILLAGER`, `UNIFORM`, `of(Identifier)` | `DEFAULT` (which follows the Unicode option of the game), `ALT` |
-| Text | hex colors (`§x`) | the 16 colors: 1.7.10 has no hex color |
-| Screens | `@UIDataMinecraft(title, pause, background)` | `@UIDataMinecraft(pause, background)`: 1.7.10 screens have no title |
-| Containers | `ContainerUI.screen(...)` for `MenuScreens` | `ContainerUI.screen(...)` for the `IGuiHandler` of the mod |
-| Sprites | `SpriteId`, `TextureAtlasSprite`, `NativeImage`, `GpuTexture` | `IIcon`, `ITextureObject`, `Framebuffer` |
-| Audio | `SoundSource.UI` by default | `Master Volume` by default, `SoundCategory` for `audioGroup` |
-| HUD | 20 layers | the 12 `ElementType` layers of Forge 1.7.10 |
-
-The parts of JOID-MC that do not depend on a version of Minecraft (the `§` markup, the payloads, the registries and the bases of the UI bridges) come from the [common branch](https://github.com/Zeldown/JOID-MC/tree/common), shared by every version.
-
-## Building
-
-The branch builds with Gradle 3.5, ForgeGradle 1.2 and a JDK 8:
-
-```shell
-./gradlew setupDecompWorkspace build
-```
-
-The jars land in `forge/build/libs`. `./gradlew :forge:runClient` starts the game with the demos of JOID and JOID-MC: the `J` key opens them in game.
+| 26.2 | `STENCIL` | Blaze3D gives no stencil buffer to the screen: JOID emulates it. |
+| 1.7.10 | `client-tests-vulkan` | Minecraft 1.7.10 draws with OpenGL only. |
+| 1.7.10 | `AUDIO_INTERFACE` | No interface sound category: JOID follows the master volume. |
+| 1.7.10 | `ITEM_COOLDOWN` | No item cooldowns, added in 1.9. |
+| 1.7.10 | `SCREEN_TITLE` | A screen has no title. |
+| 1.7.10 | `SUBTITLES` | No subtitles, added in 1.9. |
+| 1.7.10 | `NESTED_FEATURE_RASTER` | No feature render pipeline: the game draws at once. |
+| 1.7.10 | `FONT_TRAILING_CODE` | The game measures a trailing `§` as -1 pixel, a bug that JOID does not copy. |
+| 1.7.10 | `CONTAINER_CLOSE` | Closing a container drops the carried stack, newer versions give it back to the inventory. |
+| 1.7.10 | `MinecraftShaderTranslatorTest` | No shader translation: JOID draws with OpenGL 2.1 itself. |
+| 1.7.10 | `ChatTextConverterTest`: hex and palette colors | A chat component has no hex color. |
 
 ## Community
 
