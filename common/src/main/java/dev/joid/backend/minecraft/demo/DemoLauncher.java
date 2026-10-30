@@ -4,12 +4,14 @@ import dev.joid.backend.minecraft.MinecraftJoid;
 import dev.joid.backend.minecraft.demo.container.DemoContainer;
 import dev.joid.backend.minecraft.demo.network.OpenDemoContainerPayload;
 import dev.joid.backend.minecraft.demo.network.OpenDemoContainerPayloadHandler;
-import dev.joid.backend.minecraft.demo.smoke.ClientSmokeTest;
+import dev.joid.backend.minecraft.demo.test.ClientTestPlan;
+import dev.joid.backend.minecraft.demo.test.MinecraftClientTestPilot;
 import dev.joid.backend.minecraft.demo.ui.UIDemoContainer;
 import dev.joid.backend.minecraft.demo.ui.UIDemoMinecraftChoice;
 import dev.joid.backend.minecraft.loader.registry.ContainerTypeRegistry;
 import dev.joid.backend.minecraft.loader.registry.ContainerUIRegistry;
 import dev.joid.backend.minecraft.loader.registry.KeyBindRegistry;
+import dev.joid.backend.minecraft.loader.registry.ReloadListenerRegistry;
 import dev.joid.backend.minecraft.showcase.ShowcaseLauncher;
 import dev.joid.demo.ui.UIDemoChoice;
 import dev.joid.lib.JOID;
@@ -29,13 +31,17 @@ public final class DemoLauncher {
 			ShowcaseLauncher.init();
 		}
 
+		if (ClientTestPlan.isActive()) {
+			ReloadListenerRegistry.create(MinecraftJoid.MOD_ID + ":demo/test").onReload(MinecraftClientTestPilot::countReload).register();
+		}
+
 		JOID.onReady(DemoLauncher::register);
 	}
 
 	private static void register() {
 		UIDemoChoice.menu(UIDemoMinecraftChoice::new);
-		if (Boolean.getBoolean("joid.smoke")) {
-			ClientSmokeTest.start();
+		if (ClientTestPlan.isActive()) {
+			ClientTestPlan.start(new MinecraftClientTestPilot());
 		}
 	}
 

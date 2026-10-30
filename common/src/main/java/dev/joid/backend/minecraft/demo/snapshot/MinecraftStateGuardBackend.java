@@ -1,4 +1,4 @@
-package dev.joid.backend.minecraft.fabric.test;
+package dev.joid.backend.minecraft.demo.snapshot;
 
 import java.lang.reflect.Field;
 import java.util.Map;

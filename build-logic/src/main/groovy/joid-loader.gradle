@@ -30,8 +30,9 @@ configurations {
     joidDemo
     joidDev
     joidProd
-    compileOnly.extendsFrom(embed, joidDemo)
-    runtimeOnly.extendsFrom(embed, joidDemo)
+    clientTest
+    compileOnly.extendsFrom(embed, joidDemo, clientTest)
+    runtimeOnly.extendsFrom(embed, joidDemo, clientTest)
 }
 
 def loaderAttribute = Attribute.of('io.github.mcgradleconventions.loader', String)
@@ -48,8 +49,9 @@ dependencies {
     joidDev(files(rootProject.file("libs/joid-core-${joid_version}-dev.jar")))
     joidProd(files(rootProject.file("libs/joid-core-${joid_version}-prod.jar")))
     joidProd(files(rootProject.file("libs/joid-backend-minecraft-common-${common_version}-prod.jar")))
-    compileOnly(files(rootProject.file("libs/joid-backend-minecraft-common-${common_version}-dev.jar")))
-    compileOnly(files(rootProject.file("libs/joid-tool-testkit-${joid_version}.jar")))
+    compileOnly(files(rootProject.file("libs/joid-backend-minecraft-common-${common_version}-demo.jar")))
+    clientTest(files(rootProject.file("libs/joid-tool-testkit-${joid_version}.jar")))
+    clientTest("junit:junit:${junit_version}")
     embed(files(rootProject.file("libs/joid-base-lwjgl3-glfw-${joid_version}.jar")))
     embed(files(rootProject.file("libs/joid-base-lwjgl3-openal-${joid_version}.jar")))
     embed(files(rootProject.file("libs/joid-base-openal-${joid_version}.jar")))
@@ -79,7 +81,7 @@ tasks.named('compileJava', JavaCompile) {
 processResources {
     dependsOn(configurations.commonResources)
     from(configurations.commonResources)
-    from(zipTree(rootProject.file("libs/joid-backend-minecraft-common-${common_version}-dev.jar"))) {
+    from(zipTree(rootProject.file("libs/joid-backend-minecraft-common-${common_version}-demo.jar"))) {
         include('**/*.class')
     }
 }

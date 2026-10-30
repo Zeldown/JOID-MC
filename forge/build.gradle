@@ -16,9 +16,16 @@ minecraft {
             workingDir = layout.projectDirectory.dir("runs/${it.name}")
         }
         register('client') {
-            if (project.hasProperty('joid.smoke')) {
-                systemProperty('joid.smoke', 'true')
-                args('--quickPlaySingleplayer', 'joid-smoke', '--width', '1920', '--height', '1080')
+            if (project.hasProperty('joid.test')) {
+                systemProperty('joid.test', 'true')
+                systemProperty('joid.loader', project.name)
+                systemProperty('joid.snapshot.output', file('runs/snapshots').absolutePath)
+                systemProperty('joid.snapshot.references', rootProject.file('.snapshots/references').absolutePath)
+                systemProperty('joid.cache', layout.buildDirectory.dir('joid-cache').get().asFile.absolutePath)
+                args('--width', '1920', '--height', '1080')
+                if (project.hasProperty('joid.graphicsBackend')) {
+                    args('--graphicsBackend', project.property('joid.graphicsBackend').toString())
+                }
             }
             if (project.hasProperty('joid.showcase')) {
                 project.properties.findAll { it.key.startsWith('joid.showcase') }.each { systemProperty(it.key, it.value.toString()) }
