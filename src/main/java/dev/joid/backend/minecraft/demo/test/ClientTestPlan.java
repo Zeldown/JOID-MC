@@ -44,7 +44,7 @@ public final class ClientTestPlan {
 		final List<String> failures = new ArrayList<>();
 		final Set<ClientTestScenario> selection = ClientTestPlan.getSelection();
 		final Map<ClientTestScenario, String> exclusions = pilot.getExclusions();
-		System.out.println("[JOID] Client tests of Minecraft " + pilot.getVersion() + " on " + pilot.getLoader() + " with " + pilot.getGraphicsBackend());
+		System.out.println("[JOID] Client tests of Minecraft " + pilot.getVersion() + " on " + pilot.getLoader() + " with " + pilot.getGraphicsBackend() + ", snapshots of the " + pilot.getRenderPipeline() + " pipeline");
 		for (final Entry<ClientTestScenario, String> exclusion : exclusions.entrySet()) {
 			System.out.println("[JOID] Excluded " + exclusion.getKey() + ": " + exclusion.getValue());
 		}

@@ -128,13 +128,14 @@ public final class ClientTestImages {
 		for (int face = 0; face < points.length; face++) {
 			final int x = (int) (bounds[0] + bounds[2] * points[face][0]);
 			final int y = (int) (bounds[1] + bounds[3] * points[face][1]);
+			final int radius = Math.max(1, bounds[2] / 16);
 			int sum = 0;
-			for (int row = -1; row <= 1; row++) {
-				for (int column = -1; column <= 1; column++) {
+			for (int row = -radius; row <= radius; row++) {
+				for (int column = -radius; column <= radius; column++) {
 					sum += image.getRGB(x + column, y + row) >> 8 & 0xFF;
 				}
 			}
-			faces[face] = sum / 9;
+			faces[face] = sum / ((2 * radius + 1) * (2 * radius + 1));
 		}
 		return faces;
 	}

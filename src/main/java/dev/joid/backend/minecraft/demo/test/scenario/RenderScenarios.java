@@ -50,8 +50,15 @@ import lombok.NoArgsConstructor;
 public final class RenderScenarios {
 
 	public static void verifyFontWidths(final ClientTestContext context) {
+		RenderScenarios.verifyWidths(context, Arrays.asList("The quick brown fox jumps over the lazy dog", "\u00A7lBold\u00A7r and regular", "\u00A7cRed \u00A7l\u00A7oBold italic\u00A7r back", "\u00A7kSecret \u00A7nunder", "Unicode \u00E9\u00E8 \u2605 \u65E5\u672C", "\u00A7x\u00A71\u00A72\u00A73\u00A74\u00A75\u00A76Hex", "  spaces  ", "\u00A7zUnknown", "Hello, JOID! 123", "\u00C9t\u00E9 \u00FCber \u00F1", "Enchanting table"));
+	}
+
+	public static void verifyFontTrailingCode(final ClientTestContext context) {
+		RenderScenarios.verifyWidths(context, Arrays.asList("Trailing\u00A7"));
+	}
+
+	private static void verifyWidths(final ClientTestContext context, final List<String> texts) {
 		final IClientTestPilot pilot = context.getPilot();
-		final List<String> texts = Arrays.asList("The quick brown fox jumps over the lazy dog", "§lBold§r and regular", "§cRed §l§oBold italic§r back", "§kSecret §nunder", "Unicode éè ★ 日本", "Trailing§", "§x§1§2§3§4§5§6Hex", "  spaces  ", "§zUnknown", "Hello, JOID! 123", "Été über ñ", "Enchanting table");
 		final List<String> failures = context.compute(() -> {
 			final List<String> found = new ArrayList<>();
 			for (final IFont font : RenderScenarios.fonts()) {
@@ -155,7 +162,7 @@ public final class RenderScenarios {
 	public static void verifySnapshots(final ClientTestContext context) {
 		final IClientTestPilot pilot = context.getPilot();
 		final File output = new File(System.getProperty("joid.snapshot.output", "snapshots/renders"));
-		final File references = new File(new File(System.getProperty("joid.snapshot.references", "snapshots/references")), pilot.getGraphicsBackend());
+		final File references = new File(new File(System.getProperty("joid.snapshot.references", "snapshots/references")), pilot.getRenderPipeline());
 		final List<String> failures = context.compute(() -> {
 			final List<String> found = new ArrayList<>();
 			final SnapshotRunner runner = SnapshotRunner.start(pilot.createSnapshotBackend());

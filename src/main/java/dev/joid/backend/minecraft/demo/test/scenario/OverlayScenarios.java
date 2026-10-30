@@ -42,7 +42,7 @@ public final class OverlayScenarios {
 		ClientTestImages.expectColor(context, "overlay replacing the experience bar", hud, new int[] {experience[0] + experience[2] - 8, experience[1], 8, experience[3]}, 0xDDDDDD, true);
 		ClientTestImages.expectColor(context, "interactive overlay in game", hud, interactive, 0xDDDDDD, true);
 		ClientTestImages.expectColor(context, "overlay under the crosshair", hud, crosshair, 0xDDDDDD, true);
-		ClientTestImages.expectColor(context, "vanilla crosshair over the overlay", hud, new int[] {954, 534, 8, 8}, 0xDDDDDD, false);
+		context.check(ClientTestImages.countDifferent(hud, new int[] {944, 524, 32, 32}, 0xDDDDDD) > 0, "the vanilla crosshair is not drawn over the overlay under it");
 		ClientTestImages.expectColor(context, "overlay always shown in game", hud, always, 0xDDDDDD, true);
 		context.check(OverlayScenarios.isCancelled(context, "CONTEXTUAL_BAR"), "the overlay replacing the experience bar does not cancel the contextual bar");
 

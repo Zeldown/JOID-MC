@@ -136,9 +136,23 @@ public final class ContainerScenarios {
 		final int[] clicked = pilot.readContainer(true);
 		context.check(clicked[2] == 1 && clicked[0] == 4, "a right click places " + clicked[2] + " emerald and carries " + clicked[0] + " instead of 1 and 4");
 		pilot.closeDemoContainer();
-		final int inventory = pilot.countInventory(ClientTestItem.EMERALD);
 		final int stored = pilot.countDemoStorage(1);
-		context.check(inventory == 4 && stored == 1, "closing the demo container gives back " + inventory + " carried emeralds and keeps " + stored + " in the storage instead of 4 and 1");
+		context.check(stored == 1, "closing the demo container keeps " + stored + " emeralds in the storage instead of 1");
+		context.waitFor("the game without screen", () -> !pilot.isScreenOpen(), 30);
+	}
+
+	public static void verifyContainerClose(final ClientTestContext context) {
+		final IClientTestPilot pilot = context.getPilot();
+		if (pilot.openDemoContainer() < 0) {
+			context.fail("the demo container does not open for the owner of the world");
+			return;
+		}
+
+		pilot.setContainerSlot(0, ClientTestItem.EMERALD, 4);
+		pilot.clickDemoContainer(0, 0);
+		pilot.closeDemoContainer();
+		final int inventory = pilot.countInventory(ClientTestItem.EMERALD);
+		context.check(inventory == 4, "closing the demo container gives back " + inventory + " carried emeralds instead of 4");
 		context.waitFor("the game without screen", () -> !pilot.isScreenOpen(), 30);
 	}
 

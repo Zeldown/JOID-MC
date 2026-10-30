@@ -25,6 +25,7 @@ public interface IClientTestPilot {
 	public String getVersion();
 	public String getLoader();
 	public String getGraphicsBackend();
+	public String getRenderPipeline();
 	public Map<ClientTestScenario, String> getExclusions();
 	public List<Class<?>> getContractTests();
 

@@ -87,6 +87,17 @@ jobs:
         with:
           lfs: true
 
+      - uses: actions/checkout@v7
+        with:
+          ref: common
+          path: .common
+          sparse-checkout: .snapshots
+
+      - name: Take the snapshot references of the common branch
+        run: |
+          rm -rf .snapshots
+          cp -r .common/.snapshots .snapshots
+
       - uses: actions/setup-java@v6
         with:
           distribution: temurin
@@ -125,8 +136,8 @@ jobs:
       - name: Report the snapshot references
         if: always()
         run: |
-          RECORDED=$(git status --porcelain --untracked-files=all .snapshots/references/opengl | wc -l)
-          echo "::notice::OpenGL snapshot renderers: $(ls .snapshots/references/opengl 2>/dev/null | xargs), $RECORDED references recorded by this run"
+          RECORDED=$(diff -rq .common/.snapshots .snapshots | grep -c '^Only in \.snapshots' || true)
+          echo "::notice::$RECORDED snapshot references recorded by this run, missing from the common branch"
 
       - uses: actions/upload-artifact@v6
         if: always()
@@ -138,7 +149,7 @@ jobs:
             ${{ matrix.loader }}/runs/client/logs/
             ${{ matrix.loader }}/runs/client/crash-reports/
             ${{ matrix.loader }}/runs/snapshots/
-            .snapshots/references/opengl/
+            .snapshots/references/
 
   client-tests-vulkan:
     needs: build
@@ -153,6 +164,17 @@ jobs:
       - uses: actions/checkout@v7
         with:
           lfs: true
+
+      - uses: actions/checkout@v7
+        with:
+          ref: common
+          path: .common
+          sparse-checkout: .snapshots
+
+      - name: Take the snapshot references of the common branch
+        run: |
+          rm -rf .snapshots
+          cp -r .common/.snapshots .snapshots
 
       - uses: actions/setup-java@v6
         with:
@@ -194,8 +216,8 @@ jobs:
       - name: Report the snapshot references
         if: always()
         run: |
-          RECORDED=$(git status --porcelain --untracked-files=all .snapshots/references/vulkan | wc -l)
-          echo "::notice::Vulkan snapshot renderers: $(ls .snapshots/references/vulkan 2>/dev/null | xargs), $RECORDED references recorded by this run"
+          RECORDED=$(diff -rq .common/.snapshots .snapshots | grep -c '^Only in \.snapshots' || true)
+          echo "::notice::$RECORDED snapshot references recorded by this run, missing from the common branch"
 
       - uses: actions/upload-artifact@v6
         if: always()
@@ -207,7 +229,7 @@ jobs:
             ${{ matrix.loader }}/runs/client/logs/
             ${{ matrix.loader }}/runs/client/crash-reports/
             ${{ matrix.loader }}/runs/snapshots/
-            .snapshots/references/vulkan/
+            .snapshots/references/
 
   parity:
     runs-on: ubuntu-26.04
