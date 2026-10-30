@@ -162,13 +162,18 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	}
 
 	@Override
+	public String getLoader() {
+		return System.getProperty("joid.loader", "unknown");
+	}
+
+	@Override
 	public String getVersion() {
 		return "1.7.10";
 	}
 
 	@Override
-	public String getLoader() {
-		return System.getProperty("joid.loader", "unknown");
+	public String getRenderPipeline() {
+		return "opengl";
 	}
 
 	@Override
@@ -177,8 +182,8 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	}
 
 	@Override
-	public String getRenderPipeline() {
-		return "opengl";
+	public List<Class<?>> getContractTests() {
+		return Arrays.asList(MinecraftRenderBridgeContractTest.class, MinecraftStateGuardContractTest.class, MinecraftBorrowedTextureContractTest.class, MinecraftBitmapFontContractTest.class);
 	}
 
 	@Override
@@ -192,62 +197,6 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 		exclusions.put(ClientTestScenario.FONT_TRAILING_CODE, "the FontRenderer of Minecraft 1.7.10 measures a trailing \u00A7 as -1 pixel, a bug of the game that JOID does not copy");
 		exclusions.put(ClientTestScenario.CONTAINER_CLOSE, "Minecraft 1.7.10 drops the carried stack when a container closes, newer versions give it back to the inventory");
 		return exclusions;
-	}
-
-	@Override
-	public List<Class<?>> getContractTests() {
-		return Arrays.asList(MinecraftRenderBridgeContractTest.class, MinecraftStateGuardContractTest.class, MinecraftBorrowedTextureContractTest.class, MinecraftBitmapFontContractTest.class);
-	}
-
-	@Override
-	public void runOnClient(final Runnable runnable) {
-		MinecraftClientTestPilot.await(Minecraft.getMinecraft().func_152344_a(runnable), "running on the client", 120);
-	}
-
-	@Override
-	public <T> T computeOnClient(final Callable<T> callable, final int seconds) {
-		return (T) MinecraftClientTestPilot.await(Minecraft.getMinecraft().func_152343_a(callable), "computing on the client", seconds);
-	}
-
-	@Override
-	public void stop(final boolean passed) {
-		Minecraft.getMinecraft().func_152344_a(Minecraft.getMinecraft()::shutdown);
-	}
-
-	@Override
-	public void moveMouse(final double x, final double y) {
-		MinecraftClientTestPilot.xdotool("mousemove", "--window", this.focusWindow(), String.valueOf((int) Math.round(x)), String.valueOf((int) Math.round(y)));
-	}
-
-	@Override
-	public void pressMouse(final boolean press) {
-		this.focusWindow();
-		MinecraftClientTestPilot.xdotool(press ? "mousedown" : "mouseup", "1");
-	}
-
-	@Override
-	public void scroll(final double amount) {
-		this.focusWindow();
-		MinecraftClientTestPilot.xdotool("click", amount < 0D ? "5" : "4");
-	}
-
-	@Override
-	public void pressKey(final Key key, final boolean press) {
-		this.focusWindow();
-		MinecraftClientTestPilot.xdotool(press ? "keydown" : "keyup", MinecraftClientTestPilot.keysym(key));
-	}
-
-	@Override
-	public BufferedImage capture(final String name) {
-		this.runOnClient(() -> {
-			final Minecraft minecraft = Minecraft.getMinecraft();
-			ScreenShotHelper.saveScreenshot(minecraft.mcDataDir, name + ".png", minecraft.displayWidth, minecraft.displayHeight, minecraft.getFramebuffer());
-		});
-		try {
-			return ImageIO.read(new File(new File(Minecraft.getMinecraft().mcDataDir, "screenshots"), name + ".png"));
-		} catch (final IOException exception) {
-			throw new AssertionError("Unable to read the capture " + name, exception);
-		}
 	}
 
 	@Override
@@ -277,6 +226,57 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	}
 
 	@Override
+	public void stop(final boolean passed) {
+		Minecraft.getMinecraft().func_152344_a(Minecraft.getMinecraft()::shutdown);
+	}
+
+	@Override
+	public void runOnClient(final Runnable runnable) {
+		MinecraftClientTestPilot.await(Minecraft.getMinecraft().func_152344_a(runnable), "running on the client", 120);
+	}
+
+	@Override
+	public <T> T computeOnClient(final Callable<T> callable, final int seconds) {
+		return (T) MinecraftClientTestPilot.await(Minecraft.getMinecraft().func_152343_a(callable), "computing on the client", seconds);
+	}
+
+	@Override
+	public void scroll(final double amount) {
+		this.focusWindow();
+		MinecraftClientTestPilot.xdotool("click", amount < 0D ? "5" : "4");
+	}
+
+	@Override
+	public void pressMouse(final boolean press) {
+		this.focusWindow();
+		MinecraftClientTestPilot.xdotool(press ? "mousedown" : "mouseup", "1");
+	}
+
+	@Override
+	public BufferedImage capture(final String name) {
+		this.runOnClient(() -> {
+			final Minecraft minecraft = Minecraft.getMinecraft();
+			ScreenShotHelper.saveScreenshot(minecraft.mcDataDir, name + ".png", minecraft.displayWidth, minecraft.displayHeight, minecraft.getFramebuffer());
+		});
+		try {
+			return ImageIO.read(new File(new File(Minecraft.getMinecraft().mcDataDir, "screenshots"), name + ".png"));
+		} catch (final IOException exception) {
+			throw new AssertionError("Unable to read the capture " + name, exception);
+		}
+	}
+
+	@Override
+	public void moveMouse(final double x, final double y) {
+		MinecraftClientTestPilot.xdotool("mousemove", "--window", this.focusWindow(), String.valueOf((int) Math.round(x)), String.valueOf((int) Math.round(y)));
+	}
+
+	@Override
+	public void pressKey(final Key key, final boolean press) {
+		this.focusWindow();
+		MinecraftClientTestPilot.xdotool(press ? "keydown" : "keyup", MinecraftClientTestPilot.keysym(key));
+	}
+
+	@Override
 	public void clearInventory() {
 		this.computeOnServer(player -> {
 			for (int slot = 0; slot < player.inventory.getSizeInventory(); slot++) {
@@ -290,22 +290,37 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	}
 
 	@Override
-	public void giveItem(final int slot, final ClientTestItem item, final int count) {
+	public int openDemoContainer() {
+		this.clearInventory();
+		return this.computeOnServer(player -> {
+			OpenDemoContainerPayloadHandler.handle(OpenDemoContainerPayload.INSTANCE, player);
+			if (!(player.openContainer instanceof DemoContainer)) {
+				return -1;
+			}
+
+			for (int slot = 0; slot < 27; slot++) {
+				OpenDemoContainerPayloadHandler.getStorage(player).setInventorySlotContents(slot, null);
+			}
+			return player.openContainer.inventorySlots.size();
+		});
+	}
+
+	@Override
+	public void closeDemoContainer() {
 		this.computeOnServer(player -> {
-			player.inventory.setInventorySlotContents(slot, MinecraftClientTestPilot.stack(item, count));
-			player.inventoryContainer.detectAndSendChanges();
+			player.closeScreen();
 			return null;
 		});
 	}
 
 	@Override
-	public void setContainerSlot(final int slot, final ClientTestItem item, final int count) {
-		this.computeOnServer(player -> {
-			player.openContainer.getSlot(slot).putStack(MinecraftClientTestPilot.stack(item, count));
-			player.openContainer.detectAndSendChanges();
-			return null;
-		});
-		this.sleep(500L);
+	public boolean isDemoContainerOpen() {
+		return this.computeOnServer(player -> player.openContainer instanceof DemoContainer);
+	}
+
+	@Override
+	public int countDemoStorage(final int slot) {
+		return this.computeOnServer(player -> MinecraftClientTestPilot.count(OpenDemoContainerPayloadHandler.getStorage(player).getStackInSlot(slot)));
 	}
 
 	@Override
@@ -320,8 +335,8 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	}
 
 	@Override
-	public boolean isDemoContainerOpen() {
-		return this.computeOnServer(player -> player.openContainer instanceof DemoContainer);
+	public void quickMoveDemoContainer(final int slot) {
+		this.computeOnServer(player -> player.openContainer.transferStackInSlot(player, slot));
 	}
 
 	@Override
@@ -344,40 +359,6 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	}
 
 	@Override
-	public int openDemoContainer() {
-		this.clearInventory();
-		return this.computeOnServer(player -> {
-			OpenDemoContainerPayloadHandler.handle(OpenDemoContainerPayload.INSTANCE, player);
-			if (!(player.openContainer instanceof DemoContainer)) {
-				return -1;
-			}
-
-			for (int slot = 0; slot < 27; slot++) {
-				OpenDemoContainerPayloadHandler.getStorage(player).setInventorySlotContents(slot, null);
-			}
-			return player.openContainer.inventorySlots.size();
-		});
-	}
-
-	@Override
-	public void quickMoveDemoContainer(final int slot) {
-		this.computeOnServer(player -> player.openContainer.transferStackInSlot(player, slot));
-	}
-
-	@Override
-	public void clickDemoContainer(final int slot, final int button) {
-		this.computeOnServer(player -> player.openContainer.slotClick(slot, button, 0, player));
-	}
-
-	@Override
-	public void closeDemoContainer() {
-		this.computeOnServer(player -> {
-			player.closeScreen();
-			return null;
-		});
-	}
-
-	@Override
 	public int countInventory(final ClientTestItem item) {
 		return this.computeOnServer(player -> {
 			int count = 0;
@@ -391,53 +372,27 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	}
 
 	@Override
-	public int countDemoStorage(final int slot) {
-		return this.computeOnServer(player -> MinecraftClientTestPilot.count(OpenDemoContainerPayloadHandler.getStorage(player).getStackInSlot(slot)));
+	public void clickDemoContainer(final int slot, final int button) {
+		this.computeOnServer(player -> player.openContainer.slotClick(slot, button, 0, player));
 	}
 
 	@Override
-	public File getGameDirectory() {
-		return Minecraft.getMinecraft().mcDataDir;
+	public void giveItem(final int slot, final ClientTestItem item, final int count) {
+		this.computeOnServer(player -> {
+			player.inventory.setInventorySlotContents(slot, MinecraftClientTestPilot.stack(item, count));
+			player.inventoryContainer.detectAndSendChanges();
+			return null;
+		});
 	}
 
 	@Override
-	public boolean isBackendRegistered() {
-		return MinecraftBackend.inst().isRegistered();
-	}
-
-	@Override
-	public boolean isTitleScreen() {
-		return Minecraft.getMinecraft().currentScreen instanceof GuiMainMenu;
-	}
-
-	@Override
-	public boolean isScreenOpen() {
-		return Minecraft.getMinecraft().currentScreen != null;
-	}
-
-	@Override
-	public boolean isJoidScreen() {
-		return Minecraft.getMinecraft().currentScreen instanceof UIScreen;
-	}
-
-	@Override
-	public boolean isContainerScreen() {
-		return Minecraft.getMinecraft().currentScreen instanceof ContainerUIScreen;
-	}
-
-	@Override
-	public boolean isInventoryScreen() {
-		return Minecraft.getMinecraft().currentScreen instanceof GuiInventory;
-	}
-
-	@Override
-	public boolean isReloading() {
-		return false;
-	}
-
-	@Override
-	public int countReloads() {
-		return MinecraftClientTestPilot.RELOADS.get();
+	public void setContainerSlot(final int slot, final ClientTestItem item, final int count) {
+		this.computeOnServer(player -> {
+			player.openContainer.getSlot(slot).putStack(MinecraftClientTestPilot.stack(item, count));
+			player.openContainer.detectAndSendChanges();
+			return null;
+		});
+		this.sleep(500L);
 	}
 
 	@Override
@@ -451,8 +406,13 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	}
 
 	@Override
-	public boolean isPauseScreen() {
-		return Minecraft.getMinecraft().currentScreen.doesGuiPauseGame();
+	public boolean isScreenOpen() {
+		return Minecraft.getMinecraft().currentScreen != null;
+	}
+
+	@Override
+	public boolean isJoidScreen() {
+		return Minecraft.getMinecraft().currentScreen instanceof UIScreen;
 	}
 
 	@Override
@@ -461,8 +421,28 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	}
 
 	@Override
+	public boolean isTitleScreen() {
+		return Minecraft.getMinecraft().currentScreen instanceof GuiMainMenu;
+	}
+
+	@Override
+	public boolean isPauseScreen() {
+		return Minecraft.getMinecraft().currentScreen.doesGuiPauseGame();
+	}
+
+	@Override
 	public String getScreenTitle() {
 		throw new UnsupportedOperationException("A screen of Minecraft 1.7.10 has no title");
+	}
+
+	@Override
+	public boolean isContainerScreen() {
+		return Minecraft.getMinecraft().currentScreen instanceof ContainerUIScreen;
+	}
+
+	@Override
+	public boolean isInventoryScreen() {
+		return Minecraft.getMinecraft().currentScreen instanceof GuiInventory;
 	}
 
 	@Override
@@ -487,8 +467,8 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	}
 
 	@Override
-	public void reloadResources() {
-		Minecraft.getMinecraft().refreshResources();
+	public int countReloads() {
+		return MinecraftClientTestPilot.RELOADS.get();
 	}
 
 	@Override
@@ -510,6 +490,31 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	}
 
 	@Override
+	public boolean isReloading() {
+		return false;
+	}
+
+	@Override
+	public void reloadResources() {
+		Minecraft.getMinecraft().refreshResources();
+	}
+
+	@Override
+	public File getGameDirectory() {
+		return Minecraft.getMinecraft().mcDataDir;
+	}
+
+	@Override
+	public boolean isBackendRegistered() {
+		return MinecraftBackend.inst().isRegistered();
+	}
+
+	@Override
+	public Object createRedChat(final String text) {
+		return new ChatComponentText(text).setChatStyle(new ChatStyle().setColor(EnumChatFormatting.RED));
+	}
+
+	@Override
 	public Object getKeyMapping(final String name) {
 		for (final KeyBinding binding : Minecraft.getMinecraft().gameSettings.keyBindings) {
 			if (binding.getKeyDescription().equals(name)) {
@@ -517,6 +522,13 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 			}
 		}
 		throw new AssertionError("Minecraft has no key binding " + name);
+	}
+
+	@Override
+	public int measureText(final IFont font, final String text) {
+		final Minecraft minecraft = Minecraft.getMinecraft();
+		final FontRenderer renderer = font == MinecraftFont.ALT ? minecraft.standardGalacticFontRenderer : minecraft.fontRenderer;
+		return renderer.getStringWidth(text);
 	}
 
 	@Override
@@ -532,15 +544,8 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	}
 
 	@Override
-	public Object createRedChat(final String text) {
-		return new ChatComponentText(text).setChatStyle(new ChatStyle().setColor(EnumChatFormatting.RED));
-	}
-
-	@Override
-	public int measureText(final IFont font, final String text) {
-		final Minecraft minecraft = Minecraft.getMinecraft();
-		final FontRenderer renderer = font == MinecraftFont.ALT ? minecraft.standardGalacticFontRenderer : minecraft.fontRenderer;
-		return renderer.getStringWidth(text);
+	public int getAudioError() {
+		return AL10.alGetError();
 	}
 
 	@Override
@@ -561,38 +566,6 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	}
 
 	@Override
-	public int getAudioError() {
-		return AL10.alGetError();
-	}
-
-	@Override
-	public float getAudioGain(final int source) {
-		return AL10.alGetSourcef(source, AL10.AL_GAIN);
-	}
-
-	@Override
-	public double getVolume(final ClientTestVolume volume) {
-		return volume == ClientTestVolume.MASTER ? Minecraft.getMinecraft().gameSettings.getSoundLevel(SoundCategory.MASTER) : 1D;
-	}
-
-	@Override
-	public void setVolume(final ClientTestVolume volume, final double value) {
-		if (volume == ClientTestVolume.MASTER) {
-			Minecraft.getMinecraft().gameSettings.setSoundLevel(SoundCategory.MASTER, (float) value);
-		}
-	}
-
-	@Override
-	public void setSubtitles(final boolean subtitles) {
-		throw new UnsupportedOperationException("Minecraft 1.7.10 has no subtitles");
-	}
-
-	@Override
-	public void playInterfaceSound() {
-		throw new UnsupportedOperationException("Minecraft 1.7.10 has no subtitles to show a sound");
-	}
-
-	@Override
 	public void startSoundCapture() {
 		this.sounds.clear();
 		this.soundCapture = true;
@@ -605,43 +578,34 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	}
 
 	@Override
+	public void playInterfaceSound() {
+		throw new UnsupportedOperationException("Minecraft 1.7.10 has no subtitles to show a sound");
+	}
+
+	@Override
 	public String getNoteBlockSound() {
 		return "minecraft:note.pling";
 	}
 
 	@Override
-	public Node createItemNode(final double x, final double y, final double size, final ClientTestItem item, final boolean glint) {
-		final ItemNode node = ItemNode.create(x, y, size, size).stack(MinecraftClientTestPilot.stack(item, 1));
-		return glint ? node.glint(true) : node;
+	public float getAudioGain(final int source) {
+		return AL10.alGetSourcef(source, AL10.AL_GAIN);
 	}
 
 	@Override
-	public Node createBlockNode(final double x, final double y, final double size, final ClientTestBlock block) {
-		final BlockNode node = BlockNode.create(x, y, size, size);
-		switch (block) {
-			case GRASS:
-				return node.block(Blocks.grass);
-			case ICE:
-				return node.block(Blocks.ice);
-			case SNOW_BLOCK:
-				return node.block(Blocks.snow);
-			default:
-				return node.block(Blocks.stone);
-		}
+	public void setSubtitles(final boolean subtitles) {
+		throw new UnsupportedOperationException("Minecraft 1.7.10 has no subtitles");
 	}
 
 	@Override
-	public Node createEntityNode(final double x, final double y, final double width, final double height, final ClientTestEntity entity, final double yaw, final double pitch) {
-		final EntityNode node = EntityNode.create(x, y, width, height).rotationYaw(yaw).rotationPitch(pitch);
-		switch (entity) {
-			case PIG:
-				return node.type(EntityPig.class);
-			case ZOMBIE:
-				return node.type(EntityZombie.class);
-			case PLAYER_PROFILE:
-				return node.profile(new GameProfile(new UUID(0L, 15L), "Steve"));
-			default:
-				return node.skin(new ResourceLocation("joid", "demo/textures/skin.png"));
+	public double getVolume(final ClientTestVolume volume) {
+		return volume == ClientTestVolume.MASTER ? Minecraft.getMinecraft().gameSettings.getSoundLevel(SoundCategory.MASTER) : 1D;
+	}
+
+	@Override
+	public void setVolume(final ClientTestVolume volume, final double value) {
+		if (volume == ClientTestVolume.MASTER) {
+			Minecraft.getMinecraft().gameSettings.setSoundLevel(SoundCategory.MASTER, (float) value);
 		}
 	}
 
@@ -682,22 +646,39 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	}
 
 	@Override
-	public String getTexturePath(final ClientTestTexture texture) {
-		return "minecraft:" + MinecraftClientTestPilot.texture(texture);
-	}
-
-	@Override
-	public BufferedImage readTexture(final ClientTestTexture texture) {
-		try (final InputStream stream = Minecraft.getMinecraft().getResourceManager().getResource(new ResourceLocation(MinecraftClientTestPilot.texture(texture))).getInputStream()) {
-			return ImageIO.read(stream);
-		} catch (final IOException exception) {
-			throw new AssertionError("Unable to read the texture " + texture, exception);
+	public Node createBlockNode(final double x, final double y, final double size, final ClientTestBlock block) {
+		final BlockNode node = BlockNode.create(x, y, size, size);
+		switch (block) {
+			case GRASS:
+				return node.block(Blocks.grass);
+			case ICE:
+				return node.block(Blocks.ice);
+			case SNOW_BLOCK:
+				return node.block(Blocks.snow);
+			default:
+				return node.block(Blocks.stone);
 		}
 	}
 
 	@Override
-	public boolean isDeleted(final ITexture texture) {
-		return texture instanceof Texture && ((Texture) texture).isDeleted();
+	public Node createItemNode(final double x, final double y, final double size, final ClientTestItem item, final boolean glint) {
+		final ItemNode node = ItemNode.create(x, y, size, size).stack(MinecraftClientTestPilot.stack(item, 1));
+		return glint ? node.glint(true) : node;
+	}
+
+	@Override
+	public Node createEntityNode(final double x, final double y, final double width, final double height, final ClientTestEntity entity, final double yaw, final double pitch) {
+		final EntityNode node = EntityNode.create(x, y, width, height).rotationYaw(yaw).rotationPitch(pitch);
+		switch (entity) {
+			case PIG:
+				return node.type(EntityPig.class);
+			case ZOMBIE:
+				return node.type(EntityZombie.class);
+			case PLAYER_PROFILE:
+				return node.profile(new GameProfile(new UUID(0L, 15L), "Steve"));
+			default:
+				return node.skin(new ResourceLocation("joid", "demo/textures/skin.png"));
+		}
 	}
 
 	@Override
@@ -712,13 +693,44 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	}
 
 	@Override
-	public UI createBackgroundUi(final boolean background) {
-		return background ? new VanillaBackground() : new NoBackground();
+	public boolean isDeleted(final ITexture texture) {
+		return texture instanceof Texture && ((Texture) texture).isDeleted();
 	}
 
 	@Override
-	public UI createHiddenHotbarUi() {
-		return new HiddenHotbar();
+	public String getTexturePath(final ClientTestTexture texture) {
+		return "minecraft:" + MinecraftClientTestPilot.texture(texture);
+	}
+
+	@Override
+	public BufferedImage readTexture(final ClientTestTexture texture) {
+		try (final InputStream stream = Minecraft.getMinecraft().getResourceManager().getResource(new ResourceLocation(MinecraftClientTestPilot.texture(texture))).getInputStream()) {
+			return ImageIO.read(stream);
+		} catch (final IOException exception) {
+			throw new AssertionError("Unable to read the texture " + texture, exception);
+		}
+	}
+
+	@Override
+	public Cursor getCursor() {
+		return (Cursor) MinecraftClientTestPilot.field(BridgeHandler.WINDOW.getBridge(MinecraftWindowBridge.class), "applied");
+	}
+
+	@Override
+	public void drawHudFrame() {
+		GuiFrameCounter.inst().nextFrame();
+		BridgeHandler.UI.getBridge(OverlayUIBridge.class).drawHud(null);
+	}
+
+	@Override
+	public int getHoveredSlot() {
+		final GuiScreen screen = Minecraft.getMinecraft().currentScreen;
+		if (!(screen instanceof ContainerUIScreen)) {
+			return -1;
+		}
+
+		final Slot slot = (Slot) MinecraftClientTestPilot.field(screen, "hoveredSlot");
+		return slot != null ? slot.slotNumber : -1;
 	}
 
 	@Override
@@ -727,6 +739,18 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 		final ScaledResolution resolution = new ScaledResolution(minecraft, minecraft.displayWidth, minecraft.displayHeight);
 		final int scale = resolution.getScaleFactor();
 		return new int[] {(resolution.getScaledWidth() / 2 - 91) * scale, (resolution.getScaledHeight() - 22) * scale, 182 * scale, 22 * scale};
+	}
+
+	@Override
+	public int countRenderTargets() {
+		return 0;
+	}
+
+	@Override
+	public int[] getContainerScreenBounds() {
+		final GuiScreen screen = Minecraft.getMinecraft().currentScreen;
+		final int scale = this.getGuiScale();
+		return new int[] {(int) MinecraftClientTestPilot.field(screen, "guiLeft") * scale, (int) MinecraftClientTestPilot.field(screen, "guiTop") * scale, (int) MinecraftClientTestPilot.field(screen, "xSize") * scale, (int) MinecraftClientTestPilot.field(screen, "ySize") * scale};
 	}
 
 	@Override
@@ -746,37 +770,13 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	}
 
 	@Override
-	public int[] getContainerScreenBounds() {
-		final GuiScreen screen = Minecraft.getMinecraft().currentScreen;
-		final int scale = this.getGuiScale();
-		return new int[] {(int) MinecraftClientTestPilot.field(screen, "guiLeft") * scale, (int) MinecraftClientTestPilot.field(screen, "guiTop") * scale, (int) MinecraftClientTestPilot.field(screen, "xSize") * scale, (int) MinecraftClientTestPilot.field(screen, "ySize") * scale};
+	public UI createBackgroundUi(final boolean background) {
+		return background ? new VanillaBackground() : new NoBackground();
 	}
 
 	@Override
-	public int getHoveredSlot() {
-		final GuiScreen screen = Minecraft.getMinecraft().currentScreen;
-		if (!(screen instanceof ContainerUIScreen)) {
-			return -1;
-		}
-
-		final Slot slot = (Slot) MinecraftClientTestPilot.field(screen, "hoveredSlot");
-		return slot != null ? slot.slotNumber : -1;
-	}
-
-	@Override
-	public Cursor getCursor() {
-		return (Cursor) MinecraftClientTestPilot.field(BridgeHandler.WINDOW.getBridge(MinecraftWindowBridge.class), "applied");
-	}
-
-	@Override
-	public void drawHudFrame() {
-		GuiFrameCounter.inst().nextFrame();
-		BridgeHandler.UI.getBridge(OverlayUIBridge.class).drawHud(null);
-	}
-
-	@Override
-	public int countRenderTargets() {
-		return 0;
+	public UI createHiddenHotbarUi() {
+		return new HiddenHotbar();
 	}
 
 	@Override
