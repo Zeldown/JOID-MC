@@ -583,6 +583,8 @@ Every version branch runs the same tests, written once in the [common branch](ht
 
 All jobs run on the same pinned image, with the Mesa software renderers (llvmpipe for OpenGL, lavapipe for Vulkan). `./gradlew :<loader>:runClient -Pjoid.test` plays the client test plan in a game window: it takes the mouse and the keyboard of the window until the game closes.
 
+Every version compares its snapshots with one set of references per graphics API, kept in the common branch: the OpenGL images of 1.7.10 and of 26.2 must match to within one level per channel, so a rendering gap between versions fails the build.
+
 A version skips a scenario only when Minecraft lacks its concept:
 
 | Version | Skipped | Why |

@@ -168,11 +168,6 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	}
 
 	@Override
-	public String getRenderPipeline() {
-		return "blaze3d-" + this.getGraphicsBackend();
-	}
-
-	@Override
 	public String getGraphicsBackend() {
 		if (this.graphicsBackend == null) {
 			this.graphicsBackend = this.computeOnClient(() -> RenderSystem.getDevice().getDeviceInfo().backendName().toLowerCase(Locale.ROOT), 120);
