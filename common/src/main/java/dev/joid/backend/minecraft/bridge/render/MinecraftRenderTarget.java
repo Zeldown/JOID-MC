@@ -2,11 +2,11 @@ package dev.joid.backend.minecraft.bridge.render;
 
 import org.joml.Vector4f;
 
-import com.mojang.blaze3d.GpuFormat;
-import com.mojang.blaze3d.systems.CommandEncoder;
-import com.mojang.blaze3d.systems.GpuDevice;
-import com.mojang.blaze3d.textures.GpuTexture;
-import com.mojang.blaze3d.textures.GpuTextureView;
+import com.mojang.renderpearl.api.GpuFormat;
+import com.mojang.renderpearl.api.commands.CommandEncoder;
+import com.mojang.renderpearl.api.device.GpuDevice;
+import com.mojang.renderpearl.api.textures.GpuTexture;
+import com.mojang.renderpearl.api.textures.GpuTextureView;
 
 import dev.joid.backend.minecraft.bridge.render.texture.MinecraftTexture;
 import lombok.Getter;

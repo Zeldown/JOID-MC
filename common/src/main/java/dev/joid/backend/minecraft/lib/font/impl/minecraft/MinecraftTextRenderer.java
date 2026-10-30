@@ -3,8 +3,8 @@ package dev.joid.backend.minecraft.lib.font.impl.minecraft;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
 
-import com.mojang.blaze3d.GpuFormat;
-import com.mojang.blaze3d.textures.GpuTextureView;
+import com.mojang.renderpearl.api.GpuFormat;
+import com.mojang.renderpearl.api.textures.GpuTextureView;
 
 import dev.joid.backend.minecraft.bridge.render.texture.MinecraftBorrowedTexture;
 import dev.joid.lib.font.impl.bitmap.BitmapCell;

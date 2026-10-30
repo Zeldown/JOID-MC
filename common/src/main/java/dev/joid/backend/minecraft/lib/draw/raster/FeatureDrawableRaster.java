@@ -2,13 +2,19 @@ package dev.joid.backend.minecraft.lib.draw.raster;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.function.BiConsumer;
 
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
+import com.mojang.renderpearl.api.commands.RenderPass;
 
+import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
+import dev.joid.backend.minecraft.bridge.render.MinecraftRenderTarget;
+import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.draw.raster.DrawableRaster;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -16,6 +22,7 @@ import lombok.NonNull;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.SubmitNodeStorage;
+import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public final class FeatureDrawableRaster implements DrawableRaster {
@@ -46,7 +53,11 @@ public final class FeatureDrawableRaster implements DrawableRaster {
 			pose.translate(width / 2F, height / 2F, 0F);
 			pose.scale(size, -size, size);
 			this.submit.accept(pose, storage);
-			minecraft.gameRenderer.featureRenderDispatcher().renderAllFeatures(storage);
+			final MinecraftRenderTarget target = ((MinecraftRenderBridge) BridgeHandler.RENDER.get()).getRasterTarget();
+			try (final FeatureRenderDispatcher.PreparedFrame frame = minecraft.gameRenderer.featureRenderDispatcher().prepareFrame(storage); final RenderPass pass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "JOID Raster", target.getView(), Optional.empty(), target.getDepthView(), OptionalDouble.empty())) {
+				RenderSystem.bindDefaultUniforms(pass);
+				FeatureRenderDispatcher.renderAllFeatures(pass, frame);
+			}
 		} finally {
 			FeatureDrawableRaster.rasterDepth--;
 			pose.popPose();

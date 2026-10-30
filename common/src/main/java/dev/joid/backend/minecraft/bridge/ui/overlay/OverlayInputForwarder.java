@@ -1,6 +1,6 @@
 package dev.joid.backend.minecraft.bridge.ui.overlay;
 
-import dev.joid.base.lwjgl3.glfw.input.GlfwKeys;
+import dev.joid.backend.minecraft.bridge.input.SdlKeys;
 import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.input.mouse.MouseButton;
 import lombok.AccessLevel;
@@ -37,12 +37,12 @@ public final class OverlayInputForwarder {
 
 	public static boolean keyPressed(final int code) {
 		final OverlayUIBridge bridge = BridgeHandler.UI.getBridge(OverlayUIBridge.class);
-		return bridge != null && bridge.keyPressed(GlfwKeys.getPhysicalKey(code), GlfwKeys.getKey(code));
+		return bridge != null && bridge.keyPressed(SdlKeys.getPhysicalKey(code), SdlKeys.getKey(code));
 	}
 
 	public static boolean keyReleased(final int code) {
 		final OverlayUIBridge bridge = BridgeHandler.UI.getBridge(OverlayUIBridge.class);
-		return bridge != null && bridge.keyReleased(GlfwKeys.getPhysicalKey(code), GlfwKeys.getKey(code));
+		return bridge != null && bridge.keyReleased(SdlKeys.getPhysicalKey(code), SdlKeys.getKey(code));
 	}
 
 }

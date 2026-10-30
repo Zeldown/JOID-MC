@@ -8,10 +8,10 @@ import java.util.TreeMap;
 
 import org.joml.Vector4f;
 
-import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.systems.ScissorState;
-import com.mojang.blaze3d.textures.GpuTextureView;
+import com.mojang.renderpearl.api.commands.RenderPass;
+import com.mojang.renderpearl.api.textures.GpuTextureView;
 
 import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
 import dev.joid.backend.minecraft.bridge.render.pass.PassEncoder;
@@ -70,7 +70,8 @@ public final class MinecraftStateGuardBackend implements IStateGuardBackend {
 
 	@Override
 	public void fill(final int x, final int y, final int width, final int height, final int color) {
-		final GpuTextureView output = RenderSystem.outputColorTextureOverride != null ? RenderSystem.outputColorTextureOverride : ((MinecraftRenderBridge) BridgeHandler.RENDER.get()).getScreenTarget().getView();
+		final MinecraftRenderBridge bridge = (MinecraftRenderBridge) BridgeHandler.RENDER.get();
+		final GpuTextureView output = (bridge.getRasterTarget() != null ? bridge.getRasterTarget() : bridge.getScreenTarget()).getView();
 		final Vector4f clear = new Vector4f((color >> 16 & 255) / 255F, (color >> 8 & 255) / 255F, (color & 255) / 255F, (color >>> 24) / 255F);
 		RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Host", output, Optional.of(clear), null, OptionalDouble.empty(), new RenderPass.RenderArea(x, y, width, height)).close();
 	}
@@ -80,8 +81,7 @@ public final class MinecraftStateGuardBackend implements IStateGuardBackend {
 		final Map<String, String> state = new TreeMap<>();
 		final ScissorState scissor = RenderSystem.getScissorStateForRenderTypeDraws();
 		state.put("JOID_RENDER_PASS", Boolean.toString(MinecraftStateGuardBackend.isPassOpen()));
-		state.put("OUTPUT_COLOR_OVERRIDE", String.valueOf(RenderSystem.outputColorTextureOverride));
-		state.put("OUTPUT_DEPTH_OVERRIDE", String.valueOf(RenderSystem.outputDepthTextureOverride));
+		state.put("RASTER_TARGET", String.valueOf(((MinecraftRenderBridge) BridgeHandler.RENDER.get()).getRasterTarget()));
 		state.put("SCISSOR", scissor.enabled() ? scissor.x() + "," + scissor.y() + " " + scissor.width() + "x" + scissor.height() : "disabled");
 		state.put("PROJECTION", RenderSystem.getProjectionType() + " " + RenderSystem.getProjectionMatrixBuffer());
 		state.put("MODEL_VIEW", RenderSystem.getModelViewMatrixCopy().toString());

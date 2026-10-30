@@ -1,7 +1,7 @@
 package dev.joid.backend.minecraft.bridge.ui.screen;
 
+import dev.joid.backend.minecraft.bridge.input.SdlKeys;
 import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
-import dev.joid.base.lwjgl3.glfw.input.GlfwKeys;
 import dev.joid.lib.input.mouse.MouseButton;
 import lombok.NonNull;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -23,11 +23,13 @@ public class UIScreen extends Screen {
 
 	@Override
 	protected void init() {
+		super.minecraft.textInputManager().startTextInput(this);
 		this.bridge.load();
 	}
 
 	@Override
 	public void removed() {
+		super.minecraft.textInputManager().stopTextInput(this);
 		this.bridge.removed(this);
 	}
 
@@ -87,12 +89,12 @@ public class UIScreen extends Screen {
 
 	@Override
 	public boolean keyPressed(final KeyEvent event) {
-		return this.bridge.keyPressed(GlfwKeys.getPhysicalKey(event.key()), GlfwKeys.getKey(event.key()));
+		return this.bridge.keyPressed(SdlKeys.getPhysicalKey(event.key()), SdlKeys.getKey(event.key()));
 	}
 
 	@Override
 	public boolean keyReleased(final KeyEvent event) {
-		return this.bridge.keyReleased(GlfwKeys.getPhysicalKey(event.key()), GlfwKeys.getKey(event.key()));
+		return this.bridge.keyReleased(SdlKeys.getPhysicalKey(event.key()), SdlKeys.getKey(event.key()));
 	}
 
 	@Override

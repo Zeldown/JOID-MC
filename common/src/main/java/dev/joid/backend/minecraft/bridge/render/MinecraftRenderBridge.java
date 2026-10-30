@@ -12,18 +12,18 @@ import org.joml.Vector4f;
 import org.lwjgl.opengl.GL11;
 
 import com.mojang.blaze3d.ProjectionType;
-import com.mojang.blaze3d.buffers.GpuBuffer;
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.systems.GpuDevice;
-import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.systems.ScissorState;
-import com.mojang.blaze3d.textures.AddressMode;
-import com.mojang.blaze3d.textures.FilterMode;
-import com.mojang.blaze3d.textures.GpuSampler;
-import com.mojang.blaze3d.textures.GpuTexture;
-import com.mojang.blaze3d.textures.GpuTextureView;
+import com.mojang.renderpearl.api.buffers.GpuBuffer;
+import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
+import com.mojang.renderpearl.api.commands.RenderPass;
+import com.mojang.renderpearl.api.device.GpuDevice;
+import com.mojang.renderpearl.api.pipeline.CompiledRenderPipeline;
+import com.mojang.renderpearl.api.textures.AddressMode;
+import com.mojang.renderpearl.api.textures.FilterMode;
+import com.mojang.renderpearl.api.textures.GpuSampler;
+import com.mojang.renderpearl.api.textures.GpuTexture;
+import com.mojang.renderpearl.api.textures.GpuTextureView;
 
 import dev.joid.backend.minecraft.bridge.render.framebuffer.MinecraftFrameBuffer;
 import dev.joid.backend.minecraft.bridge.render.pass.PassEncoder;
@@ -74,6 +74,7 @@ public final class MinecraftRenderBridge extends RenderBridge {
 	private int                   rasterDepth;
 	private ByteBuffer            scratch;
 	private MinecraftRenderTarget target;
+	private MinecraftRenderTarget rasterTarget;
 	private MinecraftRenderTarget screenTarget;
 
 	public MinecraftRenderBridge() {
@@ -214,15 +215,13 @@ public final class MinecraftRenderBridge extends RenderBridge {
 		super.requireFrame();
 		final MinecraftRenderTarget renderTarget = ((MinecraftFrameBuffer) target).getTarget();
 		this.resolve(renderTarget.getTexture());
-		final GpuTextureView color = RenderSystem.outputColorTextureOverride;
-		final GpuTextureView depth = RenderSystem.outputDepthTextureOverride;
+		final MinecraftRenderTarget previous = this.rasterTarget;
 		final ScissorState scissor = new ScissorState(RenderSystem.getScissorStateForRenderTypeDraws());
 		final GpuBufferSlice projection = RenderSystem.getProjectionMatrixBuffer();
 		final ProjectionType projectionType = RenderSystem.getProjectionType();
 		final float range = Math.max(1000F, Math.max(width, height));
 		this.passEncoder.encoder().clearDepthTexture(renderTarget.getDepth(), 0D);
-		RenderSystem.outputColorTextureOverride = renderTarget.getView();
-		RenderSystem.outputDepthTextureOverride = renderTarget.getDepthView();
+		this.rasterTarget = renderTarget;
 		this.rasterProjection.setOrtho(0F, renderTarget.getWidth(), height, height - renderTarget.getHeight(), range, -range, this.zeroToOne);
 		RenderSystem.setProjectionMatrix(this.getRasterProjectionBuffer(this.rasterDepth).getBuffer(this.rasterProjection), ProjectionType.ORTHOGRAPHIC);
 		RenderSystem.enableScissorForRenderTypeDraws(0, 0, width, height);
@@ -235,8 +234,7 @@ public final class MinecraftRenderBridge extends RenderBridge {
 			this.hostDepth--;
 			RenderSystem.getScissorStateForRenderTypeDraws().setFrom(scissor);
 			RenderSystem.setProjectionMatrix(projection, projectionType);
-			RenderSystem.outputColorTextureOverride = color;
-			RenderSystem.outputDepthTextureOverride = depth;
+			this.rasterTarget = previous;
 		}
 	}
 
@@ -312,7 +310,7 @@ public final class MinecraftRenderBridge extends RenderBridge {
 	}
 
 	private void record(final PipelineKey key, final GpuTextureView color, final GpuTextureView depth, final GpuTextureView stencil, final MinecraftShader shader, final GpuBufferSlice vertices, final GpuBufferSlice uniforms, final int count) {
-		final RenderPipeline pipeline = this.pipelineCache.get(key);
+		final CompiledRenderPipeline pipeline = this.pipelineCache.get(key);
 		if (pipeline == null) {
 			return;
 		}
@@ -324,10 +322,10 @@ public final class MinecraftRenderBridge extends RenderBridge {
 		for (final UniformSampler sampler : shader.getSamplerMap().values()) {
 			if (!sampler.getName().equals(GlslShaderTranslator.STENCIL)) {
 				final SamplerBinding binding = super.resolveSampler(sampler);
-				pass.bindTexture(sampler.getName(), ((IMinecraftTexture) binding.getTexture()).getView(), MinecraftRenderBridge.getSampler(binding.getSampling()));
+				pass.setUniform(sampler.getName(), ((IMinecraftTexture) binding.getTexture()).getView(), MinecraftRenderBridge.getSampler(binding.getSampling()));
 			}
 		}
-		pass.bindTexture(GlslShaderTranslator.STENCIL, stencil, MinecraftRenderBridge.getSampler(TextureSampling.of(TextureFilter.NEAREST, TextureWrap.CLAMP_TO_EDGE, false)));
+		pass.setUniform(GlslShaderTranslator.STENCIL, stencil, MinecraftRenderBridge.getSampler(TextureSampling.of(TextureFilter.NEAREST, TextureWrap.CLAMP_TO_EDGE, false)));
 		pass.setVertexBuffer(0, vertices);
 
 		final int width = color.getWidth(0);

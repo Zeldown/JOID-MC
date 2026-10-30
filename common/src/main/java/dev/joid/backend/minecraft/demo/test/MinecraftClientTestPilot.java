@@ -27,22 +27,23 @@ import java.util.function.Function;
 
 import javax.imageio.ImageIO;
 
-import org.lwjgl.glfw.GLFW;
-import org.lwjgl.glfw.GLFWCursorPosCallback;
-import org.lwjgl.glfw.GLFWKeyCallback;
-import org.lwjgl.glfw.GLFWMouseButtonCallback;
-import org.lwjgl.glfw.GLFWScrollCallback;
-import org.lwjgl.glfw.GLFWWindowFocusCallback;
 import org.lwjgl.openal.AL10;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.sdl.SDLEvents;
+import org.lwjgl.sdl.SDLKeyboard;
+import org.lwjgl.sdl.SDLKeycode;
+import org.lwjgl.sdl.SDL_Event;
+import org.lwjgl.system.MemoryStack;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.cursor.CursorType;
 import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import dev.joid.backend.minecraft.MinecraftBackend;
+import dev.joid.backend.minecraft.bridge.input.SdlKeys;
 import dev.joid.backend.minecraft.bridge.render.texture.MinecraftTexture;
 import dev.joid.backend.minecraft.bridge.snapshot.MinecraftSnapshotBackend;
 import dev.joid.backend.minecraft.bridge.ui.container.ContainerUIScreen;
@@ -69,7 +70,6 @@ import dev.joid.backend.minecraft.lib.ui.core.data.overlay.layer.UIDataOverlayLa
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.block.BlockNode;
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.entity.EntityNode;
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.item.ItemNode;
-import dev.joid.base.lwjgl3.glfw.input.GlfwKeys;
 import dev.joid.base.lwjgl3.openal.Lwjgl3AlBinding;
 import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.bridge.render.texture.ITexture;
@@ -105,6 +105,7 @@ import net.minecraft.client.gui.screens.options.controls.KeyBindsList;
 import net.minecraft.client.gui.screens.options.controls.KeyBindsScreen;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
@@ -201,10 +202,9 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 		this.runOnClient(() -> {
 			final Minecraft minecraft = Minecraft.getInstance();
-			final long window = minecraft.getWindow().handle();
-			final GLFWWindowFocusCallback callback = GLFW.glfwSetWindowFocusCallback(window, null);
-			GLFW.glfwSetWindowFocusCallback(window, callback);
-			callback.invoke(window, true);
+			try (final MemoryStack stack = MemoryStack.stackPush()) {
+				minecraft.getWindow().handleEvent(SDL_Event.calloc(stack).type(SDLEvents.SDL_EVENT_WINDOW_FOCUS_GAINED));
+			}
 			if (minecraft.level == null && !(minecraft.gui.screen() instanceof TitleScreen)) {
 				minecraft.gui.setScreen(new TitleScreen());
 			}
@@ -268,20 +268,16 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	@Override
 	public void scroll(final double amount) {
 		this.runOnClient(() -> {
-			final long window = Minecraft.getInstance().getWindow().handle();
-			final GLFWScrollCallback callback = GLFW.glfwSetScrollCallback(window, null);
-			GLFW.glfwSetScrollCallback(window, callback);
-			callback.invoke(window, 0D, amount);
+			final Minecraft minecraft = Minecraft.getInstance();
+			minecraft.mouseHandler.onScroll(minecraft.getWindow().handle(), 0D, amount);
 		});
 	}
 
 	@Override
 	public void pressMouse(final boolean press) {
 		this.runOnClient(() -> {
-			final long window = Minecraft.getInstance().getWindow().handle();
-			final GLFWMouseButtonCallback callback = GLFW.glfwSetMouseButtonCallback(window, null);
-			GLFW.glfwSetMouseButtonCallback(window, callback);
-			callback.invoke(window, GLFW.GLFW_MOUSE_BUTTON_LEFT, press ? GLFW.GLFW_PRESS : GLFW.GLFW_RELEASE, this.getModifiers());
+			final Minecraft minecraft = Minecraft.getInstance();
+			minecraft.mouseHandler.onButton(minecraft.getWindow().handle(), new MouseButtonInfo(InputConstants.MOUSE_BUTTON_LEFT, this.getModifiers()), press ? InputConstants.PRESS : InputConstants.RELEASE);
 		});
 	}
 
@@ -308,10 +304,8 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	@Override
 	public void moveMouse(final double x, final double y) {
 		this.runOnClient(() -> {
-			final long window = Minecraft.getInstance().getWindow().handle();
-			final GLFWCursorPosCallback callback = GLFW.glfwSetCursorPosCallback(window, null);
-			GLFW.glfwSetCursorPosCallback(window, callback);
-			callback.invoke(window, x, y);
+			final Minecraft minecraft = Minecraft.getInstance();
+			minecraft.mouseHandler.onMove(minecraft.getWindow().handle(), x, y, x - minecraft.mouseHandler.xpos(), y - minecraft.mouseHandler.ypos());
 		});
 	}
 
@@ -324,11 +318,9 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 		}
 
 		this.runOnClient(() -> {
-			final long window = Minecraft.getInstance().getWindow().handle();
-			final GLFWKeyCallback callback = GLFW.glfwSetKeyCallback(window, null);
-			GLFW.glfwSetKeyCallback(window, callback);
-			final int code = GlfwKeys.getCode(key);
-			callback.invoke(window, code, GLFW.glfwGetKeyScancode(code), press ? GLFW.GLFW_PRESS : GLFW.GLFW_RELEASE, this.getModifiers());
+			final Minecraft minecraft = Minecraft.getInstance();
+			final int code = SdlKeys.getCode(key);
+			minecraft.keyboardHandler.keyPress(minecraft.getWindow().handle(), press ? InputConstants.PRESS : InputConstants.RELEASE, new KeyEvent(code, SDLKeyboard.SDL_GetKeyFromScancode(code, (short) this.getModifiers(), false), this.getModifiers()));
 		});
 	}
 
@@ -797,7 +789,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	}
 
 	private int getModifiers() {
-		return this.heldKeys.contains(Key.LEFT_SHIFT) ? GLFW.GLFW_MOD_SHIFT : 0;
+		return this.heldKeys.contains(Key.LEFT_SHIFT) ? SDLKeycode.SDL_KMOD_LSHIFT : 0;
 	}
 
 	private <T> T computeOnServer(final Function<ServerPlayer, T> function) {
@@ -829,7 +821,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 		final String message = Component.translatable(translationKey).getString();
 		for (final GuiEventListener child : screen.children()) {
 			if (child instanceof final Button button && button.getMessage().getString().equals(message)) {
-				button.onPress(new MouseButtonInfo(GLFW.GLFW_KEY_UNKNOWN, 0));
+				button.onPress(new MouseButtonInfo(InputConstants.MOUSE_BUTTON_LEFT, 0));
 				return;
 			}
 		}

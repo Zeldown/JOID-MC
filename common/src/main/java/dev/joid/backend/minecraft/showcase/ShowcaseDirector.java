@@ -2,6 +2,7 @@ package dev.joid.backend.minecraft.showcase;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.nio.IntBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,13 +18,13 @@ import java.util.function.DoubleConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.lwjgl.glfw.GLFW;
-import org.lwjgl.glfw.GLFWCharCallback;
-import org.lwjgl.glfw.GLFWCursorPosCallback;
-import org.lwjgl.glfw.GLFWKeyCallback;
-import org.lwjgl.glfw.GLFWMouseButtonCallback;
-import org.lwjgl.glfw.GLFWScrollCallback;
-import org.lwjgl.glfw.GLFWWindowFocusCallback;
+import org.lwjgl.sdl.SDLEvents;
+import org.lwjgl.sdl.SDLKeyboard;
+import org.lwjgl.sdl.SDLVideo;
+import org.lwjgl.sdl.SDL_Event;
+import org.lwjgl.system.MemoryStack;
+
+import com.mojang.blaze3d.platform.InputConstants;
 
 import dev.joid.lib.JOID;
 import dev.joid.lib.ui.node.Node;
@@ -43,6 +44,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.tutorial.TutorialSteps;
 import net.minecraft.network.chat.Component;
@@ -139,10 +142,8 @@ public final class ShowcaseDirector {
 		ShowcaseDirector.mouseY  = y;
 		ShowcaseDirector.pointer = true;
 		ShowcaseDirector.runOnClient(() -> {
-			final long window = Minecraft.getInstance().getWindow().handle();
-			final GLFWCursorPosCallback callback = GLFW.glfwSetCursorPosCallback(window, null);
-			GLFW.glfwSetCursorPosCallback(window, callback);
-			callback.invoke(window, x, y);
+			final Minecraft minecraft = Minecraft.getInstance();
+			minecraft.mouseHandler.onMove(minecraft.getWindow().handle(), x, y, x - minecraft.mouseHandler.xpos(), y - minecraft.mouseHandler.ypos());
 		});
 	}
 
@@ -152,26 +153,24 @@ public final class ShowcaseDirector {
 
 	public static void press() {
 		ShowcaseDirector.pressed = true;
-		ShowcaseDirector.mouse(GLFW.GLFW_PRESS);
+		ShowcaseDirector.mouse(InputConstants.PRESS);
 	}
 
 	public static void release() {
 		ShowcaseDirector.pressed = false;
-		ShowcaseDirector.mouse(GLFW.GLFW_RELEASE);
+		ShowcaseDirector.mouse(InputConstants.RELEASE);
 	}
 
 	public static void key(final int key) {
-		ShowcaseDirector.keyEvent(key, GLFW.GLFW_PRESS);
-		ShowcaseDirector.keyEvent(key, GLFW.GLFW_RELEASE);
+		ShowcaseDirector.keyEvent(key, InputConstants.PRESS);
+		ShowcaseDirector.keyEvent(key, InputConstants.RELEASE);
 	}
 
 	public static void type(final String text, final int count) {
 		for (final char character : text.toCharArray()) {
 			ShowcaseDirector.runOnClient(() -> {
-				final long window = Minecraft.getInstance().getWindow().handle();
-				final GLFWCharCallback callback = GLFW.glfwSetCharCallback(window, null);
-				GLFW.glfwSetCharCallback(window, callback);
-				callback.invoke(window, character);
+				final Minecraft minecraft = Minecraft.getInstance();
+				minecraft.keyboardHandler.charTyped(minecraft.getWindow().handle(), new CharacterEvent(character));
 			});
 			ShowcaseDirector.frames(count);
 		}
@@ -179,10 +178,8 @@ public final class ShowcaseDirector {
 
 	public static void scroll(final double notches) {
 		ShowcaseDirector.runOnClient(() -> {
-			final long window = Minecraft.getInstance().getWindow().handle();
-			final GLFWScrollCallback callback = GLFW.glfwSetScrollCallback(window, null);
-			GLFW.glfwSetScrollCallback(window, callback);
-			callback.invoke(window, 0D, notches);
+			final Minecraft minecraft = Minecraft.getInstance();
+			minecraft.mouseHandler.onScroll(minecraft.getWindow().handle(), 0D, notches);
 		});
 	}
 
@@ -273,10 +270,9 @@ public final class ShowcaseDirector {
 		}
 
 		ShowcaseDirector.runOnClient(() -> {
-			final long window = Minecraft.getInstance().getWindow().handle();
-			final GLFWWindowFocusCallback callback = GLFW.glfwSetWindowFocusCallback(window, null);
-			GLFW.glfwSetWindowFocusCallback(window, callback);
-			callback.invoke(window, true);
+			try (final MemoryStack stack = MemoryStack.stackPush()) {
+				Minecraft.getInstance().getWindow().handleEvent(SDL_Event.calloc(stack).type(SDLEvents.SDL_EVENT_WINDOW_FOCUS_GAINED));
+			}
 		});
 		if (ShowcaseDirector.computeOnClient(() -> Minecraft.getInstance().level == null && !Minecraft.getInstance().getLevelSource().levelExists("joid-showcase"))) {
 			ShowcaseDirector.runOnClient(() -> CreateWorldScreen.openFresh(Minecraft.getInstance(), () -> Minecraft.getInstance().gui.setScreen(new TitleScreen())));
@@ -305,10 +301,12 @@ public final class ShowcaseDirector {
 		ShowcaseDirector.waitFor("the singleplayer world", () -> Minecraft.getInstance().level != null && Minecraft.getInstance().player != null && Minecraft.getInstance().gui.screen() == null && Minecraft.getInstance().gui.overlay() == null, 900);
 		ShowcaseDirector.runOnClient(() -> {
 			final long window = Minecraft.getInstance().getWindow().handle();
-			final int[] left = new int[1];
-			final int[] top = new int[1];
-			GLFW.glfwGetWindowFrameSize(window, left, top, new int[1], new int[1]);
-			GLFW.glfwSetWindowPos(window, left[0], top[0]);
+			try (final MemoryStack stack = MemoryStack.stackPush()) {
+				final IntBuffer top = stack.mallocInt(1);
+				final IntBuffer left = stack.mallocInt(1);
+				SDLVideo.SDL_GetWindowBordersSize(window, top, left, stack.mallocInt(1), stack.mallocInt(1));
+				SDLVideo.SDL_SetWindowPosition(window, left.get(0), top.get(0));
+			}
 			Minecraft.getInstance().getWindow().setTitle("Minecraft");
 			JOID.open(new ShowcaseFrameUI());
 		});
@@ -323,7 +321,7 @@ public final class ShowcaseDirector {
 		final String message = Component.translatable(translationKey).getString();
 		for (final GuiEventListener child : screen.children()) {
 			if (child instanceof final Button button && button.getMessage().getString().equals(message)) {
-				button.onPress(new MouseButtonInfo(GLFW.GLFW_KEY_UNKNOWN, 0));
+				button.onPress(new MouseButtonInfo(InputConstants.MOUSE_BUTTON_LEFT, 0));
 				return;
 			}
 		}
@@ -388,19 +386,15 @@ public final class ShowcaseDirector {
 
 	private static void mouse(final int action) {
 		ShowcaseDirector.runOnClient(() -> {
-			final long window = Minecraft.getInstance().getWindow().handle();
-			final GLFWMouseButtonCallback callback = GLFW.glfwSetMouseButtonCallback(window, null);
-			GLFW.glfwSetMouseButtonCallback(window, callback);
-			callback.invoke(window, GLFW.GLFW_MOUSE_BUTTON_LEFT, action, 0);
+			final Minecraft minecraft = Minecraft.getInstance();
+			minecraft.mouseHandler.onButton(minecraft.getWindow().handle(), new MouseButtonInfo(InputConstants.MOUSE_BUTTON_LEFT, 0), action);
 		});
 	}
 
 	private static void keyEvent(final int key, final int action) {
 		ShowcaseDirector.runOnClient(() -> {
-			final long window = Minecraft.getInstance().getWindow().handle();
-			final GLFWKeyCallback callback = GLFW.glfwSetKeyCallback(window, null);
-			GLFW.glfwSetKeyCallback(window, callback);
-			callback.invoke(window, key, GLFW.glfwGetKeyScancode(key), action, 0);
+			final Minecraft minecraft = Minecraft.getInstance();
+			minecraft.keyboardHandler.keyPress(minecraft.getWindow().handle(), action, new KeyEvent(key, SDLKeyboard.SDL_GetKeyFromScancode(key, (short) 0, false), 0));
 		});
 	}
 

@@ -2,8 +2,8 @@ package dev.joid.backend.minecraft.bridge.render.vertex;
 
 import java.util.Collection;
 
-import com.mojang.blaze3d.GpuFormat;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.renderpearl.api.GpuFormat;
+import com.mojang.renderpearl.api.vertex.VertexFormat;
 
 import dev.joid.lib.bridge.render.shader.source.ShaderBuiltin;
 import dev.joid.lib.bridge.render.vertex.VertexAttribute;

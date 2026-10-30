@@ -3,13 +3,13 @@ package dev.joid.backend.minecraft.bridge.render.texture;
 import java.nio.ByteBuffer;
 import java.util.Optional;
 
-import com.mojang.blaze3d.GpuFormat;
-import com.mojang.blaze3d.systems.DeviceInfo;
-import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.FilterMode;
-import com.mojang.blaze3d.textures.GpuTexture;
-import com.mojang.blaze3d.textures.GpuTextureView;
+import com.mojang.renderpearl.api.GpuFormat;
+import com.mojang.renderpearl.api.commands.RenderPass;
+import com.mojang.renderpearl.api.device.DeviceInfo;
+import com.mojang.renderpearl.api.textures.FilterMode;
+import com.mojang.renderpearl.api.textures.GpuTexture;
+import com.mojang.renderpearl.api.textures.GpuTextureView;
 
 import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
 import dev.joid.lib.bridge.render.texture.MipmapChain;
@@ -89,8 +89,8 @@ public final class MinecraftTexture extends Texture implements IMinecraftTexture
 			final GpuTextureView target = this.bridge.getDevice().createTextureView(this.texture, level, 1);
 			try (final RenderPass pass = this.bridge.getPassEncoder().encoder().createRenderPass(() -> "JOID Mipmap", target, Optional.empty())) {
 				RenderSystem.bindDefaultUniforms(pass);
-				pass.setPipeline(RenderPipelines.TRACY_BLIT);
-				pass.bindTexture("InSampler", source, RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
+				pass.setPipeline(RenderSystem.getCompiledPipeline(RenderPipelines.TRACY_BLIT));
+				pass.setUniform("InSampler", source, RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
 				pass.draw(3, 1, 0, 0);
 			} finally {
 				source.close();

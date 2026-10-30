@@ -1,13 +1,13 @@
 package dev.joid.backend.minecraft.bridge.window;
 
-import org.lwjgl.glfw.GLFW;
+import org.lwjgl.sdl.SDLMouse;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.platform.cursor.CursorType;
 import com.mojang.blaze3d.platform.cursor.CursorTypes;
 
-import dev.joid.base.lwjgl3.glfw.input.GlfwKeys;
+import dev.joid.backend.minecraft.bridge.input.SdlKeys;
 import dev.joid.lib.bridge.window.IWindowBridge;
 import dev.joid.lib.input.cursor.Cursor;
 import dev.joid.lib.input.key.Key;
@@ -62,7 +62,7 @@ public final class MinecraftWindowBridge implements IWindowBridge {
 
 	@Override
 	public boolean isKeyDown(final @NonNull Key physicalKey) {
-		return GlfwKeys.isKeyDown(physicalKey, code -> InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), code));
+		return SdlKeys.isKeyDown(physicalKey, InputConstants::isKeyDown);
 	}
 
 	@Override
@@ -114,8 +114,8 @@ public final class MinecraftWindowBridge implements IWindowBridge {
 
 	private static final class DiagonalCursor {
 
-		private static final CursorType NWSE = CursorType.createStandardCursor(GLFW.GLFW_RESIZE_NWSE_CURSOR, "resize_nwse", CursorType.DEFAULT);
-		private static final CursorType NESW = CursorType.createStandardCursor(GLFW.GLFW_RESIZE_NESW_CURSOR, "resize_nesw", CursorType.DEFAULT);
+		private static final CursorType NWSE = CursorType.createStandardCursor(SDLMouse.SDL_SYSTEM_CURSOR_NWSE_RESIZE, "resize_nwse", CursorType.DEFAULT);
+		private static final CursorType NESW = CursorType.createStandardCursor(SDLMouse.SDL_SYSTEM_CURSOR_NESW_RESIZE, "resize_nesw", CursorType.DEFAULT);
 
 	}
 

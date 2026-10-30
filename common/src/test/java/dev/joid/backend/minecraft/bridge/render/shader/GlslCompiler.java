@@ -28,7 +28,6 @@ public final class GlslCompiler {
 		try {
 			Shaderc.shaderc_compile_options_set_target_env(options, environment, version);
 			Shaderc.shaderc_compile_options_set_auto_bind_uniforms(options, true);
-			Shaderc.shaderc_compile_options_set_auto_map_locations(options, true);
 			Shaderc.shaderc_compile_options_set_optimization_level(options, Shaderc.shaderc_optimization_level_zero);
 
 			final int kind = stage == ShaderStage.VERTEX ? Shaderc.shaderc_vertex_shader : Shaderc.shaderc_fragment_shader;

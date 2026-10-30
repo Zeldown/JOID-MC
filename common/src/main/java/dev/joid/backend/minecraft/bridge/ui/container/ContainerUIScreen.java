@@ -6,10 +6,10 @@ import java.util.Set;
 
 import com.mojang.blaze3d.platform.Window;
 
+import dev.joid.backend.minecraft.bridge.input.SdlKeys;
 import dev.joid.backend.minecraft.lib.ui.core.container.ContainerUI;
 import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
 import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
-import dev.joid.base.lwjgl3.glfw.input.GlfwKeys;
 import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.input.mouse.MouseButton;
 import lombok.Getter;
@@ -50,12 +50,14 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 	@Override
 	public void removed() {
 		super.removed();
+		super.minecraft.textInputManager().stopTextInput(this);
 		this.bridge.removed(this);
 	}
 
 	@Override
 	protected void init() {
 		super.init();
+		super.minecraft.textInputManager().startTextInput(this);
 		this.bridge.load();
 		this.updateBounds();
 	}
@@ -130,12 +132,12 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 
 	@Override
 	public boolean keyPressed(final KeyEvent event) {
-		return this.bridge.keyPressed(GlfwKeys.getPhysicalKey(event.key()), GlfwKeys.getKey(event.key())) || super.keyPressed(event);
+		return this.bridge.keyPressed(SdlKeys.getPhysicalKey(event.key()), SdlKeys.getKey(event.key())) || super.keyPressed(event);
 	}
 
 	@Override
 	public boolean keyReleased(final KeyEvent event) {
-		return this.bridge.keyReleased(GlfwKeys.getPhysicalKey(event.key()), GlfwKeys.getKey(event.key())) || super.keyReleased(event);
+		return this.bridge.keyReleased(SdlKeys.getPhysicalKey(event.key()), SdlKeys.getKey(event.key())) || super.keyReleased(event);
 	}
 
 	@Override

@@ -2,13 +2,13 @@ package dev.joid.backend.minecraft.bridge.render.shader;
 
 import java.util.Collection;
 
-import com.mojang.blaze3d.buffers.GpuBuffer;
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
-import com.mojang.blaze3d.pipeline.BindGroupLayout;
-import com.mojang.blaze3d.shaders.ShaderType;
-import com.mojang.blaze3d.shaders.UniformType;
-import com.mojang.blaze3d.systems.GpuDevice;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.renderpearl.api.buffers.GpuBuffer;
+import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
+import com.mojang.renderpearl.api.device.GpuDevice;
+import com.mojang.renderpearl.api.pipeline.BindGroupLayout;
+import com.mojang.renderpearl.api.pipeline.ShaderType;
+import com.mojang.renderpearl.api.pipeline.UniformType;
+import com.mojang.renderpearl.api.vertex.VertexFormat;
 
 import dev.joid.backend.minecraft.MinecraftJoid;
 import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
@@ -91,7 +91,7 @@ public final class MinecraftShader extends Shader {
 	private static BindGroupLayout createLayout(final Collection<String> samplers) {
 		final BindGroupLayout.Builder layout = BindGroupLayout.builder().withUniform(GlslShaderTranslator.BLOCK, UniformType.UNIFORM_BUFFER);
 		for (final String sampler : samplers) {
-			layout.withSampler(sampler);
+			layout.withUniform(sampler, UniformType.COMBINED_IMAGE_SAMPLER);
 		}
 		return layout.build();
 	}

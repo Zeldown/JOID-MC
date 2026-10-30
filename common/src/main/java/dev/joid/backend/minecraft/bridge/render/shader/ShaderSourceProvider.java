@@ -4,8 +4,8 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.mojang.blaze3d.shaders.ShaderSource;
-import com.mojang.blaze3d.shaders.ShaderType;
+import com.mojang.renderpearl.api.pipeline.ShaderSource;
+import com.mojang.renderpearl.api.pipeline.ShaderType;
 
 import net.minecraft.resources.Identifier;
 
@@ -21,9 +21,17 @@ public final class ShaderSourceProvider implements ShaderSource {
 	}
 
 	@Override
-	public String get(final Identifier identifier, final ShaderType type) {
+	public String getShader(final Identifier identifier, final ShaderType type) {
 		return this.sourceMap.get(type).get(identifier);
 	}
+
+	@Override
+	public ShaderSource.CachedIncludeSource getInclude(final Identifier identifier) {
+		return null;
+	}
+
+	@Override
+	public void close() {}
 
 	public void register(final Identifier identifier, final ShaderType type, final String source) {
 		this.sourceMap.get(type).put(identifier, source);

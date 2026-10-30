@@ -96,9 +96,9 @@ public final class DrawEntity {
 		DrawUtils.RASTER.drawRaster(x - width / 4D, y - height / 4D, width * 1.5D, height * 1.5D, FeatureDrawableRaster.of(Lighting.Entry.ENTITY_IN_UI, (pose, collector) -> {
 			pose.scale(size, -size, -size);
 			pose.translate(0F, center, 0F);
-			pose.mulPose(new Quaternionf().rotationZ((float) Math.PI).mul(tilt));
+			pose.rotate(new Quaternionf().rotationZ((float) Math.PI).mul(tilt));
 			pose.translate(0F, center, 0F);
-			pose.mulPose(new Quaternionf().rotationXYZ((float) Math.toRadians(-rotationPitch), (float) Math.toRadians(rotationYaw), 0F));
+			pose.rotate(new Quaternionf().rotationXYZ((float) Math.toRadians(-rotationPitch), (float) Math.toRadians(rotationYaw), 0F));
 			pose.translate(0F, -center, 0F);
 			Minecraft.getInstance().getEntityRenderDispatcher().submit(state, camera, 0D, 0D, 0D, pose, collector);
 		}));

@@ -1,11 +1,11 @@
 package dev.joid.backend.minecraft.bridge.ui.screen;
 
-import com.mojang.blaze3d.PrimitiveTopology;
-import com.mojang.blaze3d.pipeline.BlendFunction;
-import com.mojang.blaze3d.pipeline.ColorTargetState;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.renderpearl.api.pipeline.BlendFunction;
+import com.mojang.renderpearl.api.pipeline.ColorTargetState;
+import com.mojang.renderpearl.api.pipeline.PrimitiveTopology;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 
 import dev.joid.backend.minecraft.MinecraftJoid;
 import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
@@ -28,7 +28,8 @@ public final class GuiCompositor {
 			.withVertexShader(Identifier.fromNamespaceAndPath(MinecraftJoid.MOD_ID, "core/composite"))
 			.withFragmentShader(Identifier.fromNamespaceAndPath(MinecraftJoid.MOD_ID, "core/composite"))
 			.withBindGroupLayout(BindGroupLayouts.GLOBALS)
-			.withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION)
+			.withBindGroupLayout(BindGroupLayouts.PROJECTION)
+			.withBindGroupLayout(BindGroupLayouts.DYNAMIC_TRANSFORMS)
 			.withBindGroupLayout(BindGroupLayouts.SAMPLER0)
 			.withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT_PREMULTIPLIED_ALPHA))
 			.withVertexBinding(0, DefaultVertexFormat.POSITION_COLOR)

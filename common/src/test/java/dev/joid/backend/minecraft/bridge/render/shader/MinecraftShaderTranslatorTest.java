@@ -71,18 +71,17 @@ public class MinecraftShaderTranslatorTest {
 	}
 
 	@Test
-	public void declaresTheNamedAttributesAndVaryings() {
+	public void declaresTheAttributesAndVaryingsAtFixedLocations() {
 		final ShaderSource vertex = ShaderSource.from(ShaderStage.VERTEX, MinecraftShaderTranslatorTest.VERTEX);
 		final ShaderSource fragment = ShaderSource.from(ShaderStage.FRAGMENT, MinecraftShaderTranslatorTest.FRAGMENT);
 		final String translatedVertex = MinecraftShaderTranslatorTest.color().translateVertex(vertex, fragment);
 		final String translatedFragment = MinecraftShaderTranslatorTest.color().translateFragment(vertex, fragment);
-		Assert.assertTrue(translatedVertex.contains("in vec3 aPosition;\n"));
-		Assert.assertTrue(translatedVertex.contains("in vec2 aTexCoord;\n"));
-		Assert.assertTrue(translatedVertex.contains("in vec4 aColor;\n"));
+		Assert.assertTrue(translatedVertex.contains("layout(location = 0) in vec3 aPosition;\n"));
+		Assert.assertTrue(translatedVertex.contains("layout(location = 1) in vec2 aTexCoord;\n"));
+		Assert.assertTrue(translatedVertex.contains("layout(location = 2) in vec4 aColor;\n"));
 		Assert.assertFalse(translatedVertex.contains("aNormal"));
-		Assert.assertFalse(translatedVertex.contains("layout(location"));
-		Assert.assertTrue(translatedVertex.contains("out vec2 vTexCoord;\nflat out vec4 vColor;\n"));
-		Assert.assertTrue(translatedFragment.contains("in vec2 vTexCoord;\nflat in vec4 vColor;\n"));
+		Assert.assertTrue(translatedVertex.contains("layout(location = 0) out vec2 vTexCoord;\nlayout(location = 1) flat out vec4 vColor;\n"));
+		Assert.assertTrue(translatedFragment.contains("layout(location = 0) in vec2 vTexCoord;\nlayout(location = 1) flat in vec4 vColor;\n"));
 		Assert.assertTrue(translatedFragment.contains("layout(location = 0) out vec4 fragColor;\n"));
 	}
 

@@ -75,6 +75,11 @@ public final class GlyphVertexCapture implements VertexConsumer {
 	}
 
 	@Override
+	public @NonNull GlyphVertexCapture setUv3(final float u, final float v) {
+		return this;
+	}
+
+	@Override
 	public @NonNull GlyphVertexCapture setNormal(final float x, final float y, final float z) {
 		return this;
 	}

@@ -1,6 +1,6 @@
 package dev.joid.backend.minecraft.lib.resource.decoder.impl;
 
-import com.mojang.blaze3d.textures.GpuTextureView;
+import com.mojang.renderpearl.api.textures.GpuTextureView;
 
 import dev.joid.backend.minecraft.bridge.render.texture.MinecraftBorrowedTexture;
 import dev.joid.lib.resource.ResourceData;

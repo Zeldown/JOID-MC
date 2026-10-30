@@ -1,16 +1,16 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.2/docs/images/logo.png" width="128" alt="JOID logo">
+<img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.3/docs/images/logo.png" width="128" alt="JOID logo">
 
 # JOID-MC
 ## JOID interfaces inside Minecraft
 
 <div align="center">
-  <img align="center" src="https://img.shields.io/badge/minecraft-26.2-brightgreen">
+  <img align="center" src="https://img.shields.io/badge/minecraft-26.3-brightgreen">
   <img align="center" src="https://img.shields.io/badge/joid-8.0.0-blue">
   <img align="center" src="https://img.shields.io/badge/loader-Fabric%20%C2%B7%20NeoForge%20%C2%B7%20Forge-orange">
   <img align="center" src="https://img.shields.io/badge/license-Apache--2.0-blue">
-  <img align="center" src="https://github.com/Zeldown/JOID-MC/actions/workflows/build.yml/badge.svg?branch=version/26.2">
+  <img align="center" src="https://github.com/Zeldown/JOID-MC/actions/workflows/build.yml/badge.svg?branch=version/26.3">
   <a href="https://discord.joid.dev"><img align="center" src="https://img.shields.io/badge/discord-join-5865F2"></a>
 </div>
 
@@ -41,41 +41,41 @@ JOID-MC brings [JOID](https://github.com/Zeldown/JOID), the Java UI engine, insi
 Draw your screen in your design tool, copy each layer's values, and get the same result in the game.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.2/docs/images/copy-the-design.webp" alt="A quest panel in its mockup, then the same panel in the Minecraft window, identical" width="100%">
+  <img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.3/docs/images/copy-the-design.webp" alt="A quest panel in its mockup, then the same panel in the Minecraft window, identical" width="100%">
 </p>
 
 ## Showcase
 
-Real renders inside the game window, styled for this showcase: JOID ships with no design of its own. Watch them in the [1080p video](https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.2/docs/images/showcase.mp4).
+Real renders inside the game window, styled for this showcase: JOID ships with no design of its own. Watch them in the [1080p video](https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.3/docs/images/showcase.mp4).
 
 <table>
   <tr>
-    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.2/docs/images/showcase-hud.webp" alt="Health, hunger and experience replaced by an animated JOID HUD, in game"></td>
-    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.2/docs/images/showcase-chest.webp" alt="A chest redrawn with JOID over the world: real slots, a rotating player, items dragged with the mouse"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.3/docs/images/showcase-hud.webp" alt="Health, hunger and experience replaced by an animated JOID HUD, in game"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.3/docs/images/showcase-chest.webp" alt="A chest redrawn with JOID over the world: real slots, a rotating player, items dragged with the mouse"></td>
   </tr>
   <tr>
     <td align="center"><sub><b>HUD.</b> Replace any layer, in game.</sub></td>
     <td align="center"><sub><b>Containers.</b> Real slots, synced with the server.</sub></td>
   </tr>
   <tr>
-    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.2/docs/images/showcase-bestiary.webp" alt="Cards of mobs, blocks and items turning in 3D, with a detail panel"></td>
-    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.2/docs/images/showcase-fonts.webp" alt="The Minecraft font from 8 to 72 px, chat colors and formats, the enchanting table alphabet decoded, then a 6x zoom that stays pixel-sharp"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.3/docs/images/showcase-bestiary.webp" alt="Cards of mobs, blocks and items turning in 3D, with a detail panel"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.3/docs/images/showcase-fonts.webp" alt="The Minecraft font from 8 to 72 px, chat colors and formats, the enchanting table alphabet decoded, then a 6x zoom that stays pixel-sharp"></td>
   </tr>
   <tr>
     <td align="center"><sub><b>Game objects.</b> Entities, blocks and items, rendered in 3D.</sub></td>
     <td align="center"><sub><b>Fonts.</b> The Minecraft font, sharp at any size, with § colors.</sub></td>
   </tr>
   <tr>
-    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.2/docs/images/showcase-anvil.webp" alt="A redesigned anvil: a word of the sword name is selected with a double click and retyped, the preview and the cost follow, then the renamed sword is taken"></td>
-    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.2/docs/images/showcase-servers.webp" alt="A server list with colored messages of the day: a server is dragged to the top, then the list scrolls"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.3/docs/images/showcase-anvil.webp" alt="A redesigned anvil: a word of the sword name is selected with a double click and retyped, the preview and the cost follow, then the renamed sword is taken"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.3/docs/images/showcase-servers.webp" alt="A server list with colored messages of the day: a server is dragged to the top, then the list scrolls"></td>
   </tr>
   <tr>
     <td align="center"><sub><b>Forms.</b> Type, check and preview, in a real anvil.</sub></td>
     <td align="center"><sub><b>Lists.</b> Drag to reorder, scroll smoothly.</sub></td>
   </tr>
   <tr>
-    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.2/docs/images/showcase-daylight.webp" alt="A daylight panel over the live world: the sun dial, the clock, the sky, the moon phase and the world follow one time value, first as the game advances it, then as the slider is dragged"></td>
-    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.2/docs/images/showcase-video.webp" alt="A video with sound inside the game window, paused and resumed with its own controls, then previewed frame by frame while the pointer hovers the timeline"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.3/docs/images/showcase-daylight.webp" alt="A daylight panel over the live world: the sun dial, the clock, the sky, the moon phase and the world follow one time value, first as the game advances it, then as the slider is dragged"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/26.3/docs/images/showcase-video.webp" alt="A video with sound inside the game window, paused and resumed with its own controls, then previewed frame by frame while the pointer hovers the timeline"></td>
   </tr>
   <tr>
     <td align="center"><sub><b>Reactive.</b> Bind once, never refresh.</sub></td>
@@ -107,7 +107,7 @@ Download the `dev` jar of your loader from the [releases](https://github.com/Zel
 
 ```gradle
 dependencies {
-    implementation(files("libs/joid-backend-minecraft-fabric-26.2-1.0.0-dev.jar"))
+    implementation(files("libs/joid-backend-minecraft-fabric-26.3-1.0.0-dev.jar"))
 }
 ```
 
@@ -115,7 +115,7 @@ dependencies {
 
 ```gradle
 dependencies {
-    implementation(files("libs/joid-backend-minecraft-neoforge-26.2-1.0.0-dev.jar"))
+    implementation(files("libs/joid-backend-minecraft-neoforge-26.3-1.0.0-dev.jar"))
 }
 ```
 
@@ -123,7 +123,7 @@ dependencies {
 
 ```gradle
 dependencies {
-    implementation(files("libs/joid-backend-minecraft-forge-26.2-1.0.0-dev.jar"))
+    implementation(files("libs/joid-backend-minecraft-forge-26.3-1.0.0-dev.jar"))
 }
 ```
 

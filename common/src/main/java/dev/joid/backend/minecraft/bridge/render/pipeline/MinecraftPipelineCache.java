@@ -4,19 +4,20 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import com.mojang.blaze3d.GpuFormat;
-import com.mojang.blaze3d.PrimitiveTopology;
-import com.mojang.blaze3d.pipeline.BindGroupLayout;
-import com.mojang.blaze3d.pipeline.BlendEquation;
-import com.mojang.blaze3d.pipeline.BlendFunction;
-import com.mojang.blaze3d.pipeline.ColorTargetState;
-import com.mojang.blaze3d.pipeline.DepthStencilState;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.platform.BlendFactor;
-import com.mojang.blaze3d.platform.BlendOp;
-import com.mojang.blaze3d.platform.CompareOp;
-import com.mojang.blaze3d.systems.GpuDevice;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.renderpearl.api.GpuFormat;
+import com.mojang.renderpearl.api.device.GpuDevice;
+import com.mojang.renderpearl.api.pipeline.BindGroupLayout;
+import com.mojang.renderpearl.api.pipeline.BlendEquation;
+import com.mojang.renderpearl.api.pipeline.BlendFactor;
+import com.mojang.renderpearl.api.pipeline.BlendFunction;
+import com.mojang.renderpearl.api.pipeline.BlendOp;
+import com.mojang.renderpearl.api.pipeline.ColorTargetState;
+import com.mojang.renderpearl.api.pipeline.CompareOp;
+import com.mojang.renderpearl.api.pipeline.CompiledRenderPipeline;
+import com.mojang.renderpearl.api.pipeline.DepthStencilState;
+import com.mojang.renderpearl.api.pipeline.PrimitiveTopology;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
+import com.mojang.renderpearl.api.vertex.VertexFormat;
 
 import dev.joid.backend.minecraft.MinecraftJoid;
 import dev.joid.backend.minecraft.bridge.render.shader.MinecraftShader;
@@ -25,12 +26,13 @@ import dev.joid.lib.bridge.render.state.BlendState;
 import dev.joid.lib.bridge.render.state.PipelineKey;
 import dev.joid.lib.bridge.render.vertex.Primitive;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.Util;
 
 public final class MinecraftPipelineCache {
 
-	private final GpuDevice                        device;
-	private final ShaderSourceProvider             sourceProvider;
-	private final Map<PipelineKey, RenderPipeline> pipelineMap;
+	private final GpuDevice                                device;
+	private final ShaderSourceProvider                     sourceProvider;
+	private final Map<PipelineKey, CompiledRenderPipeline> pipelineMap;
 
 	public MinecraftPipelineCache(final GpuDevice device, final ShaderSourceProvider sourceProvider) {
 		this.device         = device;
@@ -38,22 +40,29 @@ public final class MinecraftPipelineCache {
 		this.pipelineMap    = new HashMap<>();
 	}
 
-	public RenderPipeline get(final PipelineKey key) {
-		RenderPipeline pipeline = this.pipelineMap.get(key);
-		if (pipeline == null) {
-			pipeline = MinecraftPipelineCache.build(key, this.pipelineMap.size());
-			this.pipelineMap.put(key, pipeline);
+	public CompiledRenderPipeline get(final PipelineKey key) {
+		if (!this.pipelineMap.containsKey(key)) {
+			this.pipelineMap.put(key, this.compile(MinecraftPipelineCache.build(key, this.pipelineMap.size())));
 		}
 
-		return this.isValid(pipeline) ? pipeline : null;
+		return this.pipelineMap.get(key);
 	}
 
 	public void remove(final MinecraftShader shader) {
-		this.pipelineMap.keySet().removeIf(key -> key.getShader() == shader);
+		this.pipelineMap.entrySet().removeIf(entry -> {
+			if (entry.getKey().getShader() != shader) {
+				return false;
+			}
+
+			if (entry.getValue() != null) {
+				entry.getValue().close();
+			}
+			return true;
+		});
 	}
 
 	public boolean isValid(final Identifier identifier, final BindGroupLayout layout, final VertexFormat vertexFormat, final BlendState blend) {
-		return this.isValid(RenderPipeline.builder()
+		final CompiledRenderPipeline pipeline = this.compile(RenderPipeline.builder()
 				.withLocation(identifier)
 				.withVertexShader(identifier)
 				.withFragmentShader(identifier)
@@ -62,10 +71,16 @@ public final class MinecraftPipelineCache {
 				.withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
 				.withColorTargetState(new ColorTargetState(MinecraftPipelineCache.getBlendFunction(blend), GpuFormat.RGBA8_UNORM, ColorTargetState.WRITE_ALL))
 				.build());
+		if (pipeline == null) {
+			return false;
+		}
+
+		pipeline.close();
+		return true;
 	}
 
-	private boolean isValid(final RenderPipeline pipeline) {
-		return this.device.precompilePipeline(pipeline, this.sourceProvider).isValid();
+	private CompiledRenderPipeline compile(final RenderPipeline pipeline) {
+		return this.device.compilePipeline(pipeline, this.sourceProvider, Util.backgroundExecutor()).join().finishCompile();
 	}
 
 	private static RenderPipeline build(final PipelineKey key, final int index) {
