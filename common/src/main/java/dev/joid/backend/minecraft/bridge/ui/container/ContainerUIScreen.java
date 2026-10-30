@@ -7,11 +7,11 @@ import java.util.Set;
 import com.mojang.blaze3d.platform.Window;
 
 import dev.joid.backend.minecraft.bridge.input.SdlKeys;
+import dev.joid.backend.minecraft.bridge.input.SdlMouseButtons;
 import dev.joid.backend.minecraft.lib.ui.core.container.ContainerUI;
 import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
 import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
 import dev.joid.lib.bridge.BridgeHandler;
-import dev.joid.lib.input.mouse.MouseButton;
 import lombok.Getter;
 import lombok.NonNull;
 import net.minecraft.client.Minecraft;
@@ -104,7 +104,7 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 
 	@Override
 	public boolean mouseClicked(final MouseButtonEvent event, final boolean doubleClick) {
-		if (this.bridge.mousePressed(MouseButton.of(event.button()))) {
+		if (this.bridge.mousePressed(SdlMouseButtons.getButton(event.button()))) {
 			this.consumedButtons.add(event.button());
 			return true;
 		}
@@ -113,7 +113,7 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 
 	@Override
 	public boolean mouseReleased(final MouseButtonEvent event) {
-		final boolean consumed = this.bridge.mouseReleased(MouseButton.of(event.button()));
+		final boolean consumed = this.bridge.mouseReleased(SdlMouseButtons.getButton(event.button()));
 		if (this.consumedButtons.remove(event.button())) {
 			return true;
 		}

@@ -1,8 +1,8 @@
 package dev.joid.backend.minecraft.bridge.ui.overlay;
 
 import dev.joid.backend.minecraft.bridge.input.SdlKeys;
+import dev.joid.backend.minecraft.bridge.input.SdlMouseButtons;
 import dev.joid.lib.bridge.BridgeHandler;
-import dev.joid.lib.input.mouse.MouseButton;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.minecraft.util.StringUtil;
@@ -17,12 +17,12 @@ public final class OverlayInputForwarder {
 
 	public static boolean mousePressed(final int button) {
 		final OverlayUIBridge bridge = BridgeHandler.UI.getBridge(OverlayUIBridge.class);
-		return bridge != null && bridge.mousePressed(MouseButton.of(button));
+		return bridge != null && bridge.mousePressed(SdlMouseButtons.getButton(button));
 	}
 
 	public static boolean mouseReleased(final int button) {
 		final OverlayUIBridge bridge = BridgeHandler.UI.getBridge(OverlayUIBridge.class);
-		return bridge != null && bridge.mouseReleased(MouseButton.of(button));
+		return bridge != null && bridge.mouseReleased(SdlMouseButtons.getButton(button));
 	}
 
 	public static boolean mouseScrolled(final double notchesX, final double notchesY) {

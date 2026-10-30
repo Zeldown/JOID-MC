@@ -1,8 +1,8 @@
 package dev.joid.backend.minecraft.bridge.ui.screen;
 
 import dev.joid.backend.minecraft.bridge.input.SdlKeys;
+import dev.joid.backend.minecraft.bridge.input.SdlMouseButtons;
 import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
-import dev.joid.lib.input.mouse.MouseButton;
 import lombok.NonNull;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
@@ -74,12 +74,12 @@ public class UIScreen extends Screen {
 
 	@Override
 	public boolean mouseClicked(final MouseButtonEvent event, final boolean doubleClick) {
-		return this.bridge.mousePressed(MouseButton.of(event.button()));
+		return this.bridge.mousePressed(SdlMouseButtons.getButton(event.button()));
 	}
 
 	@Override
 	public boolean mouseReleased(final MouseButtonEvent event) {
-		return this.bridge.mouseReleased(MouseButton.of(event.button()));
+		return this.bridge.mouseReleased(SdlMouseButtons.getButton(event.button()));
 	}
 
 	@Override

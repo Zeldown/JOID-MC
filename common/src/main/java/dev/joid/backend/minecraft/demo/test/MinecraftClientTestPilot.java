@@ -165,7 +165,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	@Override
 	public String getVersion() {
-		return "26.2";
+		return "26.3";
 	}
 
 	@Override
