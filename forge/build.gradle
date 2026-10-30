@@ -109,6 +109,10 @@ task devJar(type: ShadowJar) {
     from(sourceSets.main.output)
     configurations = [project.configurations.embed, project.configurations.joidDev]
     exclude(moduleDescriptors)
+    from({ zipTree(project.configurations.embed.find { it.name.startsWith('jna-') }) }) {
+        include('META-INF/LICENSE')
+        rename { 'LICENSE_JNA' }
+    }
     excludeDemo(it)
     manifest.inheritFrom(jar.manifest)
 }
@@ -120,6 +124,10 @@ task prodJar(type: ShadowJar) {
     from(sourceSets.main.output)
     configurations = [project.configurations.embed, project.configurations.joidProd]
     exclude(moduleDescriptors)
+    from({ zipTree(project.configurations.embed.find { it.name.startsWith('jna-') }) }) {
+        include('META-INF/LICENSE')
+        rename { 'LICENSE_JNA' }
+    }
     excludeDevelopment(it)
     manifest.inheritFrom(jar.manifest)
 }
@@ -201,7 +209,7 @@ def readClass = { byte[] bytes ->
     return [major: major, references: references, members: members.collect { "${texts[classes[it[1]]]}/${texts[nameTypes[it[2]][0]]}${it[0] == 9 ? '' : ' ' + texts[nameTypes[it[2]][1]]}".toString() }]
 }
 
-def verifyJar = { String kind, File archive, File common, List<String> patterns, Pattern references, List<String> words, boolean devMode ->
+def verifyJar = { String kind, File archive, File common, Collection<File> embedded, List<String> patterns, Pattern references, List<String> words, boolean devMode ->
     def failures = []
     def names = []
     new ZipInputStream(new FileInputStream(archive)).withCloseable { zip ->
@@ -217,6 +225,22 @@ def verifyJar = { String kind, File archive, File common, List<String> patterns,
     names.findAll { it.startsWith('org/lwjgl/') || it ==~ /(.*\/)?(lib)?lwjgl[^\/]*\.(dll|so|dylib|jnilib)/ }.each { failures << "${it} is LWJGL, which the game provides" }
     if (names.count { it == 'com/sun/jna/Native.class' } != 1 || names.any { it.endsWith('/com/sun/jna/Native.class') }) {
         failures << 'JNA must be embedded once and unrelocated, the native cursors of JOID load it'
+    }
+
+    def licensePattern = ~/(?i)META-INF\/([^\/]*(licen[cs]e|notice)[^\/]*|licenses\/[^\/]+|LGPL[^\/]*|AL2[^\/]*)/
+    def licenses = []
+    new ZipFile(archive).withCloseable { zip ->
+        zip.entries().findAll { it.name ==~ licensePattern }.each { licenses << zip.getInputStream(it).bytes }
+    }
+    embedded.each { jar ->
+        new ZipFile(jar).withCloseable { source ->
+            source.entries().findAll { it.name ==~ licensePattern }.each { entry ->
+                def bytes = source.getInputStream(entry).bytes
+                if (!licenses.any { Arrays.equals(it, bytes) }) {
+                    failures << "${entry.name} of ${jar.name} is missing or overwritten in the jar, give each license of an embedded jar its own name"
+                }
+            }
+        }
     }
 
     new ZipFile(common).withCloseable { source ->
@@ -319,7 +343,7 @@ task verifyProdJar {
     description = 'Checks that the prod jar holds no code, asset or reference of the dev and demo modes, and runs on Minecraft 1.7.10.'
     dependsOn(reobf)
     doLast {
-        verifyJar('prod', prodJar.archivePath, rootProject.file("libs/joid-backend-minecraft-common-${common_version}-prod.jar"), demoPatterns + devPatterns, developmentReferences, developmentWords, false)
+        verifyJar('prod', prodJar.archivePath, rootProject.file("libs/joid-backend-minecraft-common-${common_version}-prod.jar"), configurations.embed.files + configurations.joidProd.files, demoPatterns + devPatterns, developmentReferences, developmentWords, false)
     }
 }
 
@@ -335,7 +359,7 @@ task verifyDevJar {
                 }
             }
         }
-        verifyJar('dev', devJar.archivePath, rootProject.file("libs/joid-backend-minecraft-common-${common_version}-dev.jar"), demoPatterns, demoReferences, demoWords, true)
+        verifyJar('dev', devJar.archivePath, rootProject.file("libs/joid-backend-minecraft-common-${common_version}-dev.jar"), configurations.embed.files + configurations.joidDev.files, demoPatterns, demoReferences, demoWords, true)
     }
 }
 
