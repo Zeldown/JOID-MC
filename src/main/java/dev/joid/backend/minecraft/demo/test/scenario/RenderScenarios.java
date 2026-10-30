@@ -155,14 +155,22 @@ public final class RenderScenarios {
 	public static void verifySnapshots(final ClientTestContext context) {
 		final IClientTestPilot pilot = context.getPilot();
 		final File output = new File(System.getProperty("joid.snapshot.output", "snapshots/renders"));
-		final File references = new File(System.getProperty("joid.snapshot.references", "snapshots/references"));
+		final File references = new File(new File(System.getProperty("joid.snapshot.references", "snapshots/references")), pilot.getGraphicsBackend());
 		final List<String> failures = context.compute(() -> {
 			final List<String> found = new ArrayList<>();
 			final SnapshotRunner runner = SnapshotRunner.start(pilot.createSnapshotBackend());
 			try {
-				final File folder = new File(new File(references, pilot.getGraphicsBackend()), runner.getRenderer());
+				final File folder = new File(references, runner.getRenderer());
 				for (final String scenario : SnapshotRunner.getScenarios()) {
-					for (final Map.Entry<String, SnapshotImage> shot : runner.run(scenario).entrySet()) {
+					final Map<String, SnapshotImage> shots;
+					try {
+						shots = runner.run(scenario);
+					} catch (final IllegalStateException exception) {
+						found.add(scenario + ": " + exception.getMessage());
+						continue;
+					}
+
+					for (final Map.Entry<String, SnapshotImage> shot : shots.entrySet()) {
 						final File reference = new File(folder, shot.getKey() + ".png");
 						shot.getValue().write(new File(output, shot.getKey() + ".png"));
 						if (!reference.exists()) {
