@@ -172,11 +172,6 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	}
 
 	@Override
-	public String getRenderPipeline() {
-		return "opengl";
-	}
-
-	@Override
 	public String getGraphicsBackend() {
 		return "opengl";
 	}
