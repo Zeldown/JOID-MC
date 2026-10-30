@@ -108,7 +108,7 @@ shadowJar {
 
 task devJar(type: ShadowJar) {
     group = 'build'
-    description = 'Builds the dev jar of the mod, with the dev mode of JOID and no demo.'
+    description = 'Builds the dev jar of the mod, with the dev mode of JOID, no demo and the MCP names of a ForgeGradle workspace.'
     classifier = 'dev'
     from(sourceSets.main.output)
     configurations = [project.configurations.embed, project.configurations.joidDev]
@@ -148,15 +148,12 @@ task sourcesJar(type: Jar) {
 }
 
 reobf {
-    reobf(devJar.archivePath) { spec ->
-        spec.classpath = configurations.compile
-    }
     reobf(prodJar.archivePath) { spec ->
         spec.classpath = configurations.compile
     }
 }
 
-reobf.dependsOn(devJar, prodJar)
+reobf.dependsOn(prodJar)
 
 runClient {
     args('--width', '1280', '--height', '720')
@@ -253,11 +250,12 @@ def verifyJar = { String kind, File archive, File common, Collection<File> embed
         source.entries().findAll { it.name.endsWith('.class') && !entries.contains(it.name) }.each { failures << "${it.name} of ${common.name} is missing" }
     }
 
-    def mcpNames = [] as Set
+    def foreignNames = [] as Set
     tasks.genSrgs.mcpToSrg.eachLine { line ->
         def parts = line.split(' ')
         if (parts[0] in ['MD:', 'FD:'] && parts[1].tokenize('/').last() != parts[parts[0] == 'MD:' ? 3 : 2].tokenize('/').last()) {
-            mcpNames << (parts[0] == 'MD:' ? "${parts[1]} ${parts[2]}".toString() : parts[1])
+            def names = parts[0] == 'MD:' ? ["${parts[1]} ${parts[2]}".toString(), "${parts[3]} ${parts[4]}".toString()] : [parts[1], parts[2]]
+            foreignNames << names[devMode ? 1 : 0]
         }
     }
 
@@ -286,8 +284,8 @@ def verifyJar = { String kind, File archive, File common, Collection<File> embed
                 }
             }
 
-            parsed.members.findAll { mcpNames.contains(it) }.each { member ->
-                failures << "${entry.name} calls ${member} by its MCP name, the jar is not reobfuscated"
+            parsed.members.findAll { foreignNames.contains(it) }.each { member ->
+                failures << (devMode ? "${entry.name} calls ${member} by its SRG name, the dev jar must keep the MCP names of a ForgeGradle workspace" : "${entry.name} calls ${member} by its MCP name, the jar is not reobfuscated")
             }
         }
 
@@ -355,8 +353,8 @@ task verifyProdJar {
 
 task verifyDevJar {
     group = 'verification'
-    description = 'Checks that the dev jar starts JOID in dev mode, holds no code, asset or reference of the demos, and runs on Minecraft 1.7.10.'
-    dependsOn(reobf)
+    description = 'Checks that the dev jar starts JOID in dev mode, holds no code, asset or reference of the demos, and runs in a ForgeGradle workspace of Minecraft 1.7.10.'
+    dependsOn(devJar)
     doLast {
         new ZipFile(devJar.archivePath).withCloseable { zip ->
             ['dev/joid/lib/ui/node/impl/dev/DevNode.class', 'dev/joid/internal/font/DevFont.class'].each { entry ->
@@ -370,5 +368,5 @@ task verifyDevJar {
 }
 
 verifyNoDemo.dependsOn(reobf)
-assemble.dependsOn(reobf, sourcesJar)
+assemble.dependsOn(reobf, devJar, sourcesJar)
 check.dependsOn(verifyProdJar, verifyDevJar)
