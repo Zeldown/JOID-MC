@@ -177,6 +177,11 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	}
 
 	@Override
+	public String getRenderPipeline() {
+		return "opengl";
+	}
+
+	@Override
 	public Map<ClientTestScenario, String> getExclusions() {
 		final Map<ClientTestScenario, String> exclusions = new EnumMap<>(ClientTestScenario.class);
 		exclusions.put(ClientTestScenario.AUDIO_INTERFACE, "Minecraft 1.7.10 has no interface sound category, JOID follows the master volume");
@@ -184,6 +189,8 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 		exclusions.put(ClientTestScenario.SCREEN_TITLE, "a screen of Minecraft 1.7.10 has no title, so UIDataMinecraft has none");
 		exclusions.put(ClientTestScenario.SUBTITLES, "Minecraft 1.7.10 has no subtitles, added in 1.9");
 		exclusions.put(ClientTestScenario.NESTED_FEATURE_RASTER, "Minecraft 1.7.10 draws at once, it has no feature render pipeline");
+		exclusions.put(ClientTestScenario.FONT_TRAILING_CODE, "the FontRenderer of Minecraft 1.7.10 measures a trailing \u00A7 as -1 pixel, a bug of the game that JOID does not copy");
+		exclusions.put(ClientTestScenario.CONTAINER_CLOSE, "Minecraft 1.7.10 drops the carried stack when a container closes, newer versions give it back to the inventory");
 		return exclusions;
 	}
 
