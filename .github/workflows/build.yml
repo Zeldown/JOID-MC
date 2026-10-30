@@ -8,6 +8,11 @@ on:
     branches:
       - version/26.2
   workflow_dispatch:
+    inputs:
+      showcase:
+        description: The showcase scenes to render, comma separated
+        type: string
+        default: ''
 
 jobs:
   version:
@@ -16,3 +21,4 @@ jobs:
       java-version: '25'
       loaders: '["fabric", "neoforge", "forge"]'
       vulkan: true
+      showcase: ${{ inputs.showcase || '' }}
