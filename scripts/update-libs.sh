@@ -20,7 +20,7 @@ done
 
 for target in "$@"; do
     rm -f "$target"/libs/joid-backend-minecraft-common-*.jar
-    for kind in dev prod sources; do
+    for kind in dev prod sources demo; do
         cp "$root/build/libs/joid-backend-minecraft-common-$version-$kind.jar" "$target/libs/"
     done
 

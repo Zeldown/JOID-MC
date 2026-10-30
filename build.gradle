@@ -38,7 +38,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly files("libs/joid-core-${joid_version}-dev.jar")
+    compileOnly files("libs/joid-core-${joid_version}-demo.jar", "libs/joid-tool-testkit-${joid_version}.jar")
+    compileOnly "junit:junit:${junit_version}"
     compileOnly "org.projectlombok:lombok:${lombok_version}"
 
     testCompile files("libs/joid-core-${joid_version}-dev.jar")
@@ -78,6 +79,13 @@ task devJar(type: Jar) {
     exclude demoPatterns
 }
 
+task demoJar(type: Jar) {
+    group = 'build'
+    description = 'Builds the demo jar, with the demos and the client test plan, for the dev runs of the version branches.'
+    classifier = 'demo'
+    from sourceSets.main.output
+}
+
 task sourcesJar(type: Jar) {
     group = 'build'
     description = 'Builds the sources jar, merged into the sources jars of the version branches.'
@@ -87,14 +95,16 @@ task sourcesJar(type: Jar) {
 }
 
 artifacts {
-    archives devJar, sourcesJar
+    archives devJar, demoJar, sourcesJar
 }
 
-def verifyJar = { String kind, File archive, File joid, List<String> patterns ->
+def verifyJar = { String kind, File archive, List<File> joid, List<String> patterns ->
     def failures = []
-    zipTree(archive).matching { include(patterns) }.visit { if (!it.directory) failures << "${it.relativePath.pathString} must not ship in the ${kind} jar" }
+    if (!patterns.isEmpty()) {
+        zipTree(archive).matching { include(patterns) }.visit { if (!it.directory) failures << "${it.relativePath.pathString} must not ship in the ${kind} jar" }
+    }
 
-    def joidEntries = new ZipFile(joid).withCloseable { zip -> zip.entries().collect { it.name } as Set }
+    def joidEntries = joid.collectMany { jar -> new ZipFile(jar).withCloseable { zip -> zip.entries().collect { it.name } } } as Set
     new ZipFile(archive).withCloseable { zip ->
         def entries = zip.entries().collect { it.name } as Set
         entries.findAll { !it.endsWith('/') && !it.startsWith('META-INF/') && !it.startsWith('dev/joid/backend/minecraft/') }.each { name ->
@@ -121,7 +131,7 @@ def verifyJar = { String kind, File archive, File joid, List<String> patterns ->
                 failures << "${name} links ${reference}, a class of a version of the game"
             }
             references.findAll { it.startsWith('dev/joid/') && !entries.contains(it + '.class') && !joidEntries.contains(it + '.class') }.each { reference ->
-                failures << "${name} links ${reference}, absent from ${joid.name}, which throws NoClassDefFoundError at run time"
+                failures << "${name} links ${reference}, absent from ${joid*.name.join(' and ')}, which throws NoClassDefFoundError at run time"
             }
         }
     }
@@ -136,7 +146,7 @@ task verifyProdJar {
     description = 'Checks that the prod jar holds Java 8 classes of JOID-MC only, with no class of the game, and links only classes of the prod jar of JOID.'
     dependsOn jar
     doLast {
-        verifyJar('prod', jar.archivePath, file("libs/joid-core-${joid_version}-prod.jar"), demoPatterns + devPatterns)
+        verifyJar('prod', jar.archivePath, [file("libs/joid-core-${joid_version}-prod.jar")], demoPatterns + devPatterns)
     }
 }
 
@@ -145,9 +155,18 @@ task verifyDevJar {
     description = 'Checks that the dev jar holds Java 8 classes of JOID-MC only, with no class of the game, and links only classes of the dev jar of JOID.'
     dependsOn devJar
     doLast {
-        verifyJar('dev', devJar.archivePath, file("libs/joid-core-${joid_version}-dev.jar"), demoPatterns)
+        verifyJar('dev', devJar.archivePath, [file("libs/joid-core-${joid_version}-dev.jar")], demoPatterns)
     }
 }
 
-assemble.dependsOn devJar, sourcesJar
-check.dependsOn verifyProdJar, verifyDevJar
+task verifyDemoJar {
+    group = 'verification'
+    description = 'Checks that the demo jar holds Java 8 classes of JOID-MC only, with no class of the game, and links only classes of the demo jar of JOID and of its testkit.'
+    dependsOn demoJar
+    doLast {
+        verifyJar('demo', demoJar.archivePath, [file("libs/joid-core-${joid_version}-demo.jar"), file("libs/joid-tool-testkit-${joid_version}.jar")], [])
+    }
+}
+
+assemble.dependsOn devJar, demoJar, sourcesJar
+check.dependsOn verifyProdJar, verifyDevJar, verifyDemoJar
