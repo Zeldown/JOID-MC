@@ -254,8 +254,8 @@ def verifyJar = { String kind, File archive, File common, Collection<File> embed
     tasks.genSrgs.mcpToSrg.eachLine { line ->
         def parts = line.split(' ')
         if (parts[0] in ['MD:', 'FD:'] && parts[1].tokenize('/').last() != parts[parts[0] == 'MD:' ? 3 : 2].tokenize('/').last()) {
-            def names = parts[0] == 'MD:' ? ["${parts[1]} ${parts[2]}".toString(), "${parts[3]} ${parts[4]}".toString()] : [parts[1], parts[2]]
-            foreignNames << names[devMode ? 1 : 0]
+            def mapped = parts[0] == 'MD:' ? ["${parts[1]} ${parts[2]}".toString(), "${parts[3]} ${parts[4]}".toString()] : [parts[1], parts[2]]
+            foreignNames << mapped[devMode ? 1 : 0]
         }
     }
 
