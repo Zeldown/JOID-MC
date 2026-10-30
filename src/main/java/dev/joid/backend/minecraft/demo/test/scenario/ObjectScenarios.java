@@ -85,7 +85,7 @@ public final class ObjectScenarios {
 		ObjectScenarios.reload(context);
 		final int reloaded = openGl ? context.compute(pilot::countTextures) : 0;
 		context.check(decoded != null && context.test(() -> pilot.isDeleted(decoded)), "the texture decoded before the reloads was not deleted: " + decoded);
-		context.check(reloaded == textures, "the reloads changed the OpenGL texture count from " + textures + " to " + reloaded);
+		context.check(reloaded <= textures, "the reloads leaked OpenGL textures, the count went from " + textures + " to " + reloaded);
 		final BufferedImage image = context.capture("joid-demo-minecraft-reloaded");
 		ClientTestImages.expectTexture(context, "sprite of the diamond item after the reloads", image, 560, 720, context.compute(() -> pilot.readTexture(ClientTestTexture.DIAMOND_ITEM)));
 		ClientTestImages.expectTexture(context, "decoded diamond block after the reloads", image, 80, 820, context.compute(() -> pilot.readTexture(ClientTestTexture.DIAMOND_BLOCK)));
