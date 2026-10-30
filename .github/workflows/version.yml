@@ -27,6 +27,10 @@ on:
         description: The arguments given to every Gradle run.
         type: string
         default: ''
+      showcase:
+        description: The showcase scenes to render on the first loader, comma separated, none by default.
+        type: string
+        default: ''
 
 jobs:
   build:
@@ -241,3 +245,58 @@ jobs:
 
       - name: Check the parity of the version branches
         run: scripts/check-parity.sh
+
+  showcase:
+    needs: build
+    if: inputs.showcase != ''
+    runs-on: ubuntu-26.04
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          lfs: true
+
+      - uses: actions/checkout@v7
+        with:
+          ref: common
+          path: .common
+          sparse-checkout: scripts
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: ${{ inputs.java-version }}
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Install Xvfb and Mesa
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb xdotool x11-xserver-utils libgl1-mesa-dri libglx-mesa0 mesa-utils mesa-vulkan-drivers libvulkan1 vulkan-tools libxrandr2 libxxf86vm1 libxcursor1 libxi6 python3-pil
+
+      - name: Set up the client workspace
+        if: inputs.client-setup-tasks != ''
+        run: ./gradlew ${{ inputs.client-setup-tasks }} ${{ inputs.gradle-args }}
+
+      - name: Showcase
+        shell: bash
+        env:
+          LOADER: ${{ fromJSON(inputs.loaders)[0] }}
+          SCENES: ${{ inputs.showcase }}
+          LIBGL_ALWAYS_SOFTWARE: '1'
+          ALSOFT_DRIVERS: 'null'
+        run: |
+          xvfb-run -a -s "-screen 0 1920x1080x24" ./gradlew ":$LOADER:runClient" -Pjoid.showcase="$SCENES" -Pjoid.showcase.video="$SCENES" -Pjoid.showcase.output="$PWD/showcase" ${{ inputs.gradle-args }} 2>&1 | tee showcase.log
+          if ! grep -q "\[JOID\] Showcase done" showcase.log; then
+            echo "::error::The showcase did not finish"
+            exit 1
+          fi
+          python3 .common/scripts/showcase/frame.py showcase
+
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: showcase
+          path: |
+            showcase/
+            showcase.log
