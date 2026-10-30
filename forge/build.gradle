@@ -28,6 +28,11 @@ sourceSets {
         }
         output.resourcesDir = output.classesDir
     }
+    test {
+        java {
+            srcDir rootProject.file('common/src/test/java')
+        }
+    }
 }
 
 repositories {
@@ -41,20 +46,22 @@ configurations {
     joidDemo
     joidDev
     joidProd
-    smoke
+    clientTest
     compile.extendsFrom(embed, joidDemo)
-    compileOnly.extendsFrom(smoke)
+    compileOnly.extendsFrom(clientTest)
 }
 
 dependencies {
-    joidDemo files(rootProject.file("libs/joid-core-${joid_version}-demo.jar"), rootProject.file("libs/joid-backend-minecraft-common-${common_version}-dev.jar"))
+    joidDemo files(rootProject.file("libs/joid-core-${joid_version}-demo.jar"), rootProject.file("libs/joid-backend-minecraft-common-${common_version}-demo.jar"))
     joidDev files(rootProject.file("libs/joid-core-${joid_version}-dev.jar"), rootProject.file("libs/joid-backend-minecraft-common-${common_version}-dev.jar"))
     joidProd files(rootProject.file("libs/joid-core-${joid_version}-prod.jar"), rootProject.file("libs/joid-backend-minecraft-common-${common_version}-prod.jar"))
     embed files(rootProject.file("libs/joid-base-opengl-${joid_version}.jar"), rootProject.file("libs/joid-base-openal-${joid_version}.jar"), rootProject.file("libs/joid-base-lwjgl2-${joid_version}.jar"))
     embed "net.java.dev.jna:jna:${jna_version}"
-    smoke files(rootProject.file("libs/joid-tool-testkit-${joid_version}.jar"), rootProject.file("libs/joid-base-opengl-${joid_version}-snapshot.jar"), rootProject.file("libs/joid-base-lwjgl2-${joid_version}-snapshot.jar"))
-    smoke "junit:junit:${junit_version}"
+    clientTest files(rootProject.file("libs/joid-tool-testkit-${joid_version}.jar"), rootProject.file("libs/joid-base-opengl-${joid_version}-snapshot.jar"), rootProject.file("libs/joid-base-lwjgl2-${joid_version}-snapshot.jar"))
+    clientTest "junit:junit:${junit_version}"
     compileOnly "org.projectlombok:lombok:${lombok_version}"
+    testCompile "junit:junit:${junit_version}"
+    testCompileOnly "org.projectlombok:lombok:${lombok_version}"
 }
 
 tasks.withType(JavaCompile) {
@@ -156,14 +163,18 @@ reobf {
 reobf.dependsOn(prodJar)
 
 runClient {
-    args('--width', '1280', '--height', '720')
-    if (project.hasProperty('joid.smoke')) {
-        systemProperty('joid.smoke', 'true')
+    if (project.hasProperty('joid.test')) {
+        systemProperty('joid.test', 'true')
+        systemProperty('joid.loader', project.name)
         systemProperty('joid.snapshot.output', file('runs/snapshots').absolutePath)
         systemProperty('joid.snapshot.references', rootProject.file('.snapshots/references').absolutePath)
+        systemProperty('joid.cache', file("$buildDir/joid-cache").absolutePath)
+        args('--width', '1920', '--height', '1080')
+    } else {
+        args('--width', '1280', '--height', '720')
     }
     doFirst {
-        classpath = classpath.filter { it != jar.archivePath } + sourceSets.main.output + configurations.smoke
+        classpath = classpath.filter { it != jar.archivePath } + sourceSets.main.output + configurations.clientTest
     }
 }
 

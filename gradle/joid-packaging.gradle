@@ -3,6 +3,7 @@ ext {
             'assets/demo/**',
             'dev/joid/demo/**',
             'dev/joid/backend/minecraft/**/demo/**',
+            'dev/joid/backend/minecraft/showcase/**',
             'assets/joid/demo/**',
             'assets/joid/lang/**'
     ]
@@ -13,13 +14,13 @@ ext {
             'dev/joid/lib/ui/node/impl/dev/**'
     ]
 
-    demoReferences = ~/dev\/joid\/(demo|backend\/minecraft\/([\w$]+\/)*demo)\/[\w$\/]+/
+    demoReferences = ~/dev\/joid\/(demo|backend\/minecraft\/(showcase|([\w$]+\/)*demo))\/[\w$\/]+/
 
-    developmentReferences = ~/dev\/joid\/(demo|test|lib\/ui\/node\/impl\/dev|backend\/minecraft\/([\w$]+\/)*demo)\/[\w$\/]+/
+    developmentReferences = ~/dev\/joid\/(demo|test|lib\/ui\/node\/impl\/dev|backend\/minecraft\/(showcase|([\w$]+\/)*demo))\/[\w$\/]+/
 
-    demoWords = ['demo', 'demos']
+    demoWords = ['demo', 'demos', 'showcase']
 
-    developmentWords = ['demo', 'demos', 'test', 'tests', 'snapshot', 'snapshots', 'testkit']
+    developmentWords = ['demo', 'demos', 'test', 'tests', 'snapshot', 'snapshots', 'testkit', 'showcase']
 
     demoCallSites = [
             'dev/joid/backend/minecraft/MinecraftJoid.class -> dev/joid/backend/minecraft/demo/DemoLauncher'
