@@ -128,10 +128,16 @@ jobs:
         env:
           LOADER: ${{ matrix.loader }}
           LIBGL_ALWAYS_SOFTWARE: '1'
+          SDL_VIDEO_FORCE_EGL: '1'
           ALSOFT_DRIVERS: 'null'
         run: |
           mkdir -p "$LOADER"/runs
           xvfb-run -a -s "-screen 0 1920x1080x24" ./gradlew ":$LOADER:runClient" -Pjoid.test ${{ inputs.gradle-args }} 2>&1 | tee "$LOADER"/runs/client-tests.log
+          if grep -q "Using graphics backend" "$LOADER"/runs/client/logs/latest.log && ! grep -q "Using graphics backend OpenGL" "$LOADER"/runs/client/logs/latest.log; then
+            echo "::error::Minecraft did not run on OpenGL: $(grep -m 1 'Using graphics backend' "$LOADER"/runs/client/logs/latest.log)"
+            exit 1
+          fi
+
           if ! grep -q "\[JOID\] Client tests passed" "$LOADER"/runs/client-tests.log; then
             echo "::error::The client tests of $LOADER did not pass"
             exit 1
@@ -284,6 +290,7 @@ jobs:
           LOADER: ${{ fromJSON(inputs.loaders)[0] }}
           SCENES: ${{ inputs.showcase }}
           LIBGL_ALWAYS_SOFTWARE: '1'
+          SDL_VIDEO_FORCE_EGL: '1'
           ALSOFT_DRIVERS: 'null'
         run: |
           xvfb-run -a -s "-screen 0 1920x1080x24" ./gradlew ":$LOADER:runClient" -Pjoid.showcase="$SCENES" -Pjoid.showcase.video="$SCENES" -Pjoid.showcase.output="$PWD/showcase" ${{ inputs.gradle-args }} 2>&1 | tee showcase.log
