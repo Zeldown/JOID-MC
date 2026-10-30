@@ -570,6 +570,35 @@ public void draw(final double mouseX, final double mouseY) {
 
 Draw the item, then its bar, cooldown and count, to match a slot. `toDrawX` and `toDrawY` turn the mouse into the coordinates of `draw`. See [Custom nodes](https://documentation.joid.dev/use/learn/going-further/custom-nodes/) and [Drawing shapes and text](https://documentation.joid.dev/use/learn/going-further/drawing/).
 
+## Tests
+
+Every version branch runs the same tests, written once in the [common branch](https://github.com/Zeldown/JOID-MC/tree/common): a version only brings the code that drives its game.
+
+| Job | Runs |
+|---|---|
+| `build` | Builds the jars, runs the unit tests and checks the jars: no demo, no test and no dev mode in the `prod` jar. |
+| `client-tests` | Starts the game of each loader on OpenGL and plays the client test plan: screens, input, containers, HUD overlays, Minecraft components, text, sound, the contract suites of JOID and its snapshots. |
+| `client-tests-vulkan` | The same plan on Vulkan, for the versions that have it. |
+| `parity` | Checks that every version branch runs these jobs and keeps the plan of this README. |
+
+All jobs run on the same pinned image, with the Mesa software renderers (llvmpipe for OpenGL, lavapipe for Vulkan). `./gradlew :<loader>:runClient -Pjoid.test` plays the client test plan in a game window: it takes the mouse and the keyboard of the window until the game closes.
+
+A version skips a scenario only when Minecraft lacks its concept:
+
+| Version | Skipped | Why |
+|---|---|---|
+| 26.2 | `STENCIL` | Blaze3D gives no stencil buffer to the screen: JOID emulates it. |
+| 1.7.10 | `client-tests-vulkan` | Minecraft 1.7.10 draws with OpenGL only. |
+| 1.7.10 | `AUDIO_INTERFACE` | No interface sound category: JOID follows the master volume. |
+| 1.7.10 | `ITEM_COOLDOWN` | No item cooldowns, added in 1.9. |
+| 1.7.10 | `SCREEN_TITLE` | A screen has no title. |
+| 1.7.10 | `SUBTITLES` | No subtitles, added in 1.9. |
+| 1.7.10 | `NESTED_FEATURE_RASTER` | No feature render pipeline: the game draws at once. |
+| 1.7.10 | `FONT_TRAILING_CODE` | The game measures a trailing `§` as -1 pixel, a bug that JOID does not copy. |
+| 1.7.10 | `CONTAINER_CLOSE` | Closing a container drops the carried stack, newer versions give it back to the inventory. |
+| 1.7.10 | `MinecraftShaderTranslatorTest` | No shader translation: JOID draws with OpenGL 2.1 itself. |
+| 1.7.10 | `ChatTextConverterTest`: hex and palette colors | A chat component has no hex color. |
+
 ## Community
 
 Questions, bug reports and ideas are welcome on the [JOID Discord](https://discord.joid.dev).
