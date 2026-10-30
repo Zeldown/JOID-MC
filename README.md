@@ -69,9 +69,25 @@ Then build each version branch, commit its `libs/` folder and push it: its conti
 Each Minecraft version has its own branch, `version/<Minecraft version>`, made from the closest version branch and never renamed. It joins the shared pipeline with three things:
 
 1. **A pilot.** `MinecraftClientTestPilot`, in `dev.joid.backend.minecraft.demo.test`, implements `IClientTestPilot` for the game of the version: input, captures, game state, and the Minecraft objects that the scenarios use. The version starts `ClientTestPlan.start(new MinecraftClientTestPilot())` when the game runs with `-Pjoid.test`. A scenario whose concept the version lacks goes in `getExclusions()` with its reason, and in the table of the Tests section of the README.
-2. **Its `build.yml`**, which only calls the shared workflow with the parameters of the version:
+2. **Its `build.yml`**, which only calls the shared workflow with the parameters of the version. It runs on the pushes and pull requests of its own branch, and takes the showcase scenes of a manual run:
 
 ```yaml
+name: Build
+
+on:
+  push:
+    branches:
+      - version/26.2
+  pull_request:
+    branches:
+      - version/26.2
+  workflow_dispatch:
+    inputs:
+      showcase:
+        description: The showcase scenes to render, comma separated
+        type: string
+        default: ''
+
 jobs:
   version:
     uses: Zeldown/JOID-MC/.github/workflows/version.yml@common
@@ -79,6 +95,7 @@ jobs:
       java-version: '25'
       loaders: '["fabric", "neoforge", "forge"]'
       vulkan: true
+      showcase: ${{ inputs.showcase || '' }}
 ```
 
 3. **Its README**, the README of `version/26.2` with the same sections in the same order: only the sentences and the code that the version changes, the same showcases rendered in the version, and the same Tests section.
