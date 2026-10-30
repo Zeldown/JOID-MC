@@ -44,7 +44,7 @@ public final class DrawBlock {
 			GL11.glTranslatef(width / 2F, height / 2F, 0F);
 			GL11.glScalef(scale, scale, -scale);
 			GL11.glRotatef(180F + (float) rotationPitch, 1F, 0F, 0F);
-			GL11.glRotatef(180F + (float) rotationYaw, 0F, 1F, 0F);
+			GL11.glRotatef(90F + (float) rotationYaw, 0F, 1F, 0F);
 			DrawBlock.RENDER.renderBlockAsItem(block, metadata, 1F);
 		}));
 	}

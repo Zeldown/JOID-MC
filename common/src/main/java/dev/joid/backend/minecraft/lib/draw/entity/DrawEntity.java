@@ -102,7 +102,7 @@ public final class DrawEntity {
 			RenderHelper.enableStandardItemLighting();
 			GL11.glRotatef(-135F, 0F, 1F, 0F);
 			GL11.glRotatef(lookPitch, 1F, 0F, 0F);
-			GL11.glRotatef((float) -rotationPitch, 1F, 0F, 0F);
+			GL11.glRotatef((float) rotationPitch, 1F, 0F, 0F);
 			GL11.glRotatef((float) rotationYaw, 0F, 1F, 0F);
 			GL11.glTranslatef(0F, -modelHeight / 2F, 0F);
 			draw.draw(lookYaw, lookPitch);
