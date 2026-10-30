@@ -2,6 +2,7 @@ package dev.joid.backend.minecraft;
 
 import dev.joid.backend.minecraft.bridge.audio.MinecraftAudioGain;
 import dev.joid.backend.minecraft.bridge.input.KeyBindKeyResolver;
+import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
 import dev.joid.backend.minecraft.bridge.thread.MinecraftThreadBridge;
 import dev.joid.backend.minecraft.bridge.ui.container.ContainerUIBridge;
 import dev.joid.backend.minecraft.bridge.ui.overlay.OverlayUIBridge;
@@ -14,9 +15,7 @@ import dev.joid.backend.minecraft.lib.resource.resolver.impl.GpuTextureResourceR
 import dev.joid.backend.minecraft.lib.resource.resolver.impl.NamespacedResourceResolver;
 import dev.joid.backend.minecraft.lib.resource.resolver.impl.SpriteResourceResolver;
 import dev.joid.base.lwjgl2.openal.Lwjgl2AlBinding;
-import dev.joid.base.lwjgl2.opengl.Lwjgl2GlBinding;
 import dev.joid.base.openal.AlAudioBridge;
-import dev.joid.base.opengl.render.GlRenderBridge;
 import dev.joid.lib.asset.locator.AssetLocator;
 import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.bridge.audio.IAudioBridge;
@@ -52,7 +51,7 @@ public final class MinecraftBackend extends Backend {
 
 	@Override
 	protected @NonNull IRenderBridge createRenderBridge() {
-		this.render = new GlRenderBridge(Lwjgl2GlBinding.inst());
+		this.render = new MinecraftRenderBridge();
 		return this.render;
 	}
 
