@@ -549,6 +549,7 @@ public final class ClientSmokeTest {
 	}
 
 	private static void verifyDemos(final List<String> failures) {
+		ClientSmokeTest.closeOverlays();
 		for (final DemoEntry entry : ClientSmokeTest.entries()) {
 			if (entry.getLabel().endsWith("Store") || entry.getState() != null || entry.getLabel().equals("UIDemoContainer")) {
 				continue;
