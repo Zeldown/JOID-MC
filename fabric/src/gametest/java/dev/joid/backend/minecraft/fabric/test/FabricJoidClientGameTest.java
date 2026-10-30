@@ -77,7 +77,6 @@ import dev.joid.lib.JOIDEnv;
 import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.bridge.clock.IClockBridge;
 import dev.joid.lib.bridge.render.texture.ITexture;
-import dev.joid.lib.bridge.thread.DirectThreadBridge;
 import dev.joid.lib.color.Color;
 import dev.joid.lib.draw.DrawUtils;
 import dev.joid.lib.draw.raster.DrawableRaster;
@@ -2046,9 +2045,7 @@ public final class FabricJoidClientGameTest implements FabricClientGameTest {
 
 	private static void verifySnapshots(final File output, final File references) {
 		final List<String> failures = new ArrayList<>();
-		final DirectThreadBridge thread = new DirectThreadBridge();
 		final SnapshotRunner runner = SnapshotRunner.start(new MinecraftSnapshotBackend());
-		BridgeHandler.THREAD.register(thread);
 		try {
 			final File rendererReferences = new File(new File(references, RenderSystem.getDevice().getDeviceInfo().backendName().toLowerCase(Locale.ROOT)), runner.getRenderer());
 			for (final String scenario : SnapshotRunner.getScenarios()) {
