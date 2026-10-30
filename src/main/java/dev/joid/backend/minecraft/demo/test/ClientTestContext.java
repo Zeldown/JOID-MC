@@ -110,9 +110,11 @@ public final class ClientTestContext {
 
 	public void press(final Key key) {
 		this.pilot.pressKey(key, true);
+		ClientTestContext.sleep(200L);
 		this.waitFrames(1);
 		this.pilot.pressKey(key, false);
-		this.waitFrames(3);
+		ClientTestContext.sleep(200L);
+		this.waitFrames(2);
 	}
 
 	public void holdKey(final Key key) {

@@ -41,6 +41,7 @@ public interface IClientTestPilot {
 	public void reachTitleScreen();
 	public void joinWorld();
 
+	public void clearInventory();
 	public void giveItem(final int slot, final ClientTestItem item, final int count);
 	public void setContainerSlot(final int slot, final ClientTestItem item, final int count);
 	public int[] readContainer(final boolean server);

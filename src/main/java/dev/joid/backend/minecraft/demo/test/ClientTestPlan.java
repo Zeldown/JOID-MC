@@ -67,6 +67,10 @@ public final class ClientTestPlan {
 					}
 				}
 
+				if (stage == ClientTestStage.WORLD) {
+					ClientTestPlan.reset(context);
+				}
+
 				final int before = failures.size();
 				final long start = System.nanoTime();
 				System.out.println("[JOID] Client test " + scenario);
@@ -85,6 +89,16 @@ public final class ClientTestPlan {
 			System.out.println("[JOID] " + failures.size() + " client test checks failed:" + System.lineSeparator() + String.join(System.lineSeparator(), failures));
 		}
 		pilot.stop(failures.isEmpty());
+	}
+
+	private static void reset(final ClientTestContext context) {
+		final IClientTestPilot pilot = context.getPilot();
+		context.closeScreens();
+		if (context.test(pilot::isDebugScreenShown)) {
+			context.press(Key.F3);
+		}
+		pilot.clearInventory();
+		context.moveMouse(960D, 540D);
 	}
 
 	private static void recover(final ClientTestContext context) {

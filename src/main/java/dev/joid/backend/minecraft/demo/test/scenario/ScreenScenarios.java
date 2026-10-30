@@ -88,6 +88,7 @@ public final class ScreenScenarios {
 
 	public static void verifyScale(final ClientTestContext context) {
 		context.openOver(ClientTestDemos.create(ClientTestDemos.MINECRAFT));
+		context.scroll(60);
 		ScreenScenarios.clickToggle(context, 2);
 		ScreenScenarios.expectScale(context, "clicking the active toggle", false, false, 1D);
 		ScreenScenarios.clickToggle(context, 2);

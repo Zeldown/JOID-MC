@@ -175,7 +175,7 @@ public final class ObjectScenarios {
 	public static void verifySound(final ClientTestContext context) {
 		final IClientTestPilot pilot = context.getPilot();
 		context.openOver(ClientTestDemos.create(ClientTestDemos.MINECRAFT));
-		context.scroll(20);
+		context.scroll(60);
 		final List<int[]> resources = context.compute(() -> ClientTestBounds.all(ClientTestDemos.MINECRAFT, ResourceNode.class.getName()));
 		context.run(pilot::startSoundCapture);
 		context.click(resources.get(resources.size() - 1));
