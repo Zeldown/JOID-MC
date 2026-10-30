@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import dev.joid.backend.minecraft.demo.network.OpenDemoContainerPayload;
+import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
 import dev.joid.demo.DemoFont;
 import dev.joid.demo.ui.DemoEntry;
 import dev.joid.demo.ui.UIDemoChoice;
@@ -22,6 +23,7 @@ import dev.joid.lib.ui.node.property.OverflowProperty;
 import dev.joid.lib.ui.shortcut.Shortcut;
 
 @UIData(background = true)
+@UIDataMinecraft(pause = false)
 public class UIDemoMinecraftChoice extends UI {
 
 	private static final Color INK     = new Color(153, 153, 153).lock();

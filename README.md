@@ -142,7 +142,7 @@ public class WelcomeUI extends UI {
 
 | Option | Default | Effect |
 |---|---|---|
-| `pause` | `true` | Pauses a singleplayer game while the screen is open. Container UIs never pause. |
+| `pause` | `true` | Pauses a singleplayer game while the screen is open. The paused game also holds the payloads sent to its server until it resumes: a screen that sends one sets `pause = false`. Container UIs never pause. |
 | `background` | `true` | Draws the Minecraft menu background behind the UI, screens and containers alike: the darkened world in game, the dirt on the title screen. `false` draws no Minecraft background. |
 
 The Minecraft background and the UI backdrop of JOID (`@UIData(background)`, default `false`, see [UIs](https://documentation.joid.dev/use/learn/describing-the-ui/uis/)) are independent: add `@UIData(background = true)` to draw the backdrop as well.
