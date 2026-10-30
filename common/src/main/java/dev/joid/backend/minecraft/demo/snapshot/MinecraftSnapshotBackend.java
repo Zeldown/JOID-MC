@@ -53,8 +53,13 @@ public final class MinecraftSnapshotBackend implements ISnapshotBackend {
 	public @NonNull SnapshotImage capture(final int width, final int height) {
 		final ByteBuffer pixels = BufferUtils.createByteBuffer(width * height * 4);
 		this.framebuffer.bindFramebuffer(false);
-		GL11.glPixelStorei(GL11.GL_PACK_ALIGNMENT, 4);
-		GL11.glReadPixels(0, 0, width, height, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, pixels);
+		GL11.glPushClientAttrib(GL11.GL_CLIENT_PIXEL_STORE_BIT);
+		try {
+			GL11.glPixelStorei(GL11.GL_PACK_ALIGNMENT, 4);
+			GL11.glReadPixels(0, 0, width, height, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, pixels);
+		} finally {
+			GL11.glPopClientAttrib();
+		}
 		return SnapshotImage.from(pixels, width, height, true, PixelLayout.RGBA8);
 	}
 
