@@ -209,21 +209,24 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	@Override
 	public void moveMouse(final double x, final double y) {
-		MinecraftClientTestPilot.xdotool("mousemove", "--window", this.window, String.valueOf((int) Math.round(x)), String.valueOf((int) Math.round(y)));
+		MinecraftClientTestPilot.xdotool("mousemove", "--window", this.focusWindow(), String.valueOf((int) Math.round(x)), String.valueOf((int) Math.round(y)));
 	}
 
 	@Override
 	public void pressMouse(final boolean press) {
+		this.focusWindow();
 		MinecraftClientTestPilot.xdotool(press ? "mousedown" : "mouseup", "1");
 	}
 
 	@Override
 	public void scroll(final double amount) {
+		this.focusWindow();
 		MinecraftClientTestPilot.xdotool("click", amount < 0D ? "5" : "4");
 	}
 
 	@Override
 	public void pressKey(final Key key, final boolean press) {
+		this.focusWindow();
 		MinecraftClientTestPilot.xdotool(press ? "keydown" : "keyup", MinecraftClientTestPilot.keysym(key));
 	}
 
@@ -243,8 +246,6 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	@Override
 	public void reachTitleScreen() {
 		this.waitFor("JOID on the main menu", () -> MinecraftBackend.inst().isRegistered() && Minecraft.getMinecraft().currentScreen instanceof GuiMainMenu, 600);
-		this.window = MinecraftClientTestPilot.xdotool("search", "--sync", "--limit", "1", "--name", "^Minecraft").trim();
-		MinecraftClientTestPilot.xdotool("windowfocus", "--sync", this.window);
 		this.runOnClient(() -> {
 			final Minecraft minecraft = Minecraft.getMinecraft();
 			minecraft.gameSettings.pauseOnLostFocus = false;
@@ -266,6 +267,19 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 			return null;
 		});
 		this.sleep(5000L);
+	}
+
+	@Override
+	public void clearInventory() {
+		this.computeOnServer(player -> {
+			for (int slot = 0; slot < player.inventory.getSizeInventory(); slot++) {
+				player.inventory.setInventorySlotContents(slot, null);
+			}
+			player.inventory.setItemStack(null);
+			player.updateHeldItem();
+			player.inventoryContainer.detectAndSendChanges();
+			return null;
+		});
 	}
 
 	@Override
@@ -324,11 +338,8 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	@Override
 	public int openDemoContainer() {
+		this.clearInventory();
 		return this.computeOnServer(player -> {
-			for (int slot = 0; slot < player.inventory.getSizeInventory(); slot++) {
-				player.inventory.setInventorySlotContents(slot, null);
-			}
-
 			OpenDemoContainerPayloadHandler.handle(OpenDemoContainerPayload.INSTANCE, player);
 			if (!(player.openContainer instanceof DemoContainer)) {
 				return -1;
@@ -764,6 +775,14 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	@Override
 	public ISnapshotBackend createSnapshotBackend() {
 		return new MinecraftSnapshotBackend();
+	}
+
+	private String focusWindow() {
+		if (this.window == null) {
+			this.window = MinecraftClientTestPilot.xdotool("search", "--sync", "--limit", "1", "--name", "^Minecraft").trim();
+			MinecraftClientTestPilot.xdotool("windowfocus", "--sync", this.window);
+		}
+		return this.window;
 	}
 
 	private <T> T computeOnServer(final Function<EntityPlayerMP, T> function) {
