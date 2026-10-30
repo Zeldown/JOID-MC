@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
+import org.lwjgl.opengl.GL11;
 
 import com.mojang.blaze3d.ProjectionType;
 import com.mojang.blaze3d.buffers.GpuBuffer;
@@ -19,6 +20,7 @@ import com.mojang.blaze3d.systems.ScissorState;
 import com.mojang.blaze3d.textures.AddressMode;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuSampler;
+import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.textures.GpuTextureView;
 
 import dev.joid.backend.minecraft.bridge.render.framebuffer.MinecraftFrameBuffer;
@@ -55,6 +57,7 @@ import net.minecraft.client.renderer.ProjectionMatrixBuffer;
 @Getter
 public final class MinecraftRenderBridge extends RenderBridge {
 
+	private final boolean                openGl;
 	private final GpuDevice              device;
 	private final boolean                zeroToOne;
 	private final PassEncoder            passEncoder;
@@ -73,6 +76,7 @@ public final class MinecraftRenderBridge extends RenderBridge {
 
 	public MinecraftRenderBridge() {
 		this.device                     = RenderSystem.getDevice();
+		this.openGl                     = "OpenGL".equals(this.device.getDeviceInfo().backendName());
 		this.zeroToOne                  = this.device.getDeviceInfo().isZZeroToOne();
 		this.passEncoder                = new PassEncoder(this.device);
 		this.sourceProvider             = new ShaderSourceProvider();
@@ -91,7 +95,7 @@ public final class MinecraftRenderBridge extends RenderBridge {
 		this.target = this.screenTarget;
 		this.passEncoder.encoder().clearDepthTexture(this.target.getDepth(), 1D);
 		if (this.target.getStencil() != null) {
-			this.passEncoder.encoder().clearColorTexture(this.target.getStencil(), new Vector4f(0F));
+			this.clearColorTexture(this.target.getStencil(), new Vector4f(0F));
 		}
 	}
 
@@ -112,14 +116,14 @@ public final class MinecraftRenderBridge extends RenderBridge {
 		super.requireFrame();
 		final MinecraftRenderTarget target = this.getTarget(super.getState());
 		if (target.getStencil() != null) {
-			this.passEncoder.encoder().clearColorTexture(target.getStencil(), new Vector4f(0F));
+			this.clearColorTexture(target.getStencil(), new Vector4f(0F));
 		}
 	}
 
 	@Override
 	protected void clearColorBuffer(final float red, final float green, final float blue, final float alpha) {
 		super.requireFrame();
-		this.passEncoder.encoder().clearColorTexture(this.getTarget(super.getState()).getTexture().getTexture(), new Vector4f(red, green, blue, alpha));
+		this.clearColorTexture(this.getTarget(super.getState()).getTexture().getTexture(), new Vector4f(red, green, blue, alpha));
 	}
 
 	@Override
@@ -237,6 +241,13 @@ public final class MinecraftRenderBridge extends RenderBridge {
 
 	private MinecraftRenderTarget getTarget(final RenderState state) {
 		return state.getFrameBuffer() == null ? this.target : ((MinecraftFrameBuffer) state.getFrameBuffer()).getTarget();
+	}
+
+	private void clearColorTexture(final GpuTexture texture, final Vector4f color) {
+		this.passEncoder.encoder().clearColorTexture(texture, color);
+		if (this.openGl) {
+			GL11.glFlush();
+		}
 	}
 
 	private void record(final PipelineKey key, final GpuTextureView color, final GpuTextureView depth, final GpuTextureView stencil, final MinecraftShader shader, final GpuBufferSlice vertices, final GpuBufferSlice uniforms, final int count) {
