@@ -113,6 +113,7 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatStyle;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ScreenShotHelper;
+import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraftforge.client.MinecraftForgeClient;
@@ -202,11 +203,17 @@ public final class ClientSmokeTest {
 		ClientSmokeTest.runOnClient(() -> {
 			final Minecraft minecraft = Minecraft.getMinecraft();
 			minecraft.gameSettings.pauseOnLostFocus = false;
+			minecraft.gameSettings.difficulty = EnumDifficulty.PEACEFUL;
 			minecraft.launchIntegratedServer("joid-smoke", "joid-smoke", new WorldSettings(0L, WorldSettings.GameType.SURVIVAL, false, false, WorldType.FLAT));
 		});
 		ClientSmokeTest.waitFor("the singleplayer world", () -> Minecraft.getMinecraft().thePlayer != null && Minecraft.getMinecraft().theWorld != null && (Minecraft.getMinecraft().currentScreen == null || Minecraft.getMinecraft().currentScreen instanceof GuiIngameMenu), 600);
 		ClientSmokeTest.runOnClient(() -> Minecraft.getMinecraft().displayGuiScreen(null));
 		ClientSmokeTest.waitFor("the game without screen", () -> Minecraft.getMinecraft().currentScreen == null, 30);
+		ClientSmokeTest.computeOnServer(player -> {
+			player.worldObj.getGameRules().setOrCreateGameRule("doDaylightCycle", "false");
+			player.worldObj.getGameRules().setOrCreateGameRule("doMobSpawning", "false");
+			return null;
+		});
 		ClientSmokeTest.sleep(5000);
 	}
 
@@ -495,7 +502,9 @@ public final class ClientSmokeTest {
 		}
 
 		ClientSmokeTest.press("Escape");
-		ClientSmokeTest.waitFor("UIDemoMinecraftChoice opened again by Escape on the game objects", () -> !JOID.isOpen(GameObjects.class) && JOID.isOpen(UIDemoMinecraftChoice.class), 30);
+		ClientSmokeTest.waitFor("the game objects to close on Escape", () -> !JOID.isOpen(GameObjects.class) && Minecraft.getMinecraft().currentScreen == null, 30);
+		ClientSmokeTest.press("j");
+		ClientSmokeTest.waitFor("UIDemoMinecraftChoice opened again by the key J", () -> JOID.isOpen(UIDemoMinecraftChoice.class), 30);
 		ClientSmokeTest.sleep(1000);
 	}
 
