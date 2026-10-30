@@ -91,6 +91,7 @@ public final class ClientTestContext {
 		this.waitFrames(1);
 		this.pilot.pressMouse(false);
 		this.waitFrames(3);
+		ClientTestContext.sleep(300L);
 	}
 
 	public void click(final int[] bounds) {
