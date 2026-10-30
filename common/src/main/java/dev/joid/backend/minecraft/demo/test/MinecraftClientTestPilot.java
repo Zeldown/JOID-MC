@@ -113,6 +113,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.language.ClientLanguage;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundEventListener;
+import net.minecraft.client.tutorial.TutorialSteps;
 import net.minecraft.core.ClientAsset;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -240,6 +241,10 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 		}
 
 		this.waitFor("the singleplayer world", () -> Minecraft.getInstance().level != null && Minecraft.getInstance().player != null && Minecraft.getInstance().gui.screen() == null && Minecraft.getInstance().gui.overlay() == null, 600);
+		this.runOnClient(() -> {
+			Minecraft.getInstance().getTutorial().setStep(TutorialSteps.NONE);
+			Minecraft.getInstance().gui.toastManager().clear();
+		});
 		this.sleep(5000L);
 	}
 
