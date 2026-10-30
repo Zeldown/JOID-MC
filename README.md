@@ -85,6 +85,8 @@ jobs:
 
 The `parity` job of every branch fails as soon as a version branch leaves this model.
 
+Every version compares its snapshots with the same references, in the `.snapshots/references/<graphics API>/<renderer>` folder of this branch: a version that draws with OpenGL, directly like 1.7.10 or through Blaze3D like 26.2, must render the images of the others, to within one level per channel. Vulkan keeps its own references: lavapipe compiles and rasterizes differently from llvmpipe, by up to 7 levels on the edges of shapes and text. A new version records the references it misses on its first run; copy them here from the artifact of that run.
+
 ## License
 
 JOID-MC is released under the [Apache 2.0 license](LICENSE).

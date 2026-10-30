@@ -162,7 +162,7 @@ public final class RenderScenarios {
 	public static void verifySnapshots(final ClientTestContext context) {
 		final IClientTestPilot pilot = context.getPilot();
 		final File output = new File(System.getProperty("joid.snapshot.output", "snapshots/renders"));
-		final File references = new File(new File(System.getProperty("joid.snapshot.references", "snapshots/references")), pilot.getRenderPipeline());
+		final File references = new File(new File(System.getProperty("joid.snapshot.references", "snapshots/references")), pilot.getGraphicsBackend());
 		final List<String> failures = context.compute(() -> {
 			final List<String> found = new ArrayList<>();
 			final SnapshotRunner runner = SnapshotRunner.start(pilot.createSnapshotBackend());
