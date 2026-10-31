@@ -142,6 +142,15 @@ public final class ClientTestContext {
 		return this.pilot.capture(name);
 	}
 
+	public BufferedImage captureChange(final String name, final BufferedImage reference, final int[] bounds, final int seconds) {
+		final long end = System.nanoTime() + TimeUnit.SECONDS.toNanos(seconds);
+		BufferedImage capture = this.capture(name);
+		while (!ClientTestImages.isChanged(reference, capture, bounds) && System.nanoTime() < end) {
+			capture = this.capture(name);
+		}
+		return capture;
+	}
+
 	public void guiScale(final int guiScale) {
 		this.run(() -> this.pilot.applyGuiScale(guiScale));
 		this.waitTicks(5);

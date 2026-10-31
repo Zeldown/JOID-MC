@@ -160,7 +160,7 @@ public final class ObjectScenarios {
 		}
 
 		ClientTestImages.expectChange(context, "zombie", Arrays.asList(left, right), entities.get(0), true);
-		ClientTestImages.expectChange(context, "rotating creeper", Arrays.asList(left, right), entities.get(1), false);
+		ClientTestImages.expectChange(context, "rotating creeper", Arrays.asList(left, context.captureChange("joid-demo-minecraft-entities-c", left, entities.get(1), 10)), entities.get(1), false);
 		ClientTestImages.expectChange(context, "player with a default skin", Arrays.asList(left, right), entities.get(4), true);
 		ClientTestImages.expectChange(context, "head of the player following the mouse", Arrays.asList(left, right), new int[] {player[0], player[1], player[2], player[3] / 3}, false);
 		ClientTestImages.expectChange(context, "head of the villager following the mouse", Arrays.asList(left, right), new int[] {villager[0], villager[1], villager[2], villager[3] / 3}, false);

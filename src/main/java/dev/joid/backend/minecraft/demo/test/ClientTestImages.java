@@ -20,11 +20,7 @@ public final class ClientTestImages {
 	public static void expectChange(final ClientTestContext context, final String label, final List<BufferedImage> captures, final int[] bounds, final boolean same) {
 		boolean changed = false;
 		for (int capture = 1; capture < captures.size() && !changed; capture++) {
-			for (int row = 0; row < bounds[3] && !changed; row++) {
-				for (int column = 0; column < bounds[2] && !changed; column++) {
-					changed = captures.get(capture - 1).getRGB(bounds[0] + column, bounds[1] + row) != captures.get(capture).getRGB(bounds[0] + column, bounds[1] + row);
-				}
-			}
+			changed = ClientTestImages.isChanged(captures.get(capture - 1), captures.get(capture), bounds);
 		}
 
 		if (changed == same) {
@@ -62,6 +58,17 @@ public final class ClientTestImages {
 		if (different > 0) {
 			context.fail(label + ": " + different + " opaque pixels differ from the texture of the game");
 		}
+	}
+
+	public static boolean isChanged(final BufferedImage first, final BufferedImage second, final int[] bounds) {
+		for (int row = 0; row < bounds[3]; row++) {
+			for (int column = 0; column < bounds[2]; column++) {
+				if (first.getRGB(bounds[0] + column, bounds[1] + row) != second.getRGB(bounds[0] + column, bounds[1] + row)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	public static int countDifferent(final BufferedImage image, final int[] bounds, final int background) {
