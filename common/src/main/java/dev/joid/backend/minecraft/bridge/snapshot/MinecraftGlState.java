@@ -137,4 +137,10 @@ public final class MinecraftGlState {
 		GL11.glClearDepth(this.clearDepth);
 	}
 
+	public static void resetPixelStore() {
+		for (final int name : MinecraftGlState.PIXEL_STORE) {
+			GL11.glPixelStorei(name, name == GL11.GL_PACK_ALIGNMENT || name == GL11.GL_UNPACK_ALIGNMENT ? 4 : 0);
+		}
+	}
+
 }

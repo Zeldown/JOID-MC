@@ -25,6 +25,7 @@ public final class MinecraftSnapshotBackend implements ISnapshotBackend {
 		this.bridge = BridgeHandler.RENDER.getBridge(GlRenderBridge.class);
 		this.state  = MinecraftGlState.read();
 		this.target = new MinecraftRenderTarget(width, height);
+		MinecraftGlState.resetPixelStore();
 		this.target.bind();
 	}
 
