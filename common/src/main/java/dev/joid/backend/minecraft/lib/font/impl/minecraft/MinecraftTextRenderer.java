@@ -41,14 +41,15 @@ public final class MinecraftTextRenderer extends BitmapTextRenderer<MinecraftFon
 	@Override
 	protected BitmapCell getCell(final @NonNull TextGlyph<MinecraftFontFace> glyph) {
 		final MinecraftFontFace face = glyph.getFace();
-		final BakedGlyph baked = face.getGlyph(glyph.getCodepoint());
+		final BakedGlyph[] baked = new BakedGlyph[1];
+		BridgeHandler.RENDER.get().suspend(() -> baked[0] = face.getGlyph(glyph.getCodepoint()));
 		final GlyphVertexCapture capture = this.capture.reset();
-		baked.render(false, 0F, 0F, MinecraftTextRenderer.IDENTITY, capture, 1F, 1F, 1F, 1F, 0);
+		baked[0].render(false, 0F, 0F, MinecraftTextRenderer.IDENTITY, capture, 1F, 1F, 1F, 1F, 0);
 		if (capture.isEmpty()) {
 			return null;
 		}
 
-		final Sheet sheet = this.sheetMap.computeIfAbsent(baked.renderType(Font.DisplayMode.NORMAL), MinecraftTextRenderer::readSheet);
+		final Sheet sheet = this.sheetMap.computeIfAbsent(baked[0].renderType(Font.DisplayMode.NORMAL), MinecraftTextRenderer::readSheet);
 		final int width = sheet.texture.getWidth();
 		final int height = sheet.texture.getHeight();
 		return BitmapCell

@@ -1,5 +1,6 @@
 package dev.joid.backend.minecraft.lib.draw.entity;
 
+import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
 import com.mojang.blaze3d.platform.Lighting;
@@ -96,7 +97,8 @@ public final class DrawEntity {
 			model.head.xRot = (float) Math.toRadians(-lookPitch);
 			model.hat.copyFrom(model.head);
 			pose.mulPose(new Quaternionf().rotationY((float) Math.toRadians(-lookYaw)));
-			pose.scale(-0.9375F, -0.9375F, 0.9375F);
+			pose.scale(-1F, -1F, 1F);
+			pose.scale(0.9375F, 0.9375F, 0.9375F);
 			pose.translate(0F, -1.501F, 0F);
 			model.renderToBuffer(pose, buffer.getBuffer(model.renderType(skin)), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 1F, 1F, 1F, 1F);
 		});
@@ -115,7 +117,7 @@ public final class DrawEntity {
 		final float center = modelHeight / 2F;
 		DrawUtils.RASTER.drawRaster(x - width / 4D, y - height / 4D, width * 1.5D, height * 1.5D, GuiDrawableRaster.of(Lighting::setupForEntityInInventory, (pose, buffer) -> {
 			final EntityRenderDispatcher dispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
-			pose.scale(size, -size, -size);
+			pose.mulPoseMatrix(new Matrix4f().scaling(size, -size, -size));
 			pose.translate(0F, center, 0F);
 			pose.mulPose(new Quaternionf().rotationZ((float) Math.PI).mul(tilt));
 			pose.translate(0F, center, 0F);
