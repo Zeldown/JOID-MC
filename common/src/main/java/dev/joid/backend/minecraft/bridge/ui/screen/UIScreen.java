@@ -4,13 +4,10 @@ import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
 import dev.joid.base.lwjgl3.glfw.input.GlfwKeys;
 import dev.joid.lib.input.mouse.MouseButton;
 import lombok.NonNull;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.SharedConstants;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.input.CharacterEvent;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.StringUtil;
 
 public class UIScreen extends Screen {
 
@@ -32,20 +29,12 @@ public class UIScreen extends Screen {
 	}
 
 	@Override
-	public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
-		this.bridge.frame(graphics, mouseX, mouseY);
-	}
-
-	@Override
-	public void extractTransparentBackground(final GuiGraphicsExtractor graphics) {
+	public void render(final GuiGraphics graphics, final int mouseX, final int mouseY, final float partialTick) {
 		if (this.hasBackground()) {
-			super.extractTransparentBackground(graphics);
+			super.renderBackground(graphics);
 		}
-	}
 
-	@Override
-	public boolean isInGameUi() {
-		return !this.hasBackground() || super.isInGameUi();
+		this.bridge.frame(graphics, mouseX, mouseY);
 	}
 
 	@Override
@@ -71,33 +60,33 @@ public class UIScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseClicked(final MouseButtonEvent event, final boolean doubleClick) {
-		return this.bridge.mousePressed(MouseButton.of(event.button()));
+	public boolean mouseClicked(final double x, final double y, final int button) {
+		return this.bridge.mousePressed(MouseButton.of(button));
 	}
 
 	@Override
-	public boolean mouseReleased(final MouseButtonEvent event) {
-		return this.bridge.mouseReleased(MouseButton.of(event.button()));
+	public boolean mouseReleased(final double x, final double y, final int button) {
+		return this.bridge.mouseReleased(MouseButton.of(button));
 	}
 
 	@Override
-	public boolean mouseScrolled(final double x, final double y, final double scrollX, final double scrollY) {
-		return this.bridge.mouseScroll(scrollX, scrollY);
+	public boolean mouseScrolled(final double x, final double y, final double scroll) {
+		return this.bridge.mouseScroll(0D, scroll);
 	}
 
 	@Override
-	public boolean keyPressed(final KeyEvent event) {
-		return this.bridge.keyPressed(GlfwKeys.getPhysicalKey(event.key()), GlfwKeys.getKey(event.key()));
+	public boolean keyPressed(final int key, final int scanCode, final int modifiers) {
+		return this.bridge.keyPressed(GlfwKeys.getPhysicalKey(key), GlfwKeys.getKey(key));
 	}
 
 	@Override
-	public boolean keyReleased(final KeyEvent event) {
-		return this.bridge.keyReleased(GlfwKeys.getPhysicalKey(event.key()), GlfwKeys.getKey(event.key()));
+	public boolean keyReleased(final int key, final int scanCode, final int modifiers) {
+		return this.bridge.keyReleased(GlfwKeys.getPhysicalKey(key), GlfwKeys.getKey(key));
 	}
 
 	@Override
-	public boolean charTyped(final CharacterEvent event) {
-		return StringUtil.isAllowedChatCharacter(event.codepoint()) && this.bridge.charTyped(event.codepoint());
+	public boolean charTyped(final char character, final int modifiers) {
+		return SharedConstants.isAllowedChatCharacter(character) && this.bridge.charTyped(character);
 	}
 
 	private boolean hasBackground() {

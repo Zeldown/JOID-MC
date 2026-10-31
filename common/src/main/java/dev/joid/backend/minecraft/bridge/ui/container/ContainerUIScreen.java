@@ -4,8 +4,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.mojang.blaze3d.platform.Window;
-
 import dev.joid.backend.minecraft.lib.ui.core.container.ContainerUI;
 import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
 import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
@@ -14,14 +12,11 @@ import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.input.mouse.MouseButton;
 import lombok.Getter;
 import lombok.NonNull;
+import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.input.CharacterEvent;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.StringUtil;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
@@ -61,33 +56,20 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 	}
 
 	@Override
-	public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
+	public void render(final GuiGraphics graphics, final int mouseX, final int mouseY, final float partialTick) {
+		if (this.hasBackground()) {
+			super.renderBackground(graphics);
+		}
+
 		if (!this.ui.getNodeList().contains(this.ui.getCarriedNode())) {
 			this.ui.getCarriedNode().attach(this.ui);
 		}
 
 		this.updateBounds();
 		this.updateQuickCraft();
-		final Slot previous = super.hoveredSlot;
-		super.hoveredSlot = this.getHoveredSlot(mouseX, mouseY);
-		if (previous != null && previous != super.hoveredSlot) {
-			super.onStopHovering(previous);
-		}
-
+		super.hoveredSlot = this.findSlot(mouseX, mouseY);
 		this.bridge.frame(graphics, mouseX, mouseY);
-		super.extractTooltip(graphics, mouseX, mouseY);
-	}
-
-	@Override
-	public void extractTransparentBackground(final GuiGraphicsExtractor graphics) {
-		if (this.hasBackground()) {
-			super.extractTransparentBackground(graphics);
-		}
-	}
-
-	@Override
-	public boolean isInGameUi() {
-		return !this.hasBackground();
+		super.renderTooltip(graphics, mouseX, mouseY);
 	}
 
 	@Override
@@ -101,46 +83,46 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 	}
 
 	@Override
-	public boolean mouseClicked(final MouseButtonEvent event, final boolean doubleClick) {
-		if (this.bridge.mousePressed(MouseButton.of(event.button()))) {
-			this.consumedButtons.add(event.button());
+	public boolean mouseClicked(final double x, final double y, final int button) {
+		if (this.bridge.mousePressed(MouseButton.of(button))) {
+			this.consumedButtons.add(button);
 			return true;
 		}
-		return super.mouseClicked(event, doubleClick);
+		return super.mouseClicked(x, y, button);
 	}
 
 	@Override
-	public boolean mouseReleased(final MouseButtonEvent event) {
-		final boolean consumed = this.bridge.mouseReleased(MouseButton.of(event.button()));
-		if (this.consumedButtons.remove(event.button())) {
+	public boolean mouseReleased(final double x, final double y, final int button) {
+		final boolean consumed = this.bridge.mouseReleased(MouseButton.of(button));
+		if (this.consumedButtons.remove(button)) {
 			return true;
 		}
-		return super.mouseReleased(event) || consumed;
+		return super.mouseReleased(x, y, button) || consumed;
 	}
 
 	@Override
-	public boolean mouseDragged(final MouseButtonEvent event, final double dx, final double dy) {
-		return this.consumedButtons.contains(event.button()) || super.mouseDragged(event, dx, dy);
+	public boolean mouseDragged(final double x, final double y, final int button, final double dragX, final double dragY) {
+		return this.consumedButtons.contains(button) || super.mouseDragged(x, y, button, dragX, dragY);
 	}
 
 	@Override
-	public boolean mouseScrolled(final double x, final double y, final double scrollX, final double scrollY) {
-		return this.bridge.mouseScroll(scrollX, scrollY) || super.mouseScrolled(x, y, scrollX, scrollY);
+	public boolean mouseScrolled(final double x, final double y, final double scroll) {
+		return this.bridge.mouseScroll(0D, scroll) || super.mouseScrolled(x, y, scroll);
 	}
 
 	@Override
-	public boolean keyPressed(final KeyEvent event) {
-		return this.bridge.keyPressed(GlfwKeys.getPhysicalKey(event.key()), GlfwKeys.getKey(event.key())) || super.keyPressed(event);
+	public boolean keyPressed(final int key, final int scanCode, final int modifiers) {
+		return this.bridge.keyPressed(GlfwKeys.getPhysicalKey(key), GlfwKeys.getKey(key)) || super.keyPressed(key, scanCode, modifiers);
 	}
 
 	@Override
-	public boolean keyReleased(final KeyEvent event) {
-		return this.bridge.keyReleased(GlfwKeys.getPhysicalKey(event.key()), GlfwKeys.getKey(event.key())) || super.keyReleased(event);
+	public boolean keyReleased(final int key, final int scanCode, final int modifiers) {
+		return this.bridge.keyReleased(GlfwKeys.getPhysicalKey(key), GlfwKeys.getKey(key)) || super.keyReleased(key, scanCode, modifiers);
 	}
 
 	@Override
-	public boolean charTyped(final CharacterEvent event) {
-		return StringUtil.isAllowedChatCharacter(event.codepoint()) && this.bridge.charTyped(event.codepoint()) || super.charTyped(event);
+	public boolean charTyped(final char character, final int modifiers) {
+		return SharedConstants.isAllowedChatCharacter(character) && this.bridge.charTyped(character) || super.charTyped(character, modifiers);
 	}
 
 	public Slot getHoveredSlot() {
@@ -148,14 +130,14 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 	}
 
 	@Override
-	protected Slot getHoveredSlot(final double x, final double y) {
+	protected Slot findSlot(final double x, final double y) {
 		final SlotNode node = this.getSlotNode(x, y);
 		return node != null && node.getSlot().isActive() ? node.getSlot() : null;
 	}
 
 	public SlotNode getHoveredSlotNode() {
 		final Minecraft minecraft = Minecraft.getInstance();
-		return this.getSlotNode(minecraft.mouseHandler.getScaledXPos(minecraft.getWindow()), minecraft.mouseHandler.getScaledYPos(minecraft.getWindow()));
+		return this.getSlotNode(minecraft.mouseHandler.xpos() * minecraft.getWindow().getGuiScaledWidth() / minecraft.getWindow().getScreenWidth(), minecraft.mouseHandler.ypos() * minecraft.getWindow().getGuiScaledHeight() / minecraft.getWindow().getScreenHeight());
 	}
 
 	public boolean isQuickCrafting() {
@@ -173,6 +155,9 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 	public @NonNull Set<@NonNull Slot> getQuickCraftSlots() {
 		return Collections.unmodifiableSet(super.quickCraftSlots);
 	}
+
+	@Override
+	protected void renderBg(final GuiGraphics graphics, final float partialTick, final int mouseX, final int mouseY) {}
 
 	private UIDataMinecraft getMinecraftData() {
 		return this.ui.getClass().getAnnotation(UIDataMinecraft.class);
@@ -206,8 +191,8 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 	}
 
 	private SlotNode getSlotNode(final double x, final double y) {
-		final Window window = Minecraft.getInstance().getWindow();
-		return this.bridge.getNodeAt(this.ui, x * window.getGuiScale(), y * window.getGuiScale(), SlotNode.class);
+		final double scale = Minecraft.getInstance().getWindow().getGuiScale();
+		return this.bridge.getNodeAt(this.ui, x * scale, y * scale, SlotNode.class);
 	}
 
 	private static Component toTitle(final ContainerUI<?> ui) {

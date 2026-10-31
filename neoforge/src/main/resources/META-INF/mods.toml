@@ -6,22 +6,21 @@ issueTrackerURL = "https://github.com/Zeldown/JOID-MC/issues"
 modId = "${mod_id}"
 version = "${version}"
 displayName = "${mod_name}"
-iconFile = "assets/joid/icon.png"
+logoFile = "assets/joid/icon.png"
 displayURL = "https://github.com/Zeldown/JOID-MC"
-credits="${credits}"
+credits = "${credits}"
 authors = "${mod_author}"
 description = '''${description}'''
-[[accessTransformers]]
-file="META-INF/accesstransformer.cfg"
+displayTest = "IGNORE_ALL_VERSION"
 [[dependencies.${mod_id}]]
-modId = "neoforge"
-type="required"
+modId = "forge"
+mandatory = true
 versionRange = "[${neoforge_version},)"
 ordering = "NONE"
-side = "BOTH"
+side = "CLIENT"
 [[dependencies.${mod_id}]]
 modId = "minecraft"
-type="required"
+mandatory = true
 versionRange = "${minecraft_version_range}"
 ordering = "NONE"
-side = "BOTH"
+side = "CLIENT"

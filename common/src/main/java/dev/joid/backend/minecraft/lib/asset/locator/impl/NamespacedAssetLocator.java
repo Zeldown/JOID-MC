@@ -4,17 +4,17 @@ import dev.joid.backend.minecraft.lib.asset.impl.NamespacedAsset;
 import dev.joid.lib.asset.Asset;
 import dev.joid.lib.asset.locator.IAssetLocator;
 import lombok.NonNull;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 public class NamespacedAssetLocator implements IAssetLocator {
 
 	@Override
 	public boolean supports(final @NonNull Object handle) {
-		if (handle instanceof Identifier) {
+		if (handle instanceof ResourceLocation) {
 			return true;
 		}
 
-		final Identifier identifier = NamespacedAssetLocator.parse(handle);
+		final ResourceLocation identifier = NamespacedAssetLocator.parse(handle);
 		return identifier != null && NamespacedAsset.of(identifier).exists();
 	}
 
@@ -23,16 +23,16 @@ public class NamespacedAssetLocator implements IAssetLocator {
 		return NamespacedAsset.of(NamespacedAssetLocator.parse(handle));
 	}
 
-	public static Identifier parse(final @NonNull Object handle) {
-		if (handle instanceof Identifier) {
-			return (Identifier) handle;
+	public static ResourceLocation parse(final @NonNull Object handle) {
+		if (handle instanceof ResourceLocation) {
+			return (ResourceLocation) handle;
 		}
 
 		if (!(handle instanceof String) || ((String) handle).contains("://")) {
 			return null;
 		}
 
-		return Identifier.tryParse((String) handle);
+		return ResourceLocation.tryParse((String) handle);
 	}
 
 }

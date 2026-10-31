@@ -15,7 +15,7 @@ import dev.joid.lib.ui.node.Node;
 import net.minecraft.SharedConstants;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.world.SimpleContainer;
-import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
@@ -56,7 +56,7 @@ public class NodeRequirementTest {
 
 	@Test
 	public void acceptsAnEntityNodeWithAType() throws ReflectiveOperationException {
-		NodeRequirementTest.checkRequirements(EntityNode.create(0, 0, 80, 160).type(EntityTypes.PIG));
+		NodeRequirementTest.checkRequirements(EntityNode.create(0, 0, 80, 160).type(EntityType.PIG));
 	}
 
 	@Test

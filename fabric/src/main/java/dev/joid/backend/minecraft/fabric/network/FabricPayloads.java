@@ -1,30 +1,36 @@
 package dev.joid.backend.minecraft.fabric.network;
 
-import dev.joid.backend.minecraft.bridge.network.PayloadPacket;
-import dev.joid.backend.minecraft.loader.network.IPayload;
+import dev.joid.backend.minecraft.MinecraftJoid;
+import dev.joid.backend.minecraft.bridge.network.PayloadMessage;
 import dev.joid.backend.minecraft.loader.network.PayloadType;
+import io.netty.buffer.Unpooled;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class FabricPayloads {
 
+	private static final ResourceLocation CHANNEL = ResourceLocation.tryBuild(MinecraftJoid.MOD_ID, "main");
+
 	public static void register() {
-		for (final PayloadType<?, ?> type : PayloadType.getRegistered()) {
-			FabricPayloads.register(type);
+		if (!PayloadType.getRegistered().isEmpty()) {
+			ServerPlayNetworking.registerGlobalReceiver(FabricPayloads.CHANNEL, (server, player, handler, buffer, sender) -> {
+				final PayloadMessage message = PayloadMessage.read(buffer);
+				server.execute(() -> message.fireServer(player));
+			});
 		}
 	}
 
 	public static void registerSender() {
-		PayloadType.sender(payload -> ClientPlayNetworking.send(new PayloadPacket<>(payload)));
-	}
-
-	private static <T extends IPayload> void register(final PayloadType<T, ?> type) {
-		PayloadTypeRegistry.serverboundPlay().register(PayloadPacket.getType(type), PayloadPacket.codec(type));
-		ServerPlayNetworking.registerGlobalReceiver(PayloadPacket.<T>getType(type), (packet, context) -> type.fireServer(packet.payload(), context.player()));
+		PayloadType.sender(payload -> {
+			final FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
+			new PayloadMessage(payload).write(buffer);
+			ClientPlayNetworking.send(FabricPayloads.CHANNEL, buffer);
+		});
 	}
 
 }

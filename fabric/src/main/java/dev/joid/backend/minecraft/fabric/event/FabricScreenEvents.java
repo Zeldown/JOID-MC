@@ -11,15 +11,13 @@ import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 public final class FabricScreenEvents {
 
 	public static void register() {
-		ScreenEvents.AFTER_INIT.register((_, screen, _, _) -> {
-			ScreenMouseEvents.allowMouseDrag(screen).register((_, _, _, _) -> !MinecraftScreenEvents.fireMouseMoved());
-			ScreenEvents.afterExtract(screen).register((_, graphics, _, _, _) -> MinecraftScreenEvents.fireRender(graphics));
-			ScreenKeyboardEvents.allowKeyPress(screen).register((_, event) -> !MinecraftScreenEvents.fireKeyPressed(event.key()));
-			ScreenKeyboardEvents.allowKeyRelease(screen).register((_, event) -> !MinecraftScreenEvents.fireKeyReleased(event.key()));
-			ScreenMouseEvents.allowMouseClick(screen).register((_, event) -> !MinecraftScreenEvents.fireMousePressed(event.button()));
-			ScreenKeyboardEvents.allowCharType(screen).register((_, event) -> !MinecraftScreenEvents.fireCharTyped(event.codepoint()));
-			ScreenMouseEvents.allowMouseRelease(screen).register((_, event) -> !MinecraftScreenEvents.fireMouseReleased(event.button()));
-			ScreenMouseEvents.allowMouseScroll(screen).register((_, _, _, notchesX, notchesY) -> !MinecraftScreenEvents.fireMouseScrolled(notchesX, notchesY));
+		ScreenEvents.AFTER_INIT.register((minecraft, screen, width, height) -> {
+			ScreenEvents.afterRender(screen).register((current, graphics, mouseX, mouseY, partialTick) -> MinecraftScreenEvents.fireRender(graphics));
+			ScreenKeyboardEvents.allowKeyPress(screen).register((current, key, scanCode, modifiers) -> !MinecraftScreenEvents.fireKeyPressed(key));
+			ScreenKeyboardEvents.allowKeyRelease(screen).register((current, key, scanCode, modifiers) -> !MinecraftScreenEvents.fireKeyReleased(key));
+			ScreenMouseEvents.allowMouseClick(screen).register((current, mouseX, mouseY, button) -> !MinecraftScreenEvents.fireMousePressed(button));
+			ScreenMouseEvents.allowMouseRelease(screen).register((current, mouseX, mouseY, button) -> !MinecraftScreenEvents.fireMouseReleased(button));
+			ScreenMouseEvents.allowMouseScroll(screen).register((current, mouseX, mouseY, scrollX, scrollY) -> !MinecraftScreenEvents.fireMouseScrolled(scrollX, scrollY));
 		});
 	}
 

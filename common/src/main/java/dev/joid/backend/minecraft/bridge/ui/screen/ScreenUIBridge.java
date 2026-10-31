@@ -8,9 +8,9 @@ import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
 import dev.joid.lib.ui.core.UI;
 import lombok.NonNull;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 
-public final class ScreenUIBridge extends BaseScreenUIBridge<GuiGraphicsExtractor> {
+public final class ScreenUIBridge extends BaseScreenUIBridge<GuiGraphics> {
 
 	private final GuiCompositor         compositor;
 	private final MinecraftWindowBridge window;
@@ -19,7 +19,7 @@ public final class ScreenUIBridge extends BaseScreenUIBridge<GuiGraphicsExtracto
 
 	public ScreenUIBridge(final MinecraftRenderBridge render, final MinecraftWindowBridge window) {
 		this.window     = window;
-		this.compositor = new GuiCompositor(render);
+		this.compositor = new GuiCompositor(render, window);
 	}
 
 	@Override
@@ -31,7 +31,7 @@ public final class ScreenUIBridge extends BaseScreenUIBridge<GuiGraphicsExtracto
 	protected void attachScreen() {
 		if (this.screen == null) {
 			this.screen = new UIScreen(this);
-			Minecraft.getInstance().gui.setScreen(this.screen);
+			Minecraft.getInstance().setScreen(this.screen);
 		}
 	}
 
@@ -43,8 +43,8 @@ public final class ScreenUIBridge extends BaseScreenUIBridge<GuiGraphicsExtracto
 
 		final UIScreen screen = this.screen;
 		this.screen = null;
-		if (Minecraft.getInstance().gui.screen() == screen) {
-			Minecraft.getInstance().gui.setScreen(null);
+		if (Minecraft.getInstance().screen == screen) {
+			Minecraft.getInstance().setScreen(null);
 		}
 	}
 
@@ -65,22 +65,22 @@ public final class ScreenUIBridge extends BaseScreenUIBridge<GuiGraphicsExtracto
 	}
 
 	@Override
-	protected long countFrame(final GuiGraphicsExtractor graphics) {
+	protected long countFrame(final GuiGraphics graphics) {
 		return GuiFrameCounter.inst().getFrame(graphics);
 	}
 
 	@Override
-	protected void requestCursor(final GuiGraphicsExtractor graphics) {
-		this.window.requestCursor(graphics, this.window.getCursor());
+	protected void requestCursor(final GuiGraphics graphics) {
+		this.window.requestCursor(this.window.getCursor());
 	}
 
 	@Override
-	protected void compositeFrame(final GuiGraphicsExtractor graphics, final Runnable draw) {
+	protected void compositeFrame(final GuiGraphics graphics, final Runnable draw) {
 		this.compositor.composite(graphics, draw);
 	}
 
 	@Override
-	protected void drawTooltip(final GuiGraphicsExtractor graphics, final Object content, final int mouseX, final int mouseY) {
+	protected void drawTooltip(final GuiGraphics graphics, final Object content, final int mouseX, final int mouseY) {
 		TooltipRenderer.draw(graphics, content, mouseX, mouseY);
 	}
 

@@ -106,7 +106,7 @@ public class ShowVideo extends UI implements IShowFocus {
 		.effect(RoundedNodeEffect.create(26F))
 		.body(chip -> {
 			CircleNode.create(22, 19, 14).color(ShowTheme.GRASS).effect(ShadowNodeEffect.create(ShowTheme.GRASS, 10F)).attach(chip);
-			TextNode.create(48, 26).text(Text.create(() -> String.format(Locale.ROOT, "Music volume  %d %%", Math.round(Minecraft.getInstance().options.getFinalSoundSourceVolume(SoundSource.MUSIC) * 100F)), ShowTheme.font(FontWeight.BOLD, 18F, ShowTheme.TEXT))).anchorY(Align.CENTER).attach(chip);
+			TextNode.create(48, 26).text(Text.create(() -> String.format(Locale.ROOT, "Music volume  %d %%", Math.round(Minecraft.getInstance().options.getSoundSourceVolume(SoundSource.MASTER) * Minecraft.getInstance().options.getSoundSourceVolume(SoundSource.MUSIC) * 100F)), ShowTheme.font(FontWeight.BOLD, 18F, ShowTheme.TEXT))).anchorY(Align.CENTER).attach(chip);
 		})
 		.attach(card);
 	}
@@ -118,16 +118,16 @@ public class ShowVideo extends UI implements IShowFocus {
 		.hoveredColor(ShowTheme.GOLD)
 		.cursor(Cursor.POINTER)
 		.effect(ShadowNodeEffect.create(ShowTheme.GOLD.withAlpha(0.6F), 26F))
-		.onClick(_ -> this.player.toggle())
-		.layer((_, _, _) -> this.icon(42D, 42D))
+		.onClick(event -> this.player.toggle())
+		.layer((node, mouseX, mouseY) -> this.icon(42D, 42D))
 		.attach(card);
 		this.timeline = RectNode
 		.create(176, 712, 1060, 40)
 		.color(Color.TRANSPARENT)
-		.onHoverStart(_ -> this.reveal.sequence(220F, 1F, TweenEquations.QUAD_OUT).start())
-		.onHoverEnd(_ -> this.reveal.sequence(220F, 0F, TweenEquations.QUAD_OUT).start())
+		.onHoverStart(event -> this.reveal.sequence(220F, 1F, TweenEquations.QUAD_OUT).start())
+		.onHoverEnd(event -> this.reveal.sequence(220F, 0F, TweenEquations.QUAD_OUT).start())
 		.onHover(event -> this.peek(ShowVideo.ratio(event.getNode(), event.getMouseX()), preview))
-		.layer((_, _, _) -> this.bar(0D, 20D, 1060D))
+		.layer((node, mouseX, mouseY) -> this.bar(0D, 20D, 1060D))
 		.attach(card);
 		TextNode.create(1384, 732).text(Text.create(() -> ShowVideo.clock(this.player.getProgress() * this.player.getDuration()) + " / " + ShowVideo.clock(this.player.getDuration()), ShowTheme.font(FontWeight.SEMI_BOLD, 22F, ShowTheme.TEXT)).alignX(Align.END)).anchorX(Align.END).anchorY(Align.CENTER).attach(card);
 	}
@@ -136,7 +136,7 @@ public class ShowVideo extends UI implements IShowFocus {
 		RectNode
 		.create(0, 456, 336, 236)
 		.color(ShowTheme.INK.withAlpha(0.94F))
-		.<RectNode>x(() -> Math.clamp(8D + this.hover.get() * 1060D, 16D, 1088D))
+		.<RectNode>x(() -> Math.max(16D, Math.min(1088D, 8D + this.hover.get() * 1060D)))
 		.visible(() -> this.reveal.get() > 0.01F)
 		.effect(ShadowNodeEffect.create(Color.BLACK.withAlpha(0.55F), 32F).offsetY(14D))
 		.effect(BorderNodeEffect.create(Color.WHITE.withAlpha(0.14F), 2F).mode(BorderMode.IN))
@@ -181,7 +181,7 @@ public class ShowVideo extends UI implements IShowFocus {
 	}
 
 	private static double ratio(final Node node, final double mouseX) {
-		return Math.clamp((mouseX - node.getAbsoluteX()) / node.getWidth(), 0D, 1D);
+		return Math.max(0D, Math.min(1D, (mouseX - node.getAbsoluteX()) / node.getWidth()));
 	}
 
 	private static String clock(final double seconds) {

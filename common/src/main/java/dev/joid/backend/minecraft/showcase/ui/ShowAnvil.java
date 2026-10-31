@@ -21,7 +21,6 @@ import dev.joid.lib.ui.node.impl.shape.RectNode;
 import dev.joid.lib.ui.node.impl.text.TextNode;
 import dev.joid.lib.utils.align.Align;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.protocol.game.ServerboundRenameItemPacket;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.AnvilMenu;
@@ -150,7 +149,7 @@ public class ShowAnvil extends ContainerUI<AnvilMenu> implements IShowFocus, Con
 			.hoveredColor(Color.WHITE.withAlpha(0.16F))
 			.body(tile -> {
 				if (hotbar) {
-					RectNode.create(0, 0, 81, 81).color(ShowTheme.GRASS.withAlpha(0.14F)).visible(() -> Minecraft.getInstance().player.getInventory().getSelectedSlot() == slot - 30).effect(RoundedNodeEffect.create(16F)).interactive(false).attach(tile);
+					RectNode.create(0, 0, 81, 81).color(ShowTheme.GRASS.withAlpha(0.14F)).visible(() -> Minecraft.getInstance().player.getInventory().selected == slot - 30).effect(RoundedNodeEffect.create(16F)).interactive(false).attach(tile);
 				}
 
 				final SlotNode node = SlotNode.create(4, 4, 73, 73).slot(super.getContainer().getSlot(slot)).hoveredColor((Color) null);
@@ -167,7 +166,7 @@ public class ShowAnvil extends ContainerUI<AnvilMenu> implements IShowFocus, Con
 			return;
 		}
 
-		final String name = !slot.getItem().has(DataComponents.CUSTOM_NAME) && text.equals(slot.getItem().getHoverName().getString()) ? "" : text;
+		final String name = !slot.getItem().hasCustomHoverName() && text.equals(slot.getItem().getHoverName().getString()) ? "" : text;
 		if (super.getContainer().setItemName(name)) {
 			Minecraft.getInstance().player.connection.send(new ServerboundRenameItemPacket(name));
 		}

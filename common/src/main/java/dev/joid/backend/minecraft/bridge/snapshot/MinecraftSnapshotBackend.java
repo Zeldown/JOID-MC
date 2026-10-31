@@ -1,63 +1,55 @@
 package dev.joid.backend.minecraft.bridge.snapshot;
 
-import com.mojang.blaze3d.buffers.GpuBuffer;
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
-import com.mojang.blaze3d.buffers.GpuFence;
-import com.mojang.blaze3d.systems.CommandEncoder;
-import com.mojang.blaze3d.systems.RenderSystem;
+import java.nio.ByteBuffer;
 
-import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.GL11;
+
 import dev.joid.backend.minecraft.bridge.render.MinecraftRenderTarget;
+import dev.joid.base.opengl.binding.GlConstants;
+import dev.joid.base.opengl.render.GlRenderBridge;
 import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.utils.image.PixelLayout;
 import dev.joid.test.snapshot.ISnapshotBackend;
 import dev.joid.test.snapshot.SnapshotImage;
 import lombok.NonNull;
+import net.minecraft.client.Minecraft;
 
 public final class MinecraftSnapshotBackend implements ISnapshotBackend {
 
+	private GlRenderBridge        bridge;
 	private MinecraftRenderTarget target;
 
 	@Override
 	public void create(final int width, final int height) {
-		final MinecraftRenderBridge render = (MinecraftRenderBridge) BridgeHandler.RENDER.get();
-		this.target = new MinecraftRenderTarget(render, width, height, true);
-		render.screenTarget(this.target);
+		this.bridge = BridgeHandler.RENDER.getBridge(GlRenderBridge.class);
+		this.target = new MinecraftRenderTarget(width, height);
+		this.target.bind();
 	}
 
 	@Override
 	public void destroy() {
+		Minecraft.getInstance().getMainRenderTarget().bindWrite(true);
 		this.target.delete();
 		this.target = null;
 	}
 
 	@Override
-	public void present() {
-		RenderSystem.getDevice().createCommandEncoder().submit();
-	}
+	public void present() {}
 
 	@Override
 	public @NonNull SnapshotImage capture(final int width, final int height) {
-		final GpuBuffer buffer = RenderSystem.getDevice().createBuffer(() -> "JOID Snapshot", GpuBuffer.USAGE_MAP_READ | GpuBuffer.USAGE_COPY_DST, (long) width * height * 4L);
-		try {
-			final CommandEncoder encoder = RenderSystem.getDevice().createCommandEncoder();
-			encoder.copyTextureToBuffer(this.target.getTexture().getTexture(), buffer, 0L, () -> {}, 0, 0, 0, width, height);
-			try (final GpuFence fence = encoder.createFence()) {
-				encoder.submit();
-				fence.awaitCompletion(Long.MAX_VALUE);
-			}
-
-			try (final GpuBufferSlice.MappedView view = buffer.map(true, false)) {
-				return SnapshotImage.from(view.data(), width, height, true, PixelLayout.RGBA8);
-			}
-		} finally {
-			buffer.close();
-		}
+		final ByteBuffer pixels = BufferUtils.createByteBuffer(width * height * 4);
+		this.bridge.getGuard().run(() -> {
+			this.bridge.getFrameBufferBinding().bindFramebuffer(GlConstants.FRAMEBUFFER, this.target.getFrameBuffer());
+			this.bridge.getBinding().readPixels(0, 0, width, height, GlConstants.RGBA, GlConstants.UNSIGNED_BYTE, pixels);
+		});
+		return SnapshotImage.from(pixels, width, height, true, PixelLayout.RGBA8);
 	}
 
 	@Override
 	public @NonNull String getRenderer() {
-		return RenderSystem.getDevice().getDeviceInfo().name();
+		return GL11.glGetString(GL11.GL_RENDERER);
 	}
 
 }

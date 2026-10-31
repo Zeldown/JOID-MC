@@ -9,7 +9,6 @@ import dev.joid.lib.ui.node.Node;
 import dev.joid.lib.ui.node.hover.IHoverElement;
 import lombok.Getter;
 import lombok.NonNull;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 
 @Getter
@@ -44,7 +43,7 @@ public class ItemNode extends Node {
 		final double size = Math.min(super.getWidth(), super.getHeight());
 		final double x = super.getX() + (super.getWidth() - size) / 2D;
 		final double y = super.getY() + (super.getHeight() - size) / 2D;
-		DrawItem.inst().drawItem(x, y, size, this.glint == null ? this.stack : ItemNode.withGlint(this.stack, this.glint));
+		DrawItem.inst().drawItem(x, y, size, this.stack, this.glint);
 		if (this.bar) {
 			DrawItem.inst().drawItemBar(x, y, size, this.stack);
 		}
@@ -117,12 +116,6 @@ public class ItemNode extends Node {
 		if (!this.stack.isEmpty() && ui != null) {
 			ui.drawHover(this.stack, mouseX, mouseY);
 		}
-	}
-
-	private static ItemStack withGlint(final ItemStack stack, final boolean glint) {
-		final ItemStack copy = stack.copy();
-		copy.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, glint);
-		return copy;
 	}
 
 }

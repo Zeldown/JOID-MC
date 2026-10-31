@@ -1,0 +1,9 @@
+accessWidener	v2	named
+accessible	method	net/minecraft/client/gui/Font	getFontSet	(Lnet/minecraft/resources/ResourceLocation;)Lnet/minecraft/client/gui/font/FontSet;
+accessible	field	net/minecraft/client/renderer/texture/TextureManager	byPath	Ljava/util/Map;
+extendable	method	net/minecraft/client/gui/screens/inventory/AbstractContainerScreen	findSlot	(DD)Lnet/minecraft/world/inventory/Slot;
+accessible	method	net/minecraft/client/gui/screens/inventory/AbstractContainerScreen	recalculateQuickCraftRemaining	()V
+accessible	field	net/minecraft/client/gui/screens/inventory/AbstractContainerScreen	quickCraftingType	I
+accessible	field	net/minecraft/client/gui/screens/inventory/AbstractContainerScreen	quickCraftingRemainder	I
+accessible	method	net/minecraft/world/inventory/MenuType	<init>	(Lnet/minecraft/world/inventory/MenuType$MenuSupplier;Lnet/minecraft/world/flag/FeatureFlagSet;)V
+accessible	class	net/minecraft/world/inventory/MenuType$MenuSupplier

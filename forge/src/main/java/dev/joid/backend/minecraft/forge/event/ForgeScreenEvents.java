@@ -4,47 +4,66 @@ import dev.joid.backend.minecraft.loader.event.MinecraftScreenEvents;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.minecraftforge.client.event.ScreenEvent;
+import net.minecraftforge.common.MinecraftForge;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ForgeScreenEvents {
 
 	public static void register() {
-		ScreenEvent.KeyPressed.Pre.BUS.addListener(ForgeScreenEvents::keyPressed);
-		ScreenEvent.KeyReleased.Pre.BUS.addListener(ForgeScreenEvents::keyReleased);
-		ScreenEvent.MouseDragged.Pre.BUS.addListener(ForgeScreenEvents::mouseMoved);
-		ScreenEvent.CharacterTyped.Pre.BUS.addListener(ForgeScreenEvents::charTyped);
-		ScreenEvent.MouseScrolled.Pre.BUS.addListener(ForgeScreenEvents::mouseScrolled);
-		ScreenEvent.MouseButtonPressed.Pre.BUS.addListener(ForgeScreenEvents::mousePressed);
-		ScreenEvent.MouseButtonReleased.Pre.BUS.addListener(ForgeScreenEvents::mouseReleased);
-		ScreenEvent.Render.Post.BUS.addListener(event -> MinecraftScreenEvents.fireRender(event.getGuiGraphics()));
+		MinecraftForge.EVENT_BUS.addListener(ForgeScreenEvents::render);
+		MinecraftForge.EVENT_BUS.addListener(ForgeScreenEvents::charTyped);
+		MinecraftForge.EVENT_BUS.addListener(ForgeScreenEvents::keyPressed);
+		MinecraftForge.EVENT_BUS.addListener(ForgeScreenEvents::mouseMoved);
+		MinecraftForge.EVENT_BUS.addListener(ForgeScreenEvents::keyReleased);
+		MinecraftForge.EVENT_BUS.addListener(ForgeScreenEvents::mousePressed);
+		MinecraftForge.EVENT_BUS.addListener(ForgeScreenEvents::mouseReleased);
+		MinecraftForge.EVENT_BUS.addListener(ForgeScreenEvents::mouseScrolled);
 	}
 
-	private static boolean mouseMoved(final ScreenEvent.MouseDragged.Pre event) {
-		return MinecraftScreenEvents.fireMouseMoved();
+	private static void render(final ScreenEvent.Render.Post event) {
+		MinecraftScreenEvents.fireRender(event.getGuiGraphics());
 	}
 
-	private static boolean mousePressed(final ScreenEvent.MouseButtonPressed.Pre event) {
-		return MinecraftScreenEvents.fireMousePressed(event.getInfo().button());
+	private static void mouseMoved(final ScreenEvent.MouseDragged.Pre event) {
+		if (MinecraftScreenEvents.fireMouseMoved()) {
+			event.setCanceled(true);
+		}
 	}
 
-	private static boolean mouseReleased(final ScreenEvent.MouseButtonReleased.Pre event) {
-		return MinecraftScreenEvents.fireMouseReleased(event.getButton());
+	private static void mousePressed(final ScreenEvent.MouseButtonPressed.Pre event) {
+		if (MinecraftScreenEvents.fireMousePressed(event.getButton())) {
+			event.setCanceled(true);
+		}
 	}
 
-	private static boolean mouseScrolled(final ScreenEvent.MouseScrolled.Pre event) {
-		return MinecraftScreenEvents.fireMouseScrolled(event.getDeltaX(), event.getDeltaY());
+	private static void mouseReleased(final ScreenEvent.MouseButtonReleased.Pre event) {
+		if (MinecraftScreenEvents.fireMouseReleased(event.getButton())) {
+			event.setCanceled(true);
+		}
 	}
 
-	private static boolean charTyped(final ScreenEvent.CharacterTyped.Pre event) {
-		return MinecraftScreenEvents.fireCharTyped(event.getInfo().codepoint());
+	private static void mouseScrolled(final ScreenEvent.MouseScrolled.Pre event) {
+		if (MinecraftScreenEvents.fireMouseScrolled(0D, event.getScrollDelta())) {
+			event.setCanceled(true);
+		}
 	}
 
-	private static boolean keyPressed(final ScreenEvent.KeyPressed.Pre event) {
-		return MinecraftScreenEvents.fireKeyPressed(event.getInfo().key());
+	private static void charTyped(final ScreenEvent.CharacterTyped.Pre event) {
+		if (MinecraftScreenEvents.fireCharTyped(event.getCodePoint())) {
+			event.setCanceled(true);
+		}
 	}
 
-	private static boolean keyReleased(final ScreenEvent.KeyReleased.Pre event) {
-		return MinecraftScreenEvents.fireKeyReleased(event.getInfo().key());
+	private static void keyPressed(final ScreenEvent.KeyPressed.Pre event) {
+		if (MinecraftScreenEvents.fireKeyPressed(event.getKeyCode())) {
+			event.setCanceled(true);
+		}
+	}
+
+	private static void keyReleased(final ScreenEvent.KeyReleased.Pre event) {
+		if (MinecraftScreenEvents.fireKeyReleased(event.getKeyCode())) {
+			event.setCanceled(true);
+		}
 	}
 
 }

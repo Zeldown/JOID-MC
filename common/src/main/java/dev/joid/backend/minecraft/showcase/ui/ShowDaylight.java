@@ -2,7 +2,6 @@ package dev.joid.backend.minecraft.showcase.ui;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.stream.Stream;
 
 import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
@@ -31,8 +30,6 @@ import dev.joid.lib.ui.node.impl.text.TextNode;
 import dev.joid.lib.utils.align.Align;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.world.clock.ClockNetworkState;
 
 @UIDataMinecraft(title = "Daylight", pause = false, background = false)
 public class ShowDaylight extends UI implements IShowFocus {
@@ -110,7 +107,7 @@ public class ShowDaylight extends UI implements IShowFocus {
 			CircleNode.create(70, 70, 140).color(() -> this.sky(0D).withAlpha(0.6F)).effect(BlurNodeEffect.create(30F)).interactive(false).attach(dial);
 			RectNode.create(0, 139, 280, 2).color(Color.WHITE.withAlpha(0.25F)).attach(dial);
 			RectNode.create(0, 141, 280, 139).color(Color.BLACK.withAlpha(0.25F)).attach(dial);
-			RectNode.create(0, 0, 280, 280).color(Color.TRANSPARENT).interactive(false).layer((_, _, _) -> {
+			RectNode.create(0, 0, 280, 280).color(Color.TRANSPARENT).interactive(false).layer((node, mouseX, mouseY) -> {
 				ShowDaylight.celestial(ShowDaylight.SUN, this.orbitX(0D), this.orbitY(0D));
 				ShowDaylight.celestial(ShowDaylight.MOONS.get(this.day() % 8), this.orbitX(Math.PI), this.orbitY(Math.PI));
 			}).attach(dial);
@@ -145,7 +142,7 @@ public class ShowDaylight extends UI implements IShowFocus {
 	}
 
 	private Color sky(final double shift) {
-		final double light = Math.clamp(0.5D + Math.sin(this.angle()) * 2D, 0D, 1D);
+		final double light = Math.max(0D, Math.min(1D, 0.5D + Math.sin(this.angle()) * 2D));
 		final double dusk = Math.max(0D, 1D - Math.abs(Math.sin(this.angle())) * 4D);
 		final Color day = Color.decode("#78A7FF").to(Color.decode("#C6DBFF"), (float) shift);
 		final Color night = Color.decode("#0B1026").to(Color.decode("#1B2244"), (float) shift);
@@ -167,8 +164,8 @@ public class ShowDaylight extends UI implements IShowFocus {
 	}
 
 	private static void world(final long ticks) {
-		final ClientLevel level = Minecraft.getInstance().level;
-		level.dimensionType().defaultClock().ifPresent(clock -> level.clockManager().handleUpdates(level.getGameTime(), Map.of(clock, new ClockNetworkState(ticks, 0F, 0F))));
+		Minecraft.getInstance().level.setDayTime(ticks);
+		Minecraft.getInstance().getSingleplayerServer().overworld().setDayTime(ticks);
 	}
 
 }

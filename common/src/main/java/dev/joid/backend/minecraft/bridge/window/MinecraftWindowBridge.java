@@ -1,12 +1,9 @@
 package dev.joid.backend.minecraft.bridge.window;
 
-import org.lwjgl.glfw.GLFW;
-
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.platform.cursor.CursorType;
-import com.mojang.blaze3d.platform.cursor.CursorTypes;
 
+import dev.joid.base.lwjgl3.glfw.GlfwWindowBridge;
 import dev.joid.base.lwjgl3.glfw.input.GlfwKeys;
 import dev.joid.lib.bridge.window.IWindowBridge;
 import dev.joid.lib.input.cursor.Cursor;
@@ -14,15 +11,21 @@ import dev.joid.lib.input.key.Key;
 import lombok.Getter;
 import lombok.NonNull;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 public final class MinecraftWindowBridge implements IWindowBridge {
+
+	private final GlfwWindowBridge window;
 
 	@Getter
 	private Cursor cursor;
 
+	private Cursor requested;
+	private Cursor applied;
+
 	public MinecraftWindowBridge() {
-		this.cursor = Cursor.DEFAULT;
+		this.window  = new GlfwWindowBridge(Minecraft.getInstance().getWindow().getWindow());
+		this.cursor  = Cursor.DEFAULT;
+		this.applied = Cursor.DEFAULT;
 	}
 
 	@Override
@@ -62,7 +65,7 @@ public final class MinecraftWindowBridge implements IWindowBridge {
 
 	@Override
 	public boolean isKeyDown(final @NonNull Key physicalKey) {
-		return GlfwKeys.isKeyDown(physicalKey, code -> InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), code));
+		return GlfwKeys.isKeyDown(physicalKey, code -> InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), code));
 	}
 
 	@Override
@@ -87,36 +90,23 @@ public final class MinecraftWindowBridge implements IWindowBridge {
 		return window.getGuiScale() / (double) window.calculateScale(0, minecraft.isEnforceUnicode());
 	}
 
-	public void requestCursor(final GuiGraphicsExtractor graphics, final Cursor cursor) {
+	public void requestCursor(final Cursor cursor) {
 		if (!this.isMouseGrabbed()) {
-			graphics.requestCursor(MinecraftWindowBridge.getCursorType(cursor));
+			this.requested = cursor;
 		}
 	}
 
-	private static @NonNull CursorType getCursorType(final Cursor cursor) {
-		return switch (cursor) {
-			case DEFAULT -> CursorType.DEFAULT;
-			case POINTER -> CursorTypes.POINTING_HAND;
-			case TEXT -> CursorTypes.IBEAM;
-			case CROSSHAIR -> CursorTypes.CROSSHAIR;
-			case MOVE -> CursorTypes.RESIZE_ALL;
-			case NOT_ALLOWED -> CursorTypes.NOT_ALLOWED;
-			case RESIZE_EW -> CursorTypes.RESIZE_EW;
-			case RESIZE_NS -> CursorTypes.RESIZE_NS;
-			case RESIZE_NWSE -> DiagonalCursor.NWSE;
-			case RESIZE_NESW -> DiagonalCursor.NESW;
-		};
+	public void applyCursor() {
+		final Cursor cursor = this.requested != null ? this.requested : Cursor.DEFAULT;
+		this.requested = null;
+		if (cursor != this.applied && !this.isMouseGrabbed()) {
+			this.applied = cursor;
+			this.window.setCursor(cursor);
+		}
 	}
 
 	private static double toFramebuffer(final double position, final int windowSize, final int framebufferSize) {
 		return windowSize == 0 ? position : position * framebufferSize / windowSize;
-	}
-
-	private static final class DiagonalCursor {
-
-		private static final CursorType NWSE = CursorType.createStandardCursor(GLFW.GLFW_RESIZE_NWSE_CURSOR, "resize_nwse", CursorType.DEFAULT);
-		private static final CursorType NESW = CursorType.createStandardCursor(GLFW.GLFW_RESIZE_NESW_CURSOR, "resize_nesw", CursorType.DEFAULT);
-
 	}
 
 }

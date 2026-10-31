@@ -4,7 +4,7 @@ import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.bridge.clock.ManualClockBridge;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import net.minecraft.util.Util;
+import net.minecraft.Util;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ShowcaseClock {
@@ -27,13 +27,13 @@ public final class ShowcaseClock {
 		ShowcaseClock.frozen  = true;
 		ShowcaseClock.INTERFACE.time(ShowcaseClock.start);
 		BridgeHandler.CLOCK.register(ShowcaseClock.INTERFACE);
-		Util.setTimeSource(() -> ShowcaseClock.nanos);
+		Util.timeSource = () -> ShowcaseClock.nanos;
 	}
 
 	public static void release() {
 		if (ShowcaseClock.frozen) {
 			ShowcaseClock.frozen = false;
-			Util.setTimeSource(System::nanoTime);
+			Util.timeSource = System::nanoTime;
 			BridgeHandler.CLOCK.unregister(ShowcaseClock.INTERFACE);
 		}
 	}

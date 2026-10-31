@@ -1,60 +1,68 @@
 package dev.joid.backend.minecraft.bridge.ui.screen;
 
-import com.mojang.blaze3d.PrimitiveTopology;
-import com.mojang.blaze3d.pipeline.BlendFunction;
-import com.mojang.blaze3d.pipeline.ColorTargetState;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL30;
 
-import dev.joid.backend.minecraft.MinecraftJoid;
-import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
 import dev.joid.backend.minecraft.bridge.render.MinecraftRenderTarget;
-import dev.joid.backend.minecraft.bridge.render.MinecraftRenderTargetPool;
-import dev.joid.lib.bridge.BridgeHandler;
+import dev.joid.base.opengl.render.texture.GlBorrowedTexture;
+import dev.joid.lib.bridge.render.IRenderBridge;
+import dev.joid.lib.bridge.render.state.BlendState;
+import dev.joid.lib.bridge.render.texture.ITexture;
 import dev.joid.lib.bridge.render.texture.TextureFilter;
-import dev.joid.lib.bridge.render.texture.TextureSampling;
-import dev.joid.lib.bridge.render.texture.TextureWrap;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.render.TextureSetup;
-import net.minecraft.client.renderer.BindGroupLayouts;
-import net.minecraft.resources.Identifier;
+import dev.joid.lib.bridge.window.IWindowBridge;
+import dev.joid.lib.draw.DrawUtils;
+import lombok.Getter;
+import net.minecraft.client.gui.GuiGraphics;
 
 public final class GuiCompositor {
 
-	private static final RenderPipeline PIPELINE = RenderPipeline.builder()
-			.withLocation(Identifier.fromNamespaceAndPath(MinecraftJoid.MOD_ID, "pipeline/composite"))
-			.withVertexShader(Identifier.fromNamespaceAndPath(MinecraftJoid.MOD_ID, "core/composite"))
-			.withFragmentShader(Identifier.fromNamespaceAndPath(MinecraftJoid.MOD_ID, "core/composite"))
-			.withBindGroupLayout(BindGroupLayouts.GLOBALS)
-			.withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION)
-			.withBindGroupLayout(BindGroupLayouts.SAMPLER0)
-			.withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT_PREMULTIPLIED_ALPHA))
-			.withVertexBinding(0, DefaultVertexFormat.POSITION_COLOR)
-			.withPrimitiveTopology(PrimitiveTopology.QUADS)
-			.build();
+	private final IRenderBridge render;
+	private final IWindowBridge window;
 
-	private final MinecraftRenderTargetPool targetPool;
+	@Getter
+	private MinecraftRenderTarget target;
 
-	public GuiCompositor(final MinecraftRenderBridge bridge) {
-		this.targetPool = new MinecraftRenderTargetPool(bridge);
+	private ITexture texture;
+
+	public GuiCompositor(final IRenderBridge render, final IWindowBridge window) {
+		this.render = render;
+		this.window = window;
 	}
 
-	public void composite(final GuiGraphicsExtractor graphics, final Runnable draw) {
-		final Window window = Minecraft.getInstance().getWindow();
-		final MinecraftRenderBridge render = (MinecraftRenderBridge) BridgeHandler.RENDER.get();
-		final MinecraftRenderTarget target = this.targetPool.acquire(graphics, window.getWidth(), window.getHeight());
-		render.screenTarget(target).beginFrame();
-		try {
-			render.screen(window.getWidth(), window.getHeight());
-			render.clearColor(0F, 0F, 0F, 0F);
-			draw.run();
-		} finally {
-			render.endFrame();
+	public void composite(final GuiGraphics graphics, final Runnable draw) {
+		final int width = this.window.getWidth();
+		final int height = this.window.getHeight();
+		graphics.flush();
+		if (this.target == null || !this.target.hasSize(width, height)) {
+			if (this.target != null) {
+				this.target.delete();
+			}
+
+			this.target  = new MinecraftRenderTarget(width, height);
+			this.texture = GlBorrowedTexture.of(this.target.getTexture());
 		}
 
-		graphics.fill(GuiCompositor.PIPELINE, TextureSetup.singleTexture(target.getView(), MinecraftRenderBridge.getSampler(TextureSampling.of(TextureFilter.NEAREST, TextureWrap.CLAMP_TO_EDGE, false))), 0, 0, graphics.guiWidth(), graphics.guiHeight());
+		final int screen = GL11.glGetInteger(GL30.GL_FRAMEBUFFER_BINDING);
+		this.target.bind();
+		this.render.beginFrame();
+		try {
+			this.render.screen(width, height);
+			this.render.clearColor(0F, 0F, 0F, 0F);
+			this.render.clearDepth();
+			this.render.clearStencil();
+			draw.run();
+		} finally {
+			this.render.endFrame();
+			GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, screen);
+		}
+
+		this.render.beginFrame();
+		try {
+			this.render.screen(width, height);
+			DrawUtils.RESOURCE.drawTexture(0D, 0D, width, height, this.texture, 0D, 1D, 1D, 0D, TextureFilter.NEAREST, BlendState.PREMULTIPLIED);
+		} finally {
+			this.render.endFrame();
+		}
 	}
 
 }

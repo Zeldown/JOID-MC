@@ -1,19 +1,30 @@
-import net.fabricmc.loom.task.ManifestModificationAction
-import net.fabricmc.loom.task.service.JarManifestService
+import net.fabricmc.loom.task.RemapJarTask
 
 plugins {
     id 'joid-loader'
-    id 'net.fabricmc.fabric-loom'
 }
+
+apply plugin: 'net.fabricmc.fabric-loom-remap'
 
 dependencies {
     minecraft("com.mojang:minecraft:${minecraft_version}")
-    implementation("net.fabricmc:fabric-loader:${fabric_loader_version}")
-    implementation("net.fabricmc.fabric-api:fabric-api:${fabric_version}")
+    mappings(loom.layered {
+        officialMojangMappings()
+        parchment("org.parchmentmc.data:parchment-${parchment_minecraft_version}:${parchment_version}@zip")
+    })
+    modImplementation("net.fabricmc:fabric-loader:${fabric_loader_version}")
+    modImplementation("net.fabricmc.fabric-api:fabric-api:${fabric_version}")
+}
+
+repositories {
+    maven {
+        name = 'ParchmentMC'
+        url = uri('https://maven.parchmentmc.org')
+    }
 }
 
 loom {
-    def aw = project(':common').file("src/main/resources/${mod_id}.classtweaker")
+    def aw = project(':common').file("src/main/resources/${mod_id}.accesswidener")
     if (aw.exists()) {
         accessWidenerPath.set(aw)
     }
@@ -30,9 +41,6 @@ loom {
                 vmArg("-Djoid.snapshot.references=${rootProject.file('.snapshots/references').absolutePath}")
                 vmArg("-Djoid.cache=${layout.buildDirectory.dir('joid-cache').get().asFile.absolutePath}")
                 programArgs('--width', '1920', '--height', '1080')
-                if (project.hasProperty('joid.graphicsBackend')) {
-                    programArgs('--graphicsBackend', project.property('joid.graphicsBackend').toString())
-                }
             }
             if (project.hasProperty('joid.showcase')) {
                 project.properties.findAll { it.key.startsWith('joid.showcase') }.each { vmArg("-D${it.key}=${it.value}") }
@@ -48,6 +56,20 @@ loom {
     }
 }
 
+['devJar', 'prodJar'].each { name ->
+    def jar = tasks.named(name, Jar)
+    jar.configure {
+        destinationDirectory = layout.buildDirectory.dir('devlibs')
+    }
+    tasks.register("remap${name.capitalize()}", RemapJarTask) {
+        group = 'build'
+        description = "Remaps the ${name} to the intermediary names of Fabric."
+        inputFile = jar.flatMap { it.archiveFile }
+        archiveClassifier = jar.flatMap { it.archiveClassifier }
+        addNestedDependencies = false
+    }
+}
+
 tasks.named('eclipseClasspath') {
     dependsOn('genSources')
 }
@@ -59,13 +81,5 @@ tasks.named('genEclipseRuns') {
                     .replace('${workspace_loc:' + eclipse.project.name + '}/' + project.name + '\\', '${workspace_loc:' + eclipse.project.name + '}/')
                     .replaceAll(/\s*<stringAttribute key="org\.eclipse\.jdt\.launching\.CLASSPATH_PROVIDER"[^>]*\/>/, '')
         }
-    }
-}
-
-[devJar, prodJar].each { task ->
-    task.configure {
-        def manifestService = JarManifestService.get(project)
-        usesService(manifestService)
-        doLast(new ManifestModificationAction(manifestService, 'official', project.provider { false }, project.provider { [] }))
     }
 }

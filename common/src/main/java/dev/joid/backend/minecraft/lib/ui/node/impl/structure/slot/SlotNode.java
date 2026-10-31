@@ -2,6 +2,8 @@ package dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot;
 
 import java.util.function.Supplier;
 
+import com.mojang.datafixers.util.Pair;
+
 import dev.joid.backend.minecraft.bridge.ui.container.ContainerUIBridge;
 import dev.joid.backend.minecraft.bridge.ui.container.ContainerUIScreen;
 import dev.joid.backend.minecraft.lib.draw.item.DrawItem;
@@ -15,9 +17,8 @@ import dev.joid.lib.ui.node.Node;
 import lombok.Getter;
 import lombok.NonNull;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.renderer.Sheets;
-import net.minecraft.client.resources.model.sprite.SpriteId;
-import net.minecraft.resources.Identifier;
+import net.minecraft.client.resources.model.Material;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -66,7 +67,7 @@ public class SlotNode extends Node {
 			}
 
 			final int max = Math.min(carried.getMaxStackSize(), this.slot.getMaxStackSize(carried));
-			final int placed = AbstractContainerMenu.getQuickCraftPlaceCount(screen.getQuickCraftSlots().size(), screen.getQuickCraftType(), carried) + (stack.isEmpty() ? 0 : stack.getCount());
+			final int placed = AbstractContainerMenu.getQuickCraftPlaceCount(screen.getQuickCraftSlots(), screen.getQuickCraftType(), carried) + (stack.isEmpty() ? 0 : stack.getCount());
 			if (placed > max) {
 				count = ChatFormatting.YELLOW.toString() + max;
 			}
@@ -75,9 +76,9 @@ public class SlotNode extends Node {
 			quickCraft = true;
 		}
 
-		final Identifier icon = stack.isEmpty() ? this.slot.getNoItemIcon() : null;
+		final Pair<ResourceLocation, ResourceLocation> icon = stack.isEmpty() ? this.slot.getNoItemIcon() : null;
 		if (icon != null) {
-			DrawUtils.RESOURCE.drawResource(x, y, size, size, Resource.of(new SpriteId(Sheets.GUI_SHEET, icon)));
+			DrawUtils.RESOURCE.drawResource(x, y, size, size, Resource.of(new Material(icon.getFirst(), icon.getSecond())));
 		} else {
 			if (quickCraft) {
 				DrawUtils.SHAPE.drawRect(x, y, size, size, SlotNode.QUICK_CRAFT);

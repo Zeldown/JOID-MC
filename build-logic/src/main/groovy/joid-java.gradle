@@ -65,13 +65,13 @@ processResources {
             'group'                        : project.group,
             'minecraft_version'            : minecraft_version,
             'minecraft_version_range'      : minecraft_version_range,
-            'fabric_version'               : fabric_version,
-            'fabric_loader_version'        : fabric_loader_version,
             'mod_name'                     : mod_name,
             'mod_author'                   : mod_author,
             'mod_id'                       : mod_id,
             'license'                      : license,
             'description'                  : project.description,
+            'fabric_version'               : fabric_version,
+            'fabric_loader_version'        : fabric_loader_version,
             'neoforge_version'             : neoforge_version,
             'neoforge_loader_version_range': neoforge_loader_version_range,
             'forge_version'                : forge_version,
@@ -85,7 +85,7 @@ processResources {
         key, value -> [(key): value instanceof String ? value.replace('\n', '\\\\n') : value]
     }
 
-    filesMatching(['META-INF/mods.toml', 'META-INF/neoforge.mods.toml', 'dev/joid/backend/minecraft/backend.properties']) {
+    filesMatching(['META-INF/mods.toml', 'dev/joid/backend/minecraft/backend.properties']) {
         expand expandProps
     }
 

@@ -4,8 +4,16 @@ plugins {
 
 repositories {
     gradlePluginPortal()
+    maven {
+        name = 'Fabric'
+        url = uri('https://maven.fabricmc.net')
+    }
 }
 
 dependencies {
     implementation('com.gradleup.shadow:shadow-gradle-plugin:9.6.1')
+    // see https://maven.fabricmc.net/fabric-loom/fabric-loom.gradle.plugin/maven-metadata.xml for new versions
+    implementation('fabric-loom:fabric-loom.gradle.plugin:1.17.21')
+    // see https://projects.neoforged.net/neoforged/moddevgradle for new versions
+    implementation('net.neoforged.moddev.legacyforge:net.neoforged.moddev.legacyforge.gradle.plugin:2.0.148')
 }

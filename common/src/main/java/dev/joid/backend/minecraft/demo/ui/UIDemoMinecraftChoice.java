@@ -53,14 +53,14 @@ public class UIDemoMinecraftChoice extends UI {
 				.color(() -> entry.isActive() ? UIDemoMinecraftChoice.ACTIVE : UIDemoMinecraftChoice.INK)
 				.hoveredColor(UIDemoMinecraftChoice.HOVERED)
 				.label(Text.create(entry::getText, label))
-				.onClick(_ -> entry.getAction().run())
+				.onClick(event -> entry.getAction().run())
 				.hover(entry::getHover)
 				.attach(grid);
 			}
 		})
 		.attach(this);
 
-		Shortcut.create(Key.K).ctrl(true).onTrigger(_ -> JOID.open(new UIDemoPopup())).attach(this);
+		Shortcut.create(Key.K).ctrl(true).onTrigger(event -> JOID.open(new UIDemoPopup())).attach(this);
 	}
 
 }

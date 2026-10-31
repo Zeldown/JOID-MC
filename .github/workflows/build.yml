@@ -3,10 +3,10 @@ name: Build
 on:
   push:
     branches:
-      - version/26.2
+      - version/1.20.1
   pull_request:
     branches:
-      - version/26.2
+      - version/1.20.1
   workflow_dispatch:
     inputs:
       showcase:
@@ -18,7 +18,7 @@ jobs:
   version:
     uses: Zeldown/JOID-MC/.github/workflows/version.yml@common
     with:
-      java-version: '25'
+      java-version: '17'
       loaders: '["fabric", "neoforge", "forge"]'
-      vulkan: true
+      vulkan: false
       showcase: ${{ inputs.showcase || '' }}

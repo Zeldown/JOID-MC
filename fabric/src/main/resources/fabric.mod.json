@@ -16,7 +16,10 @@
     "license": "${license}",
     "icon": "assets/joid/icon.png",
     "environment": "client",
-    "accessWidener": "joid.classtweaker",
+    "accessWidener": "joid.accesswidener",
+    "mixins": [
+        "joid.mixins.json"
+    ],
     "entrypoints": {
         "client": [
             "dev.joid.backend.minecraft.fabric.FabricJoidClient"
@@ -25,7 +28,7 @@
     "depends": {
         "fabricloader": ">=${fabric_loader_version}",
         "fabric-api": "*",
-        "minecraft": "~${minecraft_version}",
+        "minecraft": "${minecraft_version}",
         "java": ">=${java_version}"
     }
 }

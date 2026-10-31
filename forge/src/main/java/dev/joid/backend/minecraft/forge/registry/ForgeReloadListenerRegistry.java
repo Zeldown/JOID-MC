@@ -5,14 +5,15 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ForgeReloadListenerRegistry {
 
-	public static void register() {
-		RegisterClientReloadListenersEvent.BUS.addListener(event -> {
+	public static void register(final IEventBus modBus) {
+		modBus.addListener((final RegisterClientReloadListenersEvent event) -> {
 			for (final ReloadListenerRegistry listener : ReloadListenerRegistry.getRegistered()) {
-				event.registerReloadListener((ResourceManagerReloadListener) _ -> listener.getOnReload().run());
+				event.registerReloadListener((ResourceManagerReloadListener) manager -> listener.getOnReload().run());
 			}
 		});
 	}

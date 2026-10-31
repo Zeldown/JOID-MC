@@ -118,7 +118,7 @@ public final class UIDemoOverlayLayer {
 				.body(button -> {
 					TextNode.create(90, 40).text(Text.create(() -> "Clicks " + this.clicks, info).alignX(Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(button);
 				})
-				.onClick(_ -> this.clicks++)
+				.onClick(event -> this.clicks++)
 				.attach(rect);
 				TextNode.create(160, 200).text(Text.create("Interactive", caption).alignX(Align.CENTER)).anchorX(Align.CENTER).attach(rect);
 			})

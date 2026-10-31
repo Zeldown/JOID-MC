@@ -1,11 +1,16 @@
 plugins {
     id 'joid-common'
-    id 'net.neoforged.moddev'
 }
 
-neoForge {
-    neoFormVersion = neo_form_version
-    addModdingDependenciesTo(sourceSets.test)
+legacyForge {
+    enable {
+        mcpVersion = minecraft_version
+        enabledSourceSets = [sourceSets.main, sourceSets.test] as Set
+    }
+    parchment {
+        minecraftVersion = parchment_minecraft_version
+        mappingsVersion = parchment_version
+    }
     def at = file('src/main/resources/META-INF/accesstransformer.cfg')
     if (at.exists()) {
         accessTransformers.from(at.absolutePath)

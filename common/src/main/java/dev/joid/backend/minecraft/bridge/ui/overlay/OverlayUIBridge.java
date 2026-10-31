@@ -10,9 +10,9 @@ import dev.joid.backend.minecraft.lib.ui.core.data.overlay.layer.UIDataOverlayLa
 import dev.joid.lib.ui.core.UI;
 import lombok.NonNull;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 
-public final class OverlayUIBridge extends BaseOverlayUIBridge<GuiGraphicsExtractor, OverlayLayer> {
+public final class OverlayUIBridge extends BaseOverlayUIBridge<GuiGraphics, OverlayLayer> {
 
 	private final GuiCompositor         compositor;
 	private final MinecraftWindowBridge window;
@@ -20,7 +20,7 @@ public final class OverlayUIBridge extends BaseOverlayUIBridge<GuiGraphicsExtrac
 	public OverlayUIBridge(final MinecraftRenderBridge render, final MinecraftWindowBridge window) {
 		super(window);
 		this.window     = window;
-		this.compositor = new GuiCompositor(render);
+		this.compositor = new GuiCompositor(render, window);
 	}
 
 	@Override
@@ -29,45 +29,46 @@ public final class OverlayUIBridge extends BaseOverlayUIBridge<GuiGraphicsExtrac
 	}
 
 	@Override
-	protected long countFrame(final GuiGraphicsExtractor graphics) {
+	protected long countFrame(final GuiGraphics graphics) {
 		return GuiFrameCounter.inst().getFrame(graphics);
 	}
 
 	@Override
-	protected void requestCursor(final GuiGraphicsExtractor graphics) {
-		this.window.requestCursor(graphics, this.window.getCursor());
+	protected void requestCursor(final GuiGraphics graphics) {
+		this.window.requestCursor(this.window.getCursor());
 	}
 
 	@Override
-	protected void compositeFrame(final GuiGraphicsExtractor graphics, final Runnable draw) {
+	protected void compositeFrame(final GuiGraphics graphics, final Runnable draw) {
 		this.compositor.composite(graphics, draw);
 	}
 
 	@Override
-	protected void drawTooltip(final GuiGraphicsExtractor graphics, final Object content, final int mouseX, final int mouseY) {
+	protected void drawTooltip(final GuiGraphics graphics, final Object content, final int mouseX, final int mouseY) {
 		TooltipRenderer.draw(graphics, content, mouseX, mouseY);
 	}
 
 	@Override
 	protected int getGuiMouseX() {
 		final Minecraft minecraft = Minecraft.getInstance();
-		return (int) minecraft.mouseHandler.getScaledXPos(minecraft.getWindow());
+		return (int) (minecraft.mouseHandler.xpos() * minecraft.getWindow().getGuiScaledWidth() / minecraft.getWindow().getScreenWidth());
 	}
 
 	@Override
 	protected int getGuiMouseY() {
 		final Minecraft minecraft = Minecraft.getInstance();
-		return (int) minecraft.mouseHandler.getScaledYPos(minecraft.getWindow());
+		return (int) (minecraft.mouseHandler.ypos() * minecraft.getWindow().getGuiScaledHeight() / minecraft.getWindow().getScreenHeight());
 	}
 
 	@Override
 	protected boolean isHudHidden() {
-		return Minecraft.getInstance().gui.hud.isHidden();
+		final Minecraft minecraft = Minecraft.getInstance();
+		return minecraft.options.hideGui && minecraft.screen == null;
 	}
 
 	@Override
 	protected boolean isScreenDisplayed() {
-		return Minecraft.getInstance().gui.screen() != null;
+		return Minecraft.getInstance().screen != null;
 	}
 
 	@Override

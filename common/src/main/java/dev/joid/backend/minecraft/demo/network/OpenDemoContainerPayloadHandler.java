@@ -9,7 +9,6 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.SimpleMenuProvider;
 
@@ -23,12 +22,12 @@ public final class OpenDemoContainerPayloadHandler {
 			return;
 		}
 
-		final SimpleContainer storage = OpenDemoContainerPayloadHandler.STORAGES.computeIfAbsent(player.getUUID(), _ -> new SimpleContainer(27));
-		player.openMenu(new SimpleMenuProvider((containerId, inventory, _) -> new DemoContainer(containerId, inventory, storage), Component.literal("Demo storage")));
+		final SimpleContainer storage = OpenDemoContainerPayloadHandler.STORAGES.computeIfAbsent(player.getUUID(), uuid -> new SimpleContainer(27));
+		player.openMenu(new SimpleMenuProvider((containerId, inventory, owner) -> new DemoContainer(containerId, inventory, storage), Component.literal("Demo storage")));
 	}
 
 	public static boolean canOpen(final ServerPlayer player) {
-		return player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER) || player.level().getServer().isSingleplayerOwner(player.nameAndId());
+		return player.hasPermissions(2) || player.server.isSingleplayerOwner(player.getGameProfile());
 	}
 
 }

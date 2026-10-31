@@ -53,7 +53,7 @@ public class UIDemoContainer extends ContainerUI<DemoContainer> {
 			.body(button -> {
 				TextNode.create(72, 24).text(Text.create("Popup", info).alignX(Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(button);
 			})
-			.onClick(_ -> JOID.open(new Popup()))
+			.onClick(event -> JOID.open(new Popup()))
 			.attach(rect);
 			for (int index = 0; index < 27; index++) {
 				SlotNode.create(48 + index % 9 * 72, 96 + index / 9 * 72, 68, 68).slot(super.getContainer().getSlot(index)).color(UIDemoContainer.INK).attach(rect);
@@ -70,7 +70,7 @@ public class UIDemoContainer extends ContainerUI<DemoContainer> {
 
 		TextNode.create(960, 944).text(Text.create("Click outside drops", caption).alignX(Align.CENTER)).anchorX(Align.CENTER).attach(this);
 
-		Shortcut.create(Minecraft.getInstance().options.keyInventory).onTrigger(_ -> JOID.close(this)).attach(this);
+		Shortcut.create(Minecraft.getInstance().options.keyInventory).onTrigger(event -> JOID.close(this)).attach(this);
 	}
 
 	@UIDataPopup(active = true)
@@ -93,7 +93,7 @@ public class UIDemoContainer extends ContainerUI<DemoContainer> {
 				.body(button -> {
 					TextNode.create(90, 40).text(Text.create("Close", info).alignX(Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(button);
 				})
-				.onClick(_ -> JOID.close(this))
+				.onClick(event -> JOID.close(this))
 				.attach(rect);
 				TextNode.create(200, 240).text(Text.create("Popup above", caption).alignX(Align.CENTER)).anchorX(Align.CENTER).attach(rect);
 			})

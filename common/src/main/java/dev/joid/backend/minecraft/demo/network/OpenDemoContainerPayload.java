@@ -9,7 +9,7 @@ import net.minecraft.server.level.ServerPlayer;
 public record OpenDemoContainerPayload() implements IPayload {
 
 	public static final OpenDemoContainerPayload                            INSTANCE = new OpenDemoContainerPayload();
-	public static final PayloadType<OpenDemoContainerPayload, ServerPlayer> TYPE     = PayloadType.create(MinecraftJoid.MOD_ID + ":demo/container", _ -> OpenDemoContainerPayload.INSTANCE);
+	public static final PayloadType<OpenDemoContainerPayload, ServerPlayer> TYPE     = PayloadType.create(MinecraftJoid.MOD_ID + ":demo/container", reader -> OpenDemoContainerPayload.INSTANCE);
 
 	@Override
 	public PayloadType<OpenDemoContainerPayload, ServerPlayer> getType() {

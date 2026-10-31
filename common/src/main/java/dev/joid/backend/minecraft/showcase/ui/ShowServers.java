@@ -10,7 +10,7 @@ import dev.joid.lib.color.Color;
 import dev.joid.lib.draw.text.Text;
 import dev.joid.lib.font.FontWeight;
 import dev.joid.lib.font.TextInfo;
-import dev.joid.lib.resource.Resource;
+import dev.joid.lib.resource.ResourceBuilder;
 import dev.joid.lib.signal.impl.primitive.StringSignal;
 import dev.joid.lib.ui.core.UI;
 import dev.joid.lib.ui.node.Node;
@@ -22,9 +22,6 @@ import dev.joid.lib.ui.node.impl.shape.RectNode;
 import dev.joid.lib.ui.node.impl.text.TextNode;
 import dev.joid.lib.ui.node.property.OverflowProperty;
 import dev.joid.lib.utils.align.Align;
-import net.minecraft.client.renderer.Sheets;
-import net.minecraft.client.resources.model.sprite.SpriteId;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
@@ -55,7 +52,7 @@ public class ShowServers extends UI implements IShowFocus {
 	public ShowServers() {
 		this.rows     = new Node[ShowServers.SERVERS.size()];
 		this.order    = new ArrayList<>();
-		this.favorite = new StringSignal(ShowServers.SERVERS.getFirst().name());
+		this.favorite = new StringSignal(ShowServers.SERVERS.get(0).name());
 	}
 
 	@Override
@@ -89,10 +86,10 @@ public class ShowServers extends UI implements IShowFocus {
 				.vertical(20, 0, 920)
 				.onReorderEnd(event -> {
 					this.order.add(event.getIndex(), this.order.remove(event.getPrevious()));
-					this.favorite.set(this.order.getFirst());
+					this.favorite.set(this.order.get(0));
 				})
 				.margin(12D);
-				list.body(_ -> {
+				list.body(flex -> {
 					for (int index = 0; index < ShowServers.SERVERS.size(); index++) {
 						this.row(list, index);
 					}
@@ -130,7 +127,7 @@ public class ShowServers extends UI implements IShowFocus {
 			TextNode.create(102, 28).text(Text.create(server.name(), ShowTheme.font(FontWeight.SEMI_BOLD, 24F, ShowTheme.TEXT))).anchorY(Align.CENTER).attach(row);
 			TextNode.create(102, 54).text(Text.create(server.motd(), TextInfo.create(MinecraftFont.DEFAULT, 16F).color(ShowTheme.TEXT).shadow(2F, 2F))).attach(row);
 			TextNode.create(820, 44).text(Text.create(server.players(), ShowTheme.font(FontWeight.SEMI_BOLD, 20F, ShowTheme.MUTED)).alignX(Align.END)).anchorX(Align.END).anchorY(Align.CENTER).attach(row);
-			ResourceNode.create(850, 36, 30, 24).resource(Resource.of(new SpriteId(Sheets.GUI_SHEET, Identifier.withDefaultNamespace("server_list/ping_" + server.ping())))).interactive(false).attach(row);
+			ResourceNode.create(850, 36, 30, 24).resource(ResourceBuilder.create().nearest().textureCoords(0D, (176D + (5 - server.ping()) * 8D) / 256D, 10D / 256D, (184D + (5 - server.ping()) * 8D) / 256D).of("minecraft:textures/gui/icons.png")).interactive(false).attach(row);
 		})
 		.hoverDuration(160L)
 		.attach(list);

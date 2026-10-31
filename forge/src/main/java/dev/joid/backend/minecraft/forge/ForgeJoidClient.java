@@ -9,19 +9,19 @@ import dev.joid.backend.minecraft.forge.registry.ForgeOverlayLayerRegistry;
 import dev.joid.backend.minecraft.forge.registry.ForgeReloadListenerRegistry;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import net.minecraftforge.eventbus.api.bus.BusGroup;
+import net.minecraftforge.eventbus.api.IEventBus;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ForgeJoidClient {
 
-	public static void register(final BusGroup modBusGroup) {
+	public static void register(final IEventBus modBus) {
 		ForgeClientEvents.register();
 		ForgeScreenEvents.register();
 		ForgePayloads.registerSender();
-		ForgeKeyBindRegistry.register();
-		ForgeOverlayLayerRegistry.register();
-		ForgeReloadListenerRegistry.register();
-		ForgeContainerUIRegistry.register(modBusGroup);
+		ForgeKeyBindRegistry.register(modBus);
+		ForgeContainerUIRegistry.register(modBus);
+		ForgeOverlayLayerRegistry.register(modBus);
+		ForgeReloadListenerRegistry.register(modBus);
 	}
 
 }

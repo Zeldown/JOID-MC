@@ -4,33 +4,33 @@ import dev.joid.backend.minecraft.lib.ui.core.data.overlay.layer.OverlayLayer;
 import dev.joid.lib.bridge.BridgeHandler;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class OverlayLayerRenderer {
 
-	public static void extract(final GuiGraphicsExtractor graphics) {
+	public static void extract(final GuiGraphics graphics) {
 		final OverlayUIBridge bridge = BridgeHandler.UI.getBridge(OverlayUIBridge.class);
 		if (bridge != null) {
 			bridge.drawHud(graphics);
 		}
 	}
 
-	public static void extract(final GuiGraphicsExtractor graphics, final OverlayLayer layer, final boolean post) {
+	public static void extract(final GuiGraphics graphics, final OverlayLayer layer, final boolean post) {
 		final OverlayUIBridge bridge = BridgeHandler.UI.getBridge(OverlayUIBridge.class);
 		if (bridge != null) {
 			bridge.drawLayer(graphics, layer, post);
 		}
 	}
 
-	public static void extractScreen(final GuiGraphicsExtractor graphics) {
+	public static void extractScreen(final GuiGraphics graphics) {
 		final OverlayUIBridge bridge = BridgeHandler.UI.getBridge(OverlayUIBridge.class);
 		if (bridge != null) {
 			bridge.drawAboveScreen(graphics);
 		}
 	}
 
-	public static void extractHiddenHud(final GuiGraphicsExtractor graphics) {
+	public static void extractHiddenHud(final GuiGraphics graphics) {
 		final OverlayUIBridge bridge = BridgeHandler.UI.getBridge(OverlayUIBridge.class);
 		if (bridge != null) {
 			bridge.drawHiddenHud(graphics);

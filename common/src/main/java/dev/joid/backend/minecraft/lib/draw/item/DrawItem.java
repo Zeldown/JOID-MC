@@ -1,8 +1,9 @@
 package dev.joid.backend.minecraft.lib.draw.item;
 
 import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 
-import dev.joid.backend.minecraft.lib.draw.raster.FeatureDrawableRaster;
+import dev.joid.backend.minecraft.lib.draw.raster.GuiDrawableRaster;
 import dev.joid.backend.minecraft.lib.font.impl.minecraft.MinecraftFont;
 import dev.joid.lib.color.Color;
 import dev.joid.lib.draw.DrawUtils;
@@ -12,9 +13,13 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.item.ItemStackRenderState;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.util.LightCoordsUtil;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 
@@ -25,19 +30,28 @@ public final class DrawItem {
 
 	private static final Color COOLDOWN = Color.argb(0x7FFFFFFF).lock();
 
+	private static final VertexConsumer NO_VERTEX = new NoVertexConsumer();
+
 	public static @NonNull DrawItem inst() {
 		return DrawItem.INSTANCE;
 	}
 
 	public void drawItem(final double x, final double y, final double size, final @NonNull ItemStack stack) {
+		this.drawItem(x, y, size, stack, null);
+	}
+
+	public void drawItem(final double x, final double y, final double size, final @NonNull ItemStack stack, final Boolean glint) {
 		if (stack.isEmpty()) {
 			return;
 		}
 
 		final Minecraft minecraft = Minecraft.getInstance();
-		final ItemStackRenderState state = new ItemStackRenderState();
-		minecraft.getItemModelResolver().updateForTopItem(state, stack, ItemDisplayContext.GUI, minecraft.level, minecraft.player, 0);
-		DrawUtils.RASTER.drawRaster(x, y, size, size, FeatureDrawableRaster.of(state.usesBlockLight() ? Lighting.Entry.ITEMS_3D : Lighting.Entry.ITEMS_FLAT, (pose, collector) -> state.submit(pose, collector, LightCoordsUtil.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0)));
+		final ItemStack drawn = glint != null && glint && !stack.hasFoil() ? DrawItem.withFoil(stack) : stack;
+		final BakedModel model = minecraft.getItemRenderer().getModel(drawn, minecraft.level, minecraft.player, 0);
+		DrawUtils.RASTER.drawRaster(x, y, size, size, GuiDrawableRaster.of(model.usesBlockLight() ? Lighting::setupFor3DItems : Lighting::setupForFlatItems, (pose, buffer) -> {
+			final MultiBufferSource source = glint != null && !glint ? type -> DrawItem.isGlint(type) ? DrawItem.NO_VERTEX : buffer.getBuffer(type) : buffer;
+			minecraft.getItemRenderer().render(drawn, ItemDisplayContext.GUI, false, pose, source, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, model);
+		}));
 	}
 
 	public void drawItemBar(final double x, final double y, final double size, final @NonNull ItemStack stack) {
@@ -56,7 +70,7 @@ public final class DrawItem {
 			return;
 		}
 
-		final float cooldown = minecraft.player.getCooldowns().getCooldownPercent(stack, minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(true));
+		final float cooldown = minecraft.player.getCooldowns().getCooldownPercent(stack.getItem(), minecraft.getFrameTime());
 		if (cooldown <= 0F) {
 			return;
 		}
@@ -80,6 +94,61 @@ public final class DrawItem {
 		final double unit = size / 16D;
 		final TextInfo info = TextInfo.create(MinecraftFont.DEFAULT, (float) (MinecraftFont.SIZE * unit)).color(Color.WHITE).shadowTint(0.25F).shadow((float) unit, (float) unit);
 		DrawUtils.TEXT.drawText(x + 17D * unit - info.getWidth(count), y + 9D * unit, count, info, Align.START, Align.START);
+	}
+
+	private static boolean isGlint(final RenderType type) {
+		return type == RenderType.glint() || type == RenderType.glintDirect() || type == RenderType.glintTranslucent() || type == RenderType.entityGlint() || type == RenderType.entityGlintDirect() || type == RenderType.armorGlint() || type == RenderType.armorEntityGlint();
+	}
+
+	private static ItemStack withFoil(final ItemStack stack) {
+		final ItemStack copy = stack.copy();
+		final ListTag enchantments = new ListTag();
+		enchantments.add(new CompoundTag());
+		copy.getOrCreateTag().put("Enchantments", enchantments);
+		return copy;
+	}
+
+	private static final class NoVertexConsumer implements VertexConsumer {
+
+		@Override
+		public VertexConsumer vertex(final double x, final double y, final double z) {
+			return this;
+		}
+
+		@Override
+		public VertexConsumer color(final int red, final int green, final int blue, final int alpha) {
+			return this;
+		}
+
+		@Override
+		public VertexConsumer uv(final float u, final float v) {
+			return this;
+		}
+
+		@Override
+		public VertexConsumer overlayCoords(final int u, final int v) {
+			return this;
+		}
+
+		@Override
+		public VertexConsumer uv2(final int u, final int v) {
+			return this;
+		}
+
+		@Override
+		public VertexConsumer normal(final float x, final float y, final float z) {
+			return this;
+		}
+
+		@Override
+		public void endVertex() {}
+
+		@Override
+		public void defaultColor(final int red, final int green, final int blue, final int alpha) {}
+
+		@Override
+		public void unsetDefaultColor() {}
+
 	}
 
 }

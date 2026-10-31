@@ -103,7 +103,7 @@ public class ShowFonts extends UI {
 	}
 
 	private static double smooth(final double elapsed, final double from, final double to) {
-		final double progress = Math.clamp((elapsed - from) / (to - from), 0D, 1D);
+		final double progress = Math.max(0D, Math.min(1D, (elapsed - from) / (to - from)));
 		return progress < 0.5D ? 16D * Math.pow(progress, 5D) : 1D - Math.pow(-2D * progress + 2D, 5D) / 2D;
 	}
 

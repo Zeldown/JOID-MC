@@ -27,7 +27,12 @@ public class NativeImageResourceResolver implements IResourceResolver {
 
 	private static BufferedImage toBufferedImage(final NativeImage image) {
 		final BufferedImage copy = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
-		copy.setRGB(0, 0, image.getWidth(), image.getHeight(), image.getPixels(), 0, image.getWidth());
+		for (int y = 0; y < image.getHeight(); y++) {
+			for (int x = 0; x < image.getWidth(); x++) {
+				final int pixel = image.getPixelRGBA(x, y);
+				copy.setRGB(x, y, pixel & 0xFF00FF00 | (pixel & 0xFF) << 16 | pixel >> 16 & 0xFF);
+			}
+		}
 		return copy;
 	}
 

@@ -1,7 +1,5 @@
 package dev.joid.backend.minecraft.lib.font.impl.minecraft;
 
-import org.joml.Matrix4fc;
-
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import lombok.Getter;
@@ -31,32 +29,26 @@ public final class GlyphVertexCapture implements VertexConsumer {
 		return this;
 	}
 
+	public boolean isEmpty() {
+		return this.maxX < this.minX;
+	}
+
 	@Override
-	public @NonNull GlyphVertexCapture addVertex(final float x, final float y, final float z) {
-		this.minX = Math.min(this.minX, x);
-		this.minY = Math.min(this.minY, y);
-		this.maxX = Math.max(this.maxX, x);
-		this.maxY = Math.max(this.maxY, y);
+	public @NonNull GlyphVertexCapture vertex(final double x, final double y, final double z) {
+		this.minX = Math.min(this.minX, (float) x);
+		this.minY = Math.min(this.minY, (float) y);
+		this.maxX = Math.max(this.maxX, (float) x);
+		this.maxY = Math.max(this.maxY, (float) y);
 		return this;
 	}
 
 	@Override
-	public @NonNull GlyphVertexCapture addVertex(final Matrix4fc pose, final float x, final float y, final float z) {
-		return this.addVertex(x, y, z);
-	}
-
-	@Override
-	public @NonNull GlyphVertexCapture setColor(final int color) {
+	public @NonNull GlyphVertexCapture color(final int red, final int green, final int blue, final int alpha) {
 		return this;
 	}
 
 	@Override
-	public @NonNull GlyphVertexCapture setColor(final int r, final int g, final int b, final int a) {
-		return this;
-	}
-
-	@Override
-	public @NonNull GlyphVertexCapture setUv(final float u, final float v) {
+	public @NonNull GlyphVertexCapture uv(final float u, final float v) {
 		this.minU = Math.min(this.minU, u);
 		this.minV = Math.min(this.minV, v);
 		this.maxU = Math.max(this.maxU, u);
@@ -65,23 +57,27 @@ public final class GlyphVertexCapture implements VertexConsumer {
 	}
 
 	@Override
-	public @NonNull GlyphVertexCapture setUv1(final int u, final int v) {
+	public @NonNull GlyphVertexCapture overlayCoords(final int u, final int v) {
 		return this;
 	}
 
 	@Override
-	public @NonNull GlyphVertexCapture setUv2(final int u, final int v) {
+	public @NonNull GlyphVertexCapture uv2(final int u, final int v) {
 		return this;
 	}
 
 	@Override
-	public @NonNull GlyphVertexCapture setNormal(final float x, final float y, final float z) {
+	public @NonNull GlyphVertexCapture normal(final float x, final float y, final float z) {
 		return this;
 	}
 
 	@Override
-	public @NonNull GlyphVertexCapture setLineWidth(final float width) {
-		return this;
-	}
+	public void endVertex() {}
+
+	@Override
+	public void defaultColor(final int red, final int green, final int blue, final int alpha) {}
+
+	@Override
+	public void unsetDefaultColor() {}
 
 }

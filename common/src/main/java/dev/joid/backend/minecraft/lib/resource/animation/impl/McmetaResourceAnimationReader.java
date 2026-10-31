@@ -34,11 +34,12 @@ public final class McmetaResourceAnimationReader implements IResourceAnimationRe
 		final int columns = image.getWidth() / size.width();
 		final int count = columns * (image.getHeight() / size.height());
 		final List<AnimationFrame> frames = new ArrayList<>();
-		for (final AnimationFrame frame : this.metadata.frames().orElseGet(() -> McmetaResourceAnimationReader.sequence(count))) {
-			if (frame.index() < count) {
-				frames.add(frame);
-			}
+		this.metadata.forEachFrame((index, time) -> frames.add(new AnimationFrame(index, time)));
+		if (frames.isEmpty()) {
+			frames.addAll(McmetaResourceAnimationReader.sequence(count));
 		}
+
+		frames.removeIf(frame -> frame.getIndex() >= count);
 
 		if (frames.isEmpty()) {
 			throw new IOException("The animated texture has no frame inside its image");
@@ -47,14 +48,14 @@ public final class McmetaResourceAnimationReader implements IResourceAnimationRe
 		final List<int[]> pixels = new ArrayList<>();
 		for (final AnimationFrame frame : frames) {
 			final int[] framePixels = new int[size.width() * size.height()];
-			image.getRGB(frame.index() % columns * size.width(), frame.index() / columns * size.height(), size.width(), size.height(), framePixels, 0, size.width());
+			image.getRGB(frame.getIndex() % columns * size.width(), frame.getIndex() / columns * size.height(), size.width(), size.height(), framePixels, 0, size.width());
 			pixels.add(framePixels);
 		}
 
 		final List<ResourceAnimationFrame> animation = new ArrayList<>();
 		for (int i = 0; i < frames.size(); i++) {
-			final int time = frames.get(i).timeOr(this.metadata.defaultFrameTime());
-			if (!this.metadata.interpolatedFrames()) {
+			final int time = frames.get(i).getTime(this.metadata.getDefaultFrameTime());
+			if (!this.metadata.isInterpolatedFrames()) {
 				animation.add(McmetaResourceAnimationReader.frame(pixels.get(i), size, time));
 				continue;
 			}

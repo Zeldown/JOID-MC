@@ -61,7 +61,7 @@ jobs:
       - uses: actions/setup-java@v6
         with:
           distribution: temurin
-          java-version: '25'
+          java-version: '17'
 
       - uses: gradle/actions/setup-gradle@v6
 
@@ -78,7 +78,7 @@ jobs:
         run: |
           case "$LOADER" in
             fabric) METADATA=fabric.mod.json; PATTERN="\"version\": \"$VERSION\"" ;;
-            neoforge) METADATA=META-INF/neoforge.mods.toml; PATTERN="version = \"$VERSION\"" ;;
+            neoforge) METADATA=META-INF/mods.toml; PATTERN="version = \"$VERSION\"" ;;
             forge) METADATA=META-INF/mods.toml; PATTERN="version = \"$VERSION\"" ;;
           esac
           for KIND in dev prod; do

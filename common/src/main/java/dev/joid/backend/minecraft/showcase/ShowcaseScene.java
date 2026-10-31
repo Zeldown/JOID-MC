@@ -26,7 +26,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
@@ -41,7 +40,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -93,8 +91,8 @@ public enum ShowcaseScene {
 		ShowcaseDirector.runOnServer(player -> {
 			final Inventory inventory = player.getInventory();
 			inventory.clearContent();
-			inventory.setItem(0, ShowcaseScene.enchant(player.level(), new ItemStack(Items.DIAMOND_SWORD), Enchantments.SHARPNESS, 5));
-			inventory.setItem(1, ShowcaseScene.enchant(player.level(), new ItemStack(Items.DIAMOND_PICKAXE), Enchantments.EFFICIENCY, 4));
+			inventory.setItem(0, ShowcaseScene.enchant(new ItemStack(Items.DIAMOND_SWORD), Enchantments.SHARPNESS, 5));
+			inventory.setItem(1, ShowcaseScene.enchant(new ItemStack(Items.DIAMOND_PICKAXE), Enchantments.BLOCK_EFFICIENCY, 4));
 			inventory.setItem(2, new ItemStack(Items.IRON_AXE));
 			inventory.setItem(3, new ItemStack(Items.BOW));
 			inventory.setItem(4, new ItemStack(Items.COOKED_BEEF, 24));
@@ -110,9 +108,9 @@ public enum ShowcaseScene {
 			inventory.setItem(22, new ItemStack(Items.GLASS, 32));
 			inventory.setItem(27, new ItemStack(Items.WHEAT_SEEDS, 12));
 			inventory.setItem(31, new ItemStack(Items.LAPIS_LAZULI, 18));
-			inventory.setSelectedSlot(0);
+			inventory.selected = 0;
 		});
-		ShowcaseDirector.runOnClient(() -> Minecraft.getInstance().player.getInventory().setSelectedSlot(0));
+		ShowcaseDirector.runOnClient(() -> Minecraft.getInstance().player.getInventory().selected = 0);
 		ShowcaseDirector.waitForWorld();
 		ShowcaseDirector.command("tick freeze");
 		ShowcaseDirector.runOnServer(player -> {
@@ -122,7 +120,7 @@ public enum ShowcaseScene {
 		});
 		ShowcaseClock.freeze();
 		ShowcaseDirector.runOnClient(() -> {
-			Minecraft.getInstance().gui.toastManager().clear();
+			Minecraft.getInstance().getToasts().clear();
 			ShowcaseScene.openHud();
 		});
 		ShowcaseDirector.hidePointer();
@@ -168,7 +166,7 @@ public enum ShowcaseScene {
 		ShowcaseDirector.runOnServer(player -> {
 			final SimpleContainer storage = new SimpleContainer(27);
 			final ItemStack[] items = {
-				ShowcaseScene.enchant(player.level(), new ItemStack(Items.NETHERITE_SWORD), Enchantments.SHARPNESS, 5),
+				ShowcaseScene.enchant(new ItemStack(Items.NETHERITE_SWORD), Enchantments.SHARPNESS, 5),
 				new ItemStack(Items.GOLDEN_APPLE, 6),
 				new ItemStack(Items.ENDER_PEARL, 16),
 				new ItemStack(Items.EMERALD, 48),
@@ -179,7 +177,7 @@ public enum ShowcaseScene {
 				new ItemStack(Items.TOTEM_OF_UNDYING),
 				new ItemStack(Items.IRON_INGOT, 64),
 				new ItemStack(Items.GOLD_INGOT, 40),
-				ShowcaseScene.enchant(player.level(), new ItemStack(Items.ENCHANTED_BOOK), Enchantments.MENDING, 1),
+				ShowcaseScene.enchant(new ItemStack(Items.ENCHANTED_BOOK), Enchantments.MENDING, 1),
 				ItemStack.EMPTY,
 				new ItemStack(Items.BREAD, 32),
 				ItemStack.EMPTY,
@@ -199,7 +197,7 @@ public enum ShowcaseScene {
 			for (int index = 0; index < items.length; index++) {
 				storage.setItem(index, items[index]);
 			}
-			player.openMenu(new SimpleMenuProvider((containerId, inventory, _) -> new ChestMenu(ShowcaseLauncher.CHEST, containerId, inventory, storage, 3), Component.translatable("container.chest")));
+			player.openMenu(new SimpleMenuProvider((containerId, inventory, owner) -> new ChestMenu(ShowcaseLauncher.CHEST, containerId, inventory, storage, 3), Component.translatable("container.chest")));
 		});
 		ShowcaseDirector.waitFor("the showcase chest", () -> JOID.isOpen(ShowChest.class), 60);
 		ShowcaseDirector.frames(25);
@@ -229,7 +227,7 @@ public enum ShowcaseScene {
 		ShowcaseDirector.frames(5);
 		ShowcaseDirector.runOnServer(player -> {
 			final ItemStack sword = player.getInventory().removeItemNoUpdate(0);
-			player.openMenu(new SimpleMenuProvider((containerId, inventory, _) -> {
+			player.openMenu(new SimpleMenuProvider((containerId, inventory, owner) -> {
 				final AnvilMenu menu = new AnvilMenu(containerId, inventory, ContainerLevelAccess.NULL);
 				menu.getSlot(AnvilMenu.INPUT_SLOT).set(sword);
 				return menu;
@@ -261,7 +259,7 @@ public enum ShowcaseScene {
 		ShowcaseDirector.hidePointer();
 		ShowcaseDirector.runOnClient(() -> Minecraft.getInstance().player.closeContainer());
 		ShowcaseDirector.frames(5);
-		ShowcaseDirector.runOnServer(player -> player.getInventory().setItem(0, ShowcaseScene.enchant(player.level(), new ItemStack(Items.DIAMOND_SWORD), Enchantments.SHARPNESS, 5)));
+		ShowcaseDirector.runOnServer(player -> player.getInventory().setItem(0, ShowcaseScene.enchant(new ItemStack(Items.DIAMOND_SWORD), Enchantments.SHARPNESS, 5)));
 		ShowcaseDirector.command("xp set @a 27 levels");
 		ShowcaseDirector.command("xp set @a 62 points");
 		ShowcaseDirector.frames(5);
@@ -488,9 +486,7 @@ public enum ShowcaseScene {
 
 	private static void hideHud(final boolean hidden) {
 		ShowcaseDirector.runOnClient(() -> {
-			if (Minecraft.getInstance().gui.hud.isHidden() != hidden) {
-				Minecraft.getInstance().gui.hud.toggle();
-			}
+			Minecraft.getInstance().options.hideGui = hidden;
 		});
 	}
 
@@ -505,14 +501,12 @@ public enum ShowcaseScene {
 	private static void openHud() {
 		JOID.open(new ShowHud());
 		JOID.open(new ShowHud.Food());
-		JOID.open(new ShowHud.Level());
 		JOID.open(new ShowHud.Experience());
 	}
 
 	private static void closeHud() {
 		JOID.close(JOID.getUi(ShowHud.class));
 		JOID.close(JOID.getUi(ShowHud.Food.class));
-		JOID.close(JOID.getUi(ShowHud.Level.class));
 		JOID.close(JOID.getUi(ShowHud.Experience.class));
 	}
 
@@ -526,8 +520,8 @@ public enum ShowcaseScene {
 		return ShowcaseDirector.computeOnServer(player -> ((ServerLevel) player.level()).getChunk(blockX >> 4, blockZ >> 4).getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockX & 15, blockZ & 15));
 	}
 
-	private static ItemStack enchant(final Level level, final ItemStack stack, final ResourceKey<Enchantment> enchantment, final int value) {
-		stack.enchant(level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(enchantment), value);
+	private static ItemStack enchant(final ItemStack stack, final Enchantment enchantment, final int value) {
+		stack.enchant(enchantment, value);
 		return stack;
 	}
 

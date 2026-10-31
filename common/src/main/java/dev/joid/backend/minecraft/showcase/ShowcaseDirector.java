@@ -25,6 +25,8 @@ import org.lwjgl.glfw.GLFWMouseButtonCallback;
 import org.lwjgl.glfw.GLFWScrollCallback;
 import org.lwjgl.glfw.GLFWWindowFocusCallback;
 
+import com.mojang.blaze3d.platform.NativeImage;
+
 import dev.joid.lib.JOID;
 import dev.joid.lib.ui.node.Node;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
@@ -43,13 +45,12 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
-import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.tutorial.TutorialSteps;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.level.gamerules.GameRules;
+import net.minecraft.world.level.GameRules;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ShowcaseDirector {
@@ -139,7 +140,7 @@ public final class ShowcaseDirector {
 		ShowcaseDirector.mouseY  = y;
 		ShowcaseDirector.pointer = true;
 		ShowcaseDirector.runOnClient(() -> {
-			final long window = Minecraft.getInstance().getWindow().handle();
+			final long window = Minecraft.getInstance().getWindow().getWindow();
 			final GLFWCursorPosCallback callback = GLFW.glfwSetCursorPosCallback(window, null);
 			GLFW.glfwSetCursorPosCallback(window, callback);
 			callback.invoke(window, x, y);
@@ -168,7 +169,7 @@ public final class ShowcaseDirector {
 	public static void type(final String text, final int count) {
 		for (final char character : text.toCharArray()) {
 			ShowcaseDirector.runOnClient(() -> {
-				final long window = Minecraft.getInstance().getWindow().handle();
+				final long window = Minecraft.getInstance().getWindow().getWindow();
 				final GLFWCharCallback callback = GLFW.glfwSetCharCallback(window, null);
 				GLFW.glfwSetCharCallback(window, callback);
 				callback.invoke(window, character);
@@ -179,7 +180,7 @@ public final class ShowcaseDirector {
 
 	public static void scroll(final double notches) {
 		ShowcaseDirector.runOnClient(() -> {
-			final long window = Minecraft.getInstance().getWindow().handle();
+			final long window = Minecraft.getInstance().getWindow().getWindow();
 			final GLFWScrollCallback callback = GLFW.glfwSetScrollCallback(window, null);
 			GLFW.glfwSetScrollCallback(window, callback);
 			callback.invoke(window, 0D, notches);
@@ -200,7 +201,7 @@ public final class ShowcaseDirector {
 
 	public static <T> T computeOnServer(final Function<ServerPlayer, T> function) {
 		final MinecraftServer server = ShowcaseDirector.computeOnClient(() -> Minecraft.getInstance().getSingleplayerServer());
-		return ShowcaseDirector.await(server.submit(() -> function.apply(server.getPlayerList().getPlayers().getFirst())), "computing on the server");
+		return ShowcaseDirector.await(server.submit(() -> function.apply(server.getPlayerList().getPlayers().get(0))), "computing on the server");
 	}
 
 	public static void runOnClient(final Runnable runnable) {
@@ -215,7 +216,7 @@ public final class ShowcaseDirector {
 		final long end = System.nanoTime() + TimeUnit.SECONDS.toNanos(seconds);
 		while (!ShowcaseDirector.computeOnClient(condition::getAsBoolean)) {
 			if (System.nanoTime() > end) {
-				throw new AssertionError("Timed out after " + seconds + " s waiting for " + label + " on the screen " + ShowcaseDirector.computeOnClient(() -> Minecraft.getInstance().gui.screen()));
+				throw new AssertionError("Timed out after " + seconds + " s waiting for " + label + " on the screen " + ShowcaseDirector.computeOnClient(() -> Minecraft.getInstance().screen));
 			}
 
 			ShowcaseDirector.sleep(250);
@@ -224,9 +225,9 @@ public final class ShowcaseDirector {
 
 	public static void waitForWorld() {
 		ShowcaseDirector.sleep(3000);
-		ShowcaseDirector.waitFor("the chunks around the player", () -> Minecraft.getInstance().levelRenderer.hasRenderedAllSections(), 900);
+		ShowcaseDirector.waitFor("the chunks around the player", () -> Minecraft.getInstance().levelRenderer.hasRenderedAllChunks(), 900);
 		ShowcaseDirector.sleep(3000);
-		ShowcaseDirector.waitFor("the chunks around the player", () -> Minecraft.getInstance().levelRenderer.hasRenderedAllSections(), 900);
+		ShowcaseDirector.waitFor("the chunks around the player", () -> Minecraft.getInstance().levelRenderer.hasRenderedAllChunks(), 900);
 	}
 
 	public static void sleep(final long millis) {
@@ -262,49 +263,48 @@ public final class ShowcaseDirector {
 	}
 
 	private static void joinWorld() {
-		ShowcaseDirector.waitFor("the end of the game loading", () -> ShowcaseDirector.isLoaded() || Minecraft.getInstance().gui.screen() instanceof AccessibilityOnboardingScreen || Minecraft.getInstance().gui.screen() instanceof BackupConfirmScreen, 600);
-		if (ShowcaseDirector.computeOnClient(() -> Minecraft.getInstance().gui.screen() instanceof AccessibilityOnboardingScreen)) {
-			ShowcaseDirector.runOnClient(() -> Minecraft.getInstance().gui.screen().onClose());
-			ShowcaseDirector.waitFor("the end of the accessibility onboarding", () -> ShowcaseDirector.isLoaded() || Minecraft.getInstance().gui.screen() instanceof BackupConfirmScreen, 600);
+		ShowcaseDirector.waitFor("the end of the game loading", () -> ShowcaseDirector.isLoaded() || Minecraft.getInstance().screen instanceof AccessibilityOnboardingScreen || Minecraft.getInstance().screen instanceof BackupConfirmScreen, 600);
+		if (ShowcaseDirector.computeOnClient(() -> Minecraft.getInstance().screen instanceof AccessibilityOnboardingScreen)) {
+			ShowcaseDirector.runOnClient(() -> Minecraft.getInstance().screen.onClose());
+			ShowcaseDirector.waitFor("the end of the accessibility onboarding", () -> ShowcaseDirector.isLoaded() || Minecraft.getInstance().screen instanceof BackupConfirmScreen, 600);
 		}
 
-		if (ShowcaseDirector.computeOnClient(() -> Minecraft.getInstance().gui.screen() instanceof BackupConfirmScreen)) {
-			ShowcaseDirector.runOnClient(() -> ShowcaseDirector.pressButton(Minecraft.getInstance().gui.screen(), "selectWorld.backupJoinSkipButton"));
+		if (ShowcaseDirector.computeOnClient(() -> Minecraft.getInstance().screen instanceof BackupConfirmScreen)) {
+			ShowcaseDirector.runOnClient(() -> ShowcaseDirector.pressButton(Minecraft.getInstance().screen, "selectWorld.backupJoinSkipButton"));
 		}
 
 		ShowcaseDirector.runOnClient(() -> {
-			final long window = Minecraft.getInstance().getWindow().handle();
+			final long window = Minecraft.getInstance().getWindow().getWindow();
 			final GLFWWindowFocusCallback callback = GLFW.glfwSetWindowFocusCallback(window, null);
 			GLFW.glfwSetWindowFocusCallback(window, callback);
 			callback.invoke(window, true);
 		});
 		if (ShowcaseDirector.computeOnClient(() -> Minecraft.getInstance().level == null && !Minecraft.getInstance().getLevelSource().levelExists("joid-showcase"))) {
-			ShowcaseDirector.runOnClient(() -> CreateWorldScreen.openFresh(Minecraft.getInstance(), () -> Minecraft.getInstance().gui.setScreen(new TitleScreen())));
-			ShowcaseDirector.waitFor("the world creation screen", () -> Minecraft.getInstance().gui.screen() instanceof CreateWorldScreen, 120);
+			ShowcaseDirector.runOnClient(() -> CreateWorldScreen.openFresh(Minecraft.getInstance(), new TitleScreen()));
+			ShowcaseDirector.waitFor("the world creation screen", () -> Minecraft.getInstance().screen instanceof CreateWorldScreen, 120);
 			ShowcaseDirector.runOnClient(() -> {
-				final CreateWorldScreen screen = (CreateWorldScreen) Minecraft.getInstance().gui.screen();
+				final CreateWorldScreen screen = (CreateWorldScreen) Minecraft.getInstance().screen;
 				final WorldCreationUiState state = screen.getUiState();
 				state.setName("joid-showcase");
 				state.setSeed(System.getProperty("joid.showcase.seed", "1700"));
 				state.setDifficulty(Difficulty.NORMAL);
-				state.getGameRules().set(GameRules.ADVANCE_TIME, false, null);
-				state.getGameRules().set(GameRules.ADVANCE_WEATHER, false, null);
-				state.getGameRules().set(GameRules.SPAWN_MOBS, false, null);
-				state.getGameRules().set(GameRules.LOCATOR_BAR, false, null);
-				state.getGameRules().set(GameRules.RANDOM_TICK_SPEED, 0, null);
-				state.getGameRules().set(GameRules.NATURAL_HEALTH_REGENERATION, false, null);
-				state.getGameRules().set(GameRules.SHOW_ADVANCEMENT_MESSAGES, false, null);
+				state.getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(false, null);
+				state.getGameRules().getRule(GameRules.RULE_WEATHER_CYCLE).set(false, null);
+				state.getGameRules().getRule(GameRules.RULE_DOMOBSPAWNING).set(false, null);
+				state.getGameRules().getRule(GameRules.RULE_RANDOMTICKING).set(0, null);
+				state.getGameRules().getRule(GameRules.RULE_NATURAL_REGENERATION).set(false, null);
+				state.getGameRules().getRule(GameRules.RULE_ANNOUNCE_ADVANCEMENTS).set(false, null);
 				ShowcaseDirector.pressButton(screen, "selectWorld.create");
 			});
-			ShowcaseDirector.waitFor("the world creation", () -> Minecraft.getInstance().level != null || Minecraft.getInstance().gui.screen() instanceof ConfirmScreen, 900);
-			if (ShowcaseDirector.computeOnClient(() -> Minecraft.getInstance().gui.screen() instanceof ConfirmScreen)) {
-				ShowcaseDirector.runOnClient(() -> ((BooleanConsumer) ShowcaseDirector.field(Minecraft.getInstance().gui.screen(), "callback")).accept(true));
+			ShowcaseDirector.waitFor("the world creation", () -> Minecraft.getInstance().level != null || Minecraft.getInstance().screen instanceof ConfirmScreen, 900);
+			if (ShowcaseDirector.computeOnClient(() -> Minecraft.getInstance().screen instanceof ConfirmScreen)) {
+				ShowcaseDirector.runOnClient(() -> ((BooleanConsumer) ShowcaseDirector.field(Minecraft.getInstance().screen, "callback")).accept(true));
 			}
 		}
 
-		ShowcaseDirector.waitFor("the singleplayer world", () -> Minecraft.getInstance().level != null && Minecraft.getInstance().player != null && Minecraft.getInstance().gui.screen() == null && Minecraft.getInstance().gui.overlay() == null, 900);
+		ShowcaseDirector.waitFor("the singleplayer world", () -> Minecraft.getInstance().level != null && Minecraft.getInstance().player != null && Minecraft.getInstance().screen == null && Minecraft.getInstance().getOverlay() == null, 900);
 		ShowcaseDirector.runOnClient(() -> {
-			final long window = Minecraft.getInstance().getWindow().handle();
+			final long window = Minecraft.getInstance().getWindow().getWindow();
 			final int[] left = new int[1];
 			final int[] top = new int[1];
 			GLFW.glfwGetWindowFrameSize(window, left, top, new int[1], new int[1]);
@@ -316,14 +316,14 @@ public final class ShowcaseDirector {
 
 	private static boolean isLoaded() {
 		final Minecraft minecraft = Minecraft.getInstance();
-		return minecraft.gui.overlay() == null && (minecraft.level != null || minecraft.gui.screen() instanceof TitleScreen || minecraft.gui.screen() instanceof DisconnectedScreen);
+		return minecraft.getOverlay() == null && (minecraft.level != null || minecraft.screen instanceof TitleScreen || minecraft.screen instanceof DisconnectedScreen);
 	}
 
 	private static void pressButton(final Screen screen, final String translationKey) {
 		final String message = Component.translatable(translationKey).getString();
 		for (final GuiEventListener child : screen.children()) {
 			if (child instanceof final Button button && button.getMessage().getString().equals(message)) {
-				button.onPress(new MouseButtonInfo(GLFW.GLFW_KEY_UNKNOWN, 0));
+				button.onPress();
 				return;
 			}
 		}
@@ -363,13 +363,9 @@ public final class ShowcaseDirector {
 			Files.writeString(path.resolveSibling(path.getFileName() + ".json"), String.format(Locale.ROOT, "{\"mouse\": [%.2f, %.2f], \"pressed\": %b, \"visible\": %b}", ShowcaseDirector.mouseX, ShowcaseDirector.mouseY, ShowcaseDirector.pressed, ShowcaseDirector.pointer), StandardCharsets.UTF_8);
 			final String command = System.getProperty("joid.showcase.capture");
 			if (command == null) {
-				Screenshot.takeScreenshot(minecraft.gameRenderer.mainRenderTarget(), image -> {
-					try (image) {
-						image.writeToFile(path.resolveSibling(path.getFileName() + ".png"));
-					} catch (final IOException exception) {
-						throw new AssertionError("Unable to write the capture " + name, exception);
-					}
-				});
+				try (final NativeImage image = Screenshot.takeScreenshot(minecraft.getMainRenderTarget())) {
+					image.writeToFile(path.resolveSibling(path.getFileName() + ".png"));
+				}
 			} else {
 				final int code = new ProcessBuilder(command, path.toString()).inheritIO().start().waitFor();
 				if (code != 0) {
@@ -388,7 +384,7 @@ public final class ShowcaseDirector {
 
 	private static void mouse(final int action) {
 		ShowcaseDirector.runOnClient(() -> {
-			final long window = Minecraft.getInstance().getWindow().handle();
+			final long window = Minecraft.getInstance().getWindow().getWindow();
 			final GLFWMouseButtonCallback callback = GLFW.glfwSetMouseButtonCallback(window, null);
 			GLFW.glfwSetMouseButtonCallback(window, callback);
 			callback.invoke(window, GLFW.GLFW_MOUSE_BUTTON_LEFT, action, 0);
@@ -397,7 +393,7 @@ public final class ShowcaseDirector {
 
 	private static void keyEvent(final int key, final int action) {
 		ShowcaseDirector.runOnClient(() -> {
-			final long window = Minecraft.getInstance().getWindow().handle();
+			final long window = Minecraft.getInstance().getWindow().getWindow();
 			final GLFWKeyCallback callback = GLFW.glfwSetKeyCallback(window, null);
 			GLFW.glfwSetKeyCallback(window, callback);
 			callback.invoke(window, key, GLFW.glfwGetKeyScancode(key), action, 0);

@@ -26,7 +26,7 @@ import dev.joid.lib.ui.node.impl.shape.RectNode;
 import dev.joid.lib.ui.node.impl.text.TextNode;
 import dev.joid.lib.utils.align.Align;
 import lombok.Getter;
-import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
@@ -35,10 +35,10 @@ import net.minecraft.world.level.block.Blocks;
 public class ShowBestiary extends UI implements IShowFocus {
 
 	private static final List<Entry> ENTRIES = List.of(
-		new Entry("Fox", "MOB", ShowTheme.GRASS, "Taiga", "Sleeps by day, hunts chickens at night and steals whatever you drop.", "10", size -> EntityNode.create(0, 10 * size, 300 * size, 210 * size).type(EntityTypes.FOX)),
-		new Entry("Axolotl", "MOB", ShowTheme.GRASS, "Lush caves", "Plays dead to heal and helps you fight the drowned underwater.", "14", size -> EntityNode.create(0, 10 * size, 300 * size, 210 * size).type(EntityTypes.AXOLOTL)),
-		new Entry("Allay", "MOB", ShowTheme.GRASS, "Pillager outposts", "Brings you every copy of the item you give it, and dances to music.", "20", size -> EntityNode.create(0, 10 * size, 300 * size, 210 * size).type(EntityTypes.ALLAY)),
-		new Entry("Creeper", "MOB", ShowTheme.GRASS, "Everywhere at night", "Silent, patient and explosive. Keep your distance.", "20", size -> EntityNode.create(0, 10 * size, 300 * size, 210 * size).type(EntityTypes.CREEPER)),
+		new Entry("Fox", "MOB", ShowTheme.GRASS, "Taiga", "Sleeps by day, hunts chickens at night and steals whatever you drop.", "10", size -> EntityNode.create(0, 10 * size, 300 * size, 210 * size).type(EntityType.FOX)),
+		new Entry("Axolotl", "MOB", ShowTheme.GRASS, "Lush caves", "Plays dead to heal and helps you fight the drowned underwater.", "14", size -> EntityNode.create(0, 10 * size, 300 * size, 210 * size).type(EntityType.AXOLOTL)),
+		new Entry("Allay", "MOB", ShowTheme.GRASS, "Pillager outposts", "Brings you every copy of the item you give it, and dances to music.", "20", size -> EntityNode.create(0, 10 * size, 300 * size, 210 * size).type(EntityType.ALLAY)),
+		new Entry("Creeper", "MOB", ShowTheme.GRASS, "Everywhere at night", "Silent, patient and explosive. Keep your distance.", "20", size -> EntityNode.create(0, 10 * size, 300 * size, 210 * size).type(EntityType.CREEPER)),
 		new Entry("Diamond Ore", "BLOCK", ShowTheme.DIAMOND, "Deep slate layers", "The rarest ore of the Overworld, mined with an iron pickaxe or better.", "3", size -> BlockNode.create(80 * size, 45 * size, 140 * size, 140 * size).block(Blocks.DIAMOND_ORE.defaultBlockState())),
 		new Entry("Bookshelf", "BLOCK", ShowTheme.DIAMOND, "Villages, strongholds", "Fifteen of them around an enchanting table unlock its best offers.", "1.5", size -> BlockNode.create(80 * size, 45 * size, 140 * size, 140 * size).block(Blocks.BOOKSHELF.defaultBlockState())),
 		new Entry("Trident", "ITEM", ShowTheme.AMETHYST, "Drowned", "Thrown like a spear, it returns with Loyalty and calls lightning with Channeling.", "9", size -> ItemNode.create(80 * size, 45 * size, 140 * size, 140 * size).stack(new ItemStack(Items.TRIDENT)).glint(true)),
@@ -115,7 +115,7 @@ public class ShowBestiary extends UI implements IShowFocus {
 		.effect(RoundedNodeEffect.create(24F))
 		.effect(BorderNodeEffect.create(Color.WHITE.withAlpha(0.09F), 1.5F).mode(BorderMode.IN))
 		.effect(ShadowNodeEffect.create(Color.BLACK.withAlpha(0.5F), 36F).offsetY(16D))
-		.onHoverStart(_ -> this.selected = index)
+		.onHoverStart(event -> this.selected = index)
 		.body(card -> {
 			CircleNode.create(70, 34, 160).color(entry.color().withAlpha(0.22F)).effect(BlurNodeEffect.create(36F)).interactive(false).attach(card);
 			final Node render = entry.render().apply(1D).interactive(false);

@@ -7,20 +7,19 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GlyphSource;
+import net.minecraft.client.gui.font.FontSet;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
-import net.minecraft.network.chat.FontDescription;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 @Getter
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MinecraftFontFace implements IFontFace {
 
-	private final FontWeight               weight;
-	private final FontDescription.Resource description;
+	private final FontWeight       weight;
+	private final ResourceLocation id;
 
-	public static @NonNull MinecraftFontFace of(final @NonNull Identifier identifier, final @NonNull FontWeight weight) {
-		return new MinecraftFontFace(weight, new FontDescription.Resource(identifier));
+	public static @NonNull MinecraftFontFace of(final @NonNull ResourceLocation id, final @NonNull FontWeight weight) {
+		return new MinecraftFontFace(weight, id);
 	}
 
 	public boolean isBold() {
@@ -59,12 +58,12 @@ public final class MinecraftFontFace implements IFontFace {
 
 	@Override
 	public @NonNull String getName() {
-		return this.description.id().toString();
+		return this.id.toString();
 	}
 
 	@Override
 	public float getAdvance(final int codepoint) {
-		return this.getGlyph(codepoint).info().getAdvance(this.isBold()) / MinecraftFont.SIZE;
+		return this.getFontSet().getGlyphInfo(codepoint, false).getAdvance(this.isBold()) / MinecraftFont.SIZE;
 	}
 
 	@Override
@@ -77,12 +76,12 @@ public final class MinecraftFontFace implements IFontFace {
 		return true;
 	}
 
-	public @NonNull GlyphSource getSource() {
-		return Minecraft.getInstance().font.provider.glyphs(this.description);
+	public @NonNull FontSet getFontSet() {
+		return Minecraft.getInstance().font.getFontSet(this.id);
 	}
 
 	public @NonNull BakedGlyph getGlyph(final int codepoint) {
-		return this.getSource().getGlyph(codepoint);
+		return this.getFontSet().getGlyph(codepoint);
 	}
 
 }

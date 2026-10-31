@@ -86,7 +86,7 @@ public class ShowChest extends ContainerUI<ChestMenu> implements IShowFocus {
 			.hoveredColor(Color.WHITE.withAlpha(0.16F))
 			.body(tile -> {
 				if (hotbar) {
-					RectNode.create(0, 0, 81, 81).color(ShowTheme.GRASS.withAlpha(0.14F)).visible(() -> Minecraft.getInstance().player.getInventory().getSelectedSlot() == slot - 54).effect(RoundedNodeEffect.create(16F)).interactive(false).attach(tile);
+					RectNode.create(0, 0, 81, 81).color(ShowTheme.GRASS.withAlpha(0.14F)).visible(() -> Minecraft.getInstance().player.getInventory().selected == slot - 54).effect(RoundedNodeEffect.create(16F)).interactive(false).attach(tile);
 				}
 
 				final SlotNode node = SlotNode.create(4, 4, 73, 73).slot(super.getContainer().getSlot(slot)).hoveredColor((Color) null);

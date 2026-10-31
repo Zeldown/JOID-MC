@@ -9,6 +9,7 @@ import dev.joid.lib.draw.text.Text;
 import dev.joid.lib.font.FontWeight;
 import dev.joid.lib.font.TextInfo;
 import dev.joid.lib.resource.Resource;
+import dev.joid.lib.resource.ResourceBuilder;
 import dev.joid.lib.shader.impl.BorderShader.BorderMode;
 import dev.joid.lib.ui.core.UI;
 import dev.joid.lib.ui.core.data.UIData;
@@ -23,17 +24,14 @@ import dev.joid.lib.ui.node.impl.text.TextNode;
 import dev.joid.lib.utils.align.Align;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.Sheets;
-import net.minecraft.client.resources.model.sprite.SpriteId;
-import net.minecraft.resources.Identifier;
 
 @UIData(anchorY = Align.END)
 @UIDataOverlay(active = true)
 @UIDataOverlayLayer(layer = OverlayLayer.HEALTH, cancel = true)
 public class ShowHud extends UI {
 
-	private static final Resource FOOD  = Resource.of(new SpriteId(Sheets.GUI_SHEET, Identifier.withDefaultNamespace("hud/food_full")));
-	private static final Resource HEART = Resource.of(new SpriteId(Sheets.GUI_SHEET, Identifier.withDefaultNamespace("hud/heart/full")));
+	private static final Resource FOOD  = ResourceBuilder.create().nearest().textureCoords(52D / 256D, 27D / 256D, 61D / 256D, 36D / 256D).of("minecraft:textures/gui/icons.png");
+	private static final Resource HEART = ResourceBuilder.create().nearest().textureCoords(52D / 256D, 0D, 61D / 256D, 9D / 256D).of("minecraft:textures/gui/icons.png");
 
 	private double start;
 
@@ -131,16 +129,6 @@ public class ShowHud extends UI {
 	@UIDataOverlay(active = true)
 	@UIDataOverlayLayer(layer = OverlayLayer.CONTEXTUAL_BAR, cancel = true)
 	public static class Experience extends UI {
-
-		@Override
-		public void init() {}
-
-	}
-
-	@UIData(anchorY = Align.END)
-	@UIDataOverlay(active = true)
-	@UIDataOverlayLayer(layer = OverlayLayer.EXPERIENCE_LEVEL, cancel = true)
-	public static class Level extends UI {
 
 		@Override
 		public void init() {}

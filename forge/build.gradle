@@ -1,90 +1,41 @@
-import org.gradle.plugins.ide.eclipse.model.ProjectDependency
-import org.gradle.plugins.ide.eclipse.model.SourceFolder
-
 plugins {
     id 'joid-loader'
-    id 'net.minecraftforge.gradle'
 }
 
-minecraft {
+apply plugin: 'net.neoforged.moddev.legacyforge'
+
+legacyForge {
+    version = "${minecraft_version}-${forge_version}"
+    parchment {
+        minecraftVersion = parchment_minecraft_version
+        mappingsVersion = parchment_version
+    }
     def at = project(':common').file('src/main/resources/META-INF/accesstransformer.cfg')
     if (at.exists()) {
-        accessTransformers = files(at)
+        accessTransformers.from(at.absolutePath)
     }
     runs {
         configureEach {
-            workingDir = layout.projectDirectory.dir("runs/${it.name}")
+            ideName = "Forge ${it.name.capitalize()}"
         }
-        register('client') {
-            if (project.hasProperty('joid.test')) {
-                systemProperty('joid.test', 'true')
-                systemProperty('joid.loader', project.name)
-                systemProperty('joid.snapshot.output', file('runs/snapshots').absolutePath)
-                systemProperty('joid.snapshot.references', rootProject.file('.snapshots/references').absolutePath)
-                systemProperty('joid.cache', layout.buildDirectory.dir('joid-cache').get().asFile.absolutePath)
-                args('--width', '1920', '--height', '1080')
-                if (project.hasProperty('joid.graphicsBackend')) {
-                    args('--graphicsBackend', project.property('joid.graphicsBackend').toString())
-                }
-            }
-            if (project.hasProperty('joid.showcase')) {
-                project.properties.findAll { it.key.startsWith('joid.showcase') }.each { systemProperty(it.key, it.value.toString()) }
-                args('--quickPlaySingleplayer', 'joid-showcase', '--width', '1920', '--height', '1080', '--username', 'JOID')
-            }
+        client {
+            client()
+            gameDirectory = this.mkdir(this.file('runs/client'))
+            joidClient(it)
         }
-        register('server') {
-            args('--nogui')
+        server {
+            server()
+            gameDirectory = this.mkdir(this.file('runs/server'))
         }
-        register('data') {
-            args('--mod', mod_id, '--all', '--output', file('src/generated/resources/').absolutePath, '--existing', file('src/main/resources/').absolutePath)
+    }
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
         }
     }
 }
 
-repositories {
-    minecraft.mavenizer(it)
-    maven(fg.forgeMaven)
-    maven(fg.minecraftLibsMaven)
-    mavenCentral()
-}
-
-dependencies {
-    implementation(minecraft.dependency("net.minecraftforge:forge:${minecraft_version}-${forge_version}"))
-}
-
-sourceSets.main.resources { srcDir 'src/generated/resources' }
-
-def linkedFolders = [
-        'common-java'     : project(':common').file('src/main/java'),
-        'common-resources': project(':common').file('src/main/resources')
-]
-
-eclipse {
-    project {
-        linkedFolders.each { name, folder ->
-            linkedResource(name: name, type: '2', location: folder.absolutePath)
-        }
-        file.whenMerged { description ->
-            description.linkedResources.removeAll { link -> linkedFolders[link.name] != file(link.location) }
-        }
-    }
-    classpath.file.whenMerged { classpath ->
-        classpath.entries.removeAll { it instanceof ProjectDependency || it instanceof SourceFolder && !it.path.startsWith('src/') }
-        def output = classpath.entries.find { it instanceof SourceFolder && it.path == 'src/main/java' }?.output
-        linkedFolders.keySet().each { name ->
-            classpath.entries << new SourceFolder(name, output)
-        }
-    }
-}
-
-tasks.named('eclipse') {
-    dependsOn('genEclipseRuns')
-}
-
-tasks.named('genEclipseRuns') {
-    doLast {
-        fileTree(projectDir) { include('*.launch') }.each { launch ->
-            launch.text = launch.text.replaceAll(/\s*<listEntry value="[^"]*org\.eclipse\.buildship\.core\.gradleclasspathcontainer[^"]*"\/>/, '')
-        }
-    }
+obfuscation {
+    reobfuscate(tasks.named('devJar', Jar), sourceSets.main)
+    reobfuscate(tasks.named('prodJar', Jar), sourceSets.main)
 }

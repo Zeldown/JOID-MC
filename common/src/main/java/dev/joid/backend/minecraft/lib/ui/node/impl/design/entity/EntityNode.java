@@ -11,20 +11,17 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import net.minecraft.client.Minecraft;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntitySpawnRequest;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.player.PlayerSkin;
-import net.minecraft.world.item.component.ResolvableProfile;
 
 @Getter
 public class EntityNode extends Node {
 
-	private Entity            entity;
-	private PlayerSkin        skin;
-	private EntityType<?>     type;
-	private ResolvableProfile profile;
+	private Entity           entity;
+	private EntityType<?>    type;
+	private GameProfile      profile;
+	private ResourceLocation skin;
 
 	private double scale;
 	private double rotationYaw;
@@ -51,7 +48,7 @@ public class EntityNode extends Node {
 	public void draw(final double mouseX, final double mouseY) {
 		final Minecraft minecraft = Minecraft.getInstance();
 		if (this.type != null && (this.entity == null || this.entity.level() != minecraft.level)) {
-			this.entity = minecraft.level == null ? null : this.type.create(minecraft.level, new EntitySpawnRequest(EntitySpawnReason.LOAD, true));
+			this.entity = minecraft.level == null ? null : this.type.create(minecraft.level);
 			if (this.entity != null) {
 				this.entity.setId(-1);
 			}
@@ -63,7 +60,7 @@ public class EntityNode extends Node {
 		if (this.entity != null) {
 			DrawEntity.inst().drawEntity(super.getX(), super.getY(), super.getWidth(), super.getHeight(), this.entity, this.scale, this.rotationYaw, this.rotationPitch, lookX, lookY);
 		} else if (this.profile != null || this.skin != null) {
-			final PlayerSkin skin = this.skin != null ? this.skin : minecraft.playerSkinRenderCache().getOrDefault(this.profile).playerSkin();
+			final ResourceLocation skin = this.skin != null ? this.skin : minecraft.getSkinManager().getInsecureSkinLocation(this.profile);
 			DrawEntity.inst().drawPlayer(super.getX(), super.getY(), super.getWidth(), super.getHeight(), skin, this.scale, this.rotationYaw, this.rotationPitch, lookX, lookY);
 		}
 	}
@@ -76,11 +73,11 @@ public class EntityNode extends Node {
 		return super.follow("source", entity, value -> this.source(value, null, null, null));
 	}
 
-	public final <T extends EntityNode> @NonNull T skin(final @NonNull PlayerSkin skin) {
+	public final <T extends EntityNode> @NonNull T skin(final @NonNull ResourceLocation skin) {
 		return this.skin(Signal.from(skin));
 	}
 
-	public final <T extends EntityNode> @NonNull T skin(final @NonNull Supplier<@NonNull PlayerSkin> skin) {
+	public final <T extends EntityNode> @NonNull T skin(final @NonNull Supplier<@NonNull ResourceLocation> skin) {
 		return super.follow("source", skin, value -> this.source(null, value, null, null));
 	}
 
@@ -93,14 +90,10 @@ public class EntityNode extends Node {
 	}
 
 	public final <T extends EntityNode> @NonNull T profile(final @NonNull GameProfile profile) {
-		return this.profile(ResolvableProfile.createResolved(profile));
-	}
-
-	public final <T extends EntityNode> @NonNull T profile(final @NonNull ResolvableProfile profile) {
 		return this.profile(Signal.from(profile));
 	}
 
-	public final <T extends EntityNode> @NonNull T profile(final @NonNull Supplier<@NonNull ResolvableProfile> profile) {
+	public final <T extends EntityNode> @NonNull T profile(final @NonNull Supplier<@NonNull GameProfile> profile) {
 		return super.follow("source", profile, value -> this.source(null, null, null, value));
 	}
 
@@ -136,7 +129,7 @@ public class EntityNode extends Node {
 		return super.follow("followMouse", followMouse, value -> this.followMouse = value);
 	}
 
-	private void source(final Entity entity, final PlayerSkin skin, final EntityType<?> type, final ResolvableProfile profile) {
+	private void source(final Entity entity, final ResourceLocation skin, final EntityType<?> type, final GameProfile profile) {
 		this.entity  = entity;
 		this.skin    = skin;
 		this.type    = type;

@@ -9,28 +9,28 @@ import dev.joid.lib.font.impl.bitmap.BitmapFont;
 import dev.joid.lib.font.impl.glyph.FontFamily;
 import lombok.Getter;
 import lombok.NonNull;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 @Getter
 public final class MinecraftFont extends BitmapFont<MinecraftFontFace> {
 
 	public static final float SIZE = 8F;
 
-	private static final Map<Identifier, MinecraftFont> FONTS = new ConcurrentHashMap<>();
+	private static final Map<ResourceLocation, MinecraftFont> FONTS = new ConcurrentHashMap<>();
 
-	public static final MinecraftFont ALT     = MinecraftFont.of(Identifier.withDefaultNamespace("alt"));
-	public static final MinecraftFont DEFAULT = MinecraftFont.of(Identifier.withDefaultNamespace("default"));
-	public static final MinecraftFont UNIFORM = MinecraftFont.of(Identifier.withDefaultNamespace("uniform"));
-	public static final MinecraftFont ILLAGER = MinecraftFont.of(Identifier.withDefaultNamespace("illageralt"));
+	public static final MinecraftFont ALT     = MinecraftFont.of(ResourceLocation.tryParse("alt"));
+	public static final MinecraftFont DEFAULT = MinecraftFont.of(ResourceLocation.tryParse("default"));
+	public static final MinecraftFont UNIFORM = MinecraftFont.of(ResourceLocation.tryParse("uniform"));
+	public static final MinecraftFont ILLAGER = MinecraftFont.of(ResourceLocation.tryParse("illageralt"));
 
-	private final Identifier id;
+	private final ResourceLocation id;
 
-	private MinecraftFont(final Identifier id) {
+	private MinecraftFont(final ResourceLocation id) {
 		super(FontFamily.of(MinecraftFontFace.of(id, FontWeight.REGULAR), MinecraftFontFace.of(id, FontWeight.BOLD)), 8);
 		this.id = id;
 	}
 
-	public static @NonNull MinecraftFont of(final @NonNull Identifier id) {
+	public static @NonNull MinecraftFont of(final @NonNull ResourceLocation id) {
 		return MinecraftFont.FONTS.computeIfAbsent(id, MinecraftFont::new);
 	}
 

@@ -23,7 +23,7 @@ public abstract class ContainerUI<M extends AbstractContainerMenu> extends BaseC
 	}
 
 	public static <M extends AbstractContainerMenu> @NonNull ScreenConstructor<M, ContainerUIScreen<M>> screen(final @NonNull Function<M, ? extends ContainerUI<M>> factory) {
-		return (menu, inventory, _) -> new ContainerUIScreen<>(menu, inventory, factory.apply(menu));
+		return (menu, inventory, title) -> new ContainerUIScreen<>(menu, inventory, factory.apply(menu));
 	}
 
 	public @NonNull ItemStack getCarried() {

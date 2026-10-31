@@ -1,10 +1,10 @@
 package dev.joid.backend.minecraft.lib.resource.resolver.impl;
 
-import dev.joid.backend.minecraft.bridge.render.texture.MinecraftBorrowedTexture;
 import dev.joid.backend.minecraft.bridge.resource.ResourceReloader;
 import dev.joid.backend.minecraft.lib.asset.impl.NamespacedAsset;
 import dev.joid.backend.minecraft.lib.asset.locator.impl.NamespacedAssetLocator;
 import dev.joid.backend.minecraft.lib.resource.animation.impl.McmetaResourceAnimationReader;
+import dev.joid.base.opengl.render.texture.GlBorrowedTexture;
 import dev.joid.lib.resource.Resource;
 import dev.joid.lib.resource.ResourceBuilder;
 import dev.joid.lib.resource.ResourceData;
@@ -15,17 +15,17 @@ import dev.joid.lib.resource.resolver.IResourceResolver;
 import lombok.NonNull;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 public class NamespacedResourceResolver implements IResourceResolver {
 
 	@Override
 	public boolean supports(final @NonNull Object input) {
-		if (input instanceof Identifier) {
+		if (input instanceof ResourceLocation) {
 			return true;
 		}
 
-		final Identifier identifier = NamespacedAssetLocator.parse(input);
+		final ResourceLocation identifier = NamespacedAssetLocator.parse(input);
 		return identifier != null && (NamespacedResourceResolver.isLoaded(identifier) || NamespacedAsset.of(identifier).exists());
 	}
 
@@ -41,9 +41,9 @@ public class NamespacedResourceResolver implements IResourceResolver {
 	}
 
 	private static @NonNull ResourceData read(final NamespacedAsset asset) {
-		final Identifier identifier = asset.getId();
+		final ResourceLocation identifier = asset.getId();
 		if (NamespacedResourceResolver.isLoaded(identifier) && asset.getAnimation() == null) {
-			return ResourceReloader.inst().track(ResourceData.create(asset.getUniqueId(), null).texture(MinecraftBorrowedTexture.of(() -> Minecraft.getInstance().getTextureManager().getTexture(identifier).getTextureView())), asset);
+			return ResourceReloader.inst().track(ResourceData.create(asset.getUniqueId(), null).texture(GlBorrowedTexture.of(() -> Minecraft.getInstance().getTextureManager().getTexture(identifier).getId())), asset);
 		}
 
 		try {
@@ -55,7 +55,7 @@ public class NamespacedResourceResolver implements IResourceResolver {
 		}
 	}
 
-	private static boolean isLoaded(final Identifier identifier) {
+	private static boolean isLoaded(final ResourceLocation identifier) {
 		return Minecraft.getInstance().getTextureManager().byPath.containsKey(identifier);
 	}
 

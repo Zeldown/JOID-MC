@@ -9,35 +9,42 @@ import dev.joid.backend.minecraft.neoforge.registry.NeoForgeContainerUIRegistry;
 import dev.joid.backend.minecraft.neoforge.registry.NeoForgeKeyBindRegistry;
 import dev.joid.backend.minecraft.neoforge.registry.NeoForgeOverlayLayerRegistry;
 import dev.joid.backend.minecraft.neoforge.registry.NeoForgeReloadListenerRegistry;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.neoforge.common.NeoForge;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 
-@Mod(value = MinecraftJoid.MOD_ID, dist = Dist.CLIENT)
+@Mod(MinecraftJoid.MOD_ID)
 public final class NeoForgeJoidClient {
 
-	public NeoForgeJoidClient(final IEventBus modBus) {
+	public NeoForgeJoidClient() {
+		if (!FMLEnvironment.dist.isClient()) {
+			return;
+		}
+
+		final IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 		MinecraftJoid.init();
 
-		NeoForge.EVENT_BUS.addListener(NeoForgeClientEvents::tick);
-		NeoForge.EVENT_BUS.addListener(NeoForgeScreenEvents::render);
-		NeoForge.EVENT_BUS.addListener(NeoForgeScreenEvents::charTyped);
-		NeoForge.EVENT_BUS.addListener(NeoForgeScreenEvents::keyPressed);
-		NeoForge.EVENT_BUS.addListener(NeoForgeScreenEvents::mouseMoved);
-		NeoForge.EVENT_BUS.addListener(NeoForgeScreenEvents::keyReleased);
-		NeoForge.EVENT_BUS.addListener(NeoForgeScreenEvents::mousePressed);
-		NeoForge.EVENT_BUS.addListener(NeoForgeScreenEvents::mouseReleased);
-		NeoForge.EVENT_BUS.addListener(NeoForgeScreenEvents::mouseScrolled);
+		MinecraftForge.EVENT_BUS.addListener(NeoForgeClientEvents::tick);
+		MinecraftForge.EVENT_BUS.addListener(NeoForgeClientEvents::render);
+		MinecraftForge.EVENT_BUS.addListener(NeoForgeScreenEvents::render);
+		MinecraftForge.EVENT_BUS.addListener(NeoForgeScreenEvents::charTyped);
+		MinecraftForge.EVENT_BUS.addListener(NeoForgeScreenEvents::keyPressed);
+		MinecraftForge.EVENT_BUS.addListener(NeoForgeScreenEvents::mouseMoved);
+		MinecraftForge.EVENT_BUS.addListener(NeoForgeScreenEvents::keyReleased);
+		MinecraftForge.EVENT_BUS.addListener(NeoForgeScreenEvents::mousePressed);
+		MinecraftForge.EVENT_BUS.addListener(NeoForgeScreenEvents::mouseReleased);
+		MinecraftForge.EVENT_BUS.addListener(NeoForgeScreenEvents::mouseScrolled);
+		MinecraftForge.EVENT_BUS.addListener(NeoForgeOverlayLayerRegistry::cancel);
 
-		modBus.addListener(NeoForgePayloads::register);
 		modBus.addListener(NeoForgeKeyBindRegistry::register);
 		modBus.addListener(NeoForgeContainerUIRegistry::register);
 		modBus.addListener(NeoForgeOverlayLayerRegistry::register);
 		modBus.addListener(NeoForgeContainerTypeRegistry::register);
 		modBus.addListener(NeoForgeReloadListenerRegistry::register);
 
-		NeoForgePayloads.registerSender();
+		NeoForgePayloads.register();
 	}
 
 }
