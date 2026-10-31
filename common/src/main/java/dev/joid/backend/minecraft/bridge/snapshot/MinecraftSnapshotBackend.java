@@ -13,25 +13,26 @@ import dev.joid.lib.utils.image.PixelLayout;
 import dev.joid.test.snapshot.ISnapshotBackend;
 import dev.joid.test.snapshot.SnapshotImage;
 import lombok.NonNull;
-import net.minecraft.client.Minecraft;
 
 public final class MinecraftSnapshotBackend implements ISnapshotBackend {
 
 	private GlRenderBridge        bridge;
+	private MinecraftGlState      state;
 	private MinecraftRenderTarget target;
 
 	@Override
 	public void create(final int width, final int height) {
 		this.bridge = BridgeHandler.RENDER.getBridge(GlRenderBridge.class);
+		this.state  = MinecraftGlState.read();
 		this.target = new MinecraftRenderTarget(width, height);
 		this.target.bind();
 	}
 
 	@Override
 	public void destroy() {
-		Minecraft.getInstance().getMainRenderTarget().bindWrite(true);
 		this.target.delete();
 		this.target = null;
+		this.state.restore();
 	}
 
 	@Override
