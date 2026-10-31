@@ -1,7 +1,7 @@
 package dev.joid.backend.minecraft.bridge.ui.overlay;
 
-import dev.joid.backend.minecraft.bridge.input.SdlKeys;
-import dev.joid.backend.minecraft.bridge.input.SdlMouseButtons;
+import dev.joid.base.lwjgl3.sdl.input.SdlKeys;
+import dev.joid.base.lwjgl3.sdl.input.SdlMouseButtons;
 import dev.joid.lib.bridge.BridgeHandler;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

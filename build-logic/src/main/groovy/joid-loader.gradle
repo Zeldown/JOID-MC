@@ -53,6 +53,7 @@ dependencies {
     clientTest(files(rootProject.file("libs/joid-tool-testkit-${joid_version}.jar")))
     clientTest("junit:junit:${junit_version}")
     embed(files(rootProject.file("libs/joid-base-lwjgl3-openal-${joid_version}.jar")))
+    embed(files(rootProject.file("libs/joid-base-lwjgl3-sdl-${joid_version}.jar")))
     embed(files(rootProject.file("libs/joid-base-openal-${joid_version}.jar")))
     embed("javax.vecmath:vecmath:${vecmath_version}")
 }

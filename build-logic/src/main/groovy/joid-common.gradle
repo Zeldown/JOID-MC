@@ -22,6 +22,7 @@ dependencies {
     compileOnly(files(rootProject.file("libs/joid-core-${joid_version}-demo.jar")))
     compileOnly(files(rootProject.file("libs/joid-backend-minecraft-common-${common_version}-demo.jar")))
     compileOnly(files(rootProject.file("libs/joid-base-lwjgl3-openal-${joid_version}.jar")))
+    compileOnly(files(rootProject.file("libs/joid-base-lwjgl3-sdl-${joid_version}.jar")))
     compileOnly(files(rootProject.file("libs/joid-base-openal-${joid_version}.jar")))
     compileOnly(files(rootProject.file("libs/joid-tool-testkit-${joid_version}.jar")))
     compileOnly("junit:junit:${junit_version}")

@@ -36,6 +36,7 @@ public final class OverlayUIBridge extends BaseOverlayUIBridge<GuiGraphicsExtrac
 	@Override
 	protected void requestCursor(final GuiGraphicsExtractor graphics) {
 		this.window.requestCursor(graphics, this.window.getCursor());
+		this.window.requestTextInput();
 	}
 
 	@Override

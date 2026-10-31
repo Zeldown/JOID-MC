@@ -43,7 +43,6 @@ import com.mojang.blaze3d.platform.cursor.CursorTypes;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import dev.joid.backend.minecraft.MinecraftBackend;
-import dev.joid.backend.minecraft.bridge.input.SdlKeys;
 import dev.joid.backend.minecraft.bridge.render.texture.MinecraftTexture;
 import dev.joid.backend.minecraft.bridge.snapshot.MinecraftSnapshotBackend;
 import dev.joid.backend.minecraft.bridge.ui.container.ContainerUIScreen;
@@ -71,6 +70,7 @@ import dev.joid.backend.minecraft.lib.ui.node.impl.design.block.BlockNode;
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.entity.EntityNode;
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.item.ItemNode;
 import dev.joid.base.lwjgl3.openal.Lwjgl3AlBinding;
+import dev.joid.base.lwjgl3.sdl.input.SdlKeys;
 import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.bridge.render.texture.ITexture;
 import dev.joid.lib.color.Color;

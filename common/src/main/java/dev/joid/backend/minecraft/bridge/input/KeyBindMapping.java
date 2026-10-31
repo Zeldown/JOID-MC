@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import dev.joid.backend.minecraft.loader.registry.KeyBindRegistry;
+import dev.joid.base.lwjgl3.sdl.input.SdlKeys;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.minecraft.client.KeyMapping;

@@ -64,6 +64,10 @@ public final class ScreenUIBridge extends BaseScreenUIBridge<GuiGraphicsExtracto
 		return null;
 	}
 
+	public boolean isInputCaptured() {
+		return this.window.getTextInputArea() != null;
+	}
+
 	@Override
 	protected long countFrame(final GuiGraphicsExtractor graphics) {
 		return GuiFrameCounter.inst().getFrame(graphics);
@@ -72,6 +76,7 @@ public final class ScreenUIBridge extends BaseScreenUIBridge<GuiGraphicsExtracto
 	@Override
 	protected void requestCursor(final GuiGraphicsExtractor graphics) {
 		this.window.requestCursor(graphics, this.window.getCursor());
+		this.window.requestTextInput();
 	}
 
 	@Override

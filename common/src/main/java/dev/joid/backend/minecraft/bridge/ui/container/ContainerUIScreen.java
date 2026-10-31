@@ -6,11 +6,11 @@ import java.util.Set;
 
 import com.mojang.blaze3d.platform.Window;
 
-import dev.joid.backend.minecraft.bridge.input.SdlKeys;
-import dev.joid.backend.minecraft.bridge.input.SdlMouseButtons;
 import dev.joid.backend.minecraft.lib.ui.core.container.ContainerUI;
 import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
 import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
+import dev.joid.base.lwjgl3.sdl.input.SdlKeys;
+import dev.joid.base.lwjgl3.sdl.input.SdlMouseButtons;
 import dev.joid.lib.bridge.BridgeHandler;
 import lombok.Getter;
 import lombok.NonNull;
@@ -50,14 +50,12 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 	@Override
 	public void removed() {
 		super.removed();
-		super.minecraft.textInputManager().stopTextInput(this);
 		this.bridge.removed(this);
 	}
 
 	@Override
 	protected void init() {
 		super.init();
-		super.minecraft.textInputManager().startTextInput(this);
 		this.bridge.load();
 		this.updateBounds();
 	}
@@ -90,6 +88,11 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 	@Override
 	public boolean isInGameUi() {
 		return !this.hasBackground();
+	}
+
+	@Override
+	public boolean isInputCaptured() {
+		return this.bridge.isInputCaptured();
 	}
 
 	@Override

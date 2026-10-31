@@ -3,14 +3,16 @@ package dev.joid.backend.minecraft.bridge.window;
 import org.lwjgl.sdl.SDLMouse;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.platform.TextInputManager;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.platform.cursor.CursorType;
 import com.mojang.blaze3d.platform.cursor.CursorTypes;
 
-import dev.joid.backend.minecraft.bridge.input.SdlKeys;
+import dev.joid.base.lwjgl3.sdl.input.SdlKeys;
 import dev.joid.lib.bridge.window.IWindowBridge;
 import dev.joid.lib.input.cursor.Cursor;
 import dev.joid.lib.input.key.Key;
+import dev.joid.lib.utils.geom.BoundingBox;
 import lombok.Getter;
 import lombok.NonNull;
 import net.minecraft.client.Minecraft;
@@ -18,8 +20,8 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 public final class MinecraftWindowBridge implements IWindowBridge {
 
-	@Getter
-	private Cursor cursor;
+	@Getter private Cursor      cursor;
+	@Getter private BoundingBox textInputArea;
 
 	public MinecraftWindowBridge() {
 		this.cursor = Cursor.DEFAULT;
@@ -81,6 +83,14 @@ public final class MinecraftWindowBridge implements IWindowBridge {
 		this.cursor = cursor;
 	}
 
+	@Override
+	public void setTextInputArea(final BoundingBox area) {
+		this.textInputArea = area;
+		if (area == null) {
+			Minecraft.getInstance().textInputManager().stopTextInput(this);
+		}
+	}
+
 	public double getInterfaceScale() {
 		final Minecraft minecraft = Minecraft.getInstance();
 		final Window window = minecraft.getWindow();
@@ -91,6 +101,17 @@ public final class MinecraftWindowBridge implements IWindowBridge {
 		if (!this.isMouseGrabbed()) {
 			graphics.requestCursor(MinecraftWindowBridge.getCursorType(cursor));
 		}
+	}
+
+	public void requestTextInput() {
+		if (this.textInputArea == null) {
+			return;
+		}
+
+		final double scale = Minecraft.getInstance().getWindow().getGuiScale();
+		final TextInputManager manager = Minecraft.getInstance().textInputManager();
+		manager.setTextInputArea((int) Math.floor(this.textInputArea.getMinX() / scale), (int) Math.floor(this.textInputArea.getMinY() / scale), (int) Math.ceil(this.textInputArea.getMaxX() / scale), (int) Math.ceil(this.textInputArea.getMaxY() / scale));
+		manager.startTextInput(this);
 	}
 
 	private static @NonNull CursorType getCursorType(final Cursor cursor) {

@@ -1,8 +1,8 @@
 package dev.joid.backend.minecraft.bridge.ui.screen;
 
-import dev.joid.backend.minecraft.bridge.input.SdlKeys;
-import dev.joid.backend.minecraft.bridge.input.SdlMouseButtons;
 import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
+import dev.joid.base.lwjgl3.sdl.input.SdlKeys;
+import dev.joid.base.lwjgl3.sdl.input.SdlMouseButtons;
 import lombok.NonNull;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
@@ -23,13 +23,11 @@ public class UIScreen extends Screen {
 
 	@Override
 	protected void init() {
-		super.minecraft.textInputManager().startTextInput(this);
 		this.bridge.load();
 	}
 
 	@Override
 	public void removed() {
-		super.minecraft.textInputManager().stopTextInput(this);
 		this.bridge.removed(this);
 	}
 
@@ -54,6 +52,11 @@ public class UIScreen extends Screen {
 	public boolean isPauseScreen() {
 		final UIDataMinecraft data = this.bridge.getMinecraftData();
 		return data == null || data.pause();
+	}
+
+	@Override
+	public boolean isInputCaptured() {
+		return this.bridge.isInputCaptured();
 	}
 
 	@Override
