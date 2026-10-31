@@ -9,10 +9,6 @@ headings() {
     git show "origin/$1:README.md" | tr -d '\r' | awk '/^```/ { fence = !fence; next } !fence && /^#+ /'
 }
 
-tests() {
-    git show "origin/$1:README.md" | tr -d '\r' | awk '/^## Tests$/ { inside = 1; print; next } inside && /^##? / { inside = 0 } inside'
-}
-
 git fetch --quiet origin '+refs/heads/version/*:refs/remotes/origin/version/*'
 branches="$(git for-each-ref --format='%(refname:lstrip=3)' 'refs/remotes/origin/version/')"
 if [ -z "$branches" ]; then
@@ -23,12 +19,6 @@ fi
 for branch in $branches; do
     if ! difference="$(diff <(headings "$model") <(headings "$branch"))"; then
         echo "[JOID] The README of $branch does not follow the plan of the README of $model:" >&2
-        echo "$difference" >&2
-        failures=$((failures + 1))
-    fi
-
-    if ! difference="$(diff <(tests "$model") <(tests "$branch"))"; then
-        echo "[JOID] The Tests section of the README of $branch differs from the one of $model:" >&2
         echo "$difference" >&2
         failures=$((failures + 1))
     fi

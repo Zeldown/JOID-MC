@@ -68,7 +68,7 @@ Then build each version branch, commit its `libs/` folder and push it: its conti
 
 Each Minecraft version has its own branch, `version/<Minecraft version>`, made from the closest version branch and never renamed. It joins the shared pipeline with three things:
 
-1. **A pilot.** `MinecraftClientTestPilot`, in `dev.joid.backend.minecraft.demo.test`, implements `IClientTestPilot` for the game of the version: input, captures, game state, and the Minecraft objects that the scenarios use. The version starts `ClientTestPlan.start(new MinecraftClientTestPilot())` when the game runs with `-Pjoid.test`. A scenario whose concept the version lacks goes in `getExclusions()` with its reason, and in the table of the Tests section of the README.
+1. **A pilot.** `MinecraftClientTestPilot`, in `dev.joid.backend.minecraft.demo.test`, implements `IClientTestPilot` for the game of the version: input, captures, game state, and the Minecraft objects that the scenarios use. The version starts `ClientTestPlan.start(new MinecraftClientTestPilot())` when the game runs with `-Pjoid.test`. A scenario whose concept the version lacks goes in `getExclusions()` with its reason.
 2. **Its `build.yml`**, which only calls the shared workflow with the parameters of the version. It runs on the pushes and pull requests of its own branch, and takes the showcase scenes of a manual run:
 
 ```yaml
@@ -98,9 +98,9 @@ jobs:
       showcase: ${{ inputs.showcase || '' }}
 ```
 
-3. **Its README**, the README of `version/26.2` with the same sections in the same order: only the sentences and the code that the version changes, the same showcases rendered in the version, and the same Tests section.
+3. **Its README**, the README of `version/26.2` with the same headings in the same order: only the sentences and the code that the version changes, and the same showcases rendered in the version. A README is written for the users of the library: it has no section on the tests, whose plan and exclusions live in the code.
 
-The `parity` job of every branch fails as soon as a version branch leaves this model.
+The `parity` job of every branch fails as soon as the headings of a README or a `build.yml` leave this model.
 
 Every version compares its snapshots with the same references, in the `.snapshots/references/<graphics API>/<renderer>` folder of this branch: a version that draws with OpenGL, directly like 1.7.10 or through Blaze3D like 26.2, must render the images of the others, to within one level per channel. Vulkan keeps its own references: lavapipe compiles and rasterizes differently from llvmpipe, by up to 7 levels on the edges of shapes and text. A new version records the references it misses on its first run; copy them here from the artifact of that run.
 
