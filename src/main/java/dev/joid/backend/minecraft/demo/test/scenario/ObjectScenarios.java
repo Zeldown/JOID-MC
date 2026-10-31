@@ -133,9 +133,8 @@ public final class ObjectScenarios {
 		final int[] pearl = context.compute(() -> ClientTestBounds.all(ClientTestDemos.MINECRAFT, ClientTestDemos.ITEM_NODE)).get(4);
 		final BufferedImage before = context.capture("joid-demo-minecraft-cooldown-before");
 		context.click(pearl);
-		context.waitTicks(10);
+		context.waitFor("the cooldown of the ender pearl after its click", () -> pilot.isOnCooldown(ClientTestItem.ENDER_PEARL), 10);
 		final BufferedImage cooldown = context.capture("joid-demo-minecraft-cooldown");
-		context.check(context.test(() -> pilot.isOnCooldown(ClientTestItem.ENDER_PEARL)), "clicking the ender pearl did not start its cooldown");
 		ClientTestImages.expectChange(context, "cooldown overlay of the ender pearl", Arrays.asList(before, cooldown), pearl, false);
 		context.moveMouse(960D, 540D);
 		context.closeScreens();
