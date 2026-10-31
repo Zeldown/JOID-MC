@@ -1,5 +1,11 @@
 package dev.joid.backend.minecraft.lib.font.impl.minecraft;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
+
+import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.font.FontWeight;
 import dev.joid.lib.font.impl.glyph.IFontFace;
 import lombok.AccessLevel;
@@ -15,6 +21,8 @@ import net.minecraft.resources.Identifier;
 @Getter
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MinecraftFontFace implements IFontFace {
+
+	private static final Map<GlyphSource, Set<Integer>> BAKED_MAP = new WeakHashMap<>();
 
 	private final FontWeight               weight;
 	private final FontDescription.Resource description;
@@ -82,7 +90,11 @@ public final class MinecraftFontFace implements IFontFace {
 	}
 
 	public @NonNull BakedGlyph getGlyph(final int codepoint) {
-		return this.getSource().getGlyph(codepoint);
+		final GlyphSource source = this.getSource();
+		if (MinecraftFontFace.BAKED_MAP.computeIfAbsent(source, baked -> new HashSet<>()).add(codepoint)) {
+			BridgeHandler.RENDER.get().suspend(() -> source.getGlyph(codepoint));
+		}
+		return source.getGlyph(codepoint);
 	}
 
 }
