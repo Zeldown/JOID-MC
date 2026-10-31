@@ -18,7 +18,7 @@ jobs:
   version:
     uses: Zeldown/JOID-MC/.github/workflows/version.yml@common
     with:
-      java-version: '17'
+      java-version: '21'
       loaders: '["fabric", "neoforge", "forge"]'
       vulkan: false
       showcase: ${{ inputs.showcase || '' }}
