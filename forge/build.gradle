@@ -19,6 +19,11 @@ minecraft {
     runs {
         configureEach {
             workingDir = layout.projectDirectory.dir("runs/${it.name}")
+            mods {
+                register(mod_id) {
+                    source(sourceSets.main)
+                }
+            }
         }
         register('client') {
             if (project.hasProperty('joid.test')) {
