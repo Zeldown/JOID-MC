@@ -91,6 +91,9 @@ public final class MinecraftWindowBridge implements IWindowBridge {
 	}
 
 	public void requestCursor(final Cursor cursor) {
+		if (cursor != Cursor.DEFAULT) {
+			System.out.println("[JOIDDIAG] request " + cursor + " grabbed=" + this.isMouseGrabbed() + " from " + Thread.currentThread().getStackTrace()[2]);
+		}
 		if (!this.isMouseGrabbed()) {
 			this.requested = cursor;
 		}
@@ -98,6 +101,10 @@ public final class MinecraftWindowBridge implements IWindowBridge {
 
 	public void applyCursor() {
 		final Cursor cursor = this.requested != null ? this.requested : Cursor.DEFAULT;
+		if (cursor != Cursor.DEFAULT || this.applied != Cursor.DEFAULT) {
+			final StackTraceElement[] trace = Thread.currentThread().getStackTrace();
+			System.out.println("[JOIDDIAG] apply " + cursor + " applied=" + this.applied + " grabbed=" + this.isMouseGrabbed() + " from " + trace[3] + " / " + trace[4] + " / " + trace[5]);
+		}
 		this.requested = null;
 		if (cursor != this.applied && !this.isMouseGrabbed()) {
 			this.applied = cursor;
