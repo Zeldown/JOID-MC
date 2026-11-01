@@ -1,16 +1,16 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.20.1/docs/images/logo.png" width="128" alt="JOID logo">
+<img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.16.5/docs/images/logo.png" width="128" alt="JOID logo">
 
 # JOID-MC
 ## JOID interfaces inside Minecraft
 
 <div align="center">
-  <img align="center" src="https://img.shields.io/badge/minecraft-1.20.1-brightgreen">
+  <img align="center" src="https://img.shields.io/badge/minecraft-1.16.5-brightgreen">
   <img align="center" src="https://img.shields.io/badge/joid-8.0.0-blue">
-  <img align="center" src="https://img.shields.io/badge/loader-Fabric%20%C2%B7%20NeoForge%20%C2%B7%20Forge-orange">
+  <img align="center" src="https://img.shields.io/badge/loader-Fabric%20%C2%B7%20Forge-orange">
   <img align="center" src="https://img.shields.io/badge/license-Apache--2.0-blue">
-  <img align="center" src="https://github.com/Zeldown/JOID-MC/actions/workflows/build.yml/badge.svg?branch=version/1.20.1">
+  <img align="center" src="https://github.com/Zeldown/JOID-MC/actions/workflows/build.yml/badge.svg?branch=version/1.16.5">
   <a href="https://discord.joid.dev"><img align="center" src="https://img.shields.io/badge/discord-join-5865F2"></a>
 </div>
 
@@ -41,41 +41,41 @@ JOID-MC brings [JOID](https://github.com/Zeldown/JOID), the Java UI engine, insi
 Draw your screen in your design tool, copy each layer's values, and get the same result in the game.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.20.1/docs/images/copy-the-design.webp" alt="A quest panel in its mockup, then the same panel in the Minecraft window, identical" width="100%">
+  <img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.16.5/docs/images/copy-the-design.webp" alt="A quest panel in its mockup, then the same panel in the Minecraft window, identical" width="100%">
 </p>
 
 ## Showcase
 
-Real renders inside the game window, styled for this showcase: JOID ships with no design of its own. Watch them in the [1080p video](https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.20.1/docs/images/showcase.mp4).
+Real renders inside the game window, styled for this showcase: JOID ships with no design of its own. Watch them in the [1080p video](https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.16.5/docs/images/showcase.mp4).
 
 <table>
   <tr>
-    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.20.1/docs/images/showcase-hud.webp" alt="Health, hunger and experience replaced by an animated JOID HUD, in game"></td>
-    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.20.1/docs/images/showcase-chest.webp" alt="A chest redrawn with JOID over the world: real slots, a rotating player, items dragged with the mouse"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.16.5/docs/images/showcase-hud.webp" alt="Health, hunger and experience replaced by an animated JOID HUD, in game"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.16.5/docs/images/showcase-chest.webp" alt="A chest redrawn with JOID over the world: real slots, a rotating player, items dragged with the mouse"></td>
   </tr>
   <tr>
     <td align="center"><sub><b>HUD.</b> Replace any layer, in game.</sub></td>
     <td align="center"><sub><b>Containers.</b> Real slots, synced with the server.</sub></td>
   </tr>
   <tr>
-    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.20.1/docs/images/showcase-bestiary.webp" alt="Cards of mobs, blocks and items turning in 3D, with a detail panel"></td>
-    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.20.1/docs/images/showcase-fonts.webp" alt="The Minecraft font from 8 to 72 px, chat colors and formats, the enchanting table alphabet decoded, then a 6x zoom that stays pixel-sharp"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.16.5/docs/images/showcase-bestiary.webp" alt="Cards of mobs, blocks and items turning in 3D, with a detail panel"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.16.5/docs/images/showcase-fonts.webp" alt="The Minecraft font from 8 to 72 px, chat colors and formats, the enchanting table alphabet decoded, then a 6x zoom that stays pixel-sharp"></td>
   </tr>
   <tr>
     <td align="center"><sub><b>Game objects.</b> Entities, blocks and items, rendered in 3D.</sub></td>
     <td align="center"><sub><b>Fonts.</b> The Minecraft font, sharp at any size, with § colors.</sub></td>
   </tr>
   <tr>
-    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.20.1/docs/images/showcase-anvil.webp" alt="A redesigned anvil: a word of the sword name is selected with a double click and retyped, the preview and the cost follow, then the renamed sword is taken"></td>
-    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.20.1/docs/images/showcase-servers.webp" alt="A server list with colored messages of the day: a server is dragged to the top, then the list scrolls"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.16.5/docs/images/showcase-anvil.webp" alt="A redesigned anvil: a word of the sword name is selected with a double click and retyped, the preview and the cost follow, then the renamed sword is taken"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.16.5/docs/images/showcase-servers.webp" alt="A server list with colored messages of the day: a server is dragged to the top, then the list scrolls"></td>
   </tr>
   <tr>
     <td align="center"><sub><b>Forms.</b> Type, check and preview, in a real anvil.</sub></td>
     <td align="center"><sub><b>Lists.</b> Drag to reorder, scroll smoothly.</sub></td>
   </tr>
   <tr>
-    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.20.1/docs/images/showcase-daylight.webp" alt="A daylight panel over the live world: the sun dial, the clock, the sky, the moon phase and the world follow one time value, first as the game advances it, then as the slider is dragged"></td>
-    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.20.1/docs/images/showcase-video.webp" alt="A video with sound inside the game window, paused and resumed with its own controls, then previewed frame by frame while the pointer hovers the timeline"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.16.5/docs/images/showcase-daylight.webp" alt="A daylight panel over the live world: the sun dial, the clock, the sky, the moon phase and the world follow one time value, first as the game advances it, then as the slider is dragged"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.16.5/docs/images/showcase-video.webp" alt="A video with sound inside the game window, paused and resumed with its own controls, then previewed frame by frame while the pointer hovers the timeline"></td>
   </tr>
   <tr>
     <td align="center"><sub><b>Reactive.</b> Bind once, never refresh.</sub></td>
@@ -107,15 +107,7 @@ Download the `dev` jar of your loader from the [releases](https://github.com/Zel
 
 ```gradle
 dependencies {
-    modImplementation(files("libs/joid-backend-minecraft-fabric-1.20.1-1.0.0-dev.jar"))
-}
-```
-
-**NeoForge**
-
-```gradle
-dependencies {
-    modImplementation(files("libs/joid-backend-minecraft-neoforge-1.20.1-1.0.0-dev.jar"))
+    modImplementation(files("libs/joid-backend-minecraft-fabric-1.16.5-1.0.0-dev.jar"))
 }
 ```
 
@@ -123,11 +115,13 @@ dependencies {
 
 ```gradle
 dependencies {
-    modImplementation(files("libs/joid-backend-minecraft-forge-1.20.1-1.0.0-dev.jar"))
+    implementation(fg.deobf(files("libs/joid-backend-minecraft-forge-1.16.5-1.0.0-dev.jar")))
 }
 ```
 
-`modImplementation` maps the jar to the names of your workspace, with Loom on Fabric and ModDevGradle Legacy on NeoForge and Forge; with ForgeGradle, use `implementation(fg.deobf(files(...)))`. `runClient` then starts the game with JOID-MC in dev mode.
+`modImplementation` maps the jar to the names of your workspace with Loom, `fg.deobf` with ForgeGradle. `runClient` then starts the game with JOID-MC in dev mode.
+
+The examples below use the official names of Minecraft, those of a Loom workspace with the official mappings. A ForgeGradle workspace of Minecraft 1.16.5 keeps the method and field names but not the class names: `PoseStack` is `MatrixStack`, `AbstractContainerMenu` is `Container`, `MenuScreens` is `ScreenManager`, and so on.
 
 ### Shipping your mod
 
@@ -145,16 +139,6 @@ JOID-MC is a separate mod that players install next to yours, like any library m
 ```
 
 Fabric has no client-side dependency: use `depends` when your mod is `"environment": "client"`. A mod that also runs on servers declares `joid` in `recommends`, since a `depends` stops a dedicated server that does not have JOID-MC, and calls JOID-MC from its client entrypoint only.
-
-**NeoForge** · `mods.toml`
-
-```toml
-[[dependencies.yourmod]]
-modId = "joid"
-mandatory = true
-versionRange = "[1.0.0,)"
-side = "CLIENT"
-```
 
 **Forge** · `mods.toml`
 
@@ -269,21 +253,15 @@ public void onInitializeClient() {
 }
 ```
 
-**NeoForge** · in your `@Mod` class, on `FMLClientSetupEvent`
-
-```java
-public YourMod() {
-	FMLJavaModLoadingContext.get().getModEventBus().addListener((final FMLClientSetupEvent event) -> event.enqueueWork(() -> MenuScreens.register(BackpackMenu.TYPE, ContainerUI.screen(BackpackUI::new))));
-}
-```
-
 **Forge** · in your `@Mod` class, on `FMLClientSetupEvent`
 
 ```java
-public YourMod(final FMLJavaModLoadingContext context) {
-	context.getModEventBus().addListener((final FMLClientSetupEvent event) -> event.enqueueWork(() -> MenuScreens.register(BackpackMenu.TYPE, ContainerUI.screen(BackpackUI::new))));
+public YourMod() {
+	FMLJavaModLoadingContext.get().getModEventBus().addListener((final FMLClientSetupEvent event) -> event.enqueueWork(() -> ScreenManager.register(BackpackContainer.TYPE, ContainerUI.screen(BackpackUI::new))));
 }
 ```
+
+`MenuScreens.register` is private in Minecraft 1.16.5: JOID-MC opens it to the mods that depend on it, in their Loom workspace too.
 
 `ContainerUI.screen(...)` is the only way to get the screen of a container UI. Your mod keeps its own menu types, registries and opening logic: open the menu from the server as usual (`player.openMenu(...)`), never with `JOID.open`, which throws for a container UI. `Escape` and the inventory key close it like a vanilla container.
 
@@ -371,7 +349,7 @@ An overlay without `@UIDataOverlayLayer` is drawn above the whole HUD; an open s
 
 | `OverlayLayer` | Vanilla layer |
 |---|---|
-| `CAMERA_OVERLAYS` | Full-screen effects: vignette, pumpkin, powder snow, spyglass, nether portal and nausea. |
+| `CAMERA_OVERLAYS` | Full-screen effects: vignette, pumpkin, nether portal and nausea. |
 | `CROSSHAIR` | The crosshair and the attack indicator. |
 | `HOTBAR` | The hotbar and the offhand slot. |
 | `ARMOR` | The armor bar. |
@@ -475,7 +453,7 @@ final TextInfo info = TextInfo.create(MinecraftFont.DEFAULT, MinecraftFont.SIZE 
 
 TextNode.create(100, 100).text(Text.create("§6Gold §lbold §kmagic", info)).attach(this);
 
-TextNode.create(100, 160).text(Text.create(Component.translatable("menu.game"), info)).attach(this);
+TextNode.create(100, 160).text(Text.create(new TranslatableComponent("menu.game"), info)).attach(this);
 ```
 
 | Member | Font |
@@ -498,7 +476,7 @@ The vanilla shadow is `shadowTint(0.25F)`, the color of each glyph at 25 %, with
 
 `LegacyTextColor` gives the 16 colors as JOID colors: `LegacyTextColor.GOLD.getColor()`.
 
-A chat `Component` keeps its colors, hex colors included, its styles, and translates its `translatable` parts in the language of the game. The `§` codes and the `Component`s work with every JOID font, and the Minecraft fonts with everything else of [Text](https://documentation.joid.dev/use/learn/describing-the-ui/text/): markup, effects, alignment, wrapping. Like the vanilla text boxes, JOID text fields drop a typed `§`: the codes come from your code, never from the player.
+A chat `Component` keeps its colors, hex colors included, its styles, and translates its `TranslatableComponent` parts in the language of the game. The `§` codes and the `Component`s work with every JOID font, and the Minecraft fonts with everything else of [Text](https://documentation.joid.dev/use/learn/describing-the-ui/text/): markup, effects, alignment, wrapping. Like the vanilla text boxes, JOID text fields drop a typed `§`: the codes come from your code, never from the player.
 
 ## Textures and resources
 

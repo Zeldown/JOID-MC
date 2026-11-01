@@ -5,7 +5,7 @@ extendable	method	net/minecraft/client/gui/screens/inventory/AbstractContainerSc
 accessible	method	net/minecraft/client/gui/screens/inventory/AbstractContainerScreen	recalculateQuickCraftRemaining	()V
 accessible	field	net/minecraft/client/gui/screens/inventory/AbstractContainerScreen	quickCraftingType	I
 accessible	field	net/minecraft/client/gui/screens/inventory/AbstractContainerScreen	quickCraftingRemainder	I
-accessible	class	net/minecraft/client/gui/screens/MenuScreens$ScreenConstructor
+transitive-accessible	class	net/minecraft/client/gui/screens/MenuScreens$ScreenConstructor
 accessible	method	net/minecraft/world/inventory/MenuType	<init>	(Lnet/minecraft/world/inventory/MenuType$MenuSupplier;)V
-accessible	method	net/minecraft/client/gui/screens/MenuScreens	register	(Lnet/minecraft/world/inventory/MenuType;Lnet/minecraft/client/gui/screens/MenuScreens$ScreenConstructor;)V
+transitive-accessible	method	net/minecraft/client/gui/screens/MenuScreens	register	(Lnet/minecraft/world/inventory/MenuType;Lnet/minecraft/client/gui/screens/MenuScreens$ScreenConstructor;)V
 accessible	class	net/minecraft/world/inventory/MenuType$MenuSupplier
