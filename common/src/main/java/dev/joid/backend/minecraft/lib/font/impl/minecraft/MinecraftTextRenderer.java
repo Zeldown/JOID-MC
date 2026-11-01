@@ -2,6 +2,7 @@ package dev.joid.backend.minecraft.lib.font.impl.minecraft;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
@@ -20,9 +21,12 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.AbstractTexture;
+import net.minecraft.resources.ResourceLocation;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MinecraftTextRenderer extends BitmapTextRenderer<MinecraftFontFace> {
@@ -71,7 +75,18 @@ public final class MinecraftTextRenderer extends BitmapTextRenderer<MinecraftFon
 				type.clearRenderState();
 			}
 		});
-		return new Sheet(GlBorrowedTexture.of(sheet[0]), sheet[1] == GL30.GL_R8 || sheet[1] == GL11.GL_RED);
+		final ResourceLocation location = MinecraftTextRenderer.findLocation(sheet[0]);
+		final ITexture texture = location == null ? GlBorrowedTexture.of(sheet[0]) : GlBorrowedTexture.of(() -> Minecraft.getInstance().getTextureManager().getTexture(location).getId());
+		return new Sheet(texture, sheet[1] == GL30.GL_R8 || sheet[1] == GL11.GL_RED);
+	}
+
+	private static ResourceLocation findLocation(final int texture) {
+		for (final Entry<ResourceLocation, AbstractTexture> entry : Minecraft.getInstance().getTextureManager().byPath.entrySet()) {
+			if (entry.getValue().getId() == texture) {
+				return entry.getKey();
+			}
+		}
+		return null;
 	}
 
 	@AllArgsConstructor(access = AccessLevel.PRIVATE)

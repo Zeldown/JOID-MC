@@ -51,7 +51,7 @@ public final class GuiDrawableRaster implements DrawableRaster {
 		GuiDrawableRaster.rasterDepth++;
 		try {
 			pose.translate(width / 2F, height / 2F, 0F);
-			pose.mulPose(new Matrix4f().scaling(size, -size, size));
+			pose.last().pose().mul(new Matrix4f().scaling(size, -size, size));
 			this.draw.accept(pose, buffer);
 			buffer.endBatch();
 		} finally {
