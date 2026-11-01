@@ -77,6 +77,10 @@ loom {
     }
 }
 
+tasks.matching { it.name == 'runClient' }.configureEach {
+    useXvfb = false
+}
+
 tasks.named('eclipseClasspath') {
     dependsOn('genSources')
 }
