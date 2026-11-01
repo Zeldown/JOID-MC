@@ -1,5 +1,8 @@
 package dev.joid.backend.minecraft.bridge.ui.overlay;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
@@ -20,16 +23,20 @@ public final class OverlayInputForwarder {
 			return;
 		}
 
-		while (minecraft.currentScreen != null && Mouse.next()) {
-			if (!Lwjgl2InputForwarder.forwardMouseEvent()) {
-				minecraft.currentScreen.handleMouseInput();
+		try {
+			while (minecraft.currentScreen != null && Mouse.next()) {
+				if (!Lwjgl2InputForwarder.forwardMouseEvent()) {
+					minecraft.currentScreen.handleMouseInput();
+				}
 			}
-		}
 
-		while (minecraft.currentScreen != null && Keyboard.next()) {
-			if (!Lwjgl2InputForwarder.forwardKeyboardEvent()) {
-				minecraft.currentScreen.handleKeyboardInput();
+			while (minecraft.currentScreen != null && Keyboard.next()) {
+				if (!Lwjgl2InputForwarder.forwardKeyboardEvent()) {
+					minecraft.currentScreen.handleKeyboardInput();
+				}
 			}
+		} catch (final IOException exception) {
+			throw new UncheckedIOException("The screen " + minecraft.currentScreen + " failed to handle the input", exception);
 		}
 	}
 

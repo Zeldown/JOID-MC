@@ -48,11 +48,11 @@ public class ShowChest extends ContainerUI<ContainerChest> implements IShowFocus
 			.tile(40, 40, 300, 720, 22F)
 			.body(card -> {
 				CircleNode.create(30, 90, 240).color(ShowTheme.GRASS.withAlpha(0.20F)).effect(BlurNodeEffect.create(40F)).interactive(false).attach(card);
-				EntityNode.create(30, 50, 240, 420).entity(Minecraft.getMinecraft().thePlayer).rotationYaw(() -> -25D + this.elapsed() * 12D).scale(0.9D).attach(card);
-				TextNode.create(150, 520).text(Text.create(Minecraft.getMinecraft().thePlayer.getCommandSenderName(), ShowTheme.font(FontWeight.EXTRA_BOLD, 28F, ShowTheme.TEXT)).alignX(Align.CENTER)).anchorX(Align.CENTER).attach(card);
-				TextNode.create(150, 562).text(Text.create(() -> "Survival \u00B7 Level " + Minecraft.getMinecraft().thePlayer.experienceLevel, ShowTheme.font(FontWeight.MEDIUM, 16F, ShowTheme.MUTED)).alignX(Align.CENTER)).anchorX(Align.CENTER).attach(card);
-				this.stat(card, 612, "Health", ShowTheme.REDSTONE, () -> Minecraft.getMinecraft().thePlayer.getHealth() / 20D);
-				this.stat(card, 666, "Hunger", ShowTheme.GOLD, () -> Minecraft.getMinecraft().thePlayer.getFoodStats().getFoodLevel() / 20D);
+				EntityNode.create(30, 50, 240, 420).entity(Minecraft.getMinecraft().player).rotationYaw(() -> -25D + this.elapsed() * 12D).scale(0.9D).attach(card);
+				TextNode.create(150, 520).text(Text.create(Minecraft.getMinecraft().player.getName(), ShowTheme.font(FontWeight.EXTRA_BOLD, 28F, ShowTheme.TEXT)).alignX(Align.CENTER)).anchorX(Align.CENTER).attach(card);
+				TextNode.create(150, 562).text(Text.create(() -> "Survival \u00B7 Level " + Minecraft.getMinecraft().player.experienceLevel, ShowTheme.font(FontWeight.MEDIUM, 16F, ShowTheme.MUTED)).alignX(Align.CENTER)).anchorX(Align.CENTER).attach(card);
+				this.stat(card, 612, "Health", ShowTheme.REDSTONE, () -> Minecraft.getMinecraft().player.getHealth() / 20D);
+				this.stat(card, 666, "Hunger", ShowTheme.GOLD, () -> Minecraft.getMinecraft().player.getFoodStats().getFoodLevel() / 20D);
 			})
 			.attach(panel);
 			TextNode.create(380, 44).text(Text.create("Chest", ShowTheme.font(FontWeight.EXTRA_BOLD, 34F, ShowTheme.TEXT))).attach(panel);
@@ -86,7 +86,7 @@ public class ShowChest extends ContainerUI<ContainerChest> implements IShowFocus
 			.hoveredColor(Color.WHITE.withAlpha(0.16F))
 			.body(tile -> {
 				if (hotbar) {
-					RectNode.create(0, 0, 81, 81).color(ShowTheme.GRASS.withAlpha(0.14F)).visible(() -> Minecraft.getMinecraft().thePlayer.inventory.currentItem == slot - 54).effect(RoundedNodeEffect.create(16F)).interactive(false).attach(tile);
+					RectNode.create(0, 0, 81, 81).color(ShowTheme.GRASS.withAlpha(0.14F)).visible(() -> Minecraft.getMinecraft().player.inventory.currentItem == slot - 54).effect(RoundedNodeEffect.create(16F)).interactive(false).attach(tile);
 				}
 
 				final SlotNode node = SlotNode.create(4, 4, 73, 73).slot(super.getContainer().getSlot(slot)).hoveredColor((Color) null);
@@ -112,7 +112,7 @@ public class ShowChest extends ContainerUI<ContainerChest> implements IShowFocus
 	private int countItems() {
 		int count = 0;
 		for (int index = 0; index < 27; index++) {
-			if (super.getContainer().getSlot(index).getStack() != null) {
+			if (super.getContainer().getSlot(index).getHasStack()) {
 				count++;
 			}
 		}

@@ -1,21 +1,47 @@
 import java.lang.reflect.InvocationTargetException
 import java.util.regex.Pattern
+import java.util.zip.GZIPInputStream
 import java.util.zip.ZipFile
 import java.util.zip.ZipInputStream
 
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
-apply plugin: 'forge'
-apply plugin: 'com.github.johnrengelman.shadow'
+plugins {
+    id 'java'
+    id 'eclipse'
+    id 'net.minecraftforge.gradle'
+    id 'net.minecraftforge.renamer'
+    id 'com.gradleup.shadow'
+}
+
 apply from: rootProject.file('gradle/joid-packaging.gradle')
 
-archivesBaseName = "${mod_id}-backend-minecraft-${project.name}-${minecraft_version}"
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+base.archivesName = "${mod_id}-backend-minecraft-${project.name}-${minecraft_version}"
+java.toolchain.languageVersion = JavaLanguageVersion.of(8)
 
 minecraft {
-    version = "${minecraft_version}-${forge_version}-${minecraft_version}"
-    runDir = 'runs/client'
+    mappings(channel: mapping_channel, version: mapping_version)
+    runs {
+        register('client') {
+            workingDir = layout.projectDirectory.dir('runs/client')
+            if (project.hasProperty('joid.test')) {
+                systemProperty('joid.test', 'true')
+                systemProperty('joid.loader', project.name)
+                systemProperty('joid.snapshot.output', file('runs/snapshots').absolutePath)
+                systemProperty('joid.snapshot.references', rootProject.file('.snapshots/references').absolutePath)
+                systemProperty('joid.cache', layout.buildDirectory.dir('joid-cache').get().asFile.absolutePath)
+            }
+            if (project.hasProperty('joid.showcase')) {
+                project.properties.findAll { it.key.startsWith('joid.showcase') }.each { systemProperty(it.key, it.value.toString()) }
+                args('--username', 'JOID')
+            }
+            if (project.hasProperty('joid.test') || project.hasProperty('joid.showcase')) {
+                args('--width', '1920', '--height', '1080')
+            } else {
+                args('--width', '1280', '--height', '720')
+            }
+        }
+    }
 }
 
 sourceSets {
@@ -26,7 +52,6 @@ sourceSets {
         resources {
             srcDir rootProject.file('common/src/main/resources')
         }
-        output.resourcesDir = output.classesDir
     }
     test {
         java {
@@ -36,6 +61,9 @@ sourceSets {
 }
 
 repositories {
+    minecraft.mavenizer(it)
+    maven(fg.forgeMaven)
+    maven(fg.minecraftLibsMaven)
     mavenCentral()
 }
 
@@ -47,11 +75,13 @@ configurations {
     joidDev
     joidProd
     clientTest
-    compile.extendsFrom(embed, joidDemo)
+    implementation.extendsFrom(embed, joidDemo)
     compileOnly.extendsFrom(clientTest)
+    runtimeOnly.extendsFrom(clientTest)
 }
 
 dependencies {
+    implementation(minecraft.dependency("net.minecraftforge:forge:${minecraft_version}-${forge_version}"))
     joidDemo files(rootProject.file("libs/joid-core-${joid_version}-demo.jar"), rootProject.file("libs/joid-backend-minecraft-common-${common_version}-demo.jar"))
     joidDev files(rootProject.file("libs/joid-core-${joid_version}-dev.jar"), rootProject.file("libs/joid-backend-minecraft-common-${common_version}-dev.jar"))
     joidProd files(rootProject.file("libs/joid-core-${joid_version}-prod.jar"), rootProject.file("libs/joid-backend-minecraft-common-${common_version}-prod.jar"))
@@ -59,16 +89,27 @@ dependencies {
     embed "net.java.dev.jna:jna:${jna_version}"
     clientTest files(rootProject.file("libs/joid-tool-testkit-${joid_version}.jar"), rootProject.file("libs/joid-base-opengl-${joid_version}-snapshot.jar"), rootProject.file("libs/joid-base-lwjgl2-${joid_version}-snapshot.jar"))
     clientTest "junit:junit:${junit_version}"
+    compileOnly "org.lwjgl.lwjgl:lwjgl_util:${lwjgl_version}"
     compileOnly "org.projectlombok:lombok:${lombok_version}"
-    testCompile "junit:junit:${junit_version}"
+    annotationProcessor "org.projectlombok:lombok:${lombok_version}"
+    testImplementation "junit:junit:${junit_version}"
     testCompileOnly "org.projectlombok:lombok:${lombok_version}"
+    testAnnotationProcessor "org.projectlombok:lombok:${lombok_version}"
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
-tasks.withType(Jar) {
+tasks.named('test', Test) {
+    def directory = layout.buildDirectory.dir('test').get().asFile
+    workingDir = directory
+    doFirst {
+        directory.mkdirs()
+    }
+}
+
+tasks.withType(Jar).configureEach {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from(rootProject.file('LICENSE')) {
         rename { "${it}_${mod_name}" }
@@ -94,7 +135,7 @@ processResources {
 }
 
 jar {
-    classifier = 'slim'
+    archiveClassifier = 'slim'
     excludeDemo(it)
     manifest {
         attributes([
@@ -113,10 +154,10 @@ shadowJar {
     enabled = false
 }
 
-task devJar(type: ShadowJar) {
+def devJar = tasks.register('devJar', ShadowJar) {
     group = 'build'
     description = 'Builds the dev jar of the mod, with the dev mode of JOID, no demo and the MCP names of a ForgeGradle workspace.'
-    classifier = 'dev'
+    archiveClassifier = 'dev'
     from(sourceSets.main.output)
     configurations = [project.configurations.embed, project.configurations.joidDev]
     exclude(moduleDescriptors)
@@ -128,10 +169,11 @@ task devJar(type: ShadowJar) {
     manifest.inheritFrom(jar.manifest)
 }
 
-task prodJar(type: ShadowJar) {
+def prodJar = tasks.register('prodJar', ShadowJar) {
     group = 'build'
-    description = 'Builds the prod jar of the mod, without any code or asset of the dev and demo modes.'
-    classifier = 'prod'
+    description = 'Builds the prod jar of the mod with the MCP names, without any code or asset of the dev and demo modes.'
+    archiveClassifier = 'prod'
+    destinationDirectory = layout.buildDirectory.dir('shadow')
     from(sourceSets.main.output)
     configurations = [project.configurations.embed, project.configurations.joidProd]
     exclude(moduleDescriptors)
@@ -143,45 +185,22 @@ task prodJar(type: ShadowJar) {
     manifest.inheritFrom(jar.manifest)
 }
 
-task sourcesJar(type: Jar) {
+def reobfProdJar = renamer.classes('reobfProdJar', prodJar) {
+    group = 'build'
+    description = 'Reobfuscates the prod jar of the mod to the SRG names that Forge uses outside of a workspace.'
+    map.from(minecraft.dependency.toSrgFile)
+    output = layout.buildDirectory.file("libs/${base.archivesName.get()}-${version}-prod.jar")
+}
+
+def sourcesJar = tasks.register('sourcesJar', Jar) {
     group = 'build'
     description = 'Builds the sources jar of the mod, without demo.'
-    classifier = 'sources'
+    archiveClassifier = 'sources'
     from(sourceSets.main.allSource)
     from(zipTree(rootProject.file("libs/joid-backend-minecraft-common-${common_version}-sources.jar"))) {
         exclude('META-INF/**')
     }
     excludeDemo(it)
-}
-
-reobf {
-    reobf(prodJar.archivePath) { spec ->
-        spec.classpath = configurations.compile
-    }
-}
-
-reobf.dependsOn(prodJar)
-
-runClient {
-    if (project.hasProperty('joid.test')) {
-        systemProperty('joid.test', 'true')
-        systemProperty('joid.loader', project.name)
-        systemProperty('joid.snapshot.output', file('runs/snapshots').absolutePath)
-        systemProperty('joid.snapshot.references', rootProject.file('.snapshots/references').absolutePath)
-        systemProperty('joid.cache', file("$buildDir/joid-cache").absolutePath)
-    }
-    if (project.hasProperty('joid.showcase')) {
-        project.properties.findAll { it.key.startsWith('joid.showcase') }.each { systemProperty(it.key, it.value.toString()) }
-        args('--username', 'JOID')
-    }
-    if (project.hasProperty('joid.test') || project.hasProperty('joid.showcase')) {
-        args('--width', '1920', '--height', '1080')
-    } else {
-        args('--width', '1280', '--height', '720')
-    }
-    doFirst {
-        classpath = classpath.filter { it != jar.archivePath } + sourceSets.main.output + configurations.clientTest
-    }
 }
 
 eclipse {
@@ -229,7 +248,7 @@ def readClass = { byte[] bytes ->
     return [major: major, references: references, members: members.collect { "${texts[classes[it[1]]]}/${texts[nameTypes[it[2]][0]]}${it[0] == 9 ? '' : ' ' + texts[nameTypes[it[2]][1]]}".toString() }]
 }
 
-def verifyJar = { String kind, File archive, File common, Collection<File> embedded, List<String> patterns, Pattern references, List<String> words, boolean devMode ->
+def verifyJar = { String kind, File archive, File common, File mappings, Collection<File> embedded, List<String> patterns, Pattern references, List<String> words, boolean devMode ->
     def failures = []
     def names = []
     new ZipInputStream(new FileInputStream(archive)).withCloseable { zip ->
@@ -268,11 +287,20 @@ def verifyJar = { String kind, File archive, File common, Collection<File> embed
     }
 
     def foreignNames = [] as Set
-    tasks.genSrgs.mcpToSrg.eachLine { line ->
-        def parts = line.split(' ')
-        if (parts[0] in ['MD:', 'FD:'] && parts[1].tokenize('/').last() != parts[parts[0] == 'MD:' ? 3 : 2].tokenize('/').last()) {
-            def mapped = parts[0] == 'MD:' ? ["${parts[1]} ${parts[2]}".toString(), "${parts[3]} ${parts[4]}".toString()] : [parts[1], parts[2]]
-            foreignNames << mapped[devMode ? 1 : 0]
+    def owner = null
+    (mappings.name.endsWith('.gz') ? new GZIPInputStream(new FileInputStream(mappings)) : new FileInputStream(mappings)).withReader('UTF-8') { reader ->
+        reader.eachLine { line ->
+            if (line.startsWith('tsrg') || line.startsWith('		')) {
+                return
+            }
+
+            def parts = line.trim().split(' ')
+            if (!line.startsWith('	')) {
+                owner = parts[0]
+            } else if (parts[0] != parts[-1]) {
+                def mapped = parts.length == 3 ? ["${owner}/${parts[0]} ${parts[1]}".toString(), "${owner}/${parts[2]} ${parts[1]}".toString()] : ["${owner}/${parts[0]}".toString(), "${owner}/${parts[1]}".toString()]
+                foreignNames << mapped[devMode ? 1 : 0]
+            }
         }
     }
 
@@ -281,7 +309,7 @@ def verifyJar = { String kind, File archive, File common, Collection<File> embed
             def bytes = zip.getInputStream(entry).bytes
             def major = ((bytes[6] & 0xFF) << 8) | (bytes[7] & 0xFF)
             if (major > 52) {
-                failures << "${entry.name} is compiled for Java ${major - 44}, Minecraft 1.7.10 runs on Java 8"
+                failures << "${entry.name} is compiled for Java ${major - 44}, Minecraft ${minecraft_version} runs on Java 8"
             }
 
             if (!entry.name.startsWith('dev/joid/backend/minecraft/')) {
@@ -359,31 +387,39 @@ def verifyJar = { String kind, File archive, File common, Collection<File> embed
     }
 }
 
-task verifyProdJar {
+def verifyProdJar = tasks.register('verifyProdJar') {
     group = 'verification'
-    description = 'Checks that the prod jar holds no code, asset or reference of the dev and demo modes, and runs on Minecraft 1.7.10.'
-    dependsOn(reobf)
+    description = "Checks that the prod jar holds no code, asset or reference of the dev and demo modes, and runs on Minecraft ${minecraft_version}."
+    dependsOn(reobfProdJar)
     doLast {
-        verifyJar('prod', prodJar.archivePath, rootProject.file("libs/joid-backend-minecraft-common-${common_version}-prod.jar"), configurations.embed.files + configurations.joidProd.files, demoPatterns + devPatterns, developmentReferences, developmentWords, false)
+        verifyJar('prod', reobfProdJar.get().output.get().asFile, rootProject.file("libs/joid-backend-minecraft-common-${common_version}-prod.jar"), minecraft.dependency.toSrgFile.get(), configurations.embed.files + configurations.joidProd.files, demoPatterns + devPatterns, developmentReferences, developmentWords, false)
     }
 }
 
-task verifyDevJar {
+def verifyDevJar = tasks.register('verifyDevJar') {
     group = 'verification'
-    description = 'Checks that the dev jar starts JOID in dev mode, holds no code, asset or reference of the demos, and runs in a ForgeGradle workspace of Minecraft 1.7.10.'
+    description = "Checks that the dev jar starts JOID in dev mode, holds no code, asset or reference of the demos, and runs in a ForgeGradle workspace of Minecraft ${minecraft_version}."
     dependsOn(devJar)
     doLast {
-        new ZipFile(devJar.archivePath).withCloseable { zip ->
+        new ZipFile(devJar.get().archiveFile.get().asFile).withCloseable { zip ->
             ['dev/joid/lib/ui/node/impl/dev/DevNode.class', 'dev/joid/internal/font/DevFont.class'].each { entry ->
                 if (zip.getEntry(entry) == null) {
                     throw new GradleException("[JOID] The dev jar misses ${entry}")
                 }
             }
         }
-        verifyJar('dev', devJar.archivePath, rootProject.file("libs/joid-backend-minecraft-common-${common_version}-dev.jar"), configurations.embed.files + configurations.joidDev.files, demoPatterns, demoReferences, demoWords, true)
+        verifyJar('dev', devJar.get().archiveFile.get().asFile, rootProject.file("libs/joid-backend-minecraft-common-${common_version}-dev.jar"), minecraft.dependency.toSrgFile.get(), configurations.embed.files + configurations.joidDev.files, demoPatterns, demoReferences, demoWords, true)
     }
 }
 
-verifyNoDemo.dependsOn(reobf)
-assemble.dependsOn(reobf, devJar, sourcesJar)
-check.dependsOn(verifyProdJar, verifyDevJar)
+tasks.named('verifyNoDemo') {
+    dependsOn(reobfProdJar)
+}
+
+tasks.named('assemble') {
+    dependsOn(reobfProdJar, devJar, sourcesJar)
+}
+
+tasks.named('check') {
+    dependsOn(verifyProdJar, verifyDevJar)
+}

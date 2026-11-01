@@ -26,25 +26,27 @@ import dev.joid.lib.utils.align.Align;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import net.minecraft.block.Block;
+import net.minecraft.block.BlockColored;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.EnumDyeColor;
 
 @UIDataMinecraft(pause = false)
 public class ShowServers extends UI implements IShowFocus {
 
 	private static final List<Server> SERVERS = Arrays.asList(
-		new Server("Emerald Valley", "\u00A7aSurvival \u00A78\u00B7 \u00A7fa new season, a fresh map", "1,204", 5, ShowTheme.GRASS, Blocks.grass, 0),
-		new Server("Skyward Isles", "\u00A7bSkyblock \u00A78\u00B7 \u00A7edouble XP all weekend", "846", 5, ShowTheme.DIAMOND, Blocks.log, 0),
-		new Server("Redstone Labs", "\u00A7cRedstone \u00A77& \u00A76tech \u00A78\u00B7 \u00A7fcreative plots", "312", 4, ShowTheme.REDSTONE, Blocks.redstone_block, 0),
-		new Server("Nether Rush", "\u00A74PvP arena \u00A78\u00B7 \u00A76ranked season 3", "2,031", 4, ShowTheme.REDSTONE, Blocks.netherrack, 0),
-		new Server("Pixel Kingdom", "\u00A7dRoleplay \u00A78\u00B7 \u00A7fbuild your own castle", "577", 3, ShowTheme.AMETHYST, Blocks.brick_block, 0),
-		new Server("Frostpeak", "\u00A7bHardcore \u00A78\u00B7 \u00A7fone life, no mercy", "128", 5, ShowTheme.DIAMOND, Blocks.snow, 0),
-		new Server("Deep Mines", "\u00A7eMining event \u00A78\u00B7 \u00A7bdouble ores", "693", 4, ShowTheme.GOLD, Blocks.diamond_ore, 0),
-		new Server("Ocean Odyssey", "\u00A73Deep sea \u00A7fexploration \u00A78\u00B7 \u00A7anew ruins", "254", 3, ShowTheme.DIAMOND, Blocks.lapis_block, 0),
-		new Server("Cherry Grove", "\u00A7dChill SMP \u00A78\u00B7 \u00A7awhitelist open", "96", 5, ShowTheme.AMETHYST, Blocks.wool, 6),
-		new Server("Bed Brawl", "\u00A7cBed wars \u00A78\u00B7 \u00A7f4v4v4v4", "1,768", 2, ShowTheme.REDSTONE, Blocks.tnt, 0),
-		new Server("End City", "\u00A75The End \u00A78\u00B7 \u00A7felytra races", "403", 4, ShowTheme.AMETHYST, Blocks.end_stone, 0),
-		new Server("Builders Guild", "\u00A76Creative \u00A78\u00B7 \u00A7fmonthly contests", "731", 5, ShowTheme.GOLD, Blocks.crafting_table, 0)
+		new Server("Emerald Valley", "\u00A7aSurvival \u00A78\u00B7 \u00A7fa new season, a fresh map", "1,204", 5, ShowTheme.GRASS, Blocks.GRASS.getDefaultState()),
+		new Server("Skyward Isles", "\u00A7bSkyblock \u00A78\u00B7 \u00A7edouble XP all weekend", "846", 5, ShowTheme.DIAMOND, Blocks.LOG.getDefaultState()),
+		new Server("Redstone Labs", "\u00A7cRedstone \u00A77& \u00A76tech \u00A78\u00B7 \u00A7fcreative plots", "312", 4, ShowTheme.REDSTONE, Blocks.REDSTONE_BLOCK.getDefaultState()),
+		new Server("Nether Rush", "\u00A74PvP arena \u00A78\u00B7 \u00A76ranked season 3", "2,031", 4, ShowTheme.REDSTONE, Blocks.NETHERRACK.getDefaultState()),
+		new Server("Pixel Kingdom", "\u00A7dRoleplay \u00A78\u00B7 \u00A7fbuild your own castle", "577", 3, ShowTheme.AMETHYST, Blocks.BRICK_BLOCK.getDefaultState()),
+		new Server("Frostpeak", "\u00A7bHardcore \u00A78\u00B7 \u00A7fone life, no mercy", "128", 5, ShowTheme.DIAMOND, Blocks.SNOW.getDefaultState()),
+		new Server("Deep Mines", "\u00A7eMining event \u00A78\u00B7 \u00A7bdouble ores", "693", 4, ShowTheme.GOLD, Blocks.DIAMOND_ORE.getDefaultState()),
+		new Server("Ocean Odyssey", "\u00A73Deep sea \u00A7fexploration \u00A78\u00B7 \u00A7anew ruins", "254", 3, ShowTheme.DIAMOND, Blocks.LAPIS_BLOCK.getDefaultState()),
+		new Server("Cherry Grove", "\u00A7dChill SMP \u00A78\u00B7 \u00A7awhitelist open", "96", 5, ShowTheme.AMETHYST, Blocks.WOOL.getDefaultState().withProperty(BlockColored.COLOR, EnumDyeColor.PINK)),
+		new Server("Bed Brawl", "\u00A7cBed wars \u00A78\u00B7 \u00A7f4v4v4v4", "1,768", 2, ShowTheme.REDSTONE, Blocks.TNT.getDefaultState()),
+		new Server("End City", "\u00A75The End \u00A78\u00B7 \u00A7felytra races", "403", 4, ShowTheme.AMETHYST, Blocks.END_STONE.getDefaultState()),
+		new Server("Builders Guild", "\u00A76Creative \u00A78\u00B7 \u00A7fmonthly contests", "731", 5, ShowTheme.GOLD, Blocks.CRAFTING_TABLE.getDefaultState())
 	);
 
 	private final Node[]       rows;
@@ -125,7 +127,7 @@ public class ShowServers extends UI implements IShowFocus {
 			ShowTheme
 			.tile(16, 12, 64, 64, 14F)
 			.body(icon -> {
-				BlockNode.create(10, 10, 44, 44).block(server.getBlock()).metadata(server.getMetadata()).rotationYaw(() -> 30D + this.elapsed() * 25D + index * 30D).interactive(false).attach(icon);
+				BlockNode.create(10, 10, 44, 44).block(server.getBlock()).rotationYaw(() -> 30D + this.elapsed() * 25D + index * 30D).interactive(false).attach(icon);
 			})
 			.attach(row);
 			TextNode.create(102, 28).text(Text.create(server.getName(), ShowTheme.font(FontWeight.SEMI_BOLD, 24F, ShowTheme.TEXT))).anchorY(Align.CENTER).attach(row);
@@ -145,13 +147,12 @@ public class ShowServers extends UI implements IShowFocus {
 	@AllArgsConstructor(access = AccessLevel.PRIVATE)
 	private static final class Server {
 
-		private final String name;
-		private final String motd;
-		private final String players;
-		private final int    ping;
-		private final Color  color;
-		private final Block  block;
-		private final int    metadata;
+		private final String      name;
+		private final String      motd;
+		private final String      players;
+		private final int         ping;
+		private final Color       color;
+		private final IBlockState block;
 
 	}
 

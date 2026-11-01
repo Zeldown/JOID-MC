@@ -14,14 +14,14 @@ import net.minecraft.item.ItemStack;
 
 public class DemoContainer extends Container {
 
-	public static final ContainerTypeRegistry<DemoContainer> TYPE = ContainerTypeRegistry.create(MinecraftJoid.MOD_ID + ":demo/container", player -> new DemoContainer(player.inventory, player.worldObj.isRemote ? new InventoryBasic("Demo storage", true, 27) : OpenDemoContainerPayloadHandler.getStorage(player)));
+	public static final ContainerTypeRegistry<DemoContainer> TYPE = ContainerTypeRegistry.create(MinecraftJoid.MOD_ID + ":demo/container", player -> new DemoContainer(player.inventory, player.world.isRemote ? new InventoryBasic("Demo storage", true, 27) : OpenDemoContainerPayloadHandler.getStorage(player)));
 
 	@Getter
 	private final IInventory storage;
 
 	public DemoContainer(final InventoryPlayer inventory, final IInventory storage) {
 		this.storage = storage;
-		storage.openInventory();
+		storage.openInventory(inventory.player);
 		for (int row = 0; row < 3; row++) {
 			for (int column = 0; column < 9; column++) {
 				super.addSlotToContainer(new Slot(storage, column + row * 9, 8 + column * 18, 18 + row * 18));
@@ -42,24 +42,24 @@ public class DemoContainer extends Container {
 	@Override
 	public void onContainerClosed(final EntityPlayer player) {
 		super.onContainerClosed(player);
-		this.storage.closeInventory();
+		this.storage.closeInventory(player);
 	}
 
 	@Override
 	public ItemStack transferStackInSlot(final EntityPlayer player, final int index) {
-		final Slot slot = (Slot) super.inventorySlots.get(index);
+		final Slot slot = super.inventorySlots.get(index);
 		if (slot == null || !slot.getHasStack()) {
-			return null;
+			return ItemStack.EMPTY;
 		}
 
 		final ItemStack stack = slot.getStack();
 		final ItemStack moved = stack.copy();
 		if (index < 27 ? !super.mergeItemStack(stack, 27, super.inventorySlots.size(), true) : !super.mergeItemStack(stack, 0, 27, false)) {
-			return null;
+			return ItemStack.EMPTY;
 		}
 
-		if (stack.stackSize == 0) {
-			slot.putStack(null);
+		if (stack.isEmpty()) {
+			slot.putStack(ItemStack.EMPTY);
 		} else {
 			slot.onSlotChanged();
 		}
@@ -68,7 +68,7 @@ public class DemoContainer extends Container {
 
 	@Override
 	public boolean canInteractWith(final EntityPlayer player) {
-		return this.storage.isUseableByPlayer(player);
+		return this.storage.isUsableByPlayer(player);
 	}
 
 }

@@ -72,7 +72,7 @@ public final class MinecraftWindowBridge implements IWindowBridge {
 
 	public double getInterfaceScale() {
 		final Minecraft minecraft = Minecraft.getMinecraft();
-		return new ScaledResolution(minecraft, minecraft.displayWidth, minecraft.displayHeight).getScaleFactor() / (double) MinecraftWindowBridge.getAutoScale(minecraft.displayWidth, minecraft.displayHeight, minecraft.func_152349_b());
+		return new ScaledResolution(minecraft).getScaleFactor() / (double) MinecraftWindowBridge.getAutoScale(minecraft.displayWidth, minecraft.displayHeight, minecraft.isUnicode());
 	}
 
 	public void requestCursor(final Cursor cursor) {

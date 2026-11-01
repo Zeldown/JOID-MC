@@ -40,22 +40,26 @@ ext {
     }
 }
 
-task verifyNoDemo {
+def verifyNoDemo = tasks.register('verifyNoDemo') {
     group = 'verification'
     description = 'Checks that no jar built by this project holds a demo of JOID or of the mod.'
+    def patterns = demoPatterns
     def archives = tasks.withType(Jar).matching { it.group == 'build' }
     dependsOn(archives)
     doLast {
         archives.findAll { it.enabled }.each { archive ->
+            def file = archive.archiveFile.get().asFile
             def found = []
-            zipTree(archive.archivePath).matching { include(demoPatterns) }.visit { if (!it.directory) found << it.relativePath.pathString }
+            zipTree(file).matching { include(patterns) }.visit { if (!it.directory) found << it.relativePath.pathString }
             if (!found.isEmpty()) {
-                throw new GradleException("${archive.archivePath.name} holds demo entries: ${found.take(10)}")
+                throw new GradleException("${file.name} holds demo entries: ${found.take(10)}")
             }
         }
     }
 }
 
 plugins.withId('java') {
-    check.dependsOn(verifyNoDemo)
+    tasks.named('check') {
+        dependsOn(verifyNoDemo)
+    }
 }

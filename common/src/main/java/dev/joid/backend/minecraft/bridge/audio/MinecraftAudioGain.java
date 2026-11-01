@@ -5,8 +5,8 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.SoundCategory;
 import net.minecraft.client.settings.GameSettings;
+import net.minecraft.util.SoundCategory;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MinecraftAudioGain implements AudioGain {

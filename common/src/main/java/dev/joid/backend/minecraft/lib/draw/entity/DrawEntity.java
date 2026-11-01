@@ -11,7 +11,6 @@ import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
 
-import cpw.mods.fml.relauncher.ReflectionHelper;
 import dev.joid.backend.minecraft.lib.draw.raster.GuiDrawableRaster;
 import dev.joid.lib.draw.DrawUtils;
 import lombok.AccessLevel;
@@ -19,24 +18,26 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelBase;
-import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.model.ModelBox;
+import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.client.model.ModelRenderer;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.entity.Render;
+import net.minecraft.client.renderer.entity.RenderLivingBase;
 import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraft.client.renderer.entity.RendererLivingEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class DrawEntity {
 
 	private static final DrawEntity INSTANCE = new DrawEntity();
 
-	private static final ModelBiped PLAYER = new ModelBiped(0F);
-	private static final Method PRE_RENDER = ReflectionHelper.findMethod(RendererLivingEntity.class, null, new String[] {"preRenderCallback", "func_77041_b"}, EntityLivingBase.class, float.class);
+	private static final ModelPlayer PLAYER     = new ModelPlayer(0F, false);
+	private static final Method      PRE_RENDER = ObfuscationReflectionHelper.findMethod(RenderLivingBase.class, "func_77041_b", void.class, EntityLivingBase.class, float.class);
 
 	public static @NonNull DrawEntity inst() {
 		return DrawEntity.INSTANCE;
@@ -53,8 +54,9 @@ public final class DrawEntity {
 	public void drawEntity(final double x, final double y, final double width, final double height, final @NonNull Entity entity, final double scale, final double rotationYaw, final double rotationPitch, final double lookX, final double lookY) {
 		final double[] extent = DrawEntity.getExtent(entity);
 		this.drawModel(x, y, width, height, extent, (float) (2D * extent[2]), scale, rotationYaw, rotationPitch, lookX, lookY, (lookYaw, lookPitch) -> {
+			final RenderManager manager = Minecraft.getMinecraft().getRenderManager();
 			if (!(entity instanceof EntityLivingBase)) {
-				RenderManager.instance.renderEntityWithPosYaw(entity, 0D, 0D, 0D, 0F, 1F);
+				DrawEntity.render(manager, entity);
 				return;
 			}
 
@@ -70,9 +72,8 @@ public final class DrawEntity {
 			living.rotationYawHead     = living.rotationYaw;
 			living.prevRotationYawHead = living.rotationYaw;
 			try {
-				GL11.glTranslatef(0F, living.yOffset, 0F);
-				RenderManager.instance.playerViewY = 180F;
-				RenderManager.instance.renderEntityWithPosYaw(living, 0D, 0D, 0D, 0F, 1F);
+				manager.playerViewY = 180F;
+				DrawEntity.render(manager, living);
 			} finally {
 				living.renderYawOffset     = bodyYaw;
 				living.rotationYaw         = yaw;
@@ -93,11 +94,17 @@ public final class DrawEntity {
 
 	public void drawPlayer(final double x, final double y, final double width, final double height, final @NonNull ResourceLocation skin, final double scale, final double rotationYaw, final double rotationPitch, final double lookX, final double lookY) {
 		this.drawModel(x, y, width, height, new double[] {0.525D, 0.9D}, 1.8F, scale, rotationYaw, rotationPitch, lookX, lookY, (lookYaw, lookPitch) -> {
+			final ModelPlayer model = DrawEntity.PLAYER;
 			Minecraft.getMinecraft().getTextureManager().bindTexture(skin);
-			GL11.glRotatef(180F - lookYaw, 0F, 1F, 0F);
-			GL11.glScalef(-0.9375F, -0.9375F, 0.9375F);
-			GL11.glTranslatef(0F, -1.5078125F, 0F);
-			DrawEntity.PLAYER.render(null, 0F, 0F, 0F, lookYaw, lookPitch, 0.0625F);
+			GlStateManager.rotate(180F - lookYaw, 0F, 1F, 0F);
+			GlStateManager.scale(-0.9375F, -0.9375F, 0.9375F);
+			GlStateManager.translate(0F, -1.5078125F, 0F);
+			model.bipedHead.rotateAngleY = (float) Math.toRadians(lookYaw);
+			model.bipedHead.rotateAngleX = (float) Math.toRadians(lookPitch);
+			ModelBase.copyModelAngles(model.bipedHead, model.bipedHeadwear);
+			for (final ModelRenderer part : new ModelRenderer[] {model.bipedHead, model.bipedBody, model.bipedRightArm, model.bipedLeftArm, model.bipedRightLeg, model.bipedLeftLeg, model.bipedHeadwear, model.bipedLeftLegwear, model.bipedRightLegwear, model.bipedLeftArmwear, model.bipedRightArmwear, model.bipedBodyWear}) {
+				part.render(0.0625F);
+			}
 		});
 	}
 
@@ -111,41 +118,41 @@ public final class DrawEntity {
 		final float lookPitch = -(float) Math.atan((y + height / 2D - lookY) * 0.75D / unit) * 20F;
 		DrawUtils.RASTER.drawRaster(x - width / 4D, y - height / 4D, width * 1.5D, height * 1.5D, GuiDrawableRaster.of((rasterWidth, rasterHeight) -> {
 			final float size = (float) (unit * rasterWidth / (width * 1.5D));
-			GL11.glEnable(GL11.GL_COLOR_MATERIAL);
-			GL11.glTranslatef(rasterWidth / 2F, rasterHeight / 2F, 0F);
-			GL11.glScalef(-size, size, size);
-			GL11.glRotatef(180F, 0F, 0F, 1F);
-			GL11.glRotatef(135F, 0F, 1F, 0F);
+			GlStateManager.enableColorMaterial();
+			GlStateManager.translate(rasterWidth / 2F, rasterHeight / 2F, 0F);
+			GlStateManager.scale(-size, size, size);
+			GlStateManager.rotate(180F, 0F, 0F, 1F);
+			GlStateManager.rotate(135F, 0F, 1F, 0F);
 			RenderHelper.enableStandardItemLighting();
-			GL11.glRotatef(-135F, 0F, 1F, 0F);
-			GL11.glRotatef(lookPitch, 1F, 0F, 0F);
-			GL11.glRotatef((float) rotationPitch, 1F, 0F, 0F);
-			GL11.glRotatef((float) rotationYaw, 0F, 1F, 0F);
-			GL11.glTranslatef(0F, -modelHeight / 2F, 0F);
+			GlStateManager.rotate(-135F, 0F, 1F, 0F);
+			GlStateManager.rotate(lookPitch, 1F, 0F, 0F);
+			GlStateManager.rotate((float) rotationPitch, 1F, 0F, 0F);
+			GlStateManager.rotate((float) rotationYaw, 0F, 1F, 0F);
+			GlStateManager.translate(0F, -modelHeight / 2F, 0F);
 			draw.draw(lookYaw, lookPitch);
 		}));
 	}
 
 	private static double[] getExtent(final Entity entity) {
 		final double[] extent = {1.75D * entity.width / 2D, entity.height / 2D, entity.height / 2D};
-		final Render render = RenderManager.instance.getEntityRenderObject(entity);
-		if (!(render instanceof RendererLivingEntity) || entity.height <= 0F) {
+		final Render<Entity> render = Minecraft.getMinecraft().getRenderManager().getEntityRenderObject(entity);
+		if (!(render instanceof RenderLivingBase) || entity.height <= 0F) {
 			return extent;
 		}
 
-		final ModelBase model = ReflectionHelper.getPrivateValue(RendererLivingEntity.class, (RendererLivingEntity) render, "mainModel", "field_77045_g");
+		final ModelBase model = ((RenderLivingBase<?>) render).getMainModel();
 		model.setRotationAngles(0F, 0F, entity.ticksExisted, 0F, 0F, 0.0625F, entity);
-		final Set<Object> children = new HashSet<>();
-		for (final Object part : model.boxList) {
-			if (((ModelRenderer) part).childModels != null) {
-				children.addAll(((ModelRenderer) part).childModels);
+		final Set<ModelRenderer> children = new HashSet<>();
+		for (final ModelRenderer part : model.boxList) {
+			if (part.childModels != null) {
+				children.addAll(part.childModels);
 			}
 		}
 
 		final double[] bounds = {0D, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY};
-		for (final Object part : model.boxList) {
+		for (final ModelRenderer part : model.boxList) {
 			if (!children.contains(part)) {
-				DrawEntity.visit((ModelRenderer) part, new Matrix4f(), bounds);
+				DrawEntity.visit(part, new Matrix4f(), bounds);
 			}
 		}
 
@@ -153,7 +160,7 @@ public final class DrawEntity {
 			return extent;
 		}
 
-		final double scale = DrawEntity.getRenderScale((RendererLivingEntity) render, (EntityLivingBase) entity);
+		final double scale = DrawEntity.getRenderScale((RenderLivingBase<?>) render, (EntityLivingBase) entity);
 		final double top = scale * (1.5078125D - bounds[1]);
 		final double bottom = scale * (1.5078125D - bounds[2]);
 		extent[0] = scale * bounds[0];
@@ -162,17 +169,17 @@ public final class DrawEntity {
 		return extent;
 	}
 
-	private static double getRenderScale(final RendererLivingEntity render, final EntityLivingBase entity) {
+	private static double getRenderScale(final RenderLivingBase<?> render, final EntityLivingBase entity) {
 		final FloatBuffer matrix = BufferUtils.createFloatBuffer(16);
-		GL11.glPushMatrix();
+		GlStateManager.pushMatrix();
 		try {
-			GL11.glLoadIdentity();
+			GlStateManager.loadIdentity();
 			DrawEntity.PRE_RENDER.invoke(render, entity, 1F);
-			GL11.glGetFloat(GL11.GL_MODELVIEW_MATRIX, matrix);
+			GlStateManager.getFloat(GL11.GL_MODELVIEW_MATRIX, matrix);
 		} catch (final ReflectiveOperationException exception) {
 			return 1D;
 		} finally {
-			GL11.glPopMatrix();
+			GlStateManager.popMatrix();
 		}
 
 		return Math.sqrt(matrix.get(0) * matrix.get(0) + matrix.get(1) * matrix.get(1) + matrix.get(2) * matrix.get(2));
@@ -189,8 +196,7 @@ public final class DrawEntity {
 		matrix.rotate(part.rotateAngleY, new Vector3f(0F, 1F, 0F));
 		matrix.rotate(part.rotateAngleX, new Vector3f(1F, 0F, 0F));
 		final Vector4f corner = new Vector4f();
-		for (final Object box : part.cubeList) {
-			final ModelBox cube = (ModelBox) box;
+		for (final ModelBox cube : part.cubeList) {
 			for (int index = 0; index < 8; index++) {
 				corner.set((index & 1) == 0 ? cube.posX1 / 16F : cube.posX2 / 16F, (index & 2) == 0 ? cube.posY1 / 16F : cube.posY2 / 16F, (index & 4) == 0 ? cube.posZ1 / 16F : cube.posZ2 / 16F, 1F);
 				Matrix4f.transform(matrix, corner, corner);
@@ -201,9 +207,18 @@ public final class DrawEntity {
 		}
 
 		if (part.childModels != null) {
-			for (final Object child : part.childModels) {
-				DrawEntity.visit((ModelRenderer) child, matrix, bounds);
+			for (final ModelRenderer child : part.childModels) {
+				DrawEntity.visit(child, matrix, bounds);
 			}
+		}
+	}
+
+	private static void render(final RenderManager manager, final Entity entity) {
+		manager.setRenderShadow(false);
+		try {
+			manager.renderEntity(entity, 0D, 0D, 0D, 0F, 1F, false);
+		} finally {
+			manager.setRenderShadow(true);
 		}
 	}
 

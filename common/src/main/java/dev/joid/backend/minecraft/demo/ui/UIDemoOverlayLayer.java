@@ -78,7 +78,7 @@ public final class UIDemoOverlayLayer {
 			.create(596, 964, 728, 20)
 			.color(UIDemoOverlayLayer.PLACEHOLDER)
 			.body(rect -> {
-				RectNode.create(0, 0, 0, 20).color(UIDemoOverlayLayer.INK).width(() -> Minecraft.getMinecraft().thePlayer != null ? 728D * Minecraft.getMinecraft().thePlayer.experience : 0D).attach(rect);
+				RectNode.create(0, 0, 0, 20).color(UIDemoOverlayLayer.INK).width(() -> Minecraft.getMinecraft().player != null ? 728D * Minecraft.getMinecraft().player.experience : 0D).attach(rect);
 			})
 			.attach(this);
 		}

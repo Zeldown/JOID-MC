@@ -2,12 +2,12 @@ package dev.joid.backend.minecraft.bridge.network;
 
 import java.util.UUID;
 
-import cpw.mods.fml.common.network.ByteBufUtils;
 import dev.joid.backend.minecraft.loader.network.IPayloadReader;
 import dev.joid.backend.minecraft.loader.network.IPayloadWriter;
 import io.netty.buffer.ByteBuf;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 @AllArgsConstructor
 public final class ByteBufPayloadBuffer implements IPayloadReader, IPayloadWriter {

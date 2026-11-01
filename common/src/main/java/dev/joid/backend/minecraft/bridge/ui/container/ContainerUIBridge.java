@@ -41,9 +41,9 @@ public final class ContainerUIBridge extends BaseContainerUIBridge<Void> {
 	@Override
 	protected void detachScreen() {
 		final Minecraft minecraft = Minecraft.getMinecraft();
-		if (this.screen != null && minecraft.currentScreen == this.screen && minecraft.thePlayer != null) {
+		if (this.screen != null && minecraft.currentScreen == this.screen && minecraft.player != null) {
 			this.screen = null;
-			minecraft.thePlayer.closeScreen();
+			minecraft.player.closeScreen();
 		}
 	}
 

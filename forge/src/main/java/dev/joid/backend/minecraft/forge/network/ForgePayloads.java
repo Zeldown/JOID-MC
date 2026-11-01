@@ -3,21 +3,21 @@ package dev.joid.backend.minecraft.forge.network;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent.Phase;
-import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
-import cpw.mods.fml.common.network.NetworkRegistry;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
-import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
-import cpw.mods.fml.relauncher.Side;
 import dev.joid.backend.minecraft.MinecraftJoid;
 import dev.joid.backend.minecraft.bridge.network.PayloadMessage;
 import dev.joid.backend.minecraft.loader.network.PayloadType;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
+import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+import net.minecraftforge.fml.relauncher.Side;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ForgePayloads {
@@ -30,9 +30,9 @@ public final class ForgePayloads {
 		}
 
 		final SimpleNetworkWrapper channel = NetworkRegistry.INSTANCE.newSimpleChannel(MinecraftJoid.MOD_ID);
-		channel.registerMessage((final PayloadMessage message, final MessageContext context) -> ForgePayloads.receive(message, context.getServerHandler().playerEntity), PayloadMessage.class, 0, Side.SERVER);
+		channel.registerMessage((final PayloadMessage message, final MessageContext context) -> ForgePayloads.receive(message, context.getServerHandler().player), PayloadMessage.class, 0, Side.SERVER);
 		PayloadType.sender(payload -> channel.sendToServer(new PayloadMessage(payload)));
-		FMLCommonHandler.instance().bus().register(new ForgePayloads());
+		MinecraftForge.EVENT_BUS.register(new ForgePayloads());
 	}
 
 	@SubscribeEvent

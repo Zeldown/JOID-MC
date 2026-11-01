@@ -32,7 +32,7 @@ import dev.joid.lib.ui.node.impl.text.TextNode;
 import dev.joid.lib.utils.align.Align;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
-import net.minecraft.server.MinecraftServer;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 
 @UIDataMinecraft(pause = false, background = false)
 public class ShowDaylight extends UI implements IShowFocus {
@@ -167,8 +167,8 @@ public class ShowDaylight extends UI implements IShowFocus {
 	}
 
 	private static void world(final long ticks) {
-		Minecraft.getMinecraft().theWorld.setWorldTime(ticks);
-		MinecraftServer.getServer().worldServers[0].setWorldTime(ticks);
+		Minecraft.getMinecraft().world.setWorldTime(ticks);
+		FMLCommonHandler.instance().getMinecraftServerInstance().worlds[0].setWorldTime(ticks);
 	}
 
 }

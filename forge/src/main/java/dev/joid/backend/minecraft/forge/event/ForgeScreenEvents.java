@@ -1,11 +1,11 @@
 package dev.joid.backend.minecraft.forge.event;
 
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import dev.joid.backend.minecraft.loader.event.MinecraftScreenEvents;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.minecraftforge.client.event.GuiScreenEvent.DrawScreenEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ForgeScreenEvents {

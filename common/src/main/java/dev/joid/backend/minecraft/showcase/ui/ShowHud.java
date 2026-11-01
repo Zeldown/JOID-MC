@@ -23,7 +23,7 @@ import dev.joid.lib.ui.node.impl.shape.RectNode;
 import dev.joid.lib.ui.node.impl.text.TextNode;
 import dev.joid.lib.utils.align.Align;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityClientPlayerMP;
+import net.minecraft.client.entity.EntityPlayerSP;
 
 @UIData(anchorY = Align.END)
 @UIDataOverlay(active = true)
@@ -111,8 +111,8 @@ public class ShowHud extends UI {
 		return ShowTheme.now() - this.start;
 	}
 
-	private static EntityClientPlayerMP player() {
-		return Minecraft.getMinecraft().thePlayer;
+	private static EntityPlayerSP player() {
+		return Minecraft.getMinecraft().player;
 	}
 
 	@UIData(anchorY = Align.END)

@@ -24,8 +24,8 @@ public final class OpenDemoContainerPayloadHandler {
 	}
 
 	public static boolean canOpen(final EntityPlayerMP player) {
-		final MinecraftServer server = MinecraftServer.getServer();
-		return player.canCommandSenderUseCommand(2, "") || server.isSinglePlayer() && player.getCommandSenderName().equals(server.getServerOwner());
+		final MinecraftServer server = player.getServer();
+		return player.canUseCommand(2, "") || server.isSinglePlayer() && player.getName().equals(server.getServerOwner());
 	}
 
 	public static InventoryBasic getStorage(final EntityPlayer player) {

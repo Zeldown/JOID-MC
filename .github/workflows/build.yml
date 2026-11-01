@@ -3,10 +3,10 @@ name: Build
 on:
   push:
     branches:
-      - version/1.7.10
+      - version/1.12.2
   pull_request:
     branches:
-      - version/1.7.10
+      - version/1.12.2
   workflow_dispatch:
     inputs:
       showcase:
@@ -18,10 +18,8 @@ jobs:
   version:
     uses: Zeldown/JOID-MC/.github/workflows/version.yml@common
     with:
-      java-version: '8'
+      java-version: '21'
       loaders: '["forge"]'
       vulkan: false
-      setup-tasks: setupCIWorkspace
-      client-setup-tasks: setupDevWorkspace
       gradle-args: --max-workers=2
       showcase: ${{ inputs.showcase || '' }}

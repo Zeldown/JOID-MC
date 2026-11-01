@@ -2,8 +2,7 @@ package dev.joid.backend.minecraft.bridge.ui;
 
 import java.util.List;
 
-import org.lwjgl.opengl.GL11;
-
+import dev.joid.backend.minecraft.bridge.render.MinecraftGlState;
 import dev.joid.lib.font.converter.TextConverter;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -19,10 +18,9 @@ public final class TooltipRenderer {
 
 	public static void draw(final Object content, final int mouseX, final int mouseY) {
 		final Minecraft minecraft = Minecraft.getMinecraft();
-		final ScaledResolution resolution = new ScaledResolution(minecraft, minecraft.displayWidth, minecraft.displayHeight);
+		final ScaledResolution resolution = new ScaledResolution(minecraft);
 		TooltipRenderer.SCREEN.setWorldAndResolution(minecraft, resolution.getScaledWidth(), resolution.getScaledHeight());
-		GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
-		try {
+		MinecraftGlState.preserve(() -> {
 			if (content instanceof ItemStack) {
 				TooltipRenderer.SCREEN.drawStack((ItemStack) content, mouseX, mouseY);
 				return;
@@ -32,9 +30,7 @@ public final class TooltipRenderer {
 			if (!lines.isEmpty()) {
 				TooltipRenderer.SCREEN.drawLines(lines, mouseX, mouseY);
 			}
-		} finally {
-			GL11.glPopAttrib();
-		}
+		});
 	}
 
 	private static final class TooltipScreen extends GuiScreen {
@@ -44,7 +40,7 @@ public final class TooltipRenderer {
 		}
 
 		private void drawLines(final List<String> lines, final int mouseX, final int mouseY) {
-			super.drawHoveringText(lines, mouseX, mouseY, super.fontRendererObj);
+			super.drawHoveringText(lines, mouseX, mouseY, super.fontRenderer);
 		}
 
 	}

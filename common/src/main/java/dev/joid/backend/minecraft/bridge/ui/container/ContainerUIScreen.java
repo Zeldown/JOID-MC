@@ -1,5 +1,6 @@
 package dev.joid.backend.minecraft.bridge.ui.container;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.HashSet;
@@ -8,7 +9,6 @@ import java.util.Set;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
-import cpw.mods.fml.relauncher.ReflectionHelper;
 import dev.joid.backend.minecraft.bridge.ui.TooltipRenderer;
 import dev.joid.backend.minecraft.lib.ui.core.container.ContainerUI;
 import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
@@ -22,12 +22,13 @@ import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 public class ContainerUIScreen<C extends Container> extends GuiContainer {
 
-	private static final Field HOVERED_SLOT   = ReflectionHelper.findField(GuiContainer.class, "theSlot", "field_147006_u");
-	private static final Field DRAG_TYPE      = ReflectionHelper.findField(GuiContainer.class, "field_146987_F");
-	private static final Field DRAG_REMAINDER = ReflectionHelper.findField(GuiContainer.class, "field_146996_I");
+	private static final Field HOVERED_SLOT   = ObfuscationReflectionHelper.findField(GuiContainer.class, "field_147006_u");
+	private static final Field DRAG_TYPE      = ObfuscationReflectionHelper.findField(GuiContainer.class, "field_146987_F");
+	private static final Field DRAG_REMAINDER = ObfuscationReflectionHelper.findField(GuiContainer.class, "field_146996_I");
 
 	private final ContainerUIBridge bridge;
 	private final Set<Integer>      consumedButtons;
@@ -74,16 +75,16 @@ public class ContainerUIScreen<C extends Container> extends GuiContainer {
 		}
 
 		final SlotNode node = this.getHoveredSlotNode();
-		this.hoveredSlot = node != null && node.getSlot().func_111238_b() ? node.getSlot() : null;
+		this.hoveredSlot = node != null && node.getSlot().isEnabled() ? node.getSlot() : null;
 		ContainerUIScreen.write(ContainerUIScreen.HOVERED_SLOT, this, this.hoveredSlot);
 		this.bridge.frame(null, mouseX, mouseY);
-		if (super.mc.thePlayer.inventory.getItemStack() == null && this.hoveredSlot != null && this.hoveredSlot.getHasStack()) {
+		if (super.mc.player.inventory.getItemStack().isEmpty() && this.hoveredSlot != null && this.hoveredSlot.getHasStack()) {
 			TooltipRenderer.draw(this.hoveredSlot.getStack(), mouseX, mouseY);
 		}
 	}
 
 	@Override
-	public void handleMouseInput() {
+	public void handleMouseInput() throws IOException {
 		final int button = Mouse.getEventButton();
 		final boolean pressed = Mouse.getEventButtonState();
 		final boolean moved = button == -1 && Mouse.getEventDWheel() == 0;
@@ -103,7 +104,7 @@ public class ContainerUIScreen<C extends Container> extends GuiContainer {
 	}
 
 	@Override
-	public void handleKeyboardInput() {
+	public void handleKeyboardInput() throws IOException {
 		if (!Lwjgl2InputForwarder.forwardKeyboardEvent()) {
 			super.handleKeyboardInput();
 		}
@@ -115,7 +116,7 @@ public class ContainerUIScreen<C extends Container> extends GuiContainer {
 	}
 
 	public boolean isQuickCrafting() {
-		return super.field_147007_t;
+		return super.dragSplitting;
 	}
 
 	public int getQuickCraftType() {
@@ -127,20 +128,20 @@ public class ContainerUIScreen<C extends Container> extends GuiContainer {
 	}
 
 	public @NonNull Set<@NonNull Slot> getQuickCraftSlots() {
-		return Collections.unmodifiableSet(super.field_147008_s);
+		return Collections.unmodifiableSet(super.dragSplittingSlots);
 	}
 
 	@Override
-	protected void keyTyped(final char character, final int code) {
+	protected void keyTyped(final char character, final int code) throws IOException {
 		if (code != Keyboard.KEY_ESCAPE) {
 			super.keyTyped(character, code);
 		}
 	}
 
 	@Override
-	protected boolean func_146978_c(final int left, final int top, final int width, final int height, final int mouseX, final int mouseY) {
+	protected boolean isPointInRegion(final int left, final int top, final int width, final int height, final int mouseX, final int mouseY) {
 		final SlotNode node = this.getHoveredSlotNode();
-		return node != null && node.getSlot().xDisplayPosition == left && node.getSlot().yDisplayPosition == top;
+		return node != null && node.getSlot().xPos == left && node.getSlot().yPos == top;
 	}
 
 	@Override
@@ -154,7 +155,7 @@ public class ContainerUIScreen<C extends Container> extends GuiContainer {
 	private void updateBounds() {
 		final double[] bounds = this.ui.getBounds();
 		final Minecraft minecraft = Minecraft.getMinecraft();
-		final int scale = new ScaledResolution(minecraft, minecraft.displayWidth, minecraft.displayHeight).getScaleFactor();
+		final int scale = new ScaledResolution(minecraft).getScaleFactor();
 		final int left = (int) Math.floor(this.ui.getView().toScreenX(bounds[0]) / scale);
 		final int top = (int) Math.floor(this.ui.getView().toScreenY(bounds[1]) / scale);
 		super.guiLeft = left;

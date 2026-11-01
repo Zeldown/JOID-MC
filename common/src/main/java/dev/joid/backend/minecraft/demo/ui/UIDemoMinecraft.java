@@ -49,14 +49,14 @@ import net.minecraft.entity.passive.EntityPig;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
-import net.minecraft.item.ItemArmor;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.ChatStyle;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.IChatComponent;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
 
 @UIDataMinecraft(pause = false)
 public class UIDemoMinecraft extends UIDemo {
@@ -79,9 +79,10 @@ public class UIDemoMinecraft extends UIDemo {
 	public void init() {
 		final TextInfo caption = TextInfo.create(DemoFont.MONTSERRAT, 24).color(UIDemoMinecraft.INK);
 		final TextInfo info = TextInfo.create(MinecraftFont.DEFAULT, MinecraftFont.SIZE * 3).color(Color.WHITE).shadowTint(0.25F).shadow(3F, 3F);
-		final IChatComponent component = new ChatComponentText("").appendSibling(new ChatComponentText("Gold ").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GOLD))).appendSibling(new ChatComponentTranslation("menu.game").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.AQUA).setUnderlined(true))).appendText(" plain");
-		final ItemStack damaged = new ItemStack(Items.diamond_pickaxe);
-		final ItemStack star = new ItemStack(Items.nether_star);
+		final ITextComponent component = new TextComponentString("").appendSibling(new TextComponentString("Gold ").setStyle(new Style().setColor(TextFormatting.GOLD))).appendSibling(new TextComponentTranslation("menu.game").setStyle(new Style().setColor(TextFormatting.AQUA).setUnderlined(true))).appendText(" plain");
+		final ItemStack damaged = new ItemStack(Items.DIAMOND_PICKAXE);
+		final ItemStack pearl = new ItemStack(Items.ENDER_PEARL, 16);
+		final ItemStack totem = new ItemStack(Items.TOTEM_OF_UNDYING);
 		final ResourceLocation skin = new ResourceLocation("joid", "demo/textures/skin.png");
 		final Minecraft minecraft = Minecraft.getMinecraft();
 
@@ -181,7 +182,7 @@ public class UIDemoMinecraft extends UIDemo {
 				RectNode.create(20, 20, 400, 200).color(UIDemoMinecraft.PANEL).attach(rect);
 				ResourceNode.create(40, 40, 360, 0).resource(Resource.of("minecraft:textures/gui/title/minecraft.png")).attach(rect);
 				ResourceNode.create(40, 140, 64, 64).resource(Resource.of(new ResourceLocation("textures/blocks/diamond_block.png"))).attach(rect);
-				ResourceNode.create(140, 140, 64, 64).resource(Resource.of(minecraft.getTextureManager().getTexture(TextureMap.locationBlocksTexture))).attach(rect);
+				ResourceNode.create(140, 140, 64, 64).resource(Resource.of(minecraft.getTextureManager().getTexture(TextureMap.LOCATION_BLOCKS_TEXTURE))).attach(rect);
 				ResourceNode.create(240, 140, 64, 64).resource(Resource.of(UIDemoMinecraft.CHECKER)).attach(rect);
 				TextNode.create(220, 255).text(Text.create("Textures", caption).alignX(Align.CENTER)).anchorX(Align.CENTER).attach(rect);
 			})
@@ -192,10 +193,10 @@ public class UIDemoMinecraft extends UIDemo {
 			.color(UIDemoMinecraft.PLACEHOLDER)
 			.body(rect -> {
 				RectNode.create(20, 20, 400, 200).color(UIDemoMinecraft.PANEL).attach(rect);
-				ResourceNode.create(40, 40, 64, 64).resource(Resource.of(Items.diamond.getIconFromDamage(0))).attach(rect);
-				ResourceNode.create(40, 128, 64, 64).resource(Resource.of(Blocks.stone.getIcon(0, 0))).attach(rect);
-				ResourceNode.create(140, 40, 64, 64).resource(Resource.of(Blocks.crafting_table.getIcon(1, 0))).attach(rect);
-				ResourceNode.create(140, 128, 64, 64).resource(Resource.of(ItemArmor.func_94602_b(0))).attach(rect);
+				ResourceNode.create(40, 40, 64, 64).resource(Resource.of(minecraft.getTextureMapBlocks().getAtlasSprite("minecraft:items/diamond"))).attach(rect);
+				ResourceNode.create(40, 128, 64, 64).resource(Resource.of(minecraft.getTextureMapBlocks().getAtlasSprite("minecraft:blocks/stone"))).attach(rect);
+				ResourceNode.create(140, 40, 64, 64).resource(Resource.of(minecraft.getTextureMapBlocks().getAtlasSprite("minecraft:blocks/crafting_table_top"))).attach(rect);
+				ResourceNode.create(140, 128, 64, 64).resource(Resource.of(minecraft.getTextureMapBlocks().getAtlasSprite("minecraft:items/empty_armor_slot_helmet"))).attach(rect);
 				TextNode.create(220, 255).text(Text.create("Sprites", caption).alignX(Align.CENTER)).anchorX(Align.CENTER).attach(rect);
 			})
 			.attach(container);
@@ -205,8 +206,8 @@ public class UIDemoMinecraft extends UIDemo {
 			.color(UIDemoMinecraft.PLACEHOLDER)
 			.body(rect -> {
 				RectNode.create(20, 20, 400, 200).color(UIDemoMinecraft.PANEL).attach(rect);
-				ResourceNode.create(40, 56, 128, 128).resource(Resource.of(Blocks.fire.getFireIcon(0))).attach(rect);
-				ResourceNode.create(240, 56, 128, 128).resource(Resource.of(Blocks.water.getIcon(0, 0))).attach(rect);
+				ResourceNode.create(40, 56, 128, 128).resource(Resource.of(minecraft.getTextureMapBlocks().getAtlasSprite("minecraft:blocks/fire_layer_0"))).attach(rect);
+				ResourceNode.create(240, 56, 128, 128).resource(Resource.of(minecraft.getTextureMapBlocks().getAtlasSprite("minecraft:blocks/sea_lantern"))).attach(rect);
 				TextNode.create(220, 255).text(Text.create("Animated sprites", caption).alignX(Align.CENTER)).anchorX(Align.CENTER).attach(rect);
 			})
 			.attach(container);
@@ -227,10 +228,10 @@ public class UIDemoMinecraft extends UIDemo {
 			.color(UIDemoMinecraft.PLACEHOLDER)
 			.body(rect -> {
 				RectNode.create(20, 20, 400, 200).color(UIDemoMinecraft.PANEL).attach(rect);
-				ItemNode.create(40, 80, 80, 80).stack(new ItemStack(Items.apple)).attach(rect);
-				ItemNode.create(130, 80, 80, 80).stack(new ItemStack(Items.diamond_sword)).glint(true).attach(rect);
+				ItemNode.create(40, 80, 80, 80).stack(new ItemStack(Items.APPLE)).attach(rect);
+				ItemNode.create(130, 80, 80, 80).stack(new ItemStack(Items.DIAMOND_SWORD)).glint(true).attach(rect);
 				ItemNode.create(220, 80, 80, 80).stack(damaged).attach(rect);
-				ItemNode.create(310, 80, 80, 80).stack(new ItemStack(Blocks.cobblestone, 64)).attach(rect);
+				ItemNode.create(310, 80, 80, 80).stack(new ItemStack(Blocks.COBBLESTONE, 64)).attach(rect);
 				TextNode.create(220, 255).text(Text.create("Items", caption).alignX(Align.CENTER)).anchorX(Align.CENTER).attach(rect);
 			})
 			.attach(container);
@@ -245,18 +246,19 @@ public class UIDemoMinecraft extends UIDemo {
 				.color(UIDemoMinecraft.INK)
 				.hoveredColor(UIDemoMinecraft.PLACEHOLDER)
 				.body(slot -> {
-					ItemNode.create(10, 10, 80, 80).stack(new ItemStack(Items.ender_pearl, 16)).tooltip(true).attach(slot);
+					ItemNode.create(10, 10, 80, 80).stack(pearl).tooltip(true).attach(slot);
 				})
+				.onClick(event -> minecraft.player.getCooldownTracker().setCooldown(pearl.getItem(), 100))
 				.attach(rect);
 				RectNode
 				.create(250, 70, 100, 100)
 				.color(UIDemoMinecraft.INK)
 				.hoveredColor(UIDemoMinecraft.PLACEHOLDER)
 				.body(slot -> {
-					ItemNode.create(10, 10, 80, 80).stack(new ItemStack(Items.golden_apple, 1, 1)).tooltip(true).attach(slot);
+					ItemNode.create(10, 10, 80, 80).stack(new ItemStack(Items.GOLDEN_APPLE, 1, 1)).tooltip(true).attach(slot);
 				})
 				.attach(rect);
-				TextNode.create(220, 255).text(Text.create("Hover", caption).alignX(Align.CENTER)).anchorX(Align.CENTER).attach(rect);
+				TextNode.create(220, 255).text(Text.create("Click & hover", caption).alignX(Align.CENTER)).anchorX(Align.CENTER).attach(rect);
 			})
 			.attach(container);
 
@@ -265,10 +267,10 @@ public class UIDemoMinecraft extends UIDemo {
 			.color(UIDemoMinecraft.PLACEHOLDER)
 			.body(rect -> {
 				RectNode.create(20, 20, 400, 200).color(UIDemoMinecraft.PANEL).attach(rect);
-				BlockNode.create(40, 80, 80, 80).block(Blocks.grass).attach(rect);
-				BlockNode.create(130, 80, 80, 80).block(Blocks.chest).attach(rect);
-				BlockNode.create(220, 80, 80, 80).block(Blocks.glass).attach(rect);
-				BlockNode.create(310, 80, 80, 80).block(Blocks.furnace).metadata(3).rotationYaw(() -> System.currentTimeMillis() % 3600L / 10D).attach(rect);
+				BlockNode.create(40, 80, 80, 80).block(Blocks.GRASS.getDefaultState()).attach(rect);
+				BlockNode.create(130, 80, 80, 80).block(Blocks.CHEST.getDefaultState()).attach(rect);
+				BlockNode.create(220, 80, 80, 80).block(Blocks.GLASS.getDefaultState()).attach(rect);
+				BlockNode.create(310, 80, 80, 80).block(Blocks.FURNACE.getDefaultState()).rotationYaw(() -> System.currentTimeMillis() % 3600L / 10D).attach(rect);
 				TextNode.create(220, 255).text(Text.create("Blocks", caption).alignX(Align.CENTER)).anchorX(Align.CENTER).attach(rect);
 			})
 			.attach(container);
@@ -282,12 +284,12 @@ public class UIDemoMinecraft extends UIDemo {
 				.create(40, 80, 80, 80)
 				.effect(CircleNodeEffect.create().scope(NodeEffectScope.CHILDREN))
 				.body(mask -> {
-					ItemNode.create(-20, -20, 120, 120).stack(new ItemStack(Blocks.grass)).attach(mask);
+					ItemNode.create(-20, -20, 120, 120).stack(new ItemStack(Blocks.GRASS)).attach(mask);
 				})
 				.attach(rect);
 				ItemNode
 				.create(160, 80, 80, 80)
-				.stack(new ItemStack(Items.golden_carrot, 32))
+				.stack(new ItemStack(Items.GOLDEN_CARROT, 32))
 				.effect(TransformNodeEffect.create(Transformation.create().rotate(30D, Rotation.ROLL)))
 				.attach(rect);
 				ItemNode
@@ -328,17 +330,17 @@ public class UIDemoMinecraft extends UIDemo {
 			.color(UIDemoMinecraft.PLACEHOLDER)
 			.body(rect -> {
 				RectNode.create(20, 20, 400, 200).color(UIDemoMinecraft.PANEL).attach(rect);
-				EntityNode.create(40, 40, 80, 160).entity(() -> minecraft.thePlayer).attach(rect);
+				EntityNode.create(40, 40, 80, 160).entity(() -> minecraft.player).attach(rect);
 				RectNode
 				.create(160, 60, 120, 120)
 				.effect(CircleNodeEffect.create().scope(NodeEffectScope.CHILDREN))
 				.body(mask -> {
-					EntityNode.create(-60, 5, 240, 480).entity(() -> minecraft.thePlayer).attach(mask);
+					EntityNode.create(-60, 5, 240, 480).entity(() -> minecraft.player).attach(mask);
 				})
 				.attach(rect);
 				EntityNode
 				.create(310, 40, 80, 160)
-				.entity(() -> minecraft.thePlayer)
+				.entity(() -> minecraft.player)
 				.effect(TransformNodeEffect.create(Transformation.create().rotate(30D, Rotation.ROLL)))
 				.attach(rect);
 				TextNode.create(220, 255).text(Text.create("Local player", caption).alignX(Align.CENTER)).anchorX(Align.CENTER).attach(rect);
@@ -355,7 +357,7 @@ public class UIDemoMinecraft extends UIDemo {
 				.color(UIDemoMinecraft.INK)
 				.hoveredColor(UIDemoMinecraft.PLACEHOLDER)
 				.body(slot -> {
-					EntityNode.create(60, 10, 80, 160).entity(() -> minecraft.thePlayer).followMouse(true).attach(slot);
+					EntityNode.create(60, 10, 80, 160).entity(() -> minecraft.player).followMouse(true).attach(slot);
 					EntityNode.create(180, 10, 80, 160).type(EntityVillager.class).followMouse(true).attach(slot);
 				})
 				.attach(rect);
@@ -373,9 +375,9 @@ public class UIDemoMinecraft extends UIDemo {
 				.color(UIDemoMinecraft.INK)
 				.hoveredColor(UIDemoMinecraft.PLACEHOLDER)
 				.body(slot -> {
-					ResourceNode.create(10, 10, 80, 80).resource(Resource.of(Blocks.noteblock.getIcon(0, 0))).attach(slot);
+					ResourceNode.create(10, 10, 80, 80).resource(Resource.of(minecraft.getTextureMapBlocks().getAtlasSprite("minecraft:blocks/noteblock"))).attach(slot);
 				})
-				.onClick(event -> minecraft.getSoundHandler().playSound(PositionedSoundRecord.func_147674_a(new ResourceLocation("note.pling"), 1F)))
+				.onClick(event -> minecraft.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.BLOCK_NOTE_PLING, 1F)))
 				.attach(rect);
 				TextNode.create(220, 255).text(Text.create("Vanilla sound", caption).alignX(Align.CENTER)).anchorX(Align.CENTER).attach(rect);
 			})
@@ -386,7 +388,7 @@ public class UIDemoMinecraft extends UIDemo {
 			.color(UIDemoMinecraft.PLACEHOLDER)
 			.body(rect -> {
 				RectNode.create(20, 20, 400, 200).color(UIDemoMinecraft.PANEL).attach(rect);
-				TextNode.create(30, 30).text(Text.create(() -> "GUI scale " + new ScaledResolution(minecraft, minecraft.displayWidth, minecraft.displayHeight).getScaleFactor(), info)).attach(rect);
+				TextNode.create(30, 30).text(Text.create(() -> "GUI scale " + new ScaledResolution(minecraft).getScaleFactor(), info)).attach(rect);
 				TextNode.create(30, 60).text(Text.create(() -> String.format("Interface scale %.2f", super.getView().getInterfaceScale()), info)).attach(rect);
 				TextNode.create(30, 90).text(Text.create(() -> "Active " + super.getScale().active() + ", limited " + super.getScale().limited(), info)).attach(rect);
 				RectNode
@@ -442,9 +444,9 @@ public class UIDemoMinecraft extends UIDemo {
 				.color(UIDemoMinecraft.PANEL)
 				.onDraw(event -> {
 					final Node panel = event.getNode();
-					DrawItem.inst().drawItem(panel.getX() + 20D, panel.getY() + 60D, 80D, star);
-					DrawItem.inst().drawItemCount(panel.getX() + 20D, panel.getY() + 60D, 80D, star, "x3");
-					DrawBlock.inst().drawBlock(panel.getX() + 140D, panel.getY() + 60D, 80D, Blocks.bookshelf, 0, 30D, 20D);
+					DrawItem.inst().drawItem(panel.getX() + 20D, panel.getY() + 60D, 80D, totem);
+					DrawItem.inst().drawItemCount(panel.getX() + 20D, panel.getY() + 60D, 80D, totem, "x3");
+					DrawBlock.inst().drawBlock(panel.getX() + 140D, panel.getY() + 60D, 80D, Blocks.BOOKSHELF.getDefaultState(), 30D, 20D);
 					DrawEntity.inst().drawPlayer(panel.getX() + 280D, panel.getY() + 20D, 80D, 160D, skin, -30D, 0D);
 				})
 				.attach(rect);

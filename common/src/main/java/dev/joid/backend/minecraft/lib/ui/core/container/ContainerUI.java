@@ -27,13 +27,13 @@ public abstract class ContainerUI<C extends Container> extends BaseContainerUI<C
 	}
 
 	public ItemStack getCarried() {
-		return Minecraft.getMinecraft().thePlayer.inventory.getItemStack();
+		return Minecraft.getMinecraft().player.inventory.getItemStack();
 	}
 
 	private void drawCarried(final double mouseX, final double mouseY) {
 		final ContainerUIScreen<?> screen = BridgeHandler.UI.getBridge(ContainerUIBridge.class).getScreen(this);
 		final ItemStack carried = this.getCarried();
-		if (screen == null || carried == null) {
+		if (screen == null || carried.isEmpty()) {
 			return;
 		}
 
@@ -44,7 +44,7 @@ public abstract class ContainerUI<C extends Container> extends BaseContainerUI<C
 
 		final ItemStack stack = carried.copy();
 		if (screen.isQuickCrafting() && screen.getQuickCraftSlots().size() > 1) {
-			stack.stackSize = screen.getQuickCraftRemainder();
+			stack.setCount(screen.getQuickCraftRemainder());
 		}
 
 		final double x = mouseX - this.carriedSize / 2D;

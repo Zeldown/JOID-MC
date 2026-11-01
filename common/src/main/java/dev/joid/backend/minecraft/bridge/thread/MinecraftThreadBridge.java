@@ -8,7 +8,7 @@ public final class MinecraftThreadBridge implements IThreadBridge {
 
 	@Override
 	public boolean isRenderThread() {
-		return Minecraft.getMinecraft().func_152345_ab();
+		return Minecraft.getMinecraft().isCallingFromMinecraftThread();
 	}
 
 	@Override
@@ -16,7 +16,7 @@ public final class MinecraftThreadBridge implements IThreadBridge {
 		if (this.isRenderThread()) {
 			runnable.run();
 		} else {
-			Minecraft.getMinecraft().func_152344_a(runnable);
+			Minecraft.getMinecraft().addScheduledTask(runnable);
 		}
 	}
 

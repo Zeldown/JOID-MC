@@ -14,7 +14,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.AbstractClientPlayer;
+import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
@@ -52,8 +52,8 @@ public class EntityNode extends Node {
 	@Override
 	public void draw(final double mouseX, final double mouseY) {
 		final Minecraft minecraft = Minecraft.getMinecraft();
-		if (this.type != null && (this.entity == null || this.entity.worldObj != minecraft.theWorld)) {
-			this.entity = minecraft.theWorld == null ? null : EntityList.createEntityByName((String) EntityList.classToStringMapping.get(this.type), minecraft.theWorld);
+		if (this.type != null && (this.entity == null || this.entity.world != minecraft.world)) {
+			this.entity = minecraft.world == null ? null : EntityList.newEntity(this.type, minecraft.world);
 		}
 
 		final boolean follow = this.followMouse && super.getUi().isOnTop();
@@ -139,9 +139,9 @@ public class EntityNode extends Node {
 	}
 
 	private static ResourceLocation getSkin(final GameProfile profile) {
-		final SkinManager manager = Minecraft.getMinecraft().func_152342_ad();
-		final Map<Type, MinecraftProfileTexture> textures = manager.func_152788_a(profile);
-		return textures.containsKey(Type.SKIN) ? manager.func_152792_a(textures.get(Type.SKIN), Type.SKIN) : AbstractClientPlayer.locationStevePng;
+		final SkinManager manager = Minecraft.getMinecraft().getSkinManager();
+		final Map<Type, MinecraftProfileTexture> textures = manager.loadSkinFromCache(profile);
+		return textures.containsKey(Type.SKIN) ? manager.loadSkin(textures.get(Type.SKIN), Type.SKIN) : DefaultPlayerSkin.getDefaultSkin(profile.getId());
 	}
 
 }

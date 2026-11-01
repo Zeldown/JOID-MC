@@ -9,6 +9,7 @@ import org.lwjgl.opengl.GL21;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL33;
 
+import dev.joid.backend.minecraft.bridge.render.MinecraftGlState;
 import dev.joid.base.opengl.binding.GlConstants;
 import dev.joid.base.opengl.capability.GlCapabilities;
 import dev.joid.base.opengl.render.GlRenderBridge;
@@ -22,15 +23,18 @@ import net.minecraft.client.shader.Framebuffer;
 
 public final class MinecraftSnapshotBackend implements ISnapshotBackend {
 
-	private GlRenderBridge bridge;
-	private Framebuffer    framebuffer;
+	private GlRenderBridge   bridge;
+	private Framebuffer      framebuffer;
+	private MinecraftGlState state;
 
 	@Override
 	public void create(final int width, final int height) {
 		this.bridge = BridgeHandler.RENDER.getBridge(GlRenderBridge.class);
+		this.state  = MinecraftGlState.read();
 		GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
 		GL11.glPushClientAttrib(GL11.GL_ALL_CLIENT_ATTRIB_BITS);
 		this.framebuffer = new Framebuffer(width, height, true);
+		this.framebuffer.enableStencil();
 		this.framebuffer.bindFramebuffer(true);
 	}
 
@@ -41,6 +45,8 @@ public final class MinecraftSnapshotBackend implements ISnapshotBackend {
 		this.unbindObjects();
 		GL11.glPopClientAttrib();
 		GL11.glPopAttrib();
+		this.state.restore();
+		this.state = null;
 		Minecraft.getMinecraft().getFramebuffer().bindFramebuffer(true);
 	}
 

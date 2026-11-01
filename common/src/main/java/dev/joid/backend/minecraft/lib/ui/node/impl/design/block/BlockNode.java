@@ -7,13 +7,12 @@ import dev.joid.lib.signal.Signal;
 import dev.joid.lib.ui.node.Node;
 import lombok.Getter;
 import lombok.NonNull;
-import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 
 @Getter
 public class BlockNode extends Node {
 
-	private Block block;
-	private int   metadata;
+	private IBlockState block;
 
 	private double rotationYaw;
 	private double rotationPitch;
@@ -34,23 +33,15 @@ public class BlockNode extends Node {
 	@Override
 	public void draw(final double mouseX, final double mouseY) {
 		final double size = Math.min(super.getWidth(), super.getHeight());
-		DrawBlock.inst().drawBlock(super.getX() + (super.getWidth() - size) / 2D, super.getY() + (super.getHeight() - size) / 2D, size, this.block, this.metadata, this.rotationYaw, this.rotationPitch);
+		DrawBlock.inst().drawBlock(super.getX() + (super.getWidth() - size) / 2D, super.getY() + (super.getHeight() - size) / 2D, size, this.block, this.rotationYaw, this.rotationPitch);
 	}
 
-	public final <T extends BlockNode> @NonNull T block(final @NonNull Block block) {
+	public final <T extends BlockNode> @NonNull T block(final @NonNull IBlockState block) {
 		return this.block(Signal.from(block));
 	}
 
-	public final <T extends BlockNode> @NonNull T block(final @NonNull Supplier<@NonNull Block> block) {
+	public final <T extends BlockNode> @NonNull T block(final @NonNull Supplier<@NonNull IBlockState> block) {
 		return super.follow("block", block, value -> this.block = value);
-	}
-
-	public final <T extends BlockNode> @NonNull T metadata(final int metadata) {
-		return this.metadata(Signal.from(metadata));
-	}
-
-	public final <T extends BlockNode> @NonNull T metadata(final @NonNull Supplier<Integer> metadata) {
-		return super.follow("metadata", metadata, value -> this.metadata = value);
 	}
 
 	public final <T extends BlockNode> @NonNull T rotationYaw(final double rotationYaw) {

@@ -41,7 +41,7 @@ public final class MinecraftJoid {
 			return;
 		}
 
-		MinecraftBackend.inst().dataDir(new File(Minecraft.getMinecraft().mcDataDir, "config/joid")).register();
+		MinecraftBackend.inst().dataDir(new File(Minecraft.getMinecraft().gameDir, "config/joid")).register();
 		MinecraftStencil.enable();
 	}
 

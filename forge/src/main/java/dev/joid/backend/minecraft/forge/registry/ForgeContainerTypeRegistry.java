@@ -1,7 +1,5 @@
 package dev.joid.backend.minecraft.forge.registry;
 
-import cpw.mods.fml.common.network.IGuiHandler;
-import cpw.mods.fml.common.network.NetworkRegistry;
 import dev.joid.backend.minecraft.lib.ui.core.container.ContainerUI;
 import dev.joid.backend.minecraft.loader.registry.ContainerTypeRegistry;
 import dev.joid.backend.minecraft.loader.registry.ContainerUIRegistry;
@@ -10,6 +8,8 @@ import lombok.NoArgsConstructor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.network.IGuiHandler;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ForgeContainerTypeRegistry implements IGuiHandler {
@@ -20,7 +20,7 @@ public final class ForgeContainerTypeRegistry implements IGuiHandler {
 		}
 
 		NetworkRegistry.INSTANCE.registerGuiHandler(mod, new ForgeContainerTypeRegistry());
-		ContainerTypeRegistry.opener((type, player) -> player.openGui(mod, ContainerTypeRegistry.getRegistered().indexOf(type), player.worldObj, 0, 0, 0));
+		ContainerTypeRegistry.opener((type, player) -> player.openGui(mod, ContainerTypeRegistry.getRegistered().indexOf(type), player.world, 0, 0, 0));
 	}
 
 	@Override

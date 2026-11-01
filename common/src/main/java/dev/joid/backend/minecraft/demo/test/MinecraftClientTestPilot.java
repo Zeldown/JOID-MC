@@ -36,10 +36,6 @@ import org.lwjgl.opengl.GL11;
 
 import com.mojang.authlib.GameProfile;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent.Phase;
-import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
 import dev.joid.backend.minecraft.MinecraftBackend;
 import dev.joid.backend.minecraft.bridge.render.GuiFrameCounter;
 import dev.joid.backend.minecraft.bridge.ui.container.ContainerUIScreen;
@@ -85,8 +81,8 @@ import dev.joid.lib.ui.node.Node;
 import dev.joid.lib.ui.node.impl.shape.RectNode;
 import dev.joid.test.snapshot.ISnapshotBackend;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.SoundCategory;
-import net.minecraft.client.entity.EntityClientPlayerMP;
+import net.minecraft.client.audio.PositionedSoundRecord;
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiControls;
 import net.minecraft.client.gui.GuiMainMenu;
@@ -94,39 +90,46 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.gui.inventory.GuiInventory;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.shader.Framebuffer;
+import net.minecraft.client.tutorial.TutorialSteps;
 import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.passive.EntityPig;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
+import net.minecraft.init.SoundEvents;
+import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.ItemInWorldManager;
+import net.minecraft.server.management.PlayerInteractionManager;
 import net.minecraft.server.management.UserListOpsEntry;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatStyle;
-import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.ScreenShotHelper;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.EnumDifficulty;
+import net.minecraft.world.GameType;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
-import net.minecraftforge.client.MinecraftForgeClient;
-import net.minecraftforge.client.event.sound.PlaySoundEvent17;
+import net.minecraftforge.client.event.sound.PlaySoundEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
+import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
 
 public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	private static final AtomicInteger RELOADS = new AtomicInteger();
-
-	private static final RenderItem RENDER = new RenderItem();
 
 	private final Queue<Runnable> serverTasks = new ConcurrentLinkedQueue<>();
 	private final List<String>    sounds      = Collections.synchronizedList(new ArrayList<>());
@@ -135,7 +138,6 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	private boolean soundCapture;
 
 	public MinecraftClientTestPilot() {
-		FMLCommonHandler.instance().bus().register(this);
 		MinecraftForge.EVENT_BUS.register(this);
 	}
 
@@ -155,9 +157,9 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	}
 
 	@SubscribeEvent
-	public void playSound(final PlaySoundEvent17 event) {
+	public void playSound(final PlaySoundEvent event) {
 		if (this.soundCapture) {
-			this.sounds.add(event.sound.getPositionedSoundLocation().toString());
+			this.sounds.add(event.getSound().getSoundLocation().toString());
 		}
 	}
 
@@ -168,7 +170,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	@Override
 	public String getVersion() {
-		return "1.7.10";
+		return "1.12.2";
 	}
 
 	@Override
@@ -184,13 +186,11 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	@Override
 	public Map<ClientTestScenario, String> getExclusions() {
 		final Map<ClientTestScenario, String> exclusions = new EnumMap<>(ClientTestScenario.class);
-		exclusions.put(ClientTestScenario.AUDIO_INTERFACE, "Minecraft 1.7.10 has no interface sound category, JOID follows the master volume");
-		exclusions.put(ClientTestScenario.ITEM_COOLDOWN, "Minecraft 1.7.10 has no item cooldowns, added in 1.9");
-		exclusions.put(ClientTestScenario.SCREEN_TITLE, "a screen of Minecraft 1.7.10 has no title, so UIDataMinecraft has none");
-		exclusions.put(ClientTestScenario.SUBTITLES, "Minecraft 1.7.10 has no subtitles, added in 1.9");
-		exclusions.put(ClientTestScenario.NESTED_FEATURE_RASTER, "Minecraft 1.7.10 draws at once, it has no feature render pipeline");
-		exclusions.put(ClientTestScenario.FONT_TRAILING_CODE, "the FontRenderer of Minecraft 1.7.10 measures a trailing \u00A7 as -1 pixel, a bug of the game that JOID does not copy");
-		exclusions.put(ClientTestScenario.CONTAINER_CLOSE, "Minecraft 1.7.10 drops the carried stack when a container closes, newer versions give it back to the inventory");
+		exclusions.put(ClientTestScenario.AUDIO_INTERFACE, "Minecraft 1.12.2 has no interface sound category, JOID follows the master volume");
+		exclusions.put(ClientTestScenario.SCREEN_TITLE, "a screen of Minecraft 1.12.2 has no title, so UIDataMinecraft has none");
+		exclusions.put(ClientTestScenario.NESTED_FEATURE_RASTER, "Minecraft 1.12.2 draws at once, it has no feature render pipeline");
+		exclusions.put(ClientTestScenario.FONT_TRAILING_CODE, "the FontRenderer of Minecraft 1.12.2 measures a trailing \u00A7 as -1 pixel, a bug of the game that JOID does not copy");
+		exclusions.put(ClientTestScenario.CONTAINER_CLOSE, "Minecraft 1.12.2 drops the carried stack when a container closes, newer versions give it back to the inventory");
 		return exclusions;
 	}
 
@@ -201,20 +201,23 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 			final Minecraft minecraft = Minecraft.getMinecraft();
 			minecraft.gameSettings.pauseOnLostFocus = false;
 			minecraft.gameSettings.difficulty = EnumDifficulty.PEACEFUL;
-			minecraft.gameSettings.showInventoryAchievementHint = false;
+			minecraft.getTutorial().setStep(TutorialSteps.NONE);
 		});
 		this.sleep(2000L);
 	}
 
 	@Override
 	public void joinWorld() {
-		this.runOnClient(() -> Minecraft.getMinecraft().launchIntegratedServer("joid-test", "joid-test", new WorldSettings(1L, WorldSettings.GameType.SURVIVAL, false, false, WorldType.FLAT)));
-		this.waitFor("the singleplayer world", () -> Minecraft.getMinecraft().thePlayer != null && Minecraft.getMinecraft().theWorld != null, 600);
-		this.runOnClient(() -> Minecraft.getMinecraft().displayGuiScreen(null));
+		this.runOnClient(() -> Minecraft.getMinecraft().launchIntegratedServer("joid-test", "joid-test", new WorldSettings(1L, GameType.SURVIVAL, false, false, WorldType.FLAT)));
+		this.waitFor("the singleplayer world", () -> Minecraft.getMinecraft().player != null && Minecraft.getMinecraft().world != null, 600);
+		this.runOnClient(() -> {
+			Minecraft.getMinecraft().displayGuiScreen(null);
+			Minecraft.getMinecraft().getToastGui().clear();
+		});
 		this.waitFor("the game without screen", () -> Minecraft.getMinecraft().currentScreen == null, 30);
 		this.computeOnServer(player -> {
-			player.worldObj.getGameRules().setOrCreateGameRule("doDaylightCycle", "false");
-			player.worldObj.getGameRules().setOrCreateGameRule("doMobSpawning", "false");
+			player.world.getGameRules().setOrCreateGameRule("doDaylightCycle", "false");
+			player.world.getGameRules().setOrCreateGameRule("doMobSpawning", "false");
 			return null;
 		});
 		this.sleep(5000L);
@@ -222,17 +225,17 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	@Override
 	public void stop(final boolean passed) {
-		Minecraft.getMinecraft().func_152344_a(Minecraft.getMinecraft()::shutdown);
+		Minecraft.getMinecraft().addScheduledTask(Minecraft.getMinecraft()::shutdown);
 	}
 
 	@Override
 	public void runOnClient(final Runnable runnable) {
-		MinecraftClientTestPilot.await(Minecraft.getMinecraft().func_152344_a(runnable), "running on the client", 120);
+		MinecraftClientTestPilot.await(Minecraft.getMinecraft().addScheduledTask(runnable), "running on the client", 120);
 	}
 
 	@Override
 	public <T> T computeOnClient(final Callable<T> callable, final int seconds) {
-		return (T) MinecraftClientTestPilot.await(Minecraft.getMinecraft().func_152343_a(callable), "computing on the client", seconds);
+		return (T) MinecraftClientTestPilot.await(Minecraft.getMinecraft().addScheduledTask(callable), "computing on the client", seconds);
 	}
 
 	@Override
@@ -251,10 +254,10 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	public BufferedImage capture(final String name) {
 		this.runOnClient(() -> {
 			final Minecraft minecraft = Minecraft.getMinecraft();
-			ScreenShotHelper.saveScreenshot(minecraft.mcDataDir, name + ".png", minecraft.displayWidth, minecraft.displayHeight, minecraft.getFramebuffer());
+			ScreenShotHelper.saveScreenshot(minecraft.gameDir, name + ".png", minecraft.displayWidth, minecraft.displayHeight, minecraft.getFramebuffer());
 		});
 		try {
-			return ImageIO.read(new File(new File(Minecraft.getMinecraft().mcDataDir, "screenshots"), name + ".png"));
+			return ImageIO.read(new File(new File(Minecraft.getMinecraft().gameDir, "screenshots"), name + ".png"));
 		} catch (final IOException exception) {
 			throw new AssertionError("Unable to read the capture " + name, exception);
 		}
@@ -275,9 +278,9 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	public void clearInventory() {
 		this.computeOnServer(player -> {
 			for (int slot = 0; slot < player.inventory.getSizeInventory(); slot++) {
-				player.inventory.setInventorySlotContents(slot, null);
+				player.inventory.setInventorySlotContents(slot, ItemStack.EMPTY);
 			}
-			player.inventory.setItemStack(null);
+			player.inventory.setItemStack(ItemStack.EMPTY);
 			player.updateHeldItem();
 			player.inventoryContainer.detectAndSendChanges();
 			return null;
@@ -294,7 +297,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 			}
 
 			for (int slot = 0; slot < 27; slot++) {
-				OpenDemoContainerPayloadHandler.getStorage(player).setInventorySlotContents(slot, null);
+				OpenDemoContainerPayloadHandler.getStorage(player).setInventorySlotContents(slot, ItemStack.EMPTY);
 			}
 			return player.openContainer.inventorySlots.size();
 		});
@@ -324,7 +327,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 			return this.computeOnServer(player -> MinecraftClientTestPilot.describe(player.inventory.getItemStack(), player.openContainer));
 		}
 		return this.computeOnClient(() -> {
-			final EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
+			final EntityPlayerSP player = Minecraft.getMinecraft().player;
 			return MinecraftClientTestPilot.describe(player.inventory.getItemStack(), player.openContainer);
 		}, 120);
 	}
@@ -337,18 +340,18 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	@Override
 	public boolean canOpenDemoContainer(final int level) {
 		return this.computeOnServer(player -> {
-			final MinecraftServer server = MinecraftServer.getServer();
-			final WorldServer world = server.worldServerForDimension(0);
+			final MinecraftServer server = player.getServer();
+			final WorldServer world = server.getWorld(0);
 			final GameProfile profile = new GameProfile(UUID.randomUUID(), "JOIDStranger");
-			final EntityPlayerMP stranger = new EntityPlayerMP(server, world, profile, new ItemInWorldManager(world));
+			final EntityPlayerMP stranger = new EntityPlayerMP(server, world, profile, new PlayerInteractionManager(world));
 			if (level > 0) {
-				server.getConfigurationManager().func_152603_m().func_152687_a(new UserListOpsEntry(profile, level));
+				server.getPlayerList().getOppedPlayers().addEntry(new UserListOpsEntry(profile, level, false));
 			}
 
 			try {
 				return OpenDemoContainerPayloadHandler.canOpen(stranger);
 			} finally {
-				server.getConfigurationManager().func_152610_b(profile);
+				server.getPlayerList().removeOp(profile);
 			}
 		});
 	}
@@ -358,8 +361,8 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 		return this.computeOnServer(player -> {
 			int count = 0;
 			for (final ItemStack stack : player.inventory.mainInventory) {
-				if (stack != null && stack.getItem() == MinecraftClientTestPilot.stack(item, 1).getItem()) {
-					count += stack.stackSize;
+				if (!stack.isEmpty() && stack.getItem() == MinecraftClientTestPilot.stack(item, 1).getItem()) {
+					count += stack.getCount();
 				}
 			}
 			return count;
@@ -368,7 +371,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	@Override
 	public void clickDemoContainer(final int slot, final int button) {
-		this.computeOnServer(player -> player.openContainer.slotClick(slot, button, 0, player));
+		this.computeOnServer(player -> player.openContainer.slotClick(slot, button, ClickType.PICKUP, player));
 	}
 
 	@Override
@@ -427,7 +430,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	@Override
 	public String getScreenTitle() {
-		throw new UnsupportedOperationException("A screen of Minecraft 1.7.10 has no title");
+		throw new UnsupportedOperationException("A screen of Minecraft 1.12.2 has no title");
 	}
 
 	@Override
@@ -448,7 +451,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	@Override
 	public int getGuiScale() {
 		final Minecraft minecraft = Minecraft.getMinecraft();
-		return new ScaledResolution(minecraft, minecraft.displayWidth, minecraft.displayHeight).getScaleFactor();
+		return new ScaledResolution(minecraft).getScaleFactor();
 	}
 
 	@Override
@@ -456,7 +459,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 		final Minecraft minecraft = Minecraft.getMinecraft();
 		minecraft.gameSettings.guiScale = guiScale;
 		if (minecraft.currentScreen != null) {
-			final ScaledResolution resolution = new ScaledResolution(minecraft, minecraft.displayWidth, minecraft.displayHeight);
+			final ScaledResolution resolution = new ScaledResolution(minecraft);
 			minecraft.currentScreen.setWorldAndResolution(minecraft, resolution.getScaledWidth(), resolution.getScaledHeight());
 		}
 	}
@@ -476,9 +479,9 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	public List<String> getControlsLabels() {
 		final Object list = MinecraftClientTestPilot.field(Minecraft.getMinecraft().currentScreen, "keyBindingList");
 		final List<String> labels = new ArrayList<>();
-		for (final Object entry : (Object[]) MinecraftClientTestPilot.field(list, "field_148190_m")) {
+		for (final Object entry : (Object[]) MinecraftClientTestPilot.field(list, "listEntries")) {
 			if (entry != null) {
-				labels.add((String) MinecraftClientTestPilot.field(entry, entry.getClass().getSimpleName().equals("CategoryEntry") ? "field_148285_b" : "field_148283_c"));
+				labels.add((String) MinecraftClientTestPilot.field(entry, entry.getClass().getSimpleName().equals("CategoryEntry") ? "labelText" : "keyDesc"));
 			}
 		}
 		return labels;
@@ -491,12 +494,12 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	@Override
 	public void reloadResources() {
-		Minecraft.getMinecraft().refreshResources();
+		FMLClientHandler.instance().refreshResources(type -> true);
 	}
 
 	@Override
 	public File getGameDirectory() {
-		return Minecraft.getMinecraft().mcDataDir;
+		return Minecraft.getMinecraft().gameDir;
 	}
 
 	@Override
@@ -506,7 +509,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	@Override
 	public Object createRedChat(final String text) {
-		return new ChatComponentText(text).setChatStyle(new ChatStyle().setColor(EnumChatFormatting.RED));
+		return new TextComponentString(text).setStyle(new Style().setColor(TextFormatting.RED));
 	}
 
 	@Override
@@ -528,8 +531,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	@Override
 	public String translate(final String language, final String key) {
-		final String file = language.substring(0, 3) + language.substring(3).toUpperCase();
-		try (final InputStream stream = Minecraft.getMinecraft().getResourceManager().getResource(new ResourceLocation("joid", "lang/" + file + ".lang")).getInputStream()) {
+		try (final InputStream stream = Minecraft.getMinecraft().getResourceManager().getResource(new ResourceLocation("joid", "lang/" + language + ".lang")).getInputStream()) {
 			final Properties properties = new Properties();
 			properties.load(new InputStreamReader(stream, StandardCharsets.UTF_8));
 			return properties.getProperty(key, key);
@@ -549,7 +551,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 		framebuffer.bindFramebuffer(false);
 		try {
 			final int bits = GL11.glGetInteger(GL11.GL_STENCIL_BITS);
-			return MinecraftForgeClient.getStencilBits() == bits ? bits : -1;
+			return framebuffer.isStencilEnabled() ? bits : -1;
 		} finally {
 			framebuffer.unbindFramebuffer();
 		}
@@ -574,12 +576,12 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	@Override
 	public void playInterfaceSound() {
-		throw new UnsupportedOperationException("Minecraft 1.7.10 has no subtitles to show a sound");
+		Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.BLOCK_NOTE_PLING, 1F));
 	}
 
 	@Override
 	public String getNoteBlockSound() {
-		return "minecraft:note.pling";
+		return SoundEvents.BLOCK_NOTE_PLING.getSoundName().toString();
 	}
 
 	@Override
@@ -589,7 +591,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	@Override
 	public void setSubtitles(final boolean subtitles) {
-		throw new UnsupportedOperationException("Minecraft 1.7.10 has no subtitles");
+		Minecraft.getMinecraft().gameSettings.showSubtitles = subtitles;
 	}
 
 	@Override
@@ -611,19 +613,19 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	@Override
 	public boolean isOnCooldown(final ClientTestItem item) {
-		throw new UnsupportedOperationException("Minecraft 1.7.10 has no item cooldowns");
+		return Minecraft.getMinecraft().player.getCooldownTracker().hasCooldown(MinecraftClientTestPilot.stack(item, 1).getItem());
 	}
 
 	@Override
 	public Resource createSprite(final ClientTestItem item) {
 		final ItemStack stack = MinecraftClientTestPilot.stack(item, 1);
-		return Resource.of(stack.getItem().getIconFromDamage(stack.getItemDamage()));
+		return Resource.of(Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getParticleIcon(stack.getItem(), stack.getMetadata()));
 	}
 
 	@Override
 	public Node[] createNestedRasterNodes(final boolean feature) {
-		final ItemStack apple = new ItemStack(Items.apple);
-		final ItemStack stone = new ItemStack(Blocks.stone);
+		final ItemStack apple = new ItemStack(Items.APPLE);
+		final ItemStack stone = new ItemStack(Blocks.STONE);
 		final RectNode nested = RectNode.create(400, 300, 256, 256).color(Color.rgb(0x202020)).onDraw(event -> {
 			final Node node = event.getNode();
 			final DrawableRaster raster = MinecraftClientTestPilot.itemRaster(stone);
@@ -645,13 +647,13 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 		final BlockNode node = BlockNode.create(x, y, size, size);
 		switch (block) {
 			case GRASS:
-				return node.block(Blocks.grass);
+				return node.block(Blocks.GRASS.getDefaultState());
 			case ICE:
-				return node.block(Blocks.ice);
+				return node.block(Blocks.ICE.getDefaultState());
 			case SNOW_BLOCK:
-				return node.block(Blocks.snow);
+				return node.block(Blocks.SNOW.getDefaultState());
 			default:
-				return node.block(Blocks.stone);
+				return node.block(Blocks.STONE.getDefaultState());
 		}
 	}
 
@@ -731,7 +733,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	@Override
 	public int[] getHotbarBounds() {
 		final Minecraft minecraft = Minecraft.getMinecraft();
-		final ScaledResolution resolution = new ScaledResolution(minecraft, minecraft.displayWidth, minecraft.displayHeight);
+		final ScaledResolution resolution = new ScaledResolution(minecraft);
 		final int scale = resolution.getScaleFactor();
 		return new int[] {(resolution.getScaledWidth() / 2 - 91) * scale, (resolution.getScaledHeight() - 22) * scale, 182 * scale, 22 * scale};
 	}
@@ -751,7 +753,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	@Override
 	public int[] getHotbarSlotBounds(final int slot) {
 		final Minecraft minecraft = Minecraft.getMinecraft();
-		final ScaledResolution resolution = new ScaledResolution(minecraft, minecraft.displayWidth, minecraft.displayHeight);
+		final ScaledResolution resolution = new ScaledResolution(minecraft);
 		final int scale = resolution.getScaleFactor();
 		return new int[] {(resolution.getScaledWidth() / 2 - 88 + slot * 20) * scale, (resolution.getScaledHeight() - 19) * scale, 16 * scale, 16 * scale};
 	}
@@ -761,7 +763,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 		final GuiContainer screen = (GuiContainer) Minecraft.getMinecraft().currentScreen;
 		final Slot target = screen.inventorySlots.getSlot(slot);
 		final int scale = this.getGuiScale();
-		return new int[] {((int) MinecraftClientTestPilot.field(screen, "guiLeft") + target.xDisplayPosition) * scale, ((int) MinecraftClientTestPilot.field(screen, "guiTop") + target.yDisplayPosition) * scale, 16 * scale, 16 * scale};
+		return new int[] {((int) MinecraftClientTestPilot.field(screen, "guiLeft") + target.xPos) * scale, ((int) MinecraftClientTestPilot.field(screen, "guiTop") + target.yPos) * scale, 16 * scale, 16 * scale};
 	}
 
 	@Override
@@ -791,7 +793,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 		final CompletableFuture<T> future = new CompletableFuture<>();
 		this.serverTasks.add(() -> {
 			try {
-				future.complete(function.apply((EntityPlayerMP) MinecraftServer.getServer().getConfigurationManager().playerEntityList.get(0)));
+				future.complete(function.apply(FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getPlayers().get(0)));
 			} catch (final RuntimeException exception) {
 				future.completeExceptionally(exception);
 			}
@@ -852,23 +854,23 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	private static ItemStack stack(final ClientTestItem item, final int count) {
 		switch (item) {
 			case APPLE:
-				return new ItemStack(Items.apple, count);
+				return new ItemStack(Items.APPLE, count);
 			case DIAMOND:
-				return new ItemStack(Items.diamond, count);
+				return new ItemStack(Items.DIAMOND, count);
 			case DIAMOND_SWORD:
-				return new ItemStack(Items.diamond_sword, count);
+				return new ItemStack(Items.DIAMOND_SWORD, count);
 			case EMERALD:
-				return new ItemStack(Items.emerald, count);
+				return new ItemStack(Items.EMERALD, count);
 			case ENDER_PEARL:
-				return new ItemStack(Items.ender_pearl, count);
+				return new ItemStack(Items.ENDER_PEARL, count);
 			case FURNACE:
-				return new ItemStack(Blocks.furnace, count);
+				return new ItemStack(Blocks.FURNACE, count);
 			case GOLDEN_APPLE:
-				return new ItemStack(Items.golden_apple, count);
+				return new ItemStack(Items.GOLDEN_APPLE, count);
 			case SNOW_BLOCK:
-				return new ItemStack(Blocks.snow, count);
+				return new ItemStack(Blocks.SNOW, count);
 			default:
-				return new ItemStack(Blocks.stone, count);
+				return new ItemStack(Blocks.STONE, count);
 		}
 	}
 
@@ -893,7 +895,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	}
 
 	private static int count(final ItemStack stack) {
-		return stack == null ? 0 : stack.stackSize;
+		return stack.getCount();
 	}
 
 	private static DrawableRaster itemRaster(final ItemStack stack) {
@@ -901,8 +903,8 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 			final Minecraft minecraft = Minecraft.getMinecraft();
 			final float scale = Math.min(width, height) / 16F;
 			RenderHelper.enableGUIStandardItemLighting();
-			GL11.glScalef(scale, scale, scale);
-			MinecraftClientTestPilot.RENDER.renderItemAndEffectIntoGUI(minecraft.fontRenderer, minecraft.getTextureManager(), stack, 0, 0);
+			GlStateManager.scale(scale, scale, scale);
+			minecraft.getRenderItem().renderItemAndEffectIntoGUI(stack, 0, 0);
 		});
 	}
 

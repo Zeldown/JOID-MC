@@ -1,5 +1,7 @@
 package dev.joid.backend.minecraft.bridge.ui.screen;
 
+import java.io.IOException;
+
 import org.lwjgl.input.Keyboard;
 
 import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
@@ -39,21 +41,21 @@ public class UIScreen extends GuiScreen {
 	}
 
 	@Override
-	public void handleMouseInput() {
+	public void handleMouseInput() throws IOException {
 		if (!Lwjgl2InputForwarder.forwardMouseEvent()) {
 			super.handleMouseInput();
 		}
 	}
 
 	@Override
-	public void handleKeyboardInput() {
+	public void handleKeyboardInput() throws IOException {
 		if (!Lwjgl2InputForwarder.forwardKeyboardEvent()) {
 			super.handleKeyboardInput();
 		}
 	}
 
 	@Override
-	protected void keyTyped(final char character, final int code) {
+	protected void keyTyped(final char character, final int code) throws IOException {
 		if (code != Keyboard.KEY_ESCAPE) {
 			super.keyTyped(character, code);
 		}

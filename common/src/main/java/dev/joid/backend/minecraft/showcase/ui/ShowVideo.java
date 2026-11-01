@@ -33,7 +33,7 @@ import dev.joid.lib.utils.align.Align;
 import dev.joid.lib.utils.geom.Point;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.SoundCategory;
+import net.minecraft.util.SoundCategory;
 
 @UIDataMinecraft(pause = false)
 public class ShowVideo extends UI implements IShowFocus {

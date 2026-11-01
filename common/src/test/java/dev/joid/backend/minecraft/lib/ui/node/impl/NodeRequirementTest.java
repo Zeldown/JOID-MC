@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.util.List;
 
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.block.BlockNode;
@@ -11,14 +12,19 @@ import dev.joid.backend.minecraft.lib.ui.node.impl.design.entity.EntityNode;
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.item.ItemNode;
 import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
 import dev.joid.lib.ui.node.Node;
-import net.minecraft.block.BlockStone;
 import net.minecraft.entity.passive.EntityPig;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Bootstrap;
 import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.inventory.Slot;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 public class NodeRequirementTest {
+
+	@BeforeClass
+	public static void bootstrap() {
+		Bootstrap.register();
+	}
 
 	@Test
 	public void refusesABlockNodeWithoutBlock() {
@@ -27,7 +33,7 @@ public class NodeRequirementTest {
 
 	@Test
 	public void acceptsABlockNodeWithABlock() throws ReflectiveOperationException {
-		NodeRequirementTest.checkRequirements(BlockNode.create(0, 0, 80, 80).block(new BlockStone()));
+		NodeRequirementTest.checkRequirements(BlockNode.create(0, 0, 80, 80).block(Blocks.STONE.getDefaultState()));
 	}
 
 	@Test
@@ -37,8 +43,8 @@ public class NodeRequirementTest {
 
 	@Test
 	public void acceptsAnItemNodeWithAnEmptyStack() throws ReflectiveOperationException {
-		NodeRequirementTest.checkRequirements(ItemNode.create(0, 0, 80, 80).stack(new ItemStack((Item) null)));
-		NodeRequirementTest.checkRequirements(ItemNode.create(0, 0, 80, 80).stack(() -> new ItemStack((Item) null)));
+		NodeRequirementTest.checkRequirements(ItemNode.create(0, 0, 80, 80).stack(ItemStack.EMPTY));
+		NodeRequirementTest.checkRequirements(ItemNode.create(0, 0, 80, 80).stack(() -> ItemStack.EMPTY));
 	}
 
 	@Test

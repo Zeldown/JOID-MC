@@ -53,20 +53,20 @@ public final class OverlayUIBridge extends BaseOverlayUIBridge<Void, OverlayLaye
 	@Override
 	protected int getGuiMouseX() {
 		final Minecraft minecraft = Minecraft.getMinecraft();
-		return Mouse.getX() * new ScaledResolution(minecraft, minecraft.displayWidth, minecraft.displayHeight).getScaledWidth() / minecraft.displayWidth;
+		return Mouse.getX() * new ScaledResolution(minecraft).getScaledWidth() / minecraft.displayWidth;
 	}
 
 	@Override
 	protected int getGuiMouseY() {
 		final Minecraft minecraft = Minecraft.getMinecraft();
-		final int height = new ScaledResolution(minecraft, minecraft.displayWidth, minecraft.displayHeight).getScaledHeight();
+		final int height = new ScaledResolution(minecraft).getScaledHeight();
 		return height - Mouse.getY() * height / minecraft.displayHeight - 1;
 	}
 
 	@Override
 	protected boolean isHudHidden() {
 		final Minecraft minecraft = Minecraft.getMinecraft();
-		return minecraft.gameSettings.hideGUI && minecraft.theWorld != null && minecraft.currentScreen == null;
+		return minecraft.gameSettings.hideGUI && minecraft.world != null && minecraft.currentScreen == null;
 	}
 
 	@Override
