@@ -29,6 +29,7 @@ import net.minecraft.item.ItemEnchantedBook;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameType;
+import net.minecraft.world.World;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public enum ShowcaseScene {
@@ -70,7 +71,8 @@ public enum ShowcaseScene {
 			player.experience      = 62F / player.xpBarCap();
 			player.addExperienceLevel(0);
 			final String spot = System.getProperty("joid.showcase.spot");
-			final double[] place = spot == null ? new double[] {player.posX, player.posZ, 180D, 6D} : Arrays.stream(spot.split(" ")).mapToDouble(Double::parseDouble).toArray();
+			final BlockPos spawn = player.world.getSpawnPoint();
+			final double[] place = spot == null ? new double[] {spawn.getX() + 0.5D, spawn.getZ() + 0.5D, ShowcaseScene.getOpenYaw(player.world, spawn), 6D} : Arrays.stream(spot.split(" ")).mapToDouble(Double::parseDouble).toArray();
 			final int ground = player.world.getTopSolidOrLiquidBlock(new BlockPos(place[0], 0D, place[1])).getY();
 			player.connection.setPlayerLocation(place[0], ground + 0.01D, place[1], (float) place[2], (float) place[3]);
 			final InventoryPlayer inventory = player.inventory;
@@ -410,6 +412,22 @@ public enum ShowcaseScene {
 		JOID.close(JOID.getUi(ShowHud.class));
 		JOID.close(JOID.getUi(ShowHud.Food.class));
 		JOID.close(JOID.getUi(ShowHud.Experience.class));
+	}
+
+	private static double getOpenYaw(final World world, final BlockPos spawn) {
+		final int ground = world.getTopSolidOrLiquidBlock(spawn).getY();
+		for (final double yaw : new double[] {180D, 90D, 0D, 270D}) {
+			boolean open = true;
+			for (int distance = 1; distance <= 12 && open; distance++) {
+				final BlockPos ahead = new BlockPos(spawn.getX() - Math.sin(Math.toRadians(yaw)) * distance, ground + 1, spawn.getZ() + Math.cos(Math.toRadians(yaw)) * distance);
+				open = world.isAirBlock(ahead) && world.isAirBlock(ahead.up());
+			}
+
+			if (open) {
+				return yaw;
+			}
+		}
+		return 180D;
 	}
 
 	private static ItemStack enchant(final ItemStack stack, final Enchantment enchantment, final int level) {
