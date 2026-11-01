@@ -1,6 +1,5 @@
 package dev.joid.backend.minecraft.lib.draw.entity;
 
-import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
 import com.mojang.blaze3d.platform.Lighting;
@@ -121,7 +120,7 @@ public final class DrawEntity {
 		final float center = modelHeight / 2F;
 		DrawUtils.RASTER.drawRaster(x - width / 4D, y - height / 4D, width * 1.5D, height * 1.5D, GuiDrawableRaster.of(Lighting::setupForEntityInInventory, (pose, buffer) -> {
 			final EntityRenderDispatcher dispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
-			pose.last().pose().mul(new Matrix4f().scaling(size, -size, -size));
+			pose.scale(size, -size, -size);
 			pose.translate(0F, center, 0F);
 			pose.mulPose(new Quaternionf().rotationZ((float) Math.PI).mul(tilt));
 			pose.translate(0F, center, 0F);
