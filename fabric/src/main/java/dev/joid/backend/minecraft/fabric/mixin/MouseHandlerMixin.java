@@ -11,7 +11,7 @@ import net.minecraft.client.MouseHandler;
 @Mixin(MouseHandler.class)
 public abstract class MouseHandlerMixin {
 
-	@WrapWithCondition(method = "onMove", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/Screen;wrapScreenError(Ljava/lang/Runnable;Ljava/lang/String;Ljava/lang/String;)V", ordinal = 1))
+	@WrapWithCondition(method = "handleAccumulatedMovement", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/Screen;wrapScreenError(Ljava/lang/Runnable;Ljava/lang/String;Ljava/lang/String;)V", ordinal = 1))
 	private boolean joid$mouseDragged(final Runnable action, final String description, final String screen) {
 		return !MinecraftScreenEvents.fireMouseMoved();
 	}
