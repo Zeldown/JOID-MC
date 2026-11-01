@@ -576,7 +576,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	@Override
 	public void playInterfaceSound() {
-		Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.BLOCK_NOTE_PLING, 1F));
+		Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.BLOCK_NOTE_HARP, 1F));
 	}
 
 	@Override
