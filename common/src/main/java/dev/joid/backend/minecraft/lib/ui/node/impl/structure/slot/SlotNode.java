@@ -86,6 +86,7 @@ public class SlotNode extends Node {
 
 			DrawItem.inst().drawItem(x, y, size, stack);
 			DrawItem.inst().drawItemBar(x, y, size, stack);
+			DrawItem.inst().drawItemCooldown(x, y, size, stack);
 			if (count != null) {
 				DrawItem.inst().drawItemCount(x, y, size, stack, count);
 			} else {

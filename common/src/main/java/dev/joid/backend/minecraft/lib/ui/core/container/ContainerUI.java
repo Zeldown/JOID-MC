@@ -51,6 +51,7 @@ public abstract class ContainerUI<C extends Container> extends BaseContainerUI<C
 		final double y = mouseY - this.carriedSize / 2D;
 		DrawItem.inst().drawItem(x, y, this.carriedSize, stack);
 		DrawItem.inst().drawItemBar(x, y, this.carriedSize, stack);
+		DrawItem.inst().drawItemCooldown(x, y, this.carriedSize, stack);
 		DrawItem.inst().drawItemCount(x, y, this.carriedSize, stack);
 	}
 
