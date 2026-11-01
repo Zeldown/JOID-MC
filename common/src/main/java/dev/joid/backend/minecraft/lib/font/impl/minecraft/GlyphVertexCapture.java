@@ -74,10 +74,4 @@ public final class GlyphVertexCapture implements VertexConsumer {
 	@Override
 	public void endVertex() {}
 
-	@Override
-	public void defaultColor(final int red, final int green, final int blue, final int alpha) {}
-
-	@Override
-	public void unsetDefaultColor() {}
-
 }

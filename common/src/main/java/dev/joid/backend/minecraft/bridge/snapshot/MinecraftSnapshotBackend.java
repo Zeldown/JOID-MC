@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
+import dev.joid.backend.minecraft.bridge.render.MinecraftGlState;
 import dev.joid.backend.minecraft.bridge.render.MinecraftRenderTarget;
 import dev.joid.base.opengl.binding.GlConstants;
 import dev.joid.base.opengl.render.GlRenderBridge;

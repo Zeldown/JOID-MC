@@ -14,7 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class FabricPayloads {
 
-	private static final ResourceLocation CHANNEL = ResourceLocation.tryBuild(MinecraftJoid.MOD_ID, "main");
+	private static final ResourceLocation CHANNEL = new ResourceLocation(MinecraftJoid.MOD_ID, "main");
 
 	public static void register() {
 		if (!PayloadType.getRegistered().isEmpty()) {

@@ -1,77 +1,109 @@
 package dev.joid.backend.minecraft.forge.registry;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.mojang.blaze3d.matrix.MatrixStack;
 
+import dev.joid.backend.minecraft.forge.event.ForgeOverlayGui;
 import dev.joid.backend.minecraft.lib.ui.core.data.overlay.layer.OverlayLayer;
 import dev.joid.backend.minecraft.loader.event.MinecraftOverlayEvents;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
-import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
+import net.minecraft.client.Minecraft;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ForgeOverlayLayerRegistry {
 
-	private static final Map<ResourceLocation, OverlayLayer> LAYERS = new HashMap<>();
+	private static boolean cameraStarted;
 
-	static {
-		for (final OverlayLayer layer : OverlayLayer.values()) {
-			for (final VanillaGuiOverlay overlay : ForgeOverlayLayerRegistry.getOverlays(layer)) {
-				ForgeOverlayLayerRegistry.LAYERS.put(overlay.id(), layer);
+	public static void register(final IEventBus modBus) {
+		modBus.addListener((final FMLClientSetupEvent event) -> event.enqueueWork(() -> Minecraft.getInstance().gui = new ForgeOverlayGui(Minecraft.getInstance())));
+		MinecraftForge.EVENT_BUS.addListener(ForgeOverlayLayerRegistry::pre);
+		MinecraftForge.EVENT_BUS.addListener(ForgeOverlayLayerRegistry::post);
+	}
+
+	private static void pre(final RenderGameOverlayEvent.Pre event) {
+		final ElementType type = event.getType();
+		if (type == ElementType.ALL) {
+			ForgeOverlayLayerRegistry.cameraStarted = false;
+			return;
+		}
+
+		final OverlayLayer layer = ForgeOverlayLayerRegistry.getLayer(type);
+		if (layer == null) {
+			return;
+		}
+
+		final MatrixStack pose = event.getMatrixStack();
+		if (layer != OverlayLayer.CAMERA_OVERLAYS || !ForgeOverlayLayerRegistry.cameraStarted) {
+			ForgeOverlayLayerRegistry.cameraStarted |= layer == OverlayLayer.CAMERA_OVERLAYS;
+			MinecraftOverlayEvents.fireLayer(pose, layer, false);
+		}
+
+		if (MinecraftOverlayEvents.isCancelled(layer)) {
+			event.setCanceled(true);
+			if (ForgeOverlayLayerRegistry.isLast(type)) {
+				MinecraftOverlayEvents.fireLayer(pose, layer, true);
 			}
 		}
 	}
 
-	public static void register(final IEventBus modBus) {
-		modBus.addListener(ForgeOverlayLayerRegistry::registerOverlays);
-		MinecraftForge.EVENT_BUS.addListener(ForgeOverlayLayerRegistry::renderOverlay);
-	}
-
-	private static void registerOverlays(final RegisterGuiOverlaysEvent event) {
-		for (final OverlayLayer layer : OverlayLayer.values()) {
-			final List<VanillaGuiOverlay> overlays = ForgeOverlayLayerRegistry.getOverlays(layer);
-			event.registerBelow(overlays.get(0).id(), MinecraftOverlayEvents.getId(layer, false).getPath(), (gui, graphics, partialTick, width, height) -> MinecraftOverlayEvents.fireLayer(graphics, layer, false));
-			event.registerAbove(overlays.get(overlays.size() - 1).id(), MinecraftOverlayEvents.getId(layer, true).getPath(), (gui, graphics, partialTick, width, height) -> MinecraftOverlayEvents.fireLayer(graphics, layer, true));
+	private static void post(final RenderGameOverlayEvent.Post event) {
+		final ElementType type = event.getType();
+		if (type == ElementType.ALL) {
+			MinecraftOverlayEvents.fireHud(event.getMatrixStack());
+			return;
 		}
 
-		event.registerAboveAll(MinecraftOverlayEvents.getId().getPath(), (gui, graphics, partialTick, width, height) -> MinecraftOverlayEvents.fireHud(graphics));
-	}
-
-	private static void renderOverlay(final RenderGuiOverlayEvent.Pre event) {
-		final OverlayLayer layer = ForgeOverlayLayerRegistry.LAYERS.get(event.getOverlay().id());
-		if (layer != null && MinecraftOverlayEvents.isCancelled(layer)) {
-			event.setCanceled(true);
+		final OverlayLayer layer = ForgeOverlayLayerRegistry.getLayer(type);
+		if (layer != null && ForgeOverlayLayerRegistry.isLast(type)) {
+			MinecraftOverlayEvents.fireLayer(event.getMatrixStack(), layer, true);
 		}
 	}
 
-	private static List<VanillaGuiOverlay> getOverlays(final OverlayLayer layer) {
-		return switch (layer) {
-			case CAMERA_OVERLAYS -> List.of(VanillaGuiOverlay.VIGNETTE, VanillaGuiOverlay.SPYGLASS, VanillaGuiOverlay.HELMET, VanillaGuiOverlay.FROSTBITE, VanillaGuiOverlay.PORTAL);
-			case CROSSHAIR -> List.of(VanillaGuiOverlay.CROSSHAIR);
-			case HOTBAR -> List.of(VanillaGuiOverlay.HOTBAR);
-			case ARMOR -> List.of(VanillaGuiOverlay.ARMOR_LEVEL);
-			case HEALTH -> List.of(VanillaGuiOverlay.PLAYER_HEALTH);
-			case FOOD -> List.of(VanillaGuiOverlay.FOOD_LEVEL);
-			case AIR -> List.of(VanillaGuiOverlay.AIR_LEVEL);
-			case MOUNT_HEALTH -> List.of(VanillaGuiOverlay.MOUNT_HEALTH);
-			case CONTEXTUAL_BAR -> List.of(VanillaGuiOverlay.JUMP_BAR, VanillaGuiOverlay.EXPERIENCE_BAR);
-			case SELECTED_ITEM_NAME -> List.of(VanillaGuiOverlay.ITEM_NAME);
-			case EFFECTS -> List.of(VanillaGuiOverlay.POTION_ICONS);
-			case BOSS_BAR -> List.of(VanillaGuiOverlay.BOSS_EVENT_PROGRESS);
-			case SLEEP -> List.of(VanillaGuiOverlay.SLEEP_FADE);
-			case SCOREBOARD -> List.of(VanillaGuiOverlay.SCOREBOARD);
-			case ACTION_BAR -> List.of(VanillaGuiOverlay.RECORD_OVERLAY);
-			case TITLE -> List.of(VanillaGuiOverlay.TITLE_TEXT);
-			case CHAT -> List.of(VanillaGuiOverlay.CHAT_PANEL);
-			case PLAYER_LIST -> List.of(VanillaGuiOverlay.PLAYER_LIST);
-			case SUBTITLES -> List.of(VanillaGuiOverlay.SUBTITLES);
-		};
+	private static boolean isLast(final ElementType type) {
+		return type != ElementType.VIGNETTE && type != ElementType.HELMET;
+	}
+
+	private static OverlayLayer getLayer(final ElementType type) {
+		switch (type) {
+			case VIGNETTE:
+			case HELMET:
+			case PORTAL:
+				return OverlayLayer.CAMERA_OVERLAYS;
+			case CROSSHAIRS:
+				return OverlayLayer.CROSSHAIR;
+			case HOTBAR:
+				return OverlayLayer.HOTBAR;
+			case ARMOR:
+				return OverlayLayer.ARMOR;
+			case HEALTH:
+				return OverlayLayer.HEALTH;
+			case FOOD:
+				return OverlayLayer.FOOD;
+			case AIR:
+				return OverlayLayer.AIR;
+			case HEALTHMOUNT:
+				return OverlayLayer.MOUNT_HEALTH;
+			case EXPERIENCE:
+			case JUMPBAR:
+				return OverlayLayer.CONTEXTUAL_BAR;
+			case POTION_ICONS:
+				return OverlayLayer.EFFECTS;
+			case BOSSHEALTH:
+				return OverlayLayer.BOSS_BAR;
+			case SUBTITLES:
+				return OverlayLayer.SUBTITLES;
+			case CHAT:
+				return OverlayLayer.CHAT;
+			case PLAYER_LIST:
+				return OverlayLayer.PLAYER_LIST;
+			default:
+				return null;
+		}
 	}
 
 }

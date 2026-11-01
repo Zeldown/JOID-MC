@@ -1,6 +1,5 @@
 package dev.joid.backend.minecraft.lib.asset.impl;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -28,23 +27,19 @@ public final class NamespacedAsset extends Asset {
 
 	@Override
 	public @NonNull InputStream open() throws IOException {
-		return this.getResource().open();
+		return Minecraft.getInstance().getResourceManager().getResource(this.id).getInputStream();
 	}
 
 	public boolean exists() {
-		return Minecraft.getInstance().getResourceManager().getResource(this.id).isPresent();
+		return Minecraft.getInstance().getResourceManager().hasResource(this.id);
 	}
 
 	public AnimationMetadataSection getAnimation() {
-		try {
-			return this.getResource().metadata().getSection(AnimationMetadataSection.SERIALIZER).orElse(null);
+		try (final Resource resource = Minecraft.getInstance().getResourceManager().getResource(this.id)) {
+			return resource.getMetadata(AnimationMetadataSection.SERIALIZER);
 		} catch (final IOException exception) {
 			return null;
 		}
-	}
-
-	private Resource getResource() throws IOException {
-		return Minecraft.getInstance().getResourceManager().getResource(this.id).orElseThrow(() -> new FileNotFoundException("No resource " + this.id + " in the loaded resource packs"));
 	}
 
 }

@@ -1,11 +1,11 @@
 package dev.joid.backend.minecraft.lib.draw.entity;
 
-import org.joml.Matrix4f;
-import org.joml.Quaternionf;
-
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Quaternion;
+import com.mojang.math.Vector3f;
 
 import dev.joid.backend.minecraft.lib.draw.raster.GuiDrawableRaster;
 import dev.joid.lib.draw.DrawUtils;
@@ -15,10 +15,10 @@ import lombok.NonNull;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.PlayerModel;
-import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
@@ -48,29 +48,31 @@ public final class DrawEntity {
 
 	public void drawEntity(final double x, final double y, final double width, final double height, final @NonNull Entity entity, final double scale, final double rotationYaw, final double rotationPitch, final double lookX, final double lookY) {
 		final EntityRenderDispatcher dispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
-		final double[] extent = DrawEntity.getExtent(entity.getBbWidth(), entity.getBbHeight(), dispatcher.getRenderer(entity) instanceof final LivingEntityRenderer<?, ?> renderer ? DrawEntity.setupModel(renderer, entity) : null);
+		final EntityRenderer<?> renderer = dispatcher.getRenderer(entity);
+		final double[] extent = DrawEntity.getExtent(entity.getBbWidth(), entity.getBbHeight(), renderer instanceof LivingEntityRenderer ? DrawEntity.setupModel((LivingEntityRenderer<?, ?>) renderer, entity) : null);
 		this.drawModel(x, y, width, height, extent, entity.getBbHeight(), scale, rotationYaw, rotationPitch, lookX, lookY, (pose, buffer, lookYaw, lookPitch) -> {
-			if (!(entity instanceof final LivingEntity living)) {
-				dispatcher.render(entity, 0D, 0D, 0D, 0F, 1F, pose, buffer, LightTexture.FULL_BRIGHT);
+			if (!(entity instanceof LivingEntity)) {
+				dispatcher.render(entity, 0D, 0D, 0D, 0F, 1F, pose, buffer, LightTexture.pack(15, 15));
 				return;
 			}
 
+			final LivingEntity living = (LivingEntity) entity;
 			final float bodyYaw = living.yBodyRot;
-			final float yaw = living.getYRot();
-			final float pitch = living.getXRot();
+			final float yaw = living.yRot;
+			final float pitch = living.xRot;
 			final float previousHeadYaw = living.yHeadRotO;
 			final float headYaw = living.yHeadRot;
-			living.yBodyRot = 180F + lookYaw;
-			living.setYRot(180F + lookYaw * 2F);
-			living.setXRot(living.getPose() == Pose.FALL_FLYING ? 0F : -lookPitch);
-			living.yHeadRot  = living.getYRot();
-			living.yHeadRotO = living.getYRot();
+			living.yBodyRot  = 180F + lookYaw;
+			living.yRot      = 180F + lookYaw * 2F;
+			living.xRot      = living.getPose() == Pose.FALL_FLYING ? 0F : -lookPitch;
+			living.yHeadRot  = living.yRot;
+			living.yHeadRotO = living.yRot;
 			try {
-				dispatcher.render(living, 0D, 0D, 0D, 0F, 1F, pose, buffer, LightTexture.FULL_BRIGHT);
+				dispatcher.render(living, 0D, 0D, 0D, 0F, 1F, pose, buffer, LightTexture.pack(15, 15));
 			} finally {
-				living.yBodyRot = bodyYaw;
-				living.setYRot(yaw);
-				living.setXRot(pitch);
+				living.yBodyRot  = bodyYaw;
+				living.yRot      = yaw;
+				living.xRot      = pitch;
 				living.yHeadRotO = previousHeadYaw;
 				living.yHeadRot  = headYaw;
 			}
@@ -87,7 +89,7 @@ public final class DrawEntity {
 
 	public void drawPlayer(final double x, final double y, final double width, final double height, final @NonNull ResourceLocation skin, final double scale, final double rotationYaw, final double rotationPitch, final double lookX, final double lookY) {
 		if (this.player == null) {
-			this.player = new PlayerModel<>(Minecraft.getInstance().getEntityModels().bakeLayer(ModelLayers.PLAYER), false);
+			this.player = new PlayerModel<>(0F, false);
 		}
 
 		final PlayerModel<LivingEntity> model = this.player;
@@ -96,11 +98,11 @@ public final class DrawEntity {
 			model.head.yRot = (float) Math.toRadians(lookYaw);
 			model.head.xRot = (float) Math.toRadians(-lookPitch);
 			model.hat.copyFrom(model.head);
-			pose.mulPose(new Quaternionf().rotationY((float) Math.toRadians(-lookYaw)));
+			pose.mulPose(Vector3f.YP.rotationDegrees(-lookYaw));
 			pose.scale(-1F, -1F, 1F);
 			pose.scale(0.9375F, 0.9375F, 0.9375F);
 			pose.translate(0F, -1.501F, 0F);
-			model.renderToBuffer(pose, buffer.getBuffer(model.renderType(skin)), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 1F, 1F, 1F, 1F);
+			model.renderToBuffer(pose, buffer.getBuffer(model.renderType(skin)), LightTexture.pack(15, 15), OverlayTexture.NO_OVERLAY, 1F, 1F, 1F, 1F);
 		});
 	}
 
@@ -112,18 +114,25 @@ public final class DrawEntity {
 		final double unit = Math.min(width / (2D * extent[0]), height / (2D * extent[1])) * scale;
 		final float lookYaw = (float) Math.atan((x + width / 2D - lookX) * 0.75D / unit);
 		final float lookPitch = (float) Math.atan((y + height / 2D - lookY) * 0.75D / unit);
-		final Quaternionf tilt = new Quaternionf().rotationX((float) Math.toRadians(lookPitch * 20F));
+		final Quaternion tilt = Vector3f.XP.rotationDegrees(lookPitch * 20F);
 		final float size = (float) (unit / Math.min(width, height) / 1.5D);
 		final float center = modelHeight / 2F;
-		DrawUtils.RASTER.drawRaster(x - width / 4D, y - height / 4D, width * 1.5D, height * 1.5D, GuiDrawableRaster.of(Lighting::setupForEntityInInventory, (pose, buffer) -> {
+		DrawUtils.RASTER.drawRaster(x - width / 4D, y - height / 4D, width * 1.5D, height * 1.5D, GuiDrawableRaster.of(Lighting::setupFor3DItems, (pose, buffer) -> {
 			final EntityRenderDispatcher dispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
-			pose.mulPoseMatrix(new Matrix4f().scaling(size, -size, -size));
+			final Quaternion flip = Vector3f.ZP.rotation((float) Math.PI);
+			final Quaternion rotation = Vector3f.XP.rotationDegrees((float) -rotationPitch);
+			final Quaternion camera = tilt.copy();
+			flip.mul(tilt);
+			rotation.mul(Vector3f.YP.rotationDegrees((float) rotationYaw));
+			camera.conj();
+			camera.mul(Vector3f.YP.rotation((float) Math.PI));
+			pose.last().pose().multiply(Matrix4f.createScaleMatrix(size, -size, -size));
 			pose.translate(0F, center, 0F);
-			pose.mulPose(new Quaternionf().rotationZ((float) Math.PI).mul(tilt));
+			pose.mulPose(flip);
 			pose.translate(0F, center, 0F);
-			pose.mulPose(new Quaternionf().rotationXYZ((float) Math.toRadians(-rotationPitch), (float) Math.toRadians(rotationYaw), 0F));
+			pose.mulPose(rotation);
 			pose.translate(0F, -center, 0F);
-			dispatcher.overrideCameraOrientation(tilt.conjugate(new Quaternionf()).rotateY((float) Math.PI));
+			dispatcher.overrideCameraOrientation(camera);
 			dispatcher.setRenderShadow(false);
 			try {
 				draw.draw(pose, buffer, lookYaw * 20F, lookPitch * 20F);
@@ -140,7 +149,7 @@ public final class DrawEntity {
 		}
 
 		final BoundsCapture bounds = new BoundsCapture();
-		model.renderToBuffer(new PoseStack(), bounds, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 1F, 1F, 1F, 1F);
+		model.renderToBuffer(new PoseStack(), bounds, LightTexture.pack(15, 15), OverlayTexture.NO_OVERLAY, 1F, 1F, 1F, 1F);
 		if (bounds.maxY <= bounds.minY) {
 			return extent;
 		}
@@ -154,7 +163,7 @@ public final class DrawEntity {
 
 	private static <T extends LivingEntity> EntityModel<T> setupModel(final LivingEntityRenderer<T, ?> renderer, final Entity entity) {
 		final EntityModel<T> model = renderer.getModel();
-		model.young = entity instanceof final LivingEntity living && living.isBaby();
+		model.young = entity instanceof LivingEntity && ((LivingEntity) entity).isBaby();
 		model.setupAnim((T) entity, 0F, 0F, entity.tickCount, 0F, 0F);
 		return model;
 	}
@@ -212,12 +221,6 @@ public final class DrawEntity {
 
 		@Override
 		public void endVertex() {}
-
-		@Override
-		public void defaultColor(final int red, final int green, final int blue, final int alpha) {}
-
-		@Override
-		public void unsetDefaultColor() {}
 
 	}
 

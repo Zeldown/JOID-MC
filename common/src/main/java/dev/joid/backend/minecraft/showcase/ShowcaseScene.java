@@ -1,10 +1,9 @@
 package dev.joid.backend.minecraft.showcase;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-
-import com.mojang.datafixers.util.Pair;
 
 import dev.joid.backend.minecraft.showcase.ui.IShowFocus;
 import dev.joid.backend.minecraft.showcase.ui.ShowAnvil;
@@ -25,11 +24,10 @@ import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
-import net.minecraft.network.chat.Component;
+import net.minecraft.core.Registry;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.tags.StructureTags;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -43,6 +41,7 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public enum ShowcaseScene {
@@ -78,7 +77,7 @@ public enum ShowcaseScene {
 
 		ShowcaseScene.prepared = true;
 		final String spot = System.getProperty("joid.showcase.spot");
-		final double[] place = spot == null ? new double[] {384.5D, -239.5D, 180D, 6D} : List.of(spot.split(" ")).stream().mapToDouble(Double::parseDouble).toArray();
+		final double[] place = spot == null ? ShowcaseDirector.computeOnServer(player -> ShowcaseScene.getSpawnPlace(player.getLevel())) : Arrays.stream(spot.split(" ")).mapToDouble(Double::parseDouble).toArray();
 		ShowcaseDirector.command("tick unfreeze");
 		ShowcaseDirector.command("gamemode survival @a");
 		ShowcaseDirector.command("time set 4000");
@@ -89,7 +88,7 @@ public enum ShowcaseScene {
 		ShowcaseDirector.command("xp set @a 62 points");
 		ShowcaseScene.teleport(place);
 		ShowcaseDirector.runOnServer(player -> {
-			final Inventory inventory = player.getInventory();
+			final Inventory inventory = player.inventory;
 			inventory.clearContent();
 			inventory.setItem(0, ShowcaseScene.enchant(new ItemStack(Items.DIAMOND_SWORD), Enchantments.SHARPNESS, 5));
 			inventory.setItem(1, ShowcaseScene.enchant(new ItemStack(Items.DIAMOND_PICKAXE), Enchantments.BLOCK_EFFICIENCY, 4));
@@ -110,7 +109,7 @@ public enum ShowcaseScene {
 			inventory.setItem(31, new ItemStack(Items.LAPIS_LAZULI, 18));
 			inventory.selected = 0;
 		});
-		ShowcaseDirector.runOnClient(() -> Minecraft.getInstance().player.getInventory().selected = 0);
+		ShowcaseDirector.runOnClient(() -> Minecraft.getInstance().player.inventory.selected = 0);
 		ShowcaseDirector.waitForWorld();
 		ShowcaseDirector.command("tick freeze");
 		ShowcaseDirector.runOnServer(player -> {
@@ -181,9 +180,9 @@ public enum ShowcaseScene {
 				ItemStack.EMPTY,
 				new ItemStack(Items.BREAD, 32),
 				ItemStack.EMPTY,
-				new ItemStack(Items.AMETHYST_SHARD, 23),
+				new ItemStack(Items.QUARTZ, 23),
 				new ItemStack(Items.OAK_LOG, 64),
-				new ItemStack(Items.SPYGLASS),
+				new ItemStack(Items.CLOCK),
 				new ItemStack(Items.COMPASS),
 				ItemStack.EMPTY,
 				new ItemStack(Items.CAKE),
@@ -197,7 +196,7 @@ public enum ShowcaseScene {
 			for (int index = 0; index < items.length; index++) {
 				storage.setItem(index, items[index]);
 			}
-			player.openMenu(new SimpleMenuProvider((containerId, inventory, owner) -> new ChestMenu(ShowcaseLauncher.CHEST, containerId, inventory, storage, 3), Component.translatable("container.chest")));
+			player.openMenu(new SimpleMenuProvider((containerId, inventory, owner) -> new ChestMenu(ShowcaseLauncher.CHEST, containerId, inventory, storage, 3), new TranslatableComponent("container.chest")));
 		});
 		ShowcaseDirector.waitFor("the showcase chest", () -> JOID.isOpen(ShowChest.class), 60);
 		ShowcaseDirector.frames(25);
@@ -226,12 +225,12 @@ public enum ShowcaseScene {
 		ShowcaseDirector.begin("anvil");
 		ShowcaseDirector.frames(5);
 		ShowcaseDirector.runOnServer(player -> {
-			final ItemStack sword = player.getInventory().removeItemNoUpdate(0);
+			final ItemStack sword = player.inventory.removeItemNoUpdate(0);
 			player.openMenu(new SimpleMenuProvider((containerId, inventory, owner) -> {
 				final AnvilMenu menu = new AnvilMenu(containerId, inventory, ContainerLevelAccess.NULL);
-				menu.getSlot(AnvilMenu.INPUT_SLOT).set(sword);
+				menu.getSlot(0).set(sword);
 				return menu;
-			}, Component.translatable("container.repair")));
+			}, new TranslatableComponent("container.repair")));
 		});
 		ShowcaseDirector.waitFor("the showcase anvil", () -> JOID.isOpen(ShowAnvil.class), 60);
 		final ShowAnvil ui = ShowcaseDirector.computeOnClient(() -> JOID.getUi(ShowAnvil.class));
@@ -247,7 +246,7 @@ public enum ShowcaseScene {
 		ShowcaseDirector.type("Frostbite", 3);
 		ShowcaseDirector.frames(15);
 		ShowcaseDirector.capture("anvil");
-		ShowcaseDirector.glide(ShowcaseDirector.computeOnClient(() -> ui.getSlotNode(AnvilMenu.RESULT_SLOT)), 20);
+		ShowcaseDirector.glide(ShowcaseDirector.computeOnClient(() -> ui.getSlotNode(2)), 20);
 		ShowcaseDirector.frames(20);
 		ShowcaseDirector.click();
 		ShowcaseDirector.frames(5);
@@ -259,7 +258,7 @@ public enum ShowcaseScene {
 		ShowcaseDirector.hidePointer();
 		ShowcaseDirector.runOnClient(() -> Minecraft.getInstance().player.closeContainer());
 		ShowcaseDirector.frames(5);
-		ShowcaseDirector.runOnServer(player -> player.getInventory().setItem(0, ShowcaseScene.enchant(new ItemStack(Items.DIAMOND_SWORD), Enchantments.SHARPNESS, 5)));
+		ShowcaseDirector.runOnServer(player -> player.inventory.setItem(0, ShowcaseScene.enchant(new ItemStack(Items.DIAMOND_SWORD), Enchantments.SHARPNESS, 5)));
 		ShowcaseDirector.command("xp set @a 27 levels");
 		ShowcaseDirector.command("xp set @a 62 points");
 		ShowcaseDirector.frames(5);
@@ -322,7 +321,7 @@ public enum ShowcaseScene {
 
 	private static void loader() {
 		final String brand = ClientBrandRetriever.getClientModName();
-		final int card = brand.equals("fabric") ? 1 : brand.equals("neoforge") ? 4 : 6;
+		final int card = brand.equals("fabric") ? 1 : 6;
 		final ShowBestiary ui = new ShowBestiary();
 		ShowcaseDirector.runOnClient(() -> JOID.open(ui));
 		ShowcaseDirector.frames(40);
@@ -345,7 +344,7 @@ public enum ShowcaseScene {
 		if (spots != null) {
 			final String[] list = spots.split(";");
 			for (int index = 0; index < list.length; index++) {
-				ShowcaseScene.teleport(List.of(list[index].trim().split(" ")).stream().mapToDouble(Double::parseDouble).toArray());
+				ShowcaseScene.teleport(Arrays.stream(list[index].trim().split(" ")).mapToDouble(Double::parseDouble).toArray());
 				ShowcaseDirector.waitForWorld();
 				ShowcaseDirector.capture("spots/" + index);
 			}
@@ -354,7 +353,7 @@ public enum ShowcaseScene {
 
 		final String search = System.getProperty("joid.showcase.search");
 		if (search != null) {
-			final double[] area = List.of(search.split(" ")).stream().mapToDouble(Double::parseDouble).toArray();
+			final double[] area = Arrays.stream(search.split(" ")).mapToDouble(Double::parseDouble).toArray();
 			final List<double[]> points = new ArrayList<>();
 			for (double x = area[0] - area[2]; x <= area[0] + area[2]; x += 6D) {
 				for (double z = area[1] - area[2]; z <= area[1] + area[2]; z += 6D) {
@@ -375,25 +374,25 @@ public enum ShowcaseScene {
 
 		ShowcaseDirector.waitForWorld();
 		final List<double[]> places = ShowcaseDirector.computeOnServer(player -> {
-			final ServerLevel level = (ServerLevel) player.level();
+			final ServerLevel level = player.getLevel();
 			final List<double[]> found = new ArrayList<>();
 			final BlockPos origin = player.blockPosition();
-			final BlockPos village = level.findNearestMapStructure(StructureTags.VILLAGE, origin, 100, false);
+			final BlockPos village = level.findNearestMapFeature(StructureFeature.VILLAGE, origin, 100, false);
 			if (village != null) {
 				found.add(new double[] {village.getX(), village.getZ()});
 			}
 
-			for (final ResourceKey<Biome> biome : List.of(Biomes.CHERRY_GROVE, Biomes.RIVER, Biomes.FLOWER_FOREST, Biomes.MEADOW)) {
-				final Pair<BlockPos, Holder<Biome>> nearest = level.findClosestBiome3d(holder -> holder.is(biome), origin, 6400, 32, 64);
+			for (final ResourceKey<Biome> biome : Arrays.asList(Biomes.SUNFLOWER_PLAINS, Biomes.RIVER, Biomes.FLOWER_FOREST, Biomes.BIRCH_FOREST)) {
+				final BlockPos nearest = level.findNearestBiome(level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).get(biome), origin, 6400, 32);
 				if (nearest != null) {
-					found.add(new double[] {nearest.getFirst().getX(), nearest.getFirst().getZ()});
+					found.add(new double[] {nearest.getX(), nearest.getZ()});
 				}
 			}
 			return found;
 		});
 		for (int index = 0; index < places.size(); index++) {
 			final double[] place = places.get(index);
-			final int height = ShowcaseDirector.computeOnServer(player -> ((ServerLevel) player.level()).getChunk((int) place[0] >> 4, (int) place[1] >> 4).getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, (int) place[0] & 15, (int) place[1] & 15));
+			final int height = ShowcaseDirector.computeOnServer(player -> player.getLevel().getChunk((int) place[0] >> 4, (int) place[1] >> 4).getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, (int) place[0] & 15, (int) place[1] & 15));
 			System.out.println("[JOID] Showcase spot " + index + ": " + place[0] + " " + (height + 6) + " " + place[1]);
 			for (int yaw = 0; yaw < 360; yaw += 90) {
 				ShowcaseDirector.command(String.format(Locale.ROOT, "tp @a %.1f %d %.1f %d 15", place[0], height + 6, place[1], yaw));
@@ -517,7 +516,28 @@ public enum ShowcaseScene {
 	private static int ground(final double x, final double z) {
 		final int blockX = (int) Math.floor(x);
 		final int blockZ = (int) Math.floor(z);
-		return ShowcaseDirector.computeOnServer(player -> ((ServerLevel) player.level()).getChunk(blockX >> 4, blockZ >> 4).getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockX & 15, blockZ & 15));
+		return ShowcaseDirector.computeOnServer(player -> ShowcaseScene.ground(player.getLevel(), blockX, blockZ));
+	}
+
+	private static int ground(final ServerLevel level, final int x, final int z) {
+		return level.getChunk(x >> 4, z >> 4).getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x & 15, z & 15);
+	}
+
+	private static double[] getSpawnPlace(final ServerLevel level) {
+		final BlockPos spawn = level.getSharedSpawnPos();
+		final int ground = ShowcaseScene.ground(level, spawn.getX(), spawn.getZ());
+		for (final double yaw : new double[] {180D, 90D, 0D, 270D}) {
+			boolean open = true;
+			for (int distance = 1; distance <= 12 && open; distance++) {
+				final BlockPos ahead = new BlockPos(spawn.getX() - Math.sin(Math.toRadians(yaw)) * distance, ground + 1, spawn.getZ() + Math.cos(Math.toRadians(yaw)) * distance);
+				open = level.isEmptyBlock(ahead) && level.isEmptyBlock(ahead.above());
+			}
+
+			if (open) {
+				return new double[] {spawn.getX() + 0.5D, spawn.getZ() + 0.5D, yaw, 6D};
+			}
+		}
+		return new double[] {spawn.getX() + 0.5D, spawn.getZ() + 0.5D, 180D, 6D};
 	}
 
 	private static ItemStack enchant(final ItemStack stack, final Enchantment enchantment, final int value) {

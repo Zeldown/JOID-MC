@@ -3,12 +3,10 @@ package dev.joid.backend.minecraft.lib.font.impl.minecraft;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL30;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.math.Matrix4f;
 
 import dev.joid.base.opengl.render.texture.GlBorrowedTexture;
 import dev.joid.lib.bridge.BridgeHandler;
@@ -20,7 +18,6 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
 import net.minecraft.client.renderer.RenderType;
 
@@ -29,7 +26,7 @@ public final class MinecraftTextRenderer extends BitmapTextRenderer<MinecraftFon
 
 	private static final MinecraftTextRenderer INSTANCE = new MinecraftTextRenderer();
 
-	private static final Matrix4f IDENTITY = new Matrix4f();
+	private static final Matrix4f IDENTITY = Matrix4f.createScaleMatrix(1F, 1F, 1F);
 
 	private final GlyphVertexCapture     capture  = new GlyphVertexCapture();
 	private final Map<RenderType, Sheet> sheetMap = new HashMap<>();
@@ -49,7 +46,7 @@ public final class MinecraftTextRenderer extends BitmapTextRenderer<MinecraftFon
 			return null;
 		}
 
-		final Sheet sheet = this.sheetMap.computeIfAbsent(baked[0].renderType(Font.DisplayMode.NORMAL), MinecraftTextRenderer::readSheet);
+		final Sheet sheet = this.sheetMap.computeIfAbsent(baked[0].renderType(false), MinecraftTextRenderer::readSheet);
 		final int width = sheet.texture.getWidth();
 		final int height = sheet.texture.getHeight();
 		return BitmapCell
@@ -64,14 +61,13 @@ public final class MinecraftTextRenderer extends BitmapTextRenderer<MinecraftFon
 		BridgeHandler.RENDER.get().suspend(() -> {
 			type.setupRenderState();
 			try {
-				sheet[0] = RenderSystem.getShaderTexture(0);
-				GlStateManager._bindTexture(sheet[0]);
+				sheet[0] = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
 				sheet[1] = GlStateManager._getTexLevelParameter(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_INTERNAL_FORMAT);
 			} finally {
 				type.clearRenderState();
 			}
 		});
-		return new Sheet(GlBorrowedTexture.of(sheet[0]), sheet[1] == GL30.GL_R8 || sheet[1] == GL11.GL_RED);
+		return new Sheet(GlBorrowedTexture.of(sheet[0]), sheet[1] == GL11.GL_INTENSITY);
 	}
 
 	@AllArgsConstructor(access = AccessLevel.PRIVATE)

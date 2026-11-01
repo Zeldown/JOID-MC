@@ -2,7 +2,8 @@ package dev.joid.backend.minecraft.showcase.ui;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
 import dev.joid.lib.bridge.render.state.BlendState;
@@ -16,6 +17,7 @@ import dev.joid.lib.draw.DrawUtils;
 import dev.joid.lib.draw.text.Text;
 import dev.joid.lib.font.FontWeight;
 import dev.joid.lib.resource.Resource;
+import dev.joid.lib.resource.ResourceBuilder;
 import dev.joid.lib.shader.impl.BorderShader.BorderMode;
 import dev.joid.lib.signal.impl.primitive.DoubleSignal;
 import dev.joid.lib.ui.core.UI;
@@ -38,8 +40,8 @@ public class ShowDaylight extends UI implements IShowFocus {
 
 	private static final BlendState ADDITIVE = BlendState.of(Equation.ADD, Factor.SRC_ALPHA, Factor.ONE);
 
-	private static final Resource       SUN   = Resource.of("minecraft:textures/environment/celestial/sun.png");
-	private static final List<Resource> MOONS = Stream.of("full_moon", "waning_gibbous", "third_quarter", "waning_crescent", "new_moon", "waxing_crescent", "first_quarter", "waxing_gibbous").map(name -> Resource.of("minecraft:textures/environment/celestial/moon/" + name + ".png")).toList();
+	private static final Resource       SUN   = Resource.of("minecraft:textures/environment/sun.png");
+	private static final List<Resource> MOONS = IntStream.range(0, 8).mapToObj(phase -> ResourceBuilder.create().nearest().textureCoords(phase % 4 / 4D, phase / 4 / 2D, (phase % 4 + 1) / 4D, (phase / 4 + 1) / 2D).of("minecraft:textures/environment/moon_phases.png")).collect(Collectors.toList());
 
 	@Getter
 	private final DoubleSignal time;

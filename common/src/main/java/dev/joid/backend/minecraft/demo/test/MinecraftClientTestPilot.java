@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
@@ -30,6 +31,7 @@ import java.util.stream.Stream;
 
 import javax.imageio.ImageIO;
 
+import org.apache.commons.io.IOUtils;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
@@ -43,6 +45,7 @@ import org.lwjgl.opengl.GL30;
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.blaze3d.vertex.PoseStack;
 
 import dev.joid.backend.minecraft.MinecraftBackend;
 import dev.joid.backend.minecraft.bridge.render.MinecraftRenderTarget;
@@ -94,21 +97,18 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.screens.AccessibilityOnboardingScreen;
 import net.minecraft.client.gui.screens.BackupConfirmScreen;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.DisconnectedScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
-import net.minecraft.client.gui.screens.controls.KeyBindsList;
-import net.minecraft.client.gui.screens.controls.KeyBindsScreen;
+import net.minecraft.client.gui.screens.controls.ControlList;
+import net.minecraft.client.gui.screens.controls.ControlsScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
-import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
-import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
 import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.language.ClientLanguage;
 import net.minecraft.client.resources.model.BakedModel;
@@ -116,27 +116,40 @@ import net.minecraft.client.resources.model.Material;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundEventListener;
 import net.minecraft.client.tutorial.TutorialSteps;
-import net.minecraft.core.registries.Registries;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.server.players.ServerOpListEntry;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.DataPackConfig;
 import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.LevelSettings;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.presets.WorldPresets;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.dimension.LevelStem;
+import net.minecraft.world.level.levelgen.FlatLevelSource;
+import net.minecraft.world.level.levelgen.WorldGenSettings;
+import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
 
 public final class MinecraftClientTestPilot implements IClientTestPilot {
 
@@ -160,7 +173,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	@Override
 	public String getVersion() {
-		return "1.20.1";
+		return "1.16.5";
 	}
 
 	@Override
@@ -170,24 +183,21 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	@Override
 	public List<Class<?>> getContractTests() {
-		return List.of(MinecraftRenderBridgeContractTest.class, MinecraftStateGuardContractTest.class, MinecraftBorrowedTextureContractTest.class, MinecraftBitmapFontContractTest.class);
+		return Arrays.asList(MinecraftRenderBridgeContractTest.class, MinecraftStateGuardContractTest.class, MinecraftBorrowedTextureContractTest.class, MinecraftBitmapFontContractTest.class);
 	}
 
 	@Override
 	public Map<ClientTestScenario, String> getExclusions() {
 		final Map<ClientTestScenario, String> exclusions = new EnumMap<>(ClientTestScenario.class);
-		exclusions.put(ClientTestScenario.AUDIO_INTERFACE, "Minecraft 1.20.1 has no interface sound category, JOID follows the master volume");
-		exclusions.put(ClientTestScenario.NESTED_FEATURE_RASTER, "Minecraft 1.20.1 draws at once, it has no feature render pipeline");
+		exclusions.put(ClientTestScenario.AUDIO_INTERFACE, "Minecraft 1.16.5 has no interface sound category, JOID follows the master volume");
+		exclusions.put(ClientTestScenario.NESTED_FEATURE_RASTER, "Minecraft 1.16.5 draws at once, it has no feature render pipeline");
+		exclusions.put(ClientTestScenario.CONTAINER_CLOSE, "Minecraft 1.16.5 drops the carried stack when a container closes, newer versions give it back to the inventory");
 		return exclusions;
 	}
 
 	@Override
 	public void reachTitleScreen() {
-		this.waitFor("the end of the game loading", () -> MinecraftClientTestPilot.isLoaded() || Minecraft.getInstance().screen instanceof AccessibilityOnboardingScreen || Minecraft.getInstance().screen instanceof BackupConfirmScreen, 600);
-		if (this.computeOnClient(() -> Minecraft.getInstance().screen instanceof AccessibilityOnboardingScreen, 120)) {
-			this.runOnClient(() -> Minecraft.getInstance().screen.onClose());
-			this.waitFor("the end of the accessibility onboarding", () -> MinecraftClientTestPilot.isLoaded() || Minecraft.getInstance().screen instanceof BackupConfirmScreen, 600);
-		}
+		this.waitFor("the end of the game loading", () -> MinecraftClientTestPilot.isLoaded() || Minecraft.getInstance().screen instanceof BackupConfirmScreen, 600);
 
 		if (this.computeOnClient(() -> Minecraft.getInstance().screen instanceof BackupConfirmScreen, 120)) {
 			this.runOnClient(() -> MinecraftClientTestPilot.pressButton(Minecraft.getInstance().screen, "selectWorld.backupJoinSkipButton"));
@@ -210,18 +220,15 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	@Override
 	public void joinWorld() {
 		if (this.computeOnClient(() -> Minecraft.getInstance().level == null && !Minecraft.getInstance().getLevelSource().levelExists("joid-test"), 120)) {
-			this.runOnClient(() -> CreateWorldScreen.openFresh(Minecraft.getInstance(), new TitleScreen()));
-			this.waitFor("the world creation screen", () -> Minecraft.getInstance().screen instanceof CreateWorldScreen, 120);
 			this.runOnClient(() -> {
-				final CreateWorldScreen screen = (CreateWorldScreen) Minecraft.getInstance().screen;
-				final WorldCreationUiState state = screen.getUiState();
-				state.setName("joid-test");
-				state.setWorldType(new WorldCreationUiState.WorldTypeEntry(state.getSettings().worldgenLoadContext().registryOrThrow(Registries.WORLD_PRESET).getHolderOrThrow(WorldPresets.FLAT)));
-				state.setSeed("1");
-				state.setGenerateStructures(false);
-				state.getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(false, null);
-				state.getGameRules().getRule(GameRules.RULE_DOMOBSPAWNING).set(false, null);
-				MinecraftClientTestPilot.pressButton(screen, "selectWorld.create");
+				final RegistryAccess.RegistryHolder registries = RegistryAccess.builtin();
+				final Registry<Biome> biomes = registries.registryOrThrow(Registry.BIOME_REGISTRY);
+				final Registry<DimensionType> dimensions = registries.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
+				final MappedRegistry<LevelStem> stems = DimensionType.defaultDimensions(dimensions, biomes, registries.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY), 1L);
+				final GameRules rules = new GameRules();
+				rules.getRule(GameRules.RULE_DAYLIGHT).set(false, null);
+				rules.getRule(GameRules.RULE_DOMOBSPAWNING).set(false, null);
+				Minecraft.getInstance().createLevel("joid-test", new LevelSettings("joid-test", GameType.SURVIVAL, false, Difficulty.NORMAL, false, rules, DataPackConfig.DEFAULT), registries, new WorldGenSettings(1L, false, false, WorldGenSettings.withOverworld(dimensions, stems, new FlatLevelSource(FlatLevelGeneratorSettings.getDefault(biomes)))));
 			});
 			this.waitFor("the world creation", () -> Minecraft.getInstance().level != null || Minecraft.getInstance().screen instanceof ConfirmScreen, 600);
 			if (this.computeOnClient(() -> Minecraft.getInstance().screen instanceof ConfirmScreen, 120)) {
@@ -282,9 +289,10 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	@Override
 	public BufferedImage capture(final String name) {
 		final Path path = this.computeOnClient(() -> {
-			final Path file = Minecraft.getInstance().gameDirectory.toPath().resolve("screenshots").resolve(name + ".png");
+			final Minecraft minecraft = Minecraft.getInstance();
+			final Path file = minecraft.gameDirectory.toPath().resolve("screenshots").resolve(name + ".png");
 			Files.createDirectories(file.getParent());
-			try (final NativeImage image = Screenshot.takeScreenshot(Minecraft.getInstance().getMainRenderTarget())) {
+			try (final NativeImage image = Screenshot.takeScreenshot(minecraft.getWindow().getWidth(), minecraft.getWindow().getHeight(), minecraft.getMainRenderTarget())) {
 				image.writeToFile(file);
 			}
 			return file;
@@ -331,8 +339,9 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	@Override
 	public void clearInventory() {
 		this.computeOnServer(player -> {
-			player.getInventory().clearContent();
-			player.containerMenu.setCarried(ItemStack.EMPTY);
+			player.inventory.clearContent();
+			player.inventory.setCarried(ItemStack.EMPTY);
+			player.broadcastCarriedItem();
 			player.containerMenu.broadcastChanges();
 			return null;
 		});
@@ -341,12 +350,13 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	@Override
 	public int openDemoContainer() {
 		return this.computeOnServer(player -> {
-			player.getInventory().clearContent();
+			player.inventory.clearContent();
 			OpenDemoContainerPayloadHandler.handle(OpenDemoContainerPayload.INSTANCE, player);
-			if (!(player.containerMenu instanceof final DemoContainer container)) {
+			if (!(player.containerMenu instanceof DemoContainer)) {
 				return -1;
 			}
 
+			final DemoContainer container = (DemoContainer) player.containerMenu;
 			container.getStorage().clearContent();
 			this.demoContainer = container;
 			return container.slots.size();
@@ -374,9 +384,9 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	@Override
 	public int[] readContainer(final boolean server) {
 		if (server) {
-			return this.computeOnServer(player -> MinecraftClientTestPilot.describe(player.containerMenu));
+			return this.computeOnServer(player -> MinecraftClientTestPilot.describe(player.containerMenu, player.inventory.getCarried()));
 		}
-		return this.computeOnClient(() -> MinecraftClientTestPilot.describe(Minecraft.getInstance().player.containerMenu), 120);
+		return this.computeOnClient(() -> MinecraftClientTestPilot.describe(Minecraft.getInstance().player.containerMenu, Minecraft.getInstance().player.inventory.getCarried()), 120);
 	}
 
 	@Override
@@ -388,7 +398,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	public boolean canOpenDemoContainer(final int level) {
 		return this.computeOnServer(player -> {
 			final MinecraftServer server = player.getServer();
-			final ServerPlayer stranger = new ServerPlayer(server, server.overworld(), new GameProfile(UUID.randomUUID(), "JOIDStranger"));
+			final ServerPlayer stranger = new ServerPlayer(server, server.overworld(), new GameProfile(UUID.randomUUID(), "JOIDStranger"), new ServerPlayerGameMode(server.overworld()));
 			if (level > 0) {
 				server.getPlayerList().getOps().add(new ServerOpListEntry(stranger.getGameProfile(), level == 1 ? 1 : 2, false));
 			}
@@ -403,7 +413,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	@Override
 	public int countInventory(final ClientTestItem item) {
-		return this.computeOnServer(player -> player.getInventory().countItem(MinecraftClientTestPilot.item(item)));
+		return this.computeOnServer(player -> player.inventory.countItem(MinecraftClientTestPilot.item(item)));
 	}
 
 	@Override
@@ -417,7 +427,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	@Override
 	public void giveItem(final int slot, final ClientTestItem item, final int count) {
 		this.computeOnServer(player -> {
-			player.getInventory().setItem(slot, new ItemStack(MinecraftClientTestPilot.item(item), count));
+			player.inventory.setItem(slot, new ItemStack(MinecraftClientTestPilot.item(item), count));
 			return null;
 		});
 	}
@@ -494,7 +504,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	@Override
 	public void applyGuiScale(final int guiScale) {
 		final Minecraft minecraft = Minecraft.getInstance();
-		minecraft.options.guiScale().set(guiScale);
+		minecraft.options.guiScale = guiScale;
 		minecraft.resizeDisplay();
 	}
 
@@ -506,15 +516,15 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	@Override
 	public void openControls() {
 		final Minecraft minecraft = Minecraft.getInstance();
-		minecraft.setScreen(new KeyBindsScreen(minecraft.screen, minecraft.options));
+		minecraft.setScreen(new ControlsScreen(minecraft.screen, minecraft.options));
 	}
 
 	@Override
 	public List<String> getControlsLabels() {
-		final KeyBindsList list = (KeyBindsList) MinecraftClientTestPilot.field(Minecraft.getInstance().screen, "keyBindsList");
-		list.setScrollAmount(list.getMaxScroll());
+		final ControlList list = (ControlList) MinecraftClientTestPilot.field(Minecraft.getInstance().screen, "controlList");
+		list.setScrollAmount(Double.MAX_VALUE);
 		final List<String> labels = new ArrayList<>();
-		for (final KeyBindsList.Entry entry : list.children()) {
+		for (final ControlList.Entry entry : list.children()) {
 			labels.add(((Component) MinecraftClientTestPilot.field(entry, "name")).getString());
 		}
 		return labels;
@@ -542,7 +552,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	@Override
 	public Object createRedChat(final String text) {
-		return Component.literal(text).withStyle(ChatFormatting.RED);
+		return new TextComponent(text).withStyle(ChatFormatting.RED);
 	}
 
 	@Override
@@ -557,12 +567,12 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	@Override
 	public int measureText(final IFont font, final String text) {
-		return Minecraft.getInstance().font.width(Component.literal(text).withStyle(style -> style.withFont(((MinecraftFont) font).getId())));
+		return Minecraft.getInstance().font.width(new TextComponent(text).withStyle(style -> style.withFont(((MinecraftFont) font).getId())));
 	}
 
 	@Override
 	public String translate(final String language, final String key) {
-		return ClientLanguage.loadFrom(Minecraft.getInstance().getResourceManager(), List.of(language), false).getOrDefault(key);
+		return ClientLanguage.loadFrom(Minecraft.getInstance().getResourceManager(), Collections.singletonList(Minecraft.getInstance().getLanguageManager().getLanguage(language))).getOrDefault(key);
 	}
 
 	@Override
@@ -598,7 +608,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	@Override
 	public List<String> stopSoundCapture() {
 		Minecraft.getInstance().getSoundManager().removeListener(this.soundListener);
-		return List.copyOf(this.sounds);
+		return new ArrayList<>(this.sounds);
 	}
 
 	@Override
@@ -608,7 +618,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	@Override
 	public String getNoteBlockSound() {
-		return SoundEvents.NOTE_BLOCK_PLING.value().getLocation().toString();
+		return SoundEvents.NOTE_BLOCK_PLING.getLocation().toString();
 	}
 
 	@Override
@@ -618,18 +628,18 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	@Override
 	public void setSubtitles(final boolean subtitles) {
-		Minecraft.getInstance().options.showSubtitles().set(subtitles);
+		Minecraft.getInstance().options.showSubtitles = subtitles;
 	}
 
 	@Override
 	public double getVolume(final ClientTestVolume volume) {
-		return volume == ClientTestVolume.MASTER ? Minecraft.getInstance().options.getSoundSourceOptionInstance(SoundSource.MASTER).get() : 1D;
+		return volume == ClientTestVolume.MASTER ? Minecraft.getInstance().options.getSoundSourceVolume(SoundSource.MASTER) : 1D;
 	}
 
 	@Override
 	public void setVolume(final ClientTestVolume volume, final double value) {
 		if (volume == ClientTestVolume.MASTER) {
-			Minecraft.getInstance().options.getSoundSourceOptionInstance(SoundSource.MASTER).set(value);
+			Minecraft.getInstance().options.setSoundCategoryVolume(SoundSource.MASTER, (float) value);
 		}
 	}
 
@@ -682,12 +692,16 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	@Override
 	public Node createEntityNode(final double x, final double y, final double width, final double height, final ClientTestEntity entity, final double yaw, final double pitch) {
 		final EntityNode node = EntityNode.create(x, y, width, height).rotationYaw(yaw).rotationPitch(pitch);
-		return switch (entity) {
-			case PIG -> node.type(EntityType.PIG);
-			case ZOMBIE -> node.type(EntityType.ZOMBIE);
-			case PLAYER_PROFILE -> node.profile(new GameProfile(new UUID(0L, 15L), "Steve"));
-			case PLAYER_SKIN -> node.skin(ResourceLocation.tryBuild("joid", "demo/textures/skin.png"));
-		};
+		switch (entity) {
+			case PIG:
+				return node.type(EntityType.PIG);
+			case ZOMBIE:
+				return node.type(EntityType.ZOMBIE);
+			case PLAYER_PROFILE:
+				return node.profile(new GameProfile(new UUID(0L, 15L), "Steve"));
+			default:
+				return node.skin(new ResourceLocation("joid", "demo/textures/skin.png"));
+		}
 	}
 
 	@Override
@@ -703,7 +717,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	@Override
 	public boolean isDeleted(final ITexture texture) {
-		return texture instanceof final Texture created && created.isDeleted();
+		return texture instanceof Texture && ((Texture) texture).isDeleted();
 	}
 
 	@Override
@@ -713,7 +727,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	@Override
 	public BufferedImage readTexture(final ClientTestTexture texture) {
-		try (final InputStream stream = Minecraft.getInstance().getResourceManager().getResource(ResourceLocation.tryParse(MinecraftClientTestPilot.texture(texture))).orElseThrow().open()) {
+		try (final InputStream stream = Minecraft.getInstance().getResourceManager().getResource(ResourceLocation.tryParse(MinecraftClientTestPilot.texture(texture))).getInputStream()) {
 			return ImageIO.read(stream);
 		} catch (final IOException exception) {
 			throw new AssertionError("Unable to read the texture " + texture, exception);
@@ -727,13 +741,13 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	@Override
 	public void drawHudFrame() {
-		final Minecraft minecraft = Minecraft.getInstance();
-		BridgeHandler.UI.getBridge(OverlayUIBridge.class).drawHud(new GuiGraphics(minecraft, minecraft.renderBuffers().bufferSource()));
+		BridgeHandler.UI.getBridge(OverlayUIBridge.class).drawHud(new PoseStack());
 	}
 
 	@Override
 	public int getHoveredSlot() {
-		return Minecraft.getInstance().screen instanceof final ContainerUIScreen<?> screen && screen.getHoveredSlot() != null ? screen.getHoveredSlot().index : -1;
+		final Screen screen = Minecraft.getInstance().screen;
+		return screen instanceof ContainerUIScreen && ((ContainerUIScreen<?>) screen).getHoveredSlot() != null ? ((ContainerUIScreen<?>) screen).getHoveredSlot().index : -1;
 	}
 
 	@Override
@@ -826,19 +840,19 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	}
 
 	private static void pressButton(final Screen screen, final String translationKey) {
-		final String message = Component.translatable(translationKey).getString();
+		final String message = new TranslatableComponent(translationKey).getString();
 		for (final GuiEventListener child : screen.children()) {
-			if (child instanceof final Button button && button.getMessage().getString().equals(message)) {
-				button.onPress();
+			if (child instanceof Button && ((Button) child).getMessage().getString().equals(message)) {
+				((Button) child).onPress();
 				return;
 			}
 		}
 		throw new AssertionError("The screen " + screen + " has no button " + translationKey);
 	}
 
-	private static int[] describe(final AbstractContainerMenu container) {
+	private static int[] describe(final AbstractContainerMenu container, final ItemStack carried) {
 		final int[] counts = new int[container.slots.size() + 1];
-		counts[0] = container.getCarried().getCount();
+		counts[0] = carried.getCount();
 		for (int index = 0; index < container.slots.size(); index++) {
 			counts[index + 1] = container.slots.get(index).getItem().getCount();
 		}
@@ -846,46 +860,62 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	}
 
 	private static Item item(final ClientTestItem item) {
-		return switch (item) {
-			case APPLE -> Items.APPLE;
-			case DIAMOND -> Items.DIAMOND;
-			case DIAMOND_SWORD -> Items.DIAMOND_SWORD;
-			case EMERALD -> Items.EMERALD;
-			case ENDER_PEARL -> Items.ENDER_PEARL;
-			case FURNACE -> Items.FURNACE;
-			case GOLDEN_APPLE -> Items.GOLDEN_APPLE;
-			case SNOW_BLOCK -> Items.SNOW_BLOCK;
-			case STONE -> Items.STONE;
-		};
+		switch (item) {
+			case APPLE:
+				return Items.APPLE;
+			case DIAMOND:
+				return Items.DIAMOND;
+			case DIAMOND_SWORD:
+				return Items.DIAMOND_SWORD;
+			case EMERALD:
+				return Items.EMERALD;
+			case ENDER_PEARL:
+				return Items.ENDER_PEARL;
+			case FURNACE:
+				return Items.FURNACE;
+			case GOLDEN_APPLE:
+				return Items.GOLDEN_APPLE;
+			case SNOW_BLOCK:
+				return Items.SNOW_BLOCK;
+			default:
+				return Items.STONE;
+		}
 	}
 
 	private static BlockState block(final ClientTestBlock block) {
-		return switch (block) {
-			case GRASS -> Blocks.GRASS_BLOCK.defaultBlockState();
-			case ICE -> Blocks.ICE.defaultBlockState();
-			case SNOW_BLOCK -> Blocks.SNOW_BLOCK.defaultBlockState();
-			case STONE -> Blocks.STONE.defaultBlockState();
-		};
+		switch (block) {
+			case GRASS:
+				return Blocks.GRASS_BLOCK.defaultBlockState();
+			case ICE:
+				return Blocks.ICE.defaultBlockState();
+			case SNOW_BLOCK:
+				return Blocks.SNOW_BLOCK.defaultBlockState();
+			default:
+				return Blocks.STONE.defaultBlockState();
+		}
 	}
 
 	private static String texture(final ClientTestTexture texture) {
-		return switch (texture) {
-			case ANIMATED_BLOCK -> "textures/block/sea_lantern.png";
-			case DIAMOND_BLOCK -> "textures/block/diamond_block.png";
-			case DIAMOND_ITEM -> "textures/item/diamond.png";
-		};
+		switch (texture) {
+			case ANIMATED_BLOCK:
+				return "textures/block/sea_lantern.png";
+			case DIAMOND_BLOCK:
+				return "textures/block/diamond_block.png";
+			default:
+				return "textures/item/diamond.png";
+		}
 	}
 
 	private static DrawableRaster itemRaster(final ItemStack stack) {
 		final Minecraft minecraft = Minecraft.getInstance();
-		final BakedModel model = minecraft.getItemRenderer().getModel(stack, minecraft.level, minecraft.player, 0);
-		return GuiDrawableRaster.of(Lighting::setupFor3DItems, (pose, buffer) -> minecraft.getItemRenderer().render(stack, ItemDisplayContext.GUI, false, pose, buffer, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, model));
+		final BakedModel model = minecraft.getItemRenderer().getModel(stack, minecraft.level, minecraft.player);
+		return GuiDrawableRaster.of(Lighting::setupFor3DItems, (pose, buffer) -> minecraft.getItemRenderer().render(stack, ItemTransforms.TransformType.GUI, false, pose, buffer, LightTexture.pack(15, 15), OverlayTexture.NO_OVERLAY, model));
 	}
 
 	private static String xdotool(final String... arguments) {
 		try {
 			final Process process = new ProcessBuilder(Stream.concat(Stream.of("xdotool"), Arrays.stream(arguments)).collect(Collectors.toList())).redirectErrorStream(true).start();
-			final String output = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+			final String output = IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8);
 			if (!process.waitFor(30, TimeUnit.SECONDS) || process.exitValue() != 0) {
 				throw new AssertionError("xdotool " + String.join(" ", arguments) + " failed: " + output);
 			}

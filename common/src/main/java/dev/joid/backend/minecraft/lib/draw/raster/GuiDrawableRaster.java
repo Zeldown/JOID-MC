@@ -4,13 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 
-import org.joml.Matrix4f;
+import org.lwjgl.opengl.GL11;
 
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexSorting;
+import com.mojang.math.Matrix4f;
 
+import dev.joid.backend.minecraft.bridge.render.MinecraftGlState;
 import dev.joid.lib.draw.raster.DrawableRaster;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -26,7 +27,7 @@ public final class GuiDrawableRaster implements DrawableRaster {
 
 	private static int rasterDepth;
 
-	private final Runnable                                                lighting;
+	private final Runnable                                              lighting;
 	private final BiConsumer<PoseStack, MultiBufferSource.BufferSource> draw;
 
 	public static @NonNull GuiDrawableRaster of(final @NonNull Runnable lighting, final @NonNull BiConsumer<PoseStack, MultiBufferSource.BufferSource> draw) {
@@ -35,32 +36,41 @@ public final class GuiDrawableRaster implements DrawableRaster {
 
 	@Override
 	public void draw(final int width, final int height) {
-		final float size = Math.min(width, height);
-		final Matrix4f projection = RenderSystem.getProjectionMatrix();
-		final VertexSorting sorting = RenderSystem.getVertexSorting();
-		final PoseStack modelView = RenderSystem.getModelViewStack();
-		final PoseStack pose = GuiDrawableRaster.getPose(GuiDrawableRaster.rasterDepth);
-		final MultiBufferSource.BufferSource buffer = GuiDrawableRaster.getBuffer(GuiDrawableRaster.rasterDepth);
-		RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(0F, width, height, 0F, -10000F, 10000F), VertexSorting.ORTHOGRAPHIC_Z);
-		modelView.pushPose();
-		modelView.setIdentity();
-		RenderSystem.applyModelViewMatrix();
-		this.lighting.run();
-		pose.pushPose();
-		GuiDrawableRaster.rasterDepth++;
-		try {
-			pose.translate(width / 2F, height / 2F, 0F);
-			pose.mulPoseMatrix(new Matrix4f().scaling(size, -size, size));
-			this.draw.accept(pose, buffer);
-			buffer.endBatch();
-		} finally {
-			GuiDrawableRaster.rasterDepth--;
-			pose.popPose();
-			Lighting.setupFor3DItems();
-			modelView.popPose();
-			RenderSystem.applyModelViewMatrix();
-			RenderSystem.setProjectionMatrix(projection, sorting);
-		}
+		MinecraftGlState.preserve(() -> {
+			final float size = Math.min(width, height);
+			final PoseStack pose = GuiDrawableRaster.getPose(GuiDrawableRaster.rasterDepth);
+			final MultiBufferSource.BufferSource buffer = GuiDrawableRaster.getBuffer(GuiDrawableRaster.rasterDepth);
+			RenderSystem.matrixMode(GL11.GL_PROJECTION);
+			RenderSystem.pushMatrix();
+			RenderSystem.loadIdentity();
+			RenderSystem.ortho(0D, width, height, 0D, -10000D, 10000D);
+			RenderSystem.matrixMode(GL11.GL_MODELVIEW);
+			RenderSystem.pushMatrix();
+			RenderSystem.loadIdentity();
+			RenderSystem.enableRescaleNormal();
+			RenderSystem.enableAlphaTest();
+			RenderSystem.defaultAlphaFunc();
+			RenderSystem.enableBlend();
+			RenderSystem.defaultBlendFunc();
+			RenderSystem.color4f(1F, 1F, 1F, 1F);
+			this.lighting.run();
+			pose.pushPose();
+			GuiDrawableRaster.rasterDepth++;
+			try {
+				pose.translate(width / 2F, height / 2F, 0F);
+				pose.last().pose().multiply(Matrix4f.createScaleMatrix(size, -size, size));
+				this.draw.accept(pose, buffer);
+				buffer.endBatch();
+			} finally {
+				GuiDrawableRaster.rasterDepth--;
+				pose.popPose();
+				Lighting.setupFor3DItems();
+				RenderSystem.matrixMode(GL11.GL_PROJECTION);
+				RenderSystem.popMatrix();
+				RenderSystem.matrixMode(GL11.GL_MODELVIEW);
+				RenderSystem.popMatrix();
+			}
+		});
 	}
 
 	private static PoseStack getPose(final int depth) {

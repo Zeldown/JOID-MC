@@ -8,6 +8,8 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
+import com.mojang.datafixers.util.Pair;
+
 import dev.joid.lib.resource.animation.IResourceAnimationReader;
 import dev.joid.lib.resource.animation.ResourceAnimation;
 import dev.joid.lib.resource.animation.ResourceAnimationFrame;
@@ -16,7 +18,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.client.resources.metadata.animation.AnimationFrame;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
-import net.minecraft.client.resources.metadata.animation.FrameSize;
 
 @RequiredArgsConstructor
 public final class McmetaResourceAnimationReader implements IResourceAnimationReader {
@@ -30,11 +31,16 @@ public final class McmetaResourceAnimationReader implements IResourceAnimationRe
 			throw new IOException("The animated texture is not a readable image");
 		}
 
-		final FrameSize size = this.metadata.calculateFrameSize(image.getWidth(), image.getHeight());
-		final int columns = image.getWidth() / size.width();
-		final int count = columns * (image.getHeight() / size.height());
+		final Pair<Integer, Integer> size = this.metadata.getFrameSize(image.getWidth(), image.getHeight());
+		final int width = size.getFirst();
+		final int height = size.getSecond();
+		final int columns = image.getWidth() / width;
+		final int count = columns * (image.getHeight() / height);
 		final List<AnimationFrame> frames = new ArrayList<>();
-		this.metadata.forEachFrame((index, time) -> frames.add(new AnimationFrame(index, time)));
+		for (int i = 0; i < this.metadata.getFrameCount(); i++) {
+			frames.add(new AnimationFrame(this.metadata.getFrameIndex(i), this.metadata.getFrameTime(i)));
+		}
+
 		if (frames.isEmpty()) {
 			frames.addAll(McmetaResourceAnimationReader.sequence(count));
 		}
@@ -47,25 +53,25 @@ public final class McmetaResourceAnimationReader implements IResourceAnimationRe
 
 		final List<int[]> pixels = new ArrayList<>();
 		for (final AnimationFrame frame : frames) {
-			final int[] framePixels = new int[size.width() * size.height()];
-			image.getRGB(frame.getIndex() % columns * size.width(), frame.getIndex() / columns * size.height(), size.width(), size.height(), framePixels, 0, size.width());
+			final int[] framePixels = new int[width * height];
+			image.getRGB(frame.getIndex() % columns * width, frame.getIndex() / columns * height, width, height, framePixels, 0, width);
 			pixels.add(framePixels);
 		}
 
 		final List<ResourceAnimationFrame> animation = new ArrayList<>();
 		for (int i = 0; i < frames.size(); i++) {
-			final int time = frames.get(i).getTime(this.metadata.getDefaultFrameTime());
+			final int time = frames.get(i).isTimeUnknown() ? this.metadata.getDefaultFrameTime() : frames.get(i).getTime();
 			if (!this.metadata.isInterpolatedFrames()) {
-				animation.add(McmetaResourceAnimationReader.frame(pixels.get(i), size, time));
+				animation.add(McmetaResourceAnimationReader.frame(pixels.get(i), width, height, time));
 				continue;
 			}
 
 			for (int tick = 0; tick < time; tick++) {
-				animation.add(McmetaResourceAnimationReader.frame(McmetaResourceAnimationReader.mix(pixels.get(i), pixels.get((i + 1) % frames.size()), (float) tick / time), size, 1));
+				animation.add(McmetaResourceAnimationReader.frame(McmetaResourceAnimationReader.mix(pixels.get(i), pixels.get((i + 1) % frames.size()), (float) tick / time), width, height, 1));
 			}
 		}
 
-		return ResourceAnimation.of(size.width(), size.height(), 0, animation);
+		return ResourceAnimation.of(width, height, 0, animation);
 	}
 
 	private static @NonNull List<AnimationFrame> sequence(final int count) {
@@ -76,9 +82,9 @@ public final class McmetaResourceAnimationReader implements IResourceAnimationRe
 		return frames;
 	}
 
-	private static @NonNull ResourceAnimationFrame frame(final int[] pixels, final FrameSize size, final int ticks) {
+	private static @NonNull ResourceAnimationFrame frame(final int[] pixels, final int width, final int height, final int ticks) {
 		final int[] copy = pixels.clone();
-		ImageUtils.bleedAlpha(copy, size.width(), size.height());
+		ImageUtils.bleedAlpha(copy, width, height);
 		return ResourceAnimationFrame.of(copy, ticks * 50L);
 	}
 

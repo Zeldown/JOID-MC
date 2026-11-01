@@ -22,6 +22,7 @@ import dev.joid.lib.ui.node.impl.text.TextNode;
 import dev.joid.lib.utils.align.Align;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 
 @UIDataMinecraft(title = "Fonts", pause = false)
 public class ShowFonts extends UI {
@@ -75,7 +76,7 @@ public class ShowFonts extends UI {
 
 	private void styles(final Node container) {
 		final TextInfo info = TextInfo.create(MinecraftFont.DEFAULT, 24F).color(ShowTheme.TEXT).shadow(3F, 3F);
-		final Component chat = Component.literal("[").withStyle(ChatFormatting.DARK_GRAY).append(Component.literal("Server").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD)).append(Component.literal("] ").withStyle(ChatFormatting.DARK_GRAY)).append(Component.literal("Welcome back, ").withStyle(ChatFormatting.WHITE)).append(Component.literal("Steve").withStyle(ChatFormatting.AQUA)).append(Component.literal("!").withStyle(ChatFormatting.WHITE));
+		final Component chat = new TextComponent("[").withStyle(ChatFormatting.DARK_GRAY).append(new TextComponent("Server").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD)).append(new TextComponent("] ").withStyle(ChatFormatting.DARK_GRAY)).append(new TextComponent("Welcome back, ").withStyle(ChatFormatting.WHITE)).append(new TextComponent("Steve").withStyle(ChatFormatting.AQUA)).append(new TextComponent("!").withStyle(ChatFormatting.WHITE));
 
 		ShowTheme
 		.panel(900, 120, 900, 840)

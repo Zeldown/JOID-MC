@@ -2,17 +2,32 @@ plugins {
     id 'joid-common'
 }
 
-legacyForge {
-    enable {
-        mcpVersion = minecraft_version
-        enabledSourceSets = [sourceSets.main, sourceSets.test] as Set
+dependencies {
+    minecraft("com.mojang:minecraft:${minecraft_version}")
+    mappings(loom.layered {
+        officialMojangMappings()
+        parchment("org.parchmentmc.data:parchment-${parchment_minecraft_version}:${parchment_version}@zip")
+    })
+}
+
+repositories {
+    maven {
+        name = 'ParchmentMC'
+        url = uri('https://maven.parchmentmc.org')
     }
-    parchment {
-        minecraftVersion = parchment_minecraft_version
-        mappingsVersion = parchment_version
+}
+
+loom {
+    def aw = file("src/main/resources/${mod_id}.accesswidener")
+    if (aw.exists()) {
+        accessWidenerPath.set(aw)
     }
-    def at = file('src/main/resources/META-INF/accesstransformer.cfg')
-    if (at.exists()) {
-        accessTransformers.from(at.absolutePath)
-    }
+}
+
+tasks.register('classesJar', Zip) {
+    group = 'build'
+    description = 'Builds a jar of every class of the common project, demos included, for the loaders that rename them.'
+    archiveClassifier = 'classes'
+    archiveExtension = 'jar'
+    from(sourceSets.main.output.classesDirs)
 }

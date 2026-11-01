@@ -1,7 +1,7 @@
 plugins {
     id 'joid-java'
     id 'joid-packaging'
-    id 'net.neoforged.moddev.legacyforge'
+    id 'net.fabricmc.fabric-loom-remap'
 }
 
 configurations {

@@ -21,8 +21,8 @@ public final class MinecraftAudioGain implements AudioGain {
 	public float apply(final float gain, final Object group) {
 		final Options options = Minecraft.getInstance().options;
 		final float master = options.getSoundSourceVolume(SoundSource.MASTER);
-		if (group instanceof final SoundSource source && source != SoundSource.MASTER) {
-			return gain * master * options.getSoundSourceVolume(source);
+		if (group instanceof SoundSource && group != SoundSource.MASTER) {
+			return gain * master * options.getSoundSourceVolume((SoundSource) group);
 		}
 		return gain * master;
 	}

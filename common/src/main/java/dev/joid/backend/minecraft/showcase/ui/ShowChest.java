@@ -72,7 +72,7 @@ public class ShowChest extends ContainerUI<ChestMenu> implements IShowFocus {
 	}
 
 	public SlotNode getSlotNode(final int index) {
-		return this.slotNodes.stream().filter(node -> node.getSlot().index == index).findFirst().orElseThrow();
+		return this.slotNodes.stream().filter(node -> node.getSlot().index == index).findFirst().orElseThrow(() -> new IllegalStateException("The chest has no slot " + index));
 	}
 
 	private void grid(final Node panel, final int first, final double y, final int rows) {
@@ -86,7 +86,7 @@ public class ShowChest extends ContainerUI<ChestMenu> implements IShowFocus {
 			.hoveredColor(Color.WHITE.withAlpha(0.16F))
 			.body(tile -> {
 				if (hotbar) {
-					RectNode.create(0, 0, 81, 81).color(ShowTheme.GRASS.withAlpha(0.14F)).visible(() -> Minecraft.getInstance().player.getInventory().selected == slot - 54).effect(RoundedNodeEffect.create(16F)).interactive(false).attach(tile);
+					RectNode.create(0, 0, 81, 81).color(ShowTheme.GRASS.withAlpha(0.14F)).visible(() -> Minecraft.getInstance().player.inventory.selected == slot - 54).effect(RoundedNodeEffect.create(16F)).interactive(false).attach(tile);
 				}
 
 				final SlotNode node = SlotNode.create(4, 4, 73, 73).slot(super.getContainer().getSlot(slot)).hoveredColor((Color) null);

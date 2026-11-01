@@ -21,6 +21,7 @@ import dev.joid.lib.ui.node.impl.shape.RectNode;
 import dev.joid.lib.ui.node.impl.text.TextNode;
 import dev.joid.lib.utils.align.Align;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.NonNullList;
 import net.minecraft.network.protocol.game.ServerboundRenameItemPacket;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.AnvilMenu;
@@ -30,6 +31,10 @@ import net.minecraft.world.item.ItemStack;
 
 @UIDataMinecraft(title = "container.repair")
 public class ShowAnvil extends ContainerUI<AnvilMenu> implements IShowFocus, ContainerListener {
+
+	public static final int INPUT_SLOT      = 0;
+	public static final int ADDITIONAL_SLOT = 1;
+	public static final int RESULT_SLOT     = 2;
 
 	private final StringSignal   name;
 	private final List<SlotNode> slotNodes;
@@ -64,17 +69,17 @@ public class ShowAnvil extends ContainerUI<AnvilMenu> implements IShowFocus, Con
 			.create(380, 128, 780, ShowTheme.GRASS)
 			.info(TextInfo.create(MinecraftFont.DEFAULT, 24F).color(ShowTheme.TEXT).shadow(3F, 3F))
 			.marginHorizontal(24D)
-			.maxTextLength(AnvilMenu.MAX_NAME_LENGTH)
+			.maxTextLength(35)
 			.focused(true)
 			.text(this.name)
 			.onChange(event -> this.rename(event.getText()))
 			.attach(panel);
 			TextNode.create(382, 210).text(() -> Text.create(this.hint(), ShowTheme.font(FontWeight.SEMI_BOLD, 15F, this.hintColor()))).attach(panel);
-			this.tile(panel, AnvilMenu.INPUT_SLOT, 380);
+			this.tile(panel, ShowAnvil.INPUT_SLOT, 380);
 			TextNode.create(531, 296).text(Text.create("+", TextInfo.create(MinecraftFont.DEFAULT, 32F).color(ShowTheme.FAINT)).alignX(Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(panel);
-			this.tile(panel, AnvilMenu.ADDITIONAL_SLOT, 578);
+			this.tile(panel, ShowAnvil.ADDITIONAL_SLOT, 578);
 			TextNode.create(729, 296).text(Text.create("\u2192", TextInfo.create(MinecraftFont.DEFAULT, 32F).color(ShowTheme.FAINT)).alignX(Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(panel);
-			this.tile(panel, AnvilMenu.RESULT_SLOT, 776);
+			this.tile(panel, ShowAnvil.RESULT_SLOT, 776);
 			TextNode.create(380, 388).text(Text.create("INVENTORY", ShowTheme.label(14F, ShowTheme.FAINT))).attach(panel);
 			RectNode.create(500, 396, 660, 1).color(Color.WHITE.withAlpha(0.08F)).attach(panel);
 			this.grid(panel, 3, 420, 3);
@@ -90,16 +95,19 @@ public class ShowAnvil extends ContainerUI<AnvilMenu> implements IShowFocus, Con
 
 	@Override
 	public void slotChanged(final AbstractContainerMenu container, final int slot, final ItemStack stack) {
-		if (slot == AnvilMenu.INPUT_SLOT) {
+		if (slot == ShowAnvil.INPUT_SLOT) {
 			this.name.set(stack.isEmpty() ? "" : stack.getHoverName().getString());
 		}
 	}
 
 	@Override
-	public void dataChanged(final AbstractContainerMenu container, final int id, final int value) {}
+	public void refreshContainer(final AbstractContainerMenu container, final NonNullList<ItemStack> stacks) {}
+
+	@Override
+	public void setContainerData(final AbstractContainerMenu container, final int id, final int value) {}
 
 	public SlotNode getSlotNode(final int index) {
-		return this.slotNodes.stream().filter(node -> node.getSlot().index == index).findFirst().orElseThrow();
+		return this.slotNodes.stream().filter(node -> node.getSlot().index == index).findFirst().orElseThrow(() -> new IllegalStateException("The anvil has no slot " + index));
 	}
 
 	private void preview(final Node panel) {
@@ -149,7 +157,7 @@ public class ShowAnvil extends ContainerUI<AnvilMenu> implements IShowFocus, Con
 			.hoveredColor(Color.WHITE.withAlpha(0.16F))
 			.body(tile -> {
 				if (hotbar) {
-					RectNode.create(0, 0, 81, 81).color(ShowTheme.GRASS.withAlpha(0.14F)).visible(() -> Minecraft.getInstance().player.getInventory().selected == slot - 30).effect(RoundedNodeEffect.create(16F)).interactive(false).attach(tile);
+					RectNode.create(0, 0, 81, 81).color(ShowTheme.GRASS.withAlpha(0.14F)).visible(() -> Minecraft.getInstance().player.inventory.selected == slot - 30).effect(RoundedNodeEffect.create(16F)).interactive(false).attach(tile);
 				}
 
 				final SlotNode node = SlotNode.create(4, 4, 73, 73).slot(super.getContainer().getSlot(slot)).hoveredColor((Color) null);
@@ -161,49 +169,48 @@ public class ShowAnvil extends ContainerUI<AnvilMenu> implements IShowFocus, Con
 	}
 
 	private void rename(final String text) {
-		final Slot slot = super.getContainer().getSlot(AnvilMenu.INPUT_SLOT);
+		final Slot slot = super.getContainer().getSlot(ShowAnvil.INPUT_SLOT);
 		if (!slot.hasItem()) {
 			return;
 		}
 
 		final String name = !slot.getItem().hasCustomHoverName() && text.equals(slot.getItem().getHoverName().getString()) ? "" : text;
-		if (super.getContainer().setItemName(name)) {
-			Minecraft.getInstance().player.connection.send(new ServerboundRenameItemPacket(name));
-		}
+		super.getContainer().setItemName(name);
+		Minecraft.getInstance().player.connection.send(new ServerboundRenameItemPacket(name));
 	}
 
 	private ItemStack item() {
-		final ItemStack result = super.getContainer().getSlot(AnvilMenu.RESULT_SLOT).getItem();
-		return result.isEmpty() ? super.getContainer().getSlot(AnvilMenu.INPUT_SLOT).getItem() : result;
+		final ItemStack result = super.getContainer().getSlot(ShowAnvil.RESULT_SLOT).getItem();
+		return result.isEmpty() ? super.getContainer().getSlot(ShowAnvil.INPUT_SLOT).getItem() : result;
 	}
 
 	private String title() {
-		final ItemStack input = super.getContainer().getSlot(AnvilMenu.INPUT_SLOT).getItem();
+		final ItemStack input = super.getContainer().getSlot(ShowAnvil.INPUT_SLOT).getItem();
 		if (input.isEmpty()) {
 			return "\u00A77No item";
 		}
 
-		return this.name.get().isBlank() ? "\u00A77\u00A7o" + input.getHoverName().getString() : "\u00A7b\u00A7o" + this.name.get();
+		return this.name.get().trim().isEmpty() ? "\u00A77\u00A7o" + input.getHoverName().getString() : "\u00A7b\u00A7o" + this.name.get();
 	}
 
 	private String hint() {
-		if (super.getContainer().getSlot(AnvilMenu.INPUT_SLOT).getItem().isEmpty()) {
+		if (super.getContainer().getSlot(ShowAnvil.INPUT_SLOT).getItem().isEmpty()) {
 			return "Place an item to rename it";
 		}
 
-		if (this.name.get().isBlank()) {
+		if (this.name.get().trim().isEmpty()) {
 			return "A name can't be empty";
 		}
 
-		return this.isRenamed() ? this.name.get().length() + " / " + AnvilMenu.MAX_NAME_LENGTH + " characters, ready to forge" : "Double-click a word to rename it";
+		return this.isRenamed() ? this.name.get().length() + " / 35 characters, ready to forge" : "Double-click a word to rename it";
 	}
 
 	private Color hintColor() {
-		if (super.getContainer().getSlot(AnvilMenu.INPUT_SLOT).getItem().isEmpty()) {
+		if (super.getContainer().getSlot(ShowAnvil.INPUT_SLOT).getItem().isEmpty()) {
 			return ShowTheme.MUTED;
 		}
 
-		return this.name.get().isBlank() ? ShowTheme.REDSTONE : this.isRenamed() ? ShowTheme.GRASS : ShowTheme.MUTED;
+		return this.name.get().trim().isEmpty() ? ShowTheme.REDSTONE : this.isRenamed() ? ShowTheme.GRASS : ShowTheme.MUTED;
 	}
 
 	private String cost() {
@@ -216,11 +223,11 @@ public class ShowAnvil extends ContainerUI<AnvilMenu> implements IShowFocus, Con
 	}
 
 	private boolean isReady() {
-		return !super.getContainer().getSlot(AnvilMenu.RESULT_SLOT).getItem().isEmpty();
+		return !super.getContainer().getSlot(ShowAnvil.RESULT_SLOT).getItem().isEmpty();
 	}
 
 	private boolean isRenamed() {
-		return !this.name.get().equals(super.getContainer().getSlot(AnvilMenu.INPUT_SLOT).getItem().getHoverName().getString());
+		return !this.name.get().equals(super.getContainer().getSlot(ShowAnvil.INPUT_SLOT).getItem().getHoverName().getString());
 	}
 
 	private double elapsed() {

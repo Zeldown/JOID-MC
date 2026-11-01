@@ -1,5 +1,6 @@
 package dev.joid.backend.minecraft.showcase.ui;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -25,6 +26,8 @@ import dev.joid.lib.ui.node.impl.shape.CircleNode;
 import dev.joid.lib.ui.node.impl.shape.RectNode;
 import dev.joid.lib.ui.node.impl.text.TextNode;
 import dev.joid.lib.utils.align.Align;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
@@ -34,10 +37,10 @@ import net.minecraft.world.level.block.Blocks;
 @UIDataMinecraft(title = "Bestiary", pause = false)
 public class ShowBestiary extends UI implements IShowFocus {
 
-	private static final List<Entry> ENTRIES = List.of(
+	private static final List<Entry> ENTRIES = Arrays.asList(
 		new Entry("Fox", "MOB", ShowTheme.GRASS, "Taiga", "Sleeps by day, hunts chickens at night and steals whatever you drop.", "10", size -> EntityNode.create(0, 10 * size, 300 * size, 210 * size).type(EntityType.FOX)),
-		new Entry("Axolotl", "MOB", ShowTheme.GRASS, "Lush caves", "Plays dead to heal and helps you fight the drowned underwater.", "14", size -> EntityNode.create(0, 10 * size, 300 * size, 210 * size).type(EntityType.AXOLOTL)),
-		new Entry("Allay", "MOB", ShowTheme.GRASS, "Pillager outposts", "Brings you every copy of the item you give it, and dances to music.", "20", size -> EntityNode.create(0, 10 * size, 300 * size, 210 * size).type(EntityType.ALLAY)),
+		new Entry("Bee", "MOB", ShowTheme.GRASS, "Flower forests", "Pollinates the flowers, fills its hive with honey and stings only when provoked.", "10", size -> EntityNode.create(0, 10 * size, 300 * size, 210 * size).type(EntityType.BEE)),
+		new Entry("Strider", "MOB", ShowTheme.GRASS, "Nether lava seas", "Walks on lava, and carries you across it with a saddle and a warped fungus.", "20", size -> EntityNode.create(0, 10 * size, 300 * size, 210 * size).type(EntityType.STRIDER)),
 		new Entry("Creeper", "MOB", ShowTheme.GRASS, "Everywhere at night", "Silent, patient and explosive. Keep your distance.", "20", size -> EntityNode.create(0, 10 * size, 300 * size, 210 * size).type(EntityType.CREEPER)),
 		new Entry("Diamond Ore", "BLOCK", ShowTheme.DIAMOND, "Deep slate layers", "The rarest ore of the Overworld, mined with an iron pickaxe or better.", "3", size -> BlockNode.create(80 * size, 45 * size, 140 * size, 140 * size).block(Blocks.DIAMOND_ORE.defaultBlockState())),
 		new Entry("Bookshelf", "BLOCK", ShowTheme.DIAMOND, "Villages, strongholds", "Fifteen of them around an enchanting table unlock its best offers.", "1.5", size -> BlockNode.create(80 * size, 45 * size, 140 * size, 140 * size).block(Blocks.BOOKSHELF.defaultBlockState())),
@@ -117,24 +120,24 @@ public class ShowBestiary extends UI implements IShowFocus {
 		.effect(ShadowNodeEffect.create(Color.BLACK.withAlpha(0.5F), 36F).offsetY(16D))
 		.onHoverStart(event -> this.selected = index)
 		.body(card -> {
-			CircleNode.create(70, 34, 160).color(entry.color().withAlpha(0.22F)).effect(BlurNodeEffect.create(36F)).interactive(false).attach(card);
-			final Node render = entry.render().apply(1D).interactive(false);
-			if (render instanceof final EntityNode entity) {
-				entity.rotationYaw(() -> -35D + this.elapsed() * 20D + index * 15D);
-			} else if (render instanceof final BlockNode block) {
-				block.rotationYaw(() -> 30D + this.elapsed() * 30D + index * 25D);
+			CircleNode.create(70, 34, 160).color(entry.getColor().withAlpha(0.22F)).effect(BlurNodeEffect.create(36F)).interactive(false).attach(card);
+			final Node render = entry.getRender().apply(1D).interactive(false);
+			if (render instanceof EntityNode) {
+				((EntityNode) render).rotationYaw(() -> -35D + this.elapsed() * 20D + index * 15D);
+			} else if (render instanceof BlockNode) {
+				((BlockNode) render).rotationYaw(() -> 30D + this.elapsed() * 30D + index * 25D);
 			}
 			render.attach(card);
-			TextNode.create(24, 234).text(Text.create(entry.name(), ShowTheme.font(FontWeight.BOLD, 24F, ShowTheme.TEXT))).attach(card);
-			TextNode.create(24, 272).text(Text.create(entry.habitat(), ShowTheme.font(FontWeight.MEDIUM, 15F, ShowTheme.MUTED))).attach(card);
-			final TextInfo chip = ShowTheme.label(12F, entry.color());
-			final double width = chip.getWidth(entry.kind()) + 24D;
+			TextNode.create(24, 234).text(Text.create(entry.getName(), ShowTheme.font(FontWeight.BOLD, 24F, ShowTheme.TEXT))).attach(card);
+			TextNode.create(24, 272).text(Text.create(entry.getHabitat(), ShowTheme.font(FontWeight.MEDIUM, 15F, ShowTheme.MUTED))).attach(card);
+			final TextInfo chip = ShowTheme.label(12F, entry.getColor());
+			final double width = chip.getWidth(entry.getKind()) + 24D;
 			RectNode
 			.create(276 - width, 236, width, 28)
-			.color(entry.color().withAlpha(0.14F))
+			.color(entry.getColor().withAlpha(0.14F))
 			.effect(RoundedNodeEffect.create(14F))
 			.body(tag -> {
-				TextNode.create(width / 2D, 14).text(Text.create(entry.kind(), chip).alignX(Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(tag);
+				TextNode.create(width / 2D, 14).text(Text.create(entry.getKind(), chip).alignX(Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(tag);
 			})
 			.attach(card);
 		})
@@ -146,22 +149,22 @@ public class ShowBestiary extends UI implements IShowFocus {
 		.panel(1410, 96, 390, 892)
 		.x(() -> 1410D + 60D * (1D - ShowTheme.ease(this.elapsed(), 0.3D, 0.8D)))
 		.body(panel -> {
-			CircleNode.create(55, 70, 280).color(() -> this.entry().color().withAlpha(0.24F)).effect(BlurNodeEffect.create(50F)).interactive(false).attach(panel);
+			CircleNode.create(55, 70, 280).color(() -> this.entry().getColor().withAlpha(0.24F)).effect(BlurNodeEffect.create(50F)).interactive(false).attach(panel);
 			for (int index = 0; index < ShowBestiary.ENTRIES.size(); index++) {
 				final int entry = index;
-				final Node render = ShowBestiary.ENTRIES.get(index).render().apply(1.3D).interactive(false);
-				if (render instanceof final EntityNode entity) {
-					entity.rotationYaw(() -> -40D + this.elapsed() * 20D);
-				} else if (render instanceof final BlockNode block) {
-					block.rotationYaw(() -> 30D + this.elapsed() * 30D);
+				final Node render = ShowBestiary.ENTRIES.get(index).getRender().apply(1.3D).interactive(false);
+				if (render instanceof EntityNode) {
+					((EntityNode) render).rotationYaw(() -> -40D + this.elapsed() * 20D);
+				} else if (render instanceof BlockNode) {
+					((BlockNode) render).rotationYaw(() -> 30D + this.elapsed() * 30D);
 				}
 				ContainerNode.create(0, 40, 390, 290).visible(() -> this.selected == entry).interactive(false).body(box -> render.attach(box)).attach(panel);
 			}
-			TextNode.create(36, 420).text(Text.create(() -> this.entry().kind(), ShowTheme.label(13F, ShowTheme.FAINT))).attach(panel);
-			TextNode.create(36, 446).text(Text.create(() -> this.entry().name(), ShowTheme.font(FontWeight.EXTRA_BOLD, 40F, ShowTheme.TEXT))).attach(panel);
-			TextNode.create(36, 508, 318, 0).text(Text.create(() -> this.entry().description(), ShowTheme.font(FontWeight.MEDIUM, 18F, ShowTheme.MUTED).lineHeight(1.5F))).mode(TextMode.SPLIT).attach(panel);
-			this.fact(panel, 640, "HABITAT", () -> this.entry().habitat());
-			this.fact(panel, 712, "HEALTH", () -> this.entry().health() + " hearts");
+			TextNode.create(36, 420).text(Text.create(() -> this.entry().getKind(), ShowTheme.label(13F, ShowTheme.FAINT))).attach(panel);
+			TextNode.create(36, 446).text(Text.create(() -> this.entry().getName(), ShowTheme.font(FontWeight.EXTRA_BOLD, 40F, ShowTheme.TEXT))).attach(panel);
+			TextNode.create(36, 508, 318, 0).text(Text.create(() -> this.entry().getDescription(), ShowTheme.font(FontWeight.MEDIUM, 18F, ShowTheme.MUTED).lineHeight(1.5F))).mode(TextMode.SPLIT).attach(panel);
+			this.fact(panel, 640, "HABITAT", () -> this.entry().getHabitat());
+			this.fact(panel, 712, "HEALTH", () -> this.entry().getHealth() + " hearts");
 			RectNode
 			.create(36, 800, 318, 60)
 			.color(ShowTheme.horizontal(ShowTheme.GRASS, ShowTheme.EMERALD))
@@ -188,6 +191,18 @@ public class ShowBestiary extends UI implements IShowFocus {
 		return ShowTheme.now() - this.start;
 	}
 
-	private record Entry(String name, String kind, Color color, String habitat, String description, String health, Function<Double, Node> render) {}
+	@Getter
+	@AllArgsConstructor(access = AccessLevel.PRIVATE)
+	private static final class Entry {
+
+		private final String                 name;
+		private final String                 kind;
+		private final Color                  color;
+		private final String                 habitat;
+		private final String                 description;
+		private final String                 health;
+		private final Function<Double, Node> render;
+
+	}
 
 }

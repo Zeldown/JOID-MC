@@ -5,7 +5,8 @@ import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
+import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -37,20 +38,26 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.screens.AccessibilityOnboardingScreen;
 import net.minecraft.client.gui.screens.BackupConfirmScreen;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.DisconnectedScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
-import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
-import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
 import net.minecraft.client.tutorial.TutorialSteps;
-import net.minecraft.network.chat.Component;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.level.DataPackConfig;
 import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.LevelSettings;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
+import net.minecraft.world.level.levelgen.WorldGenSettings;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ShowcaseDirector {
@@ -66,13 +73,12 @@ public final class ShowcaseDirector {
 	public static void start() {
 		final Minecraft minecraft = Minecraft.getInstance();
 		minecraft.options.pauseOnLostFocus = false;
-		minecraft.options.onboardAccessibility = false;
-		minecraft.options.tutorialStep = TutorialSteps.NONE;
-		minecraft.options.framerateLimit().set(260);
-		minecraft.options.renderDistance().set(16);
-		minecraft.options.bobView().set(false);
-		minecraft.options.guiScale().set(4);
-		minecraft.options.fov().set(70);
+		minecraft.options.tutorialStep   = TutorialSteps.NONE;
+		minecraft.options.framerateLimit = 260;
+		minecraft.options.renderDistance = 16;
+		minecraft.options.bobView        = false;
+		minecraft.options.guiScale       = 4;
+		minecraft.options.fov            = 70D;
 		final Thread thread = new Thread(ShowcaseDirector::run, "JOID Showcase Director");
 		thread.setDaemon(true);
 		thread.start();
@@ -89,7 +95,7 @@ public final class ShowcaseDirector {
 	}
 
 	public static void begin(final String name) {
-		if (List.of(System.getProperty("joid.showcase.video", "").split(",")).contains(name)) {
+		if (Arrays.asList(System.getProperty("joid.showcase.video", "").split(",")).contains(name)) {
 			ShowcaseDirector.clip      = name;
 			ShowcaseDirector.clipFrame = 0;
 		}
@@ -189,7 +195,7 @@ public final class ShowcaseDirector {
 
 	public static void command(final String command) {
 		final MinecraftServer server = ShowcaseDirector.computeOnClient(() -> Minecraft.getInstance().getSingleplayerServer());
-		ShowcaseDirector.await(server.submit(() -> server.getCommands().performPrefixedCommand(server.createCommandSourceStack().withSuppressedOutput(), command)), "running /" + command);
+		ShowcaseDirector.await(server.submit(() -> server.getCommands().performCommand(server.createCommandSourceStack().withSuppressedOutput(), command)), "running /" + command);
 	}
 
 	public static void runOnServer(final Consumer<ServerPlayer> consumer) {
@@ -263,11 +269,7 @@ public final class ShowcaseDirector {
 	}
 
 	private static void joinWorld() {
-		ShowcaseDirector.waitFor("the end of the game loading", () -> ShowcaseDirector.isLoaded() || Minecraft.getInstance().screen instanceof AccessibilityOnboardingScreen || Minecraft.getInstance().screen instanceof BackupConfirmScreen, 600);
-		if (ShowcaseDirector.computeOnClient(() -> Minecraft.getInstance().screen instanceof AccessibilityOnboardingScreen)) {
-			ShowcaseDirector.runOnClient(() -> Minecraft.getInstance().screen.onClose());
-			ShowcaseDirector.waitFor("the end of the accessibility onboarding", () -> ShowcaseDirector.isLoaded() || Minecraft.getInstance().screen instanceof BackupConfirmScreen, 600);
-		}
+		ShowcaseDirector.waitFor("the end of the game loading", () -> ShowcaseDirector.isLoaded() || Minecraft.getInstance().screen instanceof BackupConfirmScreen, 600);
 
 		if (ShowcaseDirector.computeOnClient(() -> Minecraft.getInstance().screen instanceof BackupConfirmScreen)) {
 			ShowcaseDirector.runOnClient(() -> ShowcaseDirector.pressButton(Minecraft.getInstance().screen, "selectWorld.backupJoinSkipButton"));
@@ -280,21 +282,20 @@ public final class ShowcaseDirector {
 			callback.invoke(window, true);
 		});
 		if (ShowcaseDirector.computeOnClient(() -> Minecraft.getInstance().level == null && !Minecraft.getInstance().getLevelSource().levelExists("joid-showcase"))) {
-			ShowcaseDirector.runOnClient(() -> CreateWorldScreen.openFresh(Minecraft.getInstance(), new TitleScreen()));
-			ShowcaseDirector.waitFor("the world creation screen", () -> Minecraft.getInstance().screen instanceof CreateWorldScreen, 120);
 			ShowcaseDirector.runOnClient(() -> {
-				final CreateWorldScreen screen = (CreateWorldScreen) Minecraft.getInstance().screen;
-				final WorldCreationUiState state = screen.getUiState();
-				state.setName("joid-showcase");
-				state.setSeed(System.getProperty("joid.showcase.seed", "1700"));
-				state.setDifficulty(Difficulty.NORMAL);
-				state.getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(false, null);
-				state.getGameRules().getRule(GameRules.RULE_WEATHER_CYCLE).set(false, null);
-				state.getGameRules().getRule(GameRules.RULE_DOMOBSPAWNING).set(false, null);
-				state.getGameRules().getRule(GameRules.RULE_RANDOMTICKING).set(0, null);
-				state.getGameRules().getRule(GameRules.RULE_NATURAL_REGENERATION).set(false, null);
-				state.getGameRules().getRule(GameRules.RULE_ANNOUNCE_ADVANCEMENTS).set(false, null);
-				ShowcaseDirector.pressButton(screen, "selectWorld.create");
+				final long seed = Long.parseLong(System.getProperty("joid.showcase.seed", "1700"));
+				final RegistryAccess.RegistryHolder registries = RegistryAccess.builtin();
+				final Registry<Biome> biomes = registries.registryOrThrow(Registry.BIOME_REGISTRY);
+				final Registry<DimensionType> dimensions = registries.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
+				final Registry<NoiseGeneratorSettings> noises = registries.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY);
+				final GameRules rules = new GameRules();
+				rules.getRule(GameRules.RULE_DAYLIGHT).set(false, null);
+				rules.getRule(GameRules.RULE_WEATHER_CYCLE).set(false, null);
+				rules.getRule(GameRules.RULE_DOMOBSPAWNING).set(false, null);
+				rules.getRule(GameRules.RULE_RANDOMTICKING).tryDeserialize("0");
+				rules.getRule(GameRules.RULE_NATURAL_REGENERATION).set(false, null);
+				rules.getRule(GameRules.RULE_ANNOUNCE_ADVANCEMENTS).set(false, null);
+				Minecraft.getInstance().createLevel("joid-showcase", new LevelSettings("joid-showcase", GameType.SURVIVAL, false, Difficulty.NORMAL, false, rules, DataPackConfig.DEFAULT), registries, new WorldGenSettings(seed, true, false, WorldGenSettings.withOverworld(dimensions, DimensionType.defaultDimensions(dimensions, biomes, noises, seed), WorldGenSettings.makeDefaultOverworld(biomes, noises, seed))));
 			});
 			ShowcaseDirector.waitFor("the world creation", () -> Minecraft.getInstance().level != null || Minecraft.getInstance().screen instanceof ConfirmScreen, 900);
 			if (ShowcaseDirector.computeOnClient(() -> Minecraft.getInstance().screen instanceof ConfirmScreen)) {
@@ -320,10 +321,10 @@ public final class ShowcaseDirector {
 	}
 
 	private static void pressButton(final Screen screen, final String translationKey) {
-		final String message = Component.translatable(translationKey).getString();
+		final String message = new TranslatableComponent(translationKey).getString();
 		for (final GuiEventListener child : screen.children()) {
-			if (child instanceof final Button button && button.getMessage().getString().equals(message)) {
-				button.onPress();
+			if (child instanceof Button && ((Button) child).getMessage().getString().equals(message)) {
+				((Button) child).onPress();
 				return;
 			}
 		}
@@ -357,13 +358,13 @@ public final class ShowcaseDirector {
 
 	private static void write(final String name) {
 		final Minecraft minecraft = Minecraft.getInstance();
-		final Path path = Path.of(System.getProperty("joid.showcase.output", minecraft.gameDirectory.toPath().resolve("showcase").toString())).resolve(name);
+		final Path path = Paths.get(System.getProperty("joid.showcase.output", minecraft.gameDirectory.toPath().resolve("showcase").toString())).resolve(name);
 		try {
 			Files.createDirectories(path.getParent());
-			Files.writeString(path.resolveSibling(path.getFileName() + ".json"), String.format(Locale.ROOT, "{\"mouse\": [%.2f, %.2f], \"pressed\": %b, \"visible\": %b}", ShowcaseDirector.mouseX, ShowcaseDirector.mouseY, ShowcaseDirector.pressed, ShowcaseDirector.pointer), StandardCharsets.UTF_8);
+			Files.write(path.resolveSibling(path.getFileName() + ".json"), String.format(Locale.ROOT, "{\"mouse\": [%.2f, %.2f], \"pressed\": %b, \"visible\": %b}", ShowcaseDirector.mouseX, ShowcaseDirector.mouseY, ShowcaseDirector.pressed, ShowcaseDirector.pointer).getBytes(StandardCharsets.UTF_8));
 			final String command = System.getProperty("joid.showcase.capture");
 			if (command == null) {
-				try (final NativeImage image = Screenshot.takeScreenshot(minecraft.getMainRenderTarget())) {
+				try (final NativeImage image = Screenshot.takeScreenshot(minecraft.getWindow().getWidth(), minecraft.getWindow().getHeight(), minecraft.getMainRenderTarget())) {
 					image.writeToFile(path.resolveSibling(path.getFileName() + ".png"));
 				}
 			} else {

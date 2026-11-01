@@ -5,10 +5,10 @@ import dev.joid.backend.minecraft.bridge.network.PayloadMessage;
 import dev.joid.backend.minecraft.loader.network.PayloadType;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.simple.SimpleChannel;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.network.NetworkDirection;
+import net.minecraftforge.fml.network.NetworkRegistry;
+import net.minecraftforge.fml.network.simple.SimpleChannel;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ForgePayloads {
@@ -20,8 +20,11 @@ public final class ForgePayloads {
 			return;
 		}
 
-		ForgePayloads.channel = NetworkRegistry.newSimpleChannel(ResourceLocation.tryBuild(MinecraftJoid.MOD_ID, "main"), () -> "1", NetworkRegistry.acceptMissingOr("1"), NetworkRegistry.acceptMissingOr("1"));
-		ForgePayloads.channel.messageBuilder(PayloadMessage.class, 0, NetworkDirection.PLAY_TO_SERVER).encoder(PayloadMessage::write).decoder(PayloadMessage::read).consumerMainThread((message, context) -> message.fireServer(context.get().getSender())).add();
+		ForgePayloads.channel = NetworkRegistry.newSimpleChannel(new ResourceLocation(MinecraftJoid.MOD_ID, "main"), () -> "1", NetworkRegistry.acceptMissingOr("1"), NetworkRegistry.acceptMissingOr("1"));
+		ForgePayloads.channel.messageBuilder(PayloadMessage.class, 0, NetworkDirection.PLAY_TO_SERVER).encoder(PayloadMessage::write).decoder(PayloadMessage::read).consumer((message, context) -> {
+			context.get().enqueueWork(() -> message.fireServer(context.get().getSender()));
+			context.get().setPacketHandled(true);
+		}).add();
 	}
 
 	public static void registerSender() {

@@ -26,8 +26,8 @@ public class GpuTextureResourceResolver implements IResourceResolver {
 	}
 
 	private static IntSupplier getTexture(final Object input) {
-		if (input instanceof final RenderTarget target) {
-			return target::getColorTextureId;
+		if (input instanceof RenderTarget) {
+			return ((RenderTarget) input)::getColorTextureId;
 		}
 
 		return ((AbstractTexture) input)::getId;

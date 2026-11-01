@@ -4,8 +4,8 @@ import dev.joid.backend.minecraft.lib.ui.core.container.ContainerUI;
 import dev.joid.backend.minecraft.loader.registry.ContainerUIRegistry;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import net.minecraft.client.gui.screens.MenuScreens;
-import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.client.gui.ScreenManager;
+import net.minecraft.inventory.container.Container;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
@@ -16,8 +16,8 @@ public final class ForgeContainerUIRegistry {
 		modBus.addListener((final FMLClientSetupEvent event) -> event.enqueueWork(() -> ContainerUIRegistry.getRegistered().forEach(ForgeContainerUIRegistry::register)));
 	}
 
-	private static <M extends AbstractContainerMenu> void register(final ContainerUIRegistry<M> binding) {
-		MenuScreens.register(binding.getType(), ContainerUI.screen(binding.getFactory()));
+	private static <M extends Container> void register(final ContainerUIRegistry<M> binding) {
+		ScreenManager.register(binding.getType(), ContainerUI.screen(binding.getFactory()));
 	}
 
 }

@@ -38,11 +38,6 @@ configurations {
 def loaderAttribute = Attribute.of('io.github.mcgradleconventions.loader', String)
 
 dependencies {
-    compileOnly(project(':common')) {
-        attributes {
-            attribute(loaderAttribute, 'common')
-        }
-    }
     commonJava(project(path: ':common', configuration: 'commonJava'))
     commonResources(project(path: ':common', configuration: 'commonResources'))
     joidDemo(files(rootProject.file("libs/joid-core-${joid_version}-demo.jar")))
@@ -142,36 +137,7 @@ def prodJar = tasks.register('prodJar', ShadowJar) {
 def loaderName = project.name
 
 def shipped = { String name ->
-    tasks.named(plugins.hasPlugin('net.fabricmc.fabric-loom-remap') ? "remap${name.capitalize()}" : "reobf${name.capitalize()}")
-}
-
-ext.joidClient = { run ->
-    if (project.hasProperty('joid.test')) {
-        run.systemProperty('joid.test', 'true')
-        run.systemProperty('joid.loader', project.name)
-        run.systemProperty('joid.snapshot.output', file('runs/snapshots').absolutePath)
-        run.systemProperty('joid.snapshot.references', rootProject.file('.snapshots/references').absolutePath)
-        run.systemProperty('joid.cache', layout.buildDirectory.dir('joid-cache').get().asFile.absolutePath)
-        run.programArguments.addAll('--width', '1920', '--height', '1080')
-    }
-    if (project.hasProperty('joid.showcase')) {
-        project.properties.findAll { it.key.startsWith('joid.showcase') }.each { run.systemProperty(it.key, it.value.toString()) }
-        run.programArguments.addAll('--quickPlaySingleplayer', 'joid-showcase', '--width', '1920', '--height', '1080', '--username', 'JOID')
-    }
-}
-
-configurations.matching { it.name == 'additionalRuntimeClasspath' }.configureEach {
-    extendsFrom(configurations.embed, configurations.joidDemo, configurations.clientTest)
-}
-
-if (project.hasProperty('joid.test') || project.hasProperty('joid.showcase')) {
-    tasks.matching { it.name == 'runClient' }.configureEach {
-        doFirst {
-            def config = file('runs/client/config/fml.toml')
-            config.parentFile.mkdirs()
-            config.text = 'earlyWindowControl = false'
-        }
-    }
+    plugins.hasPlugin('net.fabricmc.fabric-loom-remap') ? tasks.named("remap${name.capitalize()}").flatMap { it.archiveFile } : tasks.named("reobf${name.capitalize()}").flatMap { it.output }
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
@@ -251,7 +217,7 @@ def verifyJar = { String kind, File archive, File common, List<String> patterns,
             }
 
             if (entry.name ==~ /[^\/]+\.(json|mcmeta|cfg|classtweaker)|META-INF\/[^\/]+\.(toml|cfg)|(assets|data)\/.+\.(json|mcmeta)/) {
-                def lines = new String(zip.getInputStream(entry).bytes, 'UTF-8').readLines().collect { it.replaceAll(/#.*/, '').replaceAll(/^displayTest = .*/, '') }
+                def lines = new String(zip.getInputStream(entry).bytes, 'UTF-8').readLines().collect { it.replaceAll(/#.*/, '') }
                 if (lines.any { line -> split(line).any { it in words } }) {
                     described << entry.name
                 }
@@ -276,8 +242,9 @@ def verifyJar = { String kind, File archive, File common, List<String> patterns,
             server << 'fabric.mod.json'
         }
 
-        if (loaderName != 'fabric' && !new String(zip.getInputStream(zip.getEntry('META-INF/mods.toml')).bytes, 'UTF-8').readLines().contains('displayTest = "IGNORE_ALL_VERSION"')) {
-            server << 'META-INF/mods.toml'
+        def mod = zip.getEntry('dev/joid/backend/minecraft/forge/ForgeJoid.class')
+        if (loaderName == 'forge' && (mod == null || !new String(zip.getInputStream(mod).bytes, 'ISO-8859-1').contains('DISPLAYTEST'))) {
+            server << 'dev/joid/backend/minecraft/forge/ForgeJoid.class'
         }
     }
     if (!server.isEmpty()) {
@@ -313,7 +280,7 @@ def verifyJar = { String kind, File archive, File common, List<String> patterns,
 def verifyProdJar = tasks.register('verifyProdJar') {
     group = 'verification'
     description = 'Checks that the prod jar holds no code, asset or reference of the dev and demo modes.'
-    def archive = shipped('prodJar').flatMap { it.archiveFile }
+    def archive = shipped('prodJar')
     def common = rootProject.file("libs/joid-backend-minecraft-common-${common_version}-prod.jar")
     def patterns = demoPatterns + devPatterns
     def references = developmentReferences
@@ -328,7 +295,7 @@ def verifyProdJar = tasks.register('verifyProdJar') {
 def verifyDevJar = tasks.register('verifyDevJar') {
     group = 'verification'
     description = 'Checks that the dev jar starts JOID in dev mode and holds no code, asset or reference of the demos.'
-    def archive = shipped('devJar').flatMap { it.archiveFile }
+    def archive = shipped('devJar')
     def common = rootProject.file("libs/joid-backend-minecraft-common-${common_version}-dev.jar")
     def patterns = demoPatterns
     def references = demoReferences

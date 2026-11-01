@@ -1,8 +1,11 @@
 package dev.joid.backend.minecraft.lib.ui.node.impl.design.entity;
 
+import java.util.Map;
 import java.util.function.Supplier;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.minecraft.MinecraftProfileTexture;
+import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 
 import dev.joid.backend.minecraft.lib.draw.entity.DrawEntity;
 import dev.joid.lib.signal.Signal;
@@ -11,9 +14,11 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
 
 @Getter
 public class EntityNode extends Node {
@@ -47,7 +52,7 @@ public class EntityNode extends Node {
 	@Override
 	public void draw(final double mouseX, final double mouseY) {
 		final Minecraft minecraft = Minecraft.getInstance();
-		if (this.type != null && (this.entity == null || this.entity.level() != minecraft.level)) {
+		if (this.type != null && (this.entity == null || this.entity.level != minecraft.level)) {
 			this.entity = minecraft.level == null ? null : this.type.create(minecraft.level);
 			if (this.entity != null) {
 				this.entity.setId(-1);
@@ -60,7 +65,7 @@ public class EntityNode extends Node {
 		if (this.entity != null) {
 			DrawEntity.inst().drawEntity(super.getX(), super.getY(), super.getWidth(), super.getHeight(), this.entity, this.scale, this.rotationYaw, this.rotationPitch, lookX, lookY);
 		} else if (this.profile != null || this.skin != null) {
-			final ResourceLocation skin = this.skin != null ? this.skin : minecraft.getSkinManager().getInsecureSkinLocation(this.profile);
+			final ResourceLocation skin = this.skin != null ? this.skin : EntityNode.resolveSkin(this.profile);
 			DrawEntity.inst().drawPlayer(super.getX(), super.getY(), super.getWidth(), super.getHeight(), skin, this.scale, this.rotationYaw, this.rotationPitch, lookX, lookY);
 		}
 	}
@@ -135,6 +140,12 @@ public class EntityNode extends Node {
 		this.type    = type;
 		this.profile = profile;
 		this.sourced = true;
+	}
+
+	private static ResourceLocation resolveSkin(final GameProfile profile) {
+		final Minecraft minecraft = Minecraft.getInstance();
+		final Map<Type, MinecraftProfileTexture> textures = minecraft.getSkinManager().getInsecureSkinInformation(profile);
+		return textures.containsKey(Type.SKIN) ? minecraft.getSkinManager().registerTexture(textures.get(Type.SKIN), Type.SKIN) : DefaultPlayerSkin.getDefaultSkin(Player.createPlayerUUID(profile));
 	}
 
 }

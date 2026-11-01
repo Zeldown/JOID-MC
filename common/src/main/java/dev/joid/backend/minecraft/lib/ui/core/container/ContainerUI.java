@@ -8,6 +8,7 @@ import dev.joid.backend.minecraft.lib.draw.item.DrawItem;
 import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
 import dev.joid.lib.bridge.BridgeHandler;
 import lombok.NonNull;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens.ScreenConstructor;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
@@ -27,12 +28,12 @@ public abstract class ContainerUI<M extends AbstractContainerMenu> extends BaseC
 	}
 
 	public @NonNull ItemStack getCarried() {
-		return super.getContainer().getCarried();
+		return Minecraft.getInstance().player.inventory.getCarried();
 	}
 
 	private void drawCarried(final double mouseX, final double mouseY) {
 		final ContainerUIScreen<?> screen = BridgeHandler.UI.getBridge(ContainerUIBridge.class).getScreen(this);
-		final ItemStack carried = super.getContainer().getCarried();
+		final ItemStack carried = this.getCarried();
 		if (screen == null || carried.isEmpty()) {
 			return;
 		}
@@ -42,7 +43,11 @@ public abstract class ContainerUI<M extends AbstractContainerMenu> extends BaseC
 			this.carriedSize = hovered.getItemSize();
 		}
 
-		final ItemStack stack = screen.isQuickCrafting() && screen.getQuickCraftSlots().size() > 1 ? carried.copyWithCount(screen.getQuickCraftRemainder()) : carried;
+		final ItemStack stack = carried.copy();
+		if (screen.isQuickCrafting() && screen.getQuickCraftSlots().size() > 1) {
+			stack.setCount(screen.getQuickCraftRemainder());
+		}
+
 		final double x = mouseX - this.carriedSize / 2D;
 		final double y = mouseY - this.carriedSize / 2D;
 		DrawItem.inst().drawItem(x, y, this.carriedSize, stack);

@@ -4,16 +4,17 @@ import dev.joid.backend.minecraft.bridge.input.KeyBindMapping;
 import dev.joid.backend.minecraft.loader.registry.KeyBindRegistry;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ForgeKeyBindRegistry {
 
 	public static void register(final IEventBus modBus) {
-		modBus.addListener((final RegisterKeyMappingsEvent event) -> {
+		modBus.addListener((final FMLClientSetupEvent event) -> {
 			for (final KeyBindRegistry bind : KeyBindRegistry.getRegistered()) {
-				event.register(KeyBindMapping.create(bind));
+				ClientRegistry.registerKeyBinding(KeyBindMapping.create(bind));
 			}
 		});
 	}

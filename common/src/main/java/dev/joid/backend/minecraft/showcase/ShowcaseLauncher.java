@@ -15,14 +15,13 @@ import lombok.NoArgsConstructor;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.MenuScreens.ScreenConstructor;
 import net.minecraft.world.SimpleContainer;
-import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.MenuType;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ShowcaseLauncher {
 
-	public static final MenuType<ChestMenu> CHEST = new MenuType<>((containerId, inventory) -> new ChestMenu(ShowcaseLauncher.CHEST, containerId, inventory, new SimpleContainer(27), 3), FeatureFlags.VANILLA_SET);
+	public static final MenuType<ChestMenu> CHEST = new MenuType<>((containerId, inventory) -> new ChestMenu(ShowcaseLauncher.CHEST, containerId, inventory, new SimpleContainer(27), 3));
 
 	public static void init() {
 		ContainerUIRegistry.create(ShowcaseLauncher.CHEST, ShowChest::new).register();

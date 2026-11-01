@@ -1,41 +1,179 @@
+import java.util.zip.GZIPInputStream
+
+import org.gradle.plugins.ide.eclipse.model.ProjectDependency
+import org.gradle.plugins.ide.eclipse.model.SourceFolder
+
 plugins {
     id 'joid-loader'
 }
 
-apply plugin: 'net.neoforged.moddev.legacyforge'
+apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'net.minecraftforge.renamer'
 
-legacyForge {
-    version = "${minecraft_version}-${forge_version}"
-    parchment {
-        minecraftVersion = parchment_minecraft_version
-        mappingsVersion = parchment_version
-    }
+minecraft {
+    mappings channel: 'official', version: minecraft_version
     def at = project(':common').file('src/main/resources/META-INF/accesstransformer.cfg')
     if (at.exists()) {
-        accessTransformers.from(at.absolutePath)
+        accessTransformers = files(at)
     }
     runs {
         configureEach {
-            ideName = "Forge ${it.name.capitalize()}"
+            workingDir = layout.projectDirectory.dir("runs/${it.name}")
         }
-        client {
-            client()
-            gameDirectory = this.mkdir(this.file('runs/client'))
-            joidClient(it)
+        register('client') {
+            if (project.hasProperty('joid.test')) {
+                systemProperty('joid.test', 'true')
+                systemProperty('joid.loader', project.name)
+                systemProperty('joid.snapshot.output', file('runs/snapshots').absolutePath)
+                systemProperty('joid.snapshot.references', rootProject.file('.snapshots/references').absolutePath)
+                systemProperty('joid.cache', layout.buildDirectory.dir('joid-cache').get().asFile.absolutePath)
+                args('--width', '1920', '--height', '1080')
+            }
+            if (project.hasProperty('joid.showcase')) {
+                project.properties.findAll { it.key.startsWith('joid.showcase') }.each { systemProperty(it.key, it.value.toString()) }
+                args('--width', '1920', '--height', '1080', '--username', 'JOID')
+            }
         }
-        server {
-            server()
-            gameDirectory = this.mkdir(this.file('runs/server'))
-        }
-    }
-    mods {
-        "${mod_id}" {
-            sourceSet sourceSets.main
+        register('server') {
+            args('--nogui')
         }
     }
 }
 
-obfuscation {
-    reobfuscate(tasks.named('devJar', Jar), sourceSets.main)
-    reobfuscate(tasks.named('prodJar', Jar), sourceSets.main)
+repositories {
+    minecraft.mavenizer(it)
+    maven(fg.forgeMaven)
+    maven(fg.minecraftLibsMaven)
+    mavenCentral()
+}
+
+dependencies {
+    implementation(minecraft.dependency("net.minecraftforge:forge:${minecraft_version}-${forge_version}"))
+}
+
+def clientMappings = tasks.register('downloadClientMappings') {
+    group = 'build'
+    description = "Downloads the official mappings of the Minecraft ${minecraft_version} client."
+    def output = layout.buildDirectory.file("common/client-${client_mappings_sha1}.txt")
+    outputs.file(output)
+    doLast {
+        def file = output.get().asFile
+        new URL("https://piston-data.mojang.com/v1/objects/${client_mappings_sha1}/client.txt").withInputStream { file.bytes = it.bytes }
+        if (file.bytes.digest('SHA-1') != client_mappings_sha1) {
+            throw new GradleException("[JOID] The official mappings of Minecraft ${minecraft_version} do not match their checksum")
+        }
+    }
+}
+
+def commonMappings = tasks.register('generateCommonMappings') {
+    group = 'build'
+    description = 'Maps the official class names of the common project to the MCP class names of a ForgeGradle workspace.'
+    def input = clientMappings.map { it.outputs.files.singleFile }
+    def obf = minecraft.dependency.toObfFile
+    def output = layout.buildDirectory.file('common/common.srg')
+    inputs.file(input)
+    outputs.file(output)
+    doLast {
+        def named = [:]
+        (obf.get().name.endsWith('.gz') ? new GZIPInputStream(new FileInputStream(obf.get())) : new FileInputStream(obf.get())).withReader('UTF-8') { reader ->
+            reader.eachLine { line ->
+                if (!line.startsWith('tsrg') && !line.startsWith('\t')) {
+                    def parts = line.split(' ')
+                    named[parts[1]] = parts[0]
+                }
+            }
+        }
+        def lines = []
+        input.get().eachLine('UTF-8') { line ->
+            def matcher = line =~ /^(\S+) -> (\S+):$/
+            if (matcher.matches() && named.containsKey(matcher.group(2).replace('.', '/'))) {
+                lines << "CL: ${matcher.group(1).replace('.', '/')} ${named[matcher.group(2).replace('.', '/')]}"
+            }
+        }
+        output.get().asFile.text = lines.join('\n')
+    }
+}
+
+def commonClasses = renamer.classes('remapCommon') {
+    group = 'build'
+    description = 'Renames the classes of Minecraft in the common project to the MCP names of a ForgeGradle workspace.'
+    input = project(':common').tasks.named('classesJar', Zip).flatMap { it.archiveFile }
+    map.from(commonMappings)
+    libraries.setFrom()
+    output = layout.buildDirectory.file('common/common.jar')
+}
+
+def commonDirectory = layout.buildDirectory.dir('common/classes')
+def unpackCommon = tasks.register('unpackCommon', Sync) {
+    group = 'build'
+    description = 'Unpacks the renamed classes of the common project next to the classes of the mod.'
+    from(commonClasses.flatMap { it.output }.map { zipTree(it) })
+    into(commonDirectory)
+}
+
+sourceSets.main.output.dir(commonDirectory, builtBy: unpackCommon)
+
+tasks.named('prodJar', Jar) {
+    from(commonDirectory)
+    dependsOn(unpackCommon)
+}
+
+dependencies {
+    compileOnly(files(commonDirectory).builtBy(unpackCommon))
+}
+
+tasks.named('compileJava', JavaCompile) {
+    source = sourceSets.main.java
+}
+
+tasks.named('javadoc', Javadoc) {
+    source = sourceSets.main.allJava
+}
+
+['devJar', 'prodJar'].each { name ->
+    def jar = tasks.named(name, Jar)
+    jar.configure {
+        destinationDirectory = layout.buildDirectory.dir('devlibs')
+    }
+    renamer.classes("reobf${name.capitalize()}", jar) {
+        group = 'build'
+        description = "Reobfuscates the ${name} to the SRG names that Forge uses outside of a workspace."
+        map.from(minecraft.dependency.toSrgFile)
+        accessTransformers = true
+        output = jar.flatMap { layout.buildDirectory.file("libs/${it.archiveFileName.get()}") }
+    }
+}
+
+def linkedFolders = [
+        'common-resources': project(':common').file('src/main/resources')
+]
+
+eclipse {
+    project {
+        linkedFolders.each { name, folder ->
+            linkedResource(name: name, type: '2', location: folder.absolutePath)
+        }
+        file.whenMerged { description ->
+            description.linkedResources.removeAll { link -> linkedFolders[link.name] != file(link.location) }
+        }
+    }
+    classpath.file.whenMerged { classpath ->
+        classpath.entries.removeAll { it instanceof ProjectDependency || it instanceof SourceFolder && !it.path.startsWith('src/') }
+        def output = classpath.entries.find { it instanceof SourceFolder && it.path == 'src/main/java' }?.output
+        linkedFolders.keySet().each { name ->
+            classpath.entries << new SourceFolder(name, output)
+        }
+    }
+}
+
+tasks.named('eclipse') {
+    dependsOn('genEclipseRuns')
+}
+
+tasks.named('genEclipseRuns') {
+    doLast {
+        fileTree(projectDir) { include('*.launch') }.each { launch ->
+            launch.text = launch.text.replaceAll(/\s*<listEntry value="[^"]*org\.eclipse\.buildship\.core\.gradleclasspathcontainer[^"]*"\/>/, '')
+        }
+    }
 }

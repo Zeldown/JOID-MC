@@ -1,6 +1,7 @@
 package dev.joid.backend.minecraft.showcase.ui;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import dev.joid.backend.minecraft.lib.font.impl.minecraft.MinecraftFont;
@@ -22,13 +23,16 @@ import dev.joid.lib.ui.node.impl.shape.RectNode;
 import dev.joid.lib.ui.node.impl.text.TextNode;
 import dev.joid.lib.ui.node.property.OverflowProperty;
 import dev.joid.lib.utils.align.Align;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
 @UIDataMinecraft(title = "menu.multiplayer", pause = false)
 public class ShowServers extends UI implements IShowFocus {
 
-	private static final List<Server> SERVERS = List.of(
+	private static final List<Server> SERVERS = Arrays.asList(
 		new Server("Emerald Valley", "\u00A7aSurvival \u00A78\u00B7 \u00A7fa new season, a fresh map", "1,204", 5, ShowTheme.GRASS, Blocks.GRASS_BLOCK),
 		new Server("Skyward Isles", "\u00A7bSkyblock \u00A78\u00B7 \u00A7edouble XP all weekend", "846", 5, ShowTheme.DIAMOND, Blocks.OAK_LOG),
 		new Server("Redstone Labs", "\u00A7cRedstone \u00A77& \u00A76tech \u00A78\u00B7 \u00A7fcreative plots", "312", 4, ShowTheme.REDSTONE, Blocks.REDSTONE_BLOCK),
@@ -37,7 +41,7 @@ public class ShowServers extends UI implements IShowFocus {
 		new Server("Frostpeak", "\u00A7bHardcore \u00A78\u00B7 \u00A7fone life, no mercy", "128", 5, ShowTheme.DIAMOND, Blocks.SNOW_BLOCK),
 		new Server("Deep Mines", "\u00A7eMining event \u00A78\u00B7 \u00A7bdouble ores", "693", 4, ShowTheme.GOLD, Blocks.DIAMOND_ORE),
 		new Server("Ocean Odyssey", "\u00A73Deep sea \u00A7fexploration \u00A78\u00B7 \u00A7anew ruins", "254", 3, ShowTheme.DIAMOND, Blocks.PRISMARINE),
-		new Server("Cherry Grove", "\u00A7dChill SMP \u00A78\u00B7 \u00A7awhitelist open", "96", 5, ShowTheme.AMETHYST, Blocks.CHERRY_LOG),
+		new Server("Cherry Grove", "\u00A7dChill SMP \u00A78\u00B7 \u00A7awhitelist open", "96", 5, ShowTheme.AMETHYST, Blocks.PINK_WOOL),
 		new Server("Bed Brawl", "\u00A7cBed wars \u00A78\u00B7 \u00A7f4v4v4v4", "1,768", 2, ShowTheme.REDSTONE, Blocks.TNT),
 		new Server("End City", "\u00A75The End \u00A78\u00B7 \u00A7felytra races", "403", 4, ShowTheme.AMETHYST, Blocks.PURPUR_BLOCK),
 		new Server("Builders Guild", "\u00A76Creative \u00A78\u00B7 \u00A7fmonthly contests", "731", 5, ShowTheme.GOLD, Blocks.CRAFTING_TABLE)
@@ -52,14 +56,14 @@ public class ShowServers extends UI implements IShowFocus {
 	public ShowServers() {
 		this.rows     = new Node[ShowServers.SERVERS.size()];
 		this.order    = new ArrayList<>();
-		this.favorite = new StringSignal(ShowServers.SERVERS.get(0).name());
+		this.favorite = new StringSignal(ShowServers.SERVERS.get(0).getName());
 	}
 
 	@Override
 	public void init() {
 		this.start = ShowTheme.now();
 		this.order.clear();
-		ShowServers.SERVERS.forEach(server -> this.order.add(server.name()));
+		ShowServers.SERVERS.forEach(server -> this.order.add(server.getName()));
 
 		ShowTheme
 		.panel(440, 80, 1040, 920)
@@ -115,19 +119,19 @@ public class ShowServers extends UI implements IShowFocus {
 		this.rows[index] = RectNode
 		.create(0, 0, 920, 88)
 		.<RectNode>self(row -> row.color(() -> list.isDragging(row) ? Color.decode("#253046") : Color.WHITE.withAlpha(0.05F + row.hoverValue(0.05F))))
-		.<RectNode>self(row -> row.effect(ShadowNodeEffect.create(server.color(), 30F).color(() -> server.color().withAlpha(list.isDragging(row) ? 0.5F : 0F))))
+		.<RectNode>self(row -> row.effect(ShadowNodeEffect.create(server.getColor(), 30F).color(() -> server.getColor().withAlpha(list.isDragging(row) ? 0.5F : 0F))))
 		.effect(RoundedNodeEffect.create(20F))
 		.body(row -> {
 			ShowTheme
 			.tile(16, 12, 64, 64, 14F)
 			.body(icon -> {
-				BlockNode.create(10, 10, 44, 44).block(server.block().defaultBlockState()).rotationYaw(() -> 30D + this.elapsed() * 25D + index * 30D).interactive(false).attach(icon);
+				BlockNode.create(10, 10, 44, 44).block(server.getBlock().defaultBlockState()).rotationYaw(() -> 30D + this.elapsed() * 25D + index * 30D).interactive(false).attach(icon);
 			})
 			.attach(row);
-			TextNode.create(102, 28).text(Text.create(server.name(), ShowTheme.font(FontWeight.SEMI_BOLD, 24F, ShowTheme.TEXT))).anchorY(Align.CENTER).attach(row);
-			TextNode.create(102, 54).text(Text.create(server.motd(), TextInfo.create(MinecraftFont.DEFAULT, 16F).color(ShowTheme.TEXT).shadow(2F, 2F))).attach(row);
-			TextNode.create(820, 44).text(Text.create(server.players(), ShowTheme.font(FontWeight.SEMI_BOLD, 20F, ShowTheme.MUTED)).alignX(Align.END)).anchorX(Align.END).anchorY(Align.CENTER).attach(row);
-			ResourceNode.create(850, 36, 30, 24).resource(ResourceBuilder.create().nearest().textureCoords(0D, (176D + (5 - server.ping()) * 8D) / 256D, 10D / 256D, (184D + (5 - server.ping()) * 8D) / 256D).of("minecraft:textures/gui/icons.png")).interactive(false).attach(row);
+			TextNode.create(102, 28).text(Text.create(server.getName(), ShowTheme.font(FontWeight.SEMI_BOLD, 24F, ShowTheme.TEXT))).anchorY(Align.CENTER).attach(row);
+			TextNode.create(102, 54).text(Text.create(server.getMotd(), TextInfo.create(MinecraftFont.DEFAULT, 16F).color(ShowTheme.TEXT).shadow(2F, 2F))).attach(row);
+			TextNode.create(820, 44).text(Text.create(server.getPlayers(), ShowTheme.font(FontWeight.SEMI_BOLD, 20F, ShowTheme.MUTED)).alignX(Align.END)).anchorX(Align.END).anchorY(Align.CENTER).attach(row);
+			ResourceNode.create(850, 36, 30, 24).resource(ResourceBuilder.create().nearest().textureCoords(0D, (176D + (5 - server.getPing()) * 8D) / 256D, 10D / 256D, (184D + (5 - server.getPing()) * 8D) / 256D).of("minecraft:textures/gui/icons.png")).interactive(false).attach(row);
 		})
 		.hoverDuration(160L)
 		.attach(list);
@@ -137,6 +141,17 @@ public class ShowServers extends UI implements IShowFocus {
 		return ShowTheme.now() - this.start;
 	}
 
-	private record Server(String name, String motd, String players, int ping, Color color, Block block) {}
+	@Getter
+	@AllArgsConstructor(access = AccessLevel.PRIVATE)
+	private static final class Server {
+
+		private final String name;
+		private final String motd;
+		private final String players;
+		private final int    ping;
+		private final Color  color;
+		private final Block  block;
+
+	}
 
 }
