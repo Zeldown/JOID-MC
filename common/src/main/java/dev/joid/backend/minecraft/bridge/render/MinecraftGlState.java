@@ -18,13 +18,14 @@ import net.minecraft.client.renderer.OpenGlHelper;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MinecraftGlState {
 
-	private final int[]     blend     = new int[4];
-	private final int[]     depth     = new int[2];
-	private final int[]     textures  = new int[2];
-	private final float[]   color     = new float[4];
-	private final boolean[] lights    = new boolean[2];
-	private final boolean[] colorMask = new boolean[4];
-	private final boolean[] texturing = new boolean[2];
+	private final int[]     blend      = new int[4];
+	private final int[]     depth      = new int[2];
+	private final int[]     textures   = new int[2];
+	private final float[]   color      = new float[4];
+	private final float[]   clearColor = new float[4];
+	private final boolean[] lights     = new boolean[2];
+	private final boolean[] colorMask  = new boolean[4];
+	private final boolean[] texturing  = new boolean[2];
 
 	private boolean fog;
 	private int     alphaFunc;
@@ -37,6 +38,7 @@ public final class MinecraftGlState {
 	private boolean depthTest;
 	private boolean normalize;
 	private int     activeTexture;
+	private double  clearDepth;
 	private boolean rescaleNormal;
 	private boolean colorMaterial;
 
@@ -74,10 +76,14 @@ public final class MinecraftGlState {
 		state.blend[3]      = GL11.glGetInteger(GL14.GL_BLEND_DST_ALPHA);
 		state.depth[0]      = GL11.glGetInteger(GL11.GL_DEPTH_FUNC);
 		state.depth[1]      = GL11.glGetBoolean(GL11.GL_DEPTH_WRITEMASK) ? 1 : 0;
+		state.clearDepth    = GL11.glGetDouble(GL11.GL_DEPTH_CLEAR_VALUE);
 
 		final FloatBuffer color = BufferUtils.createFloatBuffer(16);
 		GL11.glGetFloat(GL11.GL_CURRENT_COLOR, color);
 		color.get(state.color);
+		color.clear();
+		GL11.glGetFloat(GL11.GL_COLOR_CLEAR_VALUE, color);
+		color.get(state.clearColor);
 
 		final ByteBuffer mask = BufferUtils.createByteBuffer(16);
 		GL11.glGetBoolean(GL11.GL_COLOR_WRITEMASK, mask);
@@ -113,6 +119,8 @@ public final class MinecraftGlState {
 		GlStateManager.depthMask(this.depth[1] != 0);
 		GlStateManager.color(this.color[0], this.color[1], this.color[2], this.color[3]);
 		GlStateManager.colorMask(this.colorMask[0], this.colorMask[1], this.colorMask[2], this.colorMask[3]);
+		GlStateManager.clearColor(this.clearColor[0], this.clearColor[1], this.clearColor[2], this.clearColor[3]);
+		GlStateManager.clearDepth(this.clearDepth);
 
 		GlStateManager.setActiveTexture(this.activeTexture);
 		for (int unit = 0; unit < this.textures.length; unit++) {
