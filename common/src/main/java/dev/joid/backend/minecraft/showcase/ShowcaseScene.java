@@ -68,6 +68,7 @@ public enum ShowcaseScene {
 			player.clearActivePotions();
 			player.experienceLevel = 27;
 			player.experience      = 62F / player.xpBarCap();
+			player.addExperienceLevel(0);
 			final String spot = System.getProperty("joid.showcase.spot");
 			final double[] place = spot == null ? new double[] {player.posX, player.posZ, 180D, 6D} : Arrays.stream(spot.split(" ")).mapToDouble(Double::parseDouble).toArray();
 			final int ground = player.world.getTopSolidOrLiquidBlock(new BlockPos(place[0], 0D, place[1])).getY();
@@ -245,6 +246,7 @@ public enum ShowcaseScene {
 			player.inventory.setInventorySlotContents(0, ShowcaseScene.enchant(new ItemStack(Items.DIAMOND_SWORD), Enchantments.SHARPNESS, 5));
 			player.experienceLevel = 27;
 			player.experience      = 62F / player.xpBarCap();
+			player.addExperienceLevel(0);
 			player.inventoryContainer.detectAndSendChanges();
 		});
 		ShowcaseDirector.frames(5);

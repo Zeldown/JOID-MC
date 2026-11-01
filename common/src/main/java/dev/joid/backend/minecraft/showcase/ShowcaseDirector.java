@@ -24,6 +24,8 @@ import java.util.function.DoubleConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import javax.imageio.ImageIO;
+
 import org.lwjgl.opengl.Display;
 
 import dev.joid.backend.minecraft.MinecraftBackend;
@@ -311,7 +313,7 @@ public final class ShowcaseDirector {
 			Files.write(new File(path.getPath() + ".json").toPath(), String.format(Locale.ROOT, "{\"mouse\": [%.2f, %.2f], \"pressed\": %b, \"visible\": %b}", ShowcaseDirector.mouseX, ShowcaseDirector.mouseY, ShowcaseDirector.pressed, ShowcaseDirector.pointer).getBytes(StandardCharsets.UTF_8));
 			final String command = System.getProperty("joid.showcase.capture");
 			if (command == null) {
-				ScreenShotHelper.saveScreenshot(path.getParentFile(), path.getName() + ".png", minecraft.displayWidth, minecraft.displayHeight, minecraft.getFramebuffer());
+				ImageIO.write(ScreenShotHelper.createScreenshot(minecraft.displayWidth, minecraft.displayHeight, minecraft.getFramebuffer()), "png", new File(path.getPath() + ".png"));
 			} else {
 				final int code = new ProcessBuilder(command, path.getPath()).inheritIO().start().waitFor();
 				if (code != 0) {
