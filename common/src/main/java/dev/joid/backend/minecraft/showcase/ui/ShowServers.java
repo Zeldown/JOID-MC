@@ -35,18 +35,18 @@ import net.minecraft.item.EnumDyeColor;
 public class ShowServers extends UI implements IShowFocus {
 
 	private static final List<Server> SERVERS = Arrays.asList(
-		new Server("Emerald Valley", "\u00A7aSurvival \u00A78\u00B7 \u00A7fa new season, a fresh map", "1,204", 5, ShowTheme.GRASS, Blocks.GRASS.getDefaultState()),
-		new Server("Skyward Isles", "\u00A7bSkyblock \u00A78\u00B7 \u00A7edouble XP all weekend", "846", 5, ShowTheme.DIAMOND, Blocks.LOG.getDefaultState()),
-		new Server("Redstone Labs", "\u00A7cRedstone \u00A77& \u00A76tech \u00A78\u00B7 \u00A7fcreative plots", "312", 4, ShowTheme.REDSTONE, Blocks.REDSTONE_BLOCK.getDefaultState()),
-		new Server("Nether Rush", "\u00A74PvP arena \u00A78\u00B7 \u00A76ranked season 3", "2,031", 4, ShowTheme.REDSTONE, Blocks.NETHERRACK.getDefaultState()),
-		new Server("Pixel Kingdom", "\u00A7dRoleplay \u00A78\u00B7 \u00A7fbuild your own castle", "577", 3, ShowTheme.AMETHYST, Blocks.BRICK_BLOCK.getDefaultState()),
-		new Server("Frostpeak", "\u00A7bHardcore \u00A78\u00B7 \u00A7fone life, no mercy", "128", 5, ShowTheme.DIAMOND, Blocks.SNOW.getDefaultState()),
-		new Server("Deep Mines", "\u00A7eMining event \u00A78\u00B7 \u00A7bdouble ores", "693", 4, ShowTheme.GOLD, Blocks.DIAMOND_ORE.getDefaultState()),
-		new Server("Ocean Odyssey", "\u00A73Deep sea \u00A7fexploration \u00A78\u00B7 \u00A7anew ruins", "254", 3, ShowTheme.DIAMOND, Blocks.LAPIS_BLOCK.getDefaultState()),
-		new Server("Cherry Grove", "\u00A7dChill SMP \u00A78\u00B7 \u00A7awhitelist open", "96", 5, ShowTheme.AMETHYST, Blocks.WOOL.getDefaultState().withProperty(BlockColored.COLOR, EnumDyeColor.PINK)),
-		new Server("Bed Brawl", "\u00A7cBed wars \u00A78\u00B7 \u00A7f4v4v4v4", "1,768", 2, ShowTheme.REDSTONE, Blocks.TNT.getDefaultState()),
-		new Server("End City", "\u00A75The End \u00A78\u00B7 \u00A7felytra races", "403", 4, ShowTheme.AMETHYST, Blocks.END_STONE.getDefaultState()),
-		new Server("Builders Guild", "\u00A76Creative \u00A78\u00B7 \u00A7fmonthly contests", "731", 5, ShowTheme.GOLD, Blocks.CRAFTING_TABLE.getDefaultState())
+		new Server("Emerald Valley", "\u00A7aSurvival \u00A78\u00B7 \u00A7fa new season, a fresh map", "1,204", 5, ShowTheme.GRASS, Blocks.grass.getDefaultState()),
+		new Server("Skyward Isles", "\u00A7bSkyblock \u00A78\u00B7 \u00A7edouble XP all weekend", "846", 5, ShowTheme.DIAMOND, Blocks.log.getDefaultState()),
+		new Server("Redstone Labs", "\u00A7cRedstone \u00A77& \u00A76tech \u00A78\u00B7 \u00A7fcreative plots", "312", 4, ShowTheme.REDSTONE, Blocks.redstone_block.getDefaultState()),
+		new Server("Nether Rush", "\u00A74PvP arena \u00A78\u00B7 \u00A76ranked season 3", "2,031", 4, ShowTheme.REDSTONE, Blocks.netherrack.getDefaultState()),
+		new Server("Pixel Kingdom", "\u00A7dRoleplay \u00A78\u00B7 \u00A7fbuild your own castle", "577", 3, ShowTheme.AMETHYST, Blocks.brick_block.getDefaultState()),
+		new Server("Frostpeak", "\u00A7bHardcore \u00A78\u00B7 \u00A7fone life, no mercy", "128", 5, ShowTheme.DIAMOND, Blocks.snow.getDefaultState()),
+		new Server("Deep Mines", "\u00A7eMining event \u00A78\u00B7 \u00A7bdouble ores", "693", 4, ShowTheme.GOLD, Blocks.diamond_ore.getDefaultState()),
+		new Server("Ocean Odyssey", "\u00A73Deep sea \u00A7fexploration \u00A78\u00B7 \u00A7anew ruins", "254", 3, ShowTheme.DIAMOND, Blocks.lapis_block.getDefaultState()),
+		new Server("Cherry Grove", "\u00A7dChill SMP \u00A78\u00B7 \u00A7awhitelist open", "96", 5, ShowTheme.AMETHYST, Blocks.wool.getDefaultState().withProperty(BlockColored.COLOR, EnumDyeColor.PINK)),
+		new Server("Bed Brawl", "\u00A7cBed wars \u00A78\u00B7 \u00A7f4v4v4v4", "1,768", 2, ShowTheme.REDSTONE, Blocks.tnt.getDefaultState()),
+		new Server("End City", "\u00A75The End \u00A78\u00B7 \u00A7felytra races", "403", 4, ShowTheme.AMETHYST, Blocks.end_stone.getDefaultState()),
+		new Server("Builders Guild", "\u00A76Creative \u00A78\u00B7 \u00A7fmonthly contests", "731", 5, ShowTheme.GOLD, Blocks.crafting_table.getDefaultState())
 	);
 
 	private final Node[]       rows;

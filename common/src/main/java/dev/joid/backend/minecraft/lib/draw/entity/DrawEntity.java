@@ -24,12 +24,12 @@ import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.entity.Render;
-import net.minecraft.client.renderer.entity.RenderLivingBase;
 import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.client.renderer.entity.RendererLivingEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class DrawEntity {
@@ -37,7 +37,7 @@ public final class DrawEntity {
 	private static final DrawEntity INSTANCE = new DrawEntity();
 
 	private static final ModelPlayer PLAYER     = new ModelPlayer(0F, false);
-	private static final Method      PRE_RENDER = ObfuscationReflectionHelper.findMethod(RenderLivingBase.class, "func_77041_b", void.class, EntityLivingBase.class, float.class);
+	private static final Method      PRE_RENDER = ReflectionHelper.findMethod(RendererLivingEntity.class, null, new String[] {"preRenderCallback", "func_77041_b"}, EntityLivingBase.class, float.class);
 
 	public static @NonNull DrawEntity inst() {
 		return DrawEntity.INSTANCE;
@@ -136,11 +136,11 @@ public final class DrawEntity {
 	private static double[] getExtent(final Entity entity) {
 		final double[] extent = {1.75D * entity.width / 2D, entity.height / 2D, entity.height / 2D};
 		final Render<Entity> render = Minecraft.getMinecraft().getRenderManager().getEntityRenderObject(entity);
-		if (!(render instanceof RenderLivingBase) || entity.height <= 0F) {
+		if (!(render instanceof RendererLivingEntity) || entity.height <= 0F) {
 			return extent;
 		}
 
-		final ModelBase model = ((RenderLivingBase<?>) render).getMainModel();
+		final ModelBase model = ((RendererLivingEntity<?>) render).getMainModel();
 		model.setRotationAngles(0F, 0F, entity.ticksExisted, 0F, 0F, 0.0625F, entity);
 		final Set<ModelRenderer> children = new HashSet<>();
 		for (final ModelRenderer part : model.boxList) {
@@ -160,7 +160,7 @@ public final class DrawEntity {
 			return extent;
 		}
 
-		final double scale = DrawEntity.getRenderScale((RenderLivingBase<?>) render, (EntityLivingBase) entity);
+		final double scale = DrawEntity.getRenderScale((RendererLivingEntity<?>) render, (EntityLivingBase) entity);
 		final double top = scale * (1.5078125D - bounds[1]);
 		final double bottom = scale * (1.5078125D - bounds[2]);
 		extent[0] = scale * bounds[0];
@@ -169,7 +169,7 @@ public final class DrawEntity {
 		return extent;
 	}
 
-	private static double getRenderScale(final RenderLivingBase<?> render, final EntityLivingBase entity) {
+	private static double getRenderScale(final RendererLivingEntity<?> render, final EntityLivingBase entity) {
 		final FloatBuffer matrix = BufferUtils.createFloatBuffer(16);
 		GlStateManager.pushMatrix();
 		try {
@@ -216,7 +216,7 @@ public final class DrawEntity {
 	private static void render(final RenderManager manager, final Entity entity) {
 		manager.setRenderShadow(false);
 		try {
-			manager.renderEntity(entity, 0D, 0D, 0D, 0F, 1F, false);
+			manager.doRenderEntity(entity, 0D, 0D, 0D, 0F, 1F, false);
 		} finally {
 			manager.setRenderShadow(true);
 		}

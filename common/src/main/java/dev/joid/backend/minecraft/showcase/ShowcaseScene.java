@@ -23,12 +23,10 @@ import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentData;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.init.Blocks;
-import net.minecraft.init.Enchantments;
 import net.minecraft.init.Items;
-import net.minecraft.item.ItemEnchantedBook;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.GameType;
+import net.minecraft.util.BlockPos;
+import net.minecraft.world.WorldSettings;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public enum ShowcaseScene {
@@ -64,40 +62,40 @@ public enum ShowcaseScene {
 		ShowcaseDirector.command("time set 4000");
 		ShowcaseDirector.command("weather clear 1000000");
 		ShowcaseDirector.runOnServer(player -> {
-			player.setGameType(GameType.SURVIVAL);
+			player.setGameType(WorldSettings.GameType.SURVIVAL);
 			player.clearActivePotions();
 			player.experienceLevel = 27;
 			player.experience      = 62F / player.xpBarCap();
 			player.addExperienceLevel(0);
 			final String spot = System.getProperty("joid.showcase.spot");
 			final double[] place = spot == null ? new double[] {player.posX, player.posZ, 180D, 6D} : Arrays.stream(spot.split(" ")).mapToDouble(Double::parseDouble).toArray();
-			final int ground = player.world.getTopSolidOrLiquidBlock(new BlockPos(place[0], 0D, place[1])).getY();
-			player.connection.setPlayerLocation(place[0], ground + 0.01D, place[1], (float) place[2], (float) place[3]);
+			final int ground = player.worldObj.getTopSolidOrLiquidBlock(new BlockPos(place[0], 0D, place[1])).getY();
+			player.playerNetServerHandler.setPlayerLocation(place[0], ground + 0.01D, place[1], (float) place[2], (float) place[3]);
 			final InventoryPlayer inventory = player.inventory;
 			for (int slot = 0; slot < inventory.getSizeInventory(); slot++) {
-				inventory.setInventorySlotContents(slot, ItemStack.EMPTY);
+				inventory.setInventorySlotContents(slot, null);
 			}
-			inventory.setInventorySlotContents(0, ShowcaseScene.enchant(new ItemStack(Items.DIAMOND_SWORD), Enchantments.SHARPNESS, 5));
-			inventory.setInventorySlotContents(1, ShowcaseScene.enchant(new ItemStack(Items.DIAMOND_PICKAXE), Enchantments.EFFICIENCY, 4));
-			inventory.setInventorySlotContents(2, new ItemStack(Items.IRON_AXE));
-			inventory.setInventorySlotContents(3, new ItemStack(Items.BOW));
-			inventory.setInventorySlotContents(4, new ItemStack(Items.COOKED_BEEF, 24));
-			inventory.setInventorySlotContents(5, new ItemStack(Blocks.TORCH, 64));
-			inventory.setInventorySlotContents(6, new ItemStack(Blocks.PLANKS, 64));
-			inventory.setInventorySlotContents(7, new ItemStack(Items.WATER_BUCKET));
-			inventory.setInventorySlotContents(8, new ItemStack(Items.MAP));
-			inventory.setInventorySlotContents(9, new ItemStack(Items.ARROW, 48));
-			inventory.setInventorySlotContents(10, new ItemStack(Blocks.COBBLESTONE, 64));
-			inventory.setInventorySlotContents(11, new ItemStack(Items.IRON_INGOT, 21));
-			inventory.setInventorySlotContents(14, new ItemStack(Items.REDSTONE, 37));
-			inventory.setInventorySlotContents(18, new ItemStack(Items.IRON_CHESTPLATE));
-			inventory.setInventorySlotContents(22, new ItemStack(Blocks.GLASS, 32));
-			inventory.setInventorySlotContents(27, new ItemStack(Items.WHEAT_SEEDS, 12));
-			inventory.setInventorySlotContents(31, new ItemStack(Items.DYE, 18, 4));
+			inventory.setInventorySlotContents(0, ShowcaseScene.enchant(new ItemStack(Items.diamond_sword), Enchantment.sharpness, 5));
+			inventory.setInventorySlotContents(1, ShowcaseScene.enchant(new ItemStack(Items.diamond_pickaxe), Enchantment.efficiency, 4));
+			inventory.setInventorySlotContents(2, new ItemStack(Items.iron_axe));
+			inventory.setInventorySlotContents(3, new ItemStack(Items.bow));
+			inventory.setInventorySlotContents(4, new ItemStack(Items.cooked_beef, 24));
+			inventory.setInventorySlotContents(5, new ItemStack(Blocks.torch, 64));
+			inventory.setInventorySlotContents(6, new ItemStack(Blocks.planks, 64));
+			inventory.setInventorySlotContents(7, new ItemStack(Items.water_bucket));
+			inventory.setInventorySlotContents(8, new ItemStack(Items.map));
+			inventory.setInventorySlotContents(9, new ItemStack(Items.arrow, 48));
+			inventory.setInventorySlotContents(10, new ItemStack(Blocks.cobblestone, 64));
+			inventory.setInventorySlotContents(11, new ItemStack(Items.iron_ingot, 21));
+			inventory.setInventorySlotContents(14, new ItemStack(Items.redstone, 37));
+			inventory.setInventorySlotContents(18, new ItemStack(Items.iron_chestplate));
+			inventory.setInventorySlotContents(22, new ItemStack(Blocks.glass, 32));
+			inventory.setInventorySlotContents(27, new ItemStack(Items.wheat_seeds, 12));
+			inventory.setInventorySlotContents(31, new ItemStack(Items.dye, 18, 4));
 			inventory.currentItem = 0;
 			player.inventoryContainer.detectAndSendChanges();
 		});
-		ShowcaseDirector.runOnClient(() -> Minecraft.getMinecraft().player.inventory.currentItem = 0);
+		ShowcaseDirector.runOnClient(() -> Minecraft.getMinecraft().thePlayer.inventory.currentItem = 0);
 		ShowcaseDirector.waitForWorld();
 		ShowcaseDirector.runOnServer(player -> {
 			player.setHealth(15F);
@@ -117,7 +115,7 @@ public enum ShowcaseScene {
 		ShowcaseDirector.frames(10);
 		ShowcaseDirector.runOnClient(ShowcaseScene::openHud);
 		ShowcaseDirector.frames(40);
-		final EntityPlayerSP player = ShowcaseDirector.computeOnClient(() -> Minecraft.getMinecraft().player);
+		final EntityPlayerSP player = ShowcaseDirector.computeOnClient(() -> Minecraft.getMinecraft().thePlayer);
 		final float experience = player.experience;
 		ShowcaseDirector.animate(24, progress -> player.experience = (float) (experience + (1D - experience) * progress));
 		ShowcaseDirector.runOnClient(() -> {
@@ -147,36 +145,36 @@ public enum ShowcaseScene {
 		ShowcaseDirector.begin("chest");
 		ShowcaseDirector.frames(5);
 		ShowcaseDirector.runOnServer(player -> {
-			final ItemStack book = new ItemStack(Items.ENCHANTED_BOOK);
-			ItemEnchantedBook.addEnchantment(book, new EnchantmentData(Enchantments.PROTECTION, 4));
+			final ItemStack book = new ItemStack(Items.enchanted_book);
+			Items.enchanted_book.addEnchantment(book, new EnchantmentData(Enchantment.protection, 4));
 			final ItemStack[] items = {
-				ShowcaseScene.enchant(new ItemStack(Items.DIAMOND_SWORD), Enchantments.SHARPNESS, 5),
-				new ItemStack(Items.GOLDEN_APPLE, 6),
-				new ItemStack(Items.ENDER_PEARL, 16),
-				new ItemStack(Items.EMERALD, 48),
-				new ItemStack(Items.DIAMOND, 12),
-				new ItemStack(Items.GOLDEN_APPLE, 1, 1),
-				new ItemStack(Items.EXPERIENCE_BOTTLE, 32),
-				new ItemStack(Items.NAME_TAG),
-				new ItemStack(Items.NETHER_STAR),
-				new ItemStack(Items.IRON_INGOT, 64),
-				new ItemStack(Items.GOLD_INGOT, 40),
+				ShowcaseScene.enchant(new ItemStack(Items.diamond_sword), Enchantment.sharpness, 5),
+				new ItemStack(Items.golden_apple, 6),
+				new ItemStack(Items.ender_pearl, 16),
+				new ItemStack(Items.emerald, 48),
+				new ItemStack(Items.diamond, 12),
+				new ItemStack(Items.golden_apple, 1, 1),
+				new ItemStack(Items.experience_bottle, 32),
+				new ItemStack(Items.name_tag),
+				new ItemStack(Items.nether_star),
+				new ItemStack(Items.iron_ingot, 64),
+				new ItemStack(Items.gold_ingot, 40),
 				book,
-				ItemStack.EMPTY,
-				new ItemStack(Items.BREAD, 32),
-				ItemStack.EMPTY,
-				new ItemStack(Items.QUARTZ, 23),
-				new ItemStack(Blocks.LOG, 64),
-				new ItemStack(Items.CLOCK),
-				new ItemStack(Items.COMPASS),
-				ItemStack.EMPTY,
-				new ItemStack(Items.CAKE),
-				new ItemStack(Items.SADDLE),
-				ItemStack.EMPTY,
-				new ItemStack(Items.FIREWORKS, 64),
-				new ItemStack(Items.DIAMOND_CHESTPLATE),
-				ItemStack.EMPTY,
-				new ItemStack(Items.ENDER_EYE)
+				null,
+				new ItemStack(Items.bread, 32),
+				null,
+				new ItemStack(Items.quartz, 23),
+				new ItemStack(Blocks.log, 64),
+				new ItemStack(Items.clock),
+				new ItemStack(Items.compass),
+				null,
+				new ItemStack(Items.cake),
+				new ItemStack(Items.saddle),
+				null,
+				new ItemStack(Items.fireworks, 64),
+				new ItemStack(Items.diamond_chestplate),
+				null,
+				new ItemStack(Items.ender_eye)
 			};
 			for (int index = 0; index < items.length; index++) {
 				ShowcaseLauncher.STORAGE.setInventorySlotContents(index, items[index]);
@@ -201,7 +199,7 @@ public enum ShowcaseScene {
 		ShowcaseDirector.frames(25);
 		ShowcaseDirector.end();
 		ShowcaseDirector.hidePointer();
-		ShowcaseDirector.runOnClient(() -> Minecraft.getMinecraft().player.closeScreen());
+		ShowcaseDirector.runOnClient(() -> Minecraft.getMinecraft().thePlayer.closeScreen());
 		ShowcaseDirector.frames(5);
 	}
 
@@ -211,7 +209,7 @@ public enum ShowcaseScene {
 		ShowcaseDirector.frames(5);
 		ShowcaseDirector.runOnServer(player -> {
 			final ItemStack sword = player.inventory.getStackInSlot(0);
-			player.inventory.setInventorySlotContents(0, ItemStack.EMPTY);
+			player.inventory.setInventorySlotContents(0, null);
 			ShowcaseLauncher.ANVIL.open(player);
 			player.openContainer.getSlot(ShowAnvil.INPUT_SLOT).putStack(sword);
 			player.openContainer.detectAndSendChanges();
@@ -240,10 +238,10 @@ public enum ShowcaseScene {
 		ShowcaseDirector.frames(30);
 		ShowcaseDirector.end();
 		ShowcaseDirector.hidePointer();
-		ShowcaseDirector.runOnClient(() -> Minecraft.getMinecraft().player.closeScreen());
+		ShowcaseDirector.runOnClient(() -> Minecraft.getMinecraft().thePlayer.closeScreen());
 		ShowcaseDirector.frames(5);
 		ShowcaseDirector.runOnServer(player -> {
-			player.inventory.setInventorySlotContents(0, ShowcaseScene.enchant(new ItemStack(Items.DIAMOND_SWORD), Enchantments.SHARPNESS, 5));
+			player.inventory.setInventorySlotContents(0, ShowcaseScene.enchant(new ItemStack(Items.diamond_sword), Enchantment.sharpness, 5));
 			player.experienceLevel = 27;
 			player.experience      = 62F / player.xpBarCap();
 			player.addExperienceLevel(0);

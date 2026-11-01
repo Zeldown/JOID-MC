@@ -28,7 +28,7 @@ public class UIDemoContainer extends ContainerUI<DemoContainer> {
 		super(container);
 		super.beforeClose(event -> {
 			event.cancel();
-			Minecraft.getMinecraft().player.closeScreen();
+			Minecraft.getMinecraft().thePlayer.closeScreen();
 			JOID.open(UIDemoChoice.getMenu().get());
 		});
 	}

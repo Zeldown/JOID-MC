@@ -66,7 +66,7 @@ public final class OverlayUIBridge extends BaseOverlayUIBridge<Void, OverlayLaye
 	@Override
 	protected boolean isHudHidden() {
 		final Minecraft minecraft = Minecraft.getMinecraft();
-		return minecraft.gameSettings.hideGUI && minecraft.world != null && minecraft.currentScreen == null;
+		return minecraft.gameSettings.hideGUI && minecraft.theWorld != null && minecraft.currentScreen == null;
 	}
 
 	@Override

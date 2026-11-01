@@ -22,14 +22,12 @@ public class ItemNode extends Node {
 	private boolean count;
 	private Boolean glint;
 	private boolean tooltip;
-	private boolean cooldown;
 
 	protected ItemNode(final double x, final double y, final double width, final double height) {
 		super(x, y, width, height);
 
-		this.count    = true;
-		this.bar      = true;
-		this.cooldown = true;
+		this.count = true;
+		this.bar   = true;
 
 		super.<ItemNode>require("stack", "call stack(...) before attaching it", node -> node.stack != null);
 	}
@@ -46,10 +44,6 @@ public class ItemNode extends Node {
 		DrawItem.inst().drawItem(x, y, size, this.stack, this.glint);
 		if (this.bar) {
 			DrawItem.inst().drawItemBar(x, y, size, this.stack);
-		}
-
-		if (this.cooldown) {
-			DrawItem.inst().drawItemCooldown(x, y, size, this.stack);
 		}
 
 		if (this.count) {
@@ -103,17 +97,9 @@ public class ItemNode extends Node {
 		});
 	}
 
-	public final <T extends ItemNode> @NonNull T cooldown(final boolean cooldown) {
-		return this.cooldown(Signal.from(cooldown));
-	}
-
-	public final <T extends ItemNode> @NonNull T cooldown(final @NonNull Supplier<Boolean> cooldown) {
-		return super.follow("cooldown", cooldown, value -> this.cooldown = value);
-	}
-
 	private void drawTooltip(final double mouseX, final double mouseY) {
 		final UI ui = super.getUi();
-		if (!this.stack.isEmpty() && ui != null) {
+		if (this.stack.getItem() != null && ui != null) {
 			ui.drawHover(this.stack, mouseX, mouseY);
 		}
 	}

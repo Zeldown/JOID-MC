@@ -6,9 +6,9 @@ import dev.joid.lib.font.converter.ITextConverter;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.ChatStyle;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.IChatComponent;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ChatTextConverter implements ITextConverter {
@@ -21,29 +21,29 @@ public final class ChatTextConverter implements ITextConverter {
 
 	@Override
 	public boolean supports(final @NonNull Object text) {
-		return text instanceof ITextComponent;
+		return text instanceof IChatComponent;
 	}
 
 	@Override
 	public @NonNull String convert(final @NonNull Object text) {
 		final StringBuilder converted = new StringBuilder();
 		final StringBuilder codes = new StringBuilder();
-		for (final ITextComponent component : (ITextComponent) text) {
-			final String next = ChatTextConverter.codes(component.getStyle());
+		for (final IChatComponent component : (IChatComponent) text) {
+			final String next = ChatTextConverter.codes(component.getChatStyle());
 			if (!next.contentEquals(codes)) {
 				converted.append(LegacyTextMarkup.PREFIX).append('r').append(next);
 				codes.setLength(0);
 				codes.append(next);
 			}
 
-			converted.append(component.getUnformattedComponentText());
+			converted.append(component.getUnformattedTextForChat());
 		}
 		return converted.toString();
 	}
 
-	private static @NonNull String codes(final Style style) {
+	private static @NonNull String codes(final ChatStyle style) {
 		final StringBuilder codes = new StringBuilder();
-		final TextFormatting formatting = style.getColor();
+		final EnumChatFormatting formatting = style.getColor();
 		final LegacyTextColor color = formatting != null && formatting.isColor() ? LegacyTextColor.byCode(Character.forDigit(formatting.getColorIndex(), 16)) : null;
 		if (color != null) {
 			codes.append(LegacyTextMarkup.PREFIX).append(color.getCode());

@@ -40,7 +40,7 @@ public final class TooltipRenderer {
 		}
 
 		private void drawLines(final List<String> lines, final int mouseX, final int mouseY) {
-			super.drawHoveringText(lines, mouseX, mouseY, super.fontRenderer);
+			super.drawHoveringText(lines, mouseX, mouseY, super.fontRendererObj);
 		}
 
 	}

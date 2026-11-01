@@ -43,9 +43,9 @@ public class ShowQuests extends UI implements IShowFocus {
 				TextNode.create(90, 22).text(Text.create("Resets in 04:12", ShowTheme.font(FontWeight.BOLD, 16F, ShowTheme.MUTED)).alignX(Align.CENTER)).anchorX(Align.CENTER).anchorY(Align.CENTER).attach(timer);
 			})
 			.attach(panel);
-			this.quest(panel, 160, Items.DIAMOND, ShowTheme.DIAMOND, "Mine 16 Diamonds", 11, 16, 12);
-			this.quest(panel, 292, Items.BREAD, ShowTheme.GOLD, "Bake 32 Bread", 32, 32, 6);
-			this.quest(panel, 424, Items.IRON_PICKAXE, ShowTheme.AMETHYST, "Craft an Iron Pickaxe", 0, 1, 4);
+			this.quest(panel, 160, Items.diamond, ShowTheme.DIAMOND, "Mine 16 Diamonds", 11, 16, 12);
+			this.quest(panel, 292, Items.bread, ShowTheme.GOLD, "Bake 32 Bread", 32, 32, 6);
+			this.quest(panel, 424, Items.iron_pickaxe, ShowTheme.AMETHYST, "Craft an Iron Pickaxe", 0, 1, 4);
 			TextNode.create(56, 576).text(Text.create("WEEKLY STREAK", ShowTheme.font(FontWeight.BOLD, 13F, ShowTheme.FAINT))).attach(panel);
 			for (int day = 0; day < 7; day++) {
 				final boolean done = day < 5;
@@ -90,7 +90,7 @@ public class ShowQuests extends UI implements IShowFocus {
 			.color(ShowTheme.EMERALD.withAlpha(0.14F))
 			.effect(RoundedNodeEffect.create(24F))
 			.body(chip -> {
-				ItemNode.create(12, 8, 32, 32).stack(new ItemStack(Items.EMERALD)).attach(chip);
+				ItemNode.create(12, 8, 32, 32).stack(new ItemStack(Items.emerald)).attach(chip);
 				TextNode.create(52, 24).text(Text.create(String.valueOf(reward), ShowTheme.font(FontWeight.BOLD, 20F, ShowTheme.TEXT))).anchorY(Align.CENTER).attach(chip);
 			})
 			.attach(row);

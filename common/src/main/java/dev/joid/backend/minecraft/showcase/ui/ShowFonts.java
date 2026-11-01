@@ -20,10 +20,10 @@ import dev.joid.lib.ui.node.impl.layout.ContainerNode;
 import dev.joid.lib.ui.node.impl.shape.RectNode;
 import dev.joid.lib.ui.node.impl.text.TextNode;
 import dev.joid.lib.utils.align.Align;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatStyle;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.IChatComponent;
 
 @UIDataMinecraft(pause = false)
 public class ShowFonts extends UI {
@@ -77,7 +77,7 @@ public class ShowFonts extends UI {
 
 	private void styles(final Node container) {
 		final TextInfo info = TextInfo.create(MinecraftFont.DEFAULT, 24F).color(ShowTheme.TEXT).shadow(3F, 3F);
-		final ITextComponent chat = new TextComponentString("").appendSibling(new TextComponentString("[").setStyle(new Style().setColor(TextFormatting.DARK_GRAY))).appendSibling(new TextComponentString("Server").setStyle(new Style().setColor(TextFormatting.GOLD).setBold(true))).appendSibling(new TextComponentString("] ").setStyle(new Style().setColor(TextFormatting.DARK_GRAY))).appendSibling(new TextComponentString("Welcome back, ").setStyle(new Style().setColor(TextFormatting.WHITE))).appendSibling(new TextComponentString("Steve").setStyle(new Style().setColor(TextFormatting.AQUA))).appendSibling(new TextComponentString("!").setStyle(new Style().setColor(TextFormatting.WHITE)));
+		final IChatComponent chat = new ChatComponentText("").appendSibling(new ChatComponentText("[").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.DARK_GRAY))).appendSibling(new ChatComponentText("Server").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.GOLD).setBold(true))).appendSibling(new ChatComponentText("] ").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.DARK_GRAY))).appendSibling(new ChatComponentText("Welcome back, ").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.WHITE))).appendSibling(new ChatComponentText("Steve").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.AQUA))).appendSibling(new ChatComponentText("!").setChatStyle(new ChatStyle().setColor(EnumChatFormatting.WHITE)));
 
 		ShowTheme
 		.panel(900, 120, 900, 840)

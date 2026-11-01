@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,8 +25,6 @@ import java.util.function.DoubleConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.imageio.ImageIO;
-
 import org.lwjgl.opengl.Display;
 
 import dev.joid.backend.minecraft.MinecraftBackend;
@@ -35,16 +34,13 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiMainMenu;
-import net.minecraft.client.tutorial.TutorialSteps;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ScreenShotHelper;
 import net.minecraft.world.EnumDifficulty;
-import net.minecraft.world.GameType;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
@@ -66,7 +62,7 @@ public final class ShowcaseDirector {
 	public static void start() {
 		final Minecraft minecraft = Minecraft.getMinecraft();
 		minecraft.gameSettings.pauseOnLostFocus = false;
-		minecraft.getTutorial().setStep(TutorialSteps.NONE);
+		minecraft.gameSettings.showInventoryAchievementHint = false;
 		minecraft.gameSettings.limitFramerate = 260;
 		minecraft.gameSettings.renderDistanceChunks = 16;
 		minecraft.gameSettings.viewBobbing = false;
@@ -185,7 +181,7 @@ public final class ShowcaseDirector {
 
 	public static void command(final String command) {
 		ShowcaseDirector.computeOnServer(player -> {
-			final MinecraftServer server = player.getServer();
+			final MinecraftServer server = player.mcServer;
 			server.getCommandManager().executeCommand(server, command);
 			return null;
 		});
@@ -202,7 +198,7 @@ public final class ShowcaseDirector {
 		final CompletableFuture<T> future = new CompletableFuture<>();
 		ShowcaseDirector.SERVER_TASKS.add(() -> {
 			try {
-				future.complete(function.apply(FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getPlayers().get(0)));
+				future.complete(function.apply(MinecraftServer.getServer().getConfigurationManager().playerEntityList.get(0)));
 			} catch (final RuntimeException exception) {
 				future.completeExceptionally(exception);
 			}
@@ -271,8 +267,8 @@ public final class ShowcaseDirector {
 		ShowcaseDirector.window = ShowcaseDirector.xdotool("search", "--sync", "--limit", "1", "--name", "^Minecraft").trim();
 		ShowcaseDirector.xdotool("windowfocus", "--sync", ShowcaseDirector.window);
 		ShowcaseDirector.xdotool("windowmove", "--sync", ShowcaseDirector.window, "0", "0");
-		ShowcaseDirector.runOnClient(() -> Minecraft.getMinecraft().launchIntegratedServer("joid-showcase", "joid-showcase", new WorldSettings(Long.parseLong(System.getProperty("joid.showcase.seed", "1700")), GameType.SURVIVAL, true, false, WorldType.DEFAULT)));
-		ShowcaseDirector.waitFor("the singleplayer world", () -> Minecraft.getMinecraft().player != null && Minecraft.getMinecraft().world != null, 900);
+		ShowcaseDirector.runOnClient(() -> Minecraft.getMinecraft().launchIntegratedServer("joid-showcase", "joid-showcase", new WorldSettings(Long.parseLong(System.getProperty("joid.showcase.seed", "1700")), WorldSettings.GameType.SURVIVAL, true, false, WorldType.DEFAULT)));
+		ShowcaseDirector.waitFor("the singleplayer world", () -> Minecraft.getMinecraft().thePlayer != null && Minecraft.getMinecraft().theWorld != null, 900);
 		ShowcaseDirector.runOnClient(() -> Minecraft.getMinecraft().displayGuiScreen(null));
 		ShowcaseDirector.waitFor("the game without screen", () -> Minecraft.getMinecraft().currentScreen == null, 60);
 		ShowcaseDirector.runOnClient(() -> {
@@ -307,13 +303,14 @@ public final class ShowcaseDirector {
 
 	private static void write(final String name) {
 		final Minecraft minecraft = Minecraft.getMinecraft();
-		final File path = new File(System.getProperty("joid.showcase.output", new File(minecraft.gameDir, "showcase").getPath()), name);
+		final File path = new File(System.getProperty("joid.showcase.output", new File(minecraft.mcDataDir, "showcase").getPath()), name);
 		try {
 			Files.createDirectories(path.getParentFile().toPath());
 			Files.write(new File(path.getPath() + ".json").toPath(), String.format(Locale.ROOT, "{\"mouse\": [%.2f, %.2f], \"pressed\": %b, \"visible\": %b}", ShowcaseDirector.mouseX, ShowcaseDirector.mouseY, ShowcaseDirector.pressed, ShowcaseDirector.pointer).getBytes(StandardCharsets.UTF_8));
 			final String command = System.getProperty("joid.showcase.capture");
 			if (command == null) {
-				ImageIO.write(ScreenShotHelper.createScreenshot(minecraft.displayWidth, minecraft.displayHeight, minecraft.getFramebuffer()), "png", new File(path.getPath() + ".png"));
+				ScreenShotHelper.saveScreenshot(path.getParentFile(), path.getName() + ".png", minecraft.displayWidth, minecraft.displayHeight, minecraft.getFramebuffer());
+				Files.move(new File(new File(path.getParentFile(), "screenshots"), path.getName() + ".png").toPath(), new File(path.getPath() + ".png").toPath(), StandardCopyOption.REPLACE_EXISTING);
 			} else {
 				final int code = new ProcessBuilder(command, path.getPath()).inheritIO().start().waitFor();
 				if (code != 0) {

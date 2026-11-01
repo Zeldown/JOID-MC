@@ -20,7 +20,7 @@ public final class ForgeContainerTypeRegistry implements IGuiHandler {
 		}
 
 		NetworkRegistry.INSTANCE.registerGuiHandler(mod, new ForgeContainerTypeRegistry());
-		ContainerTypeRegistry.opener((type, player) -> player.openGui(mod, ContainerTypeRegistry.getRegistered().indexOf(type), player.world, 0, 0, 0));
+		ContainerTypeRegistry.opener((type, player) -> player.openGui(mod, ContainerTypeRegistry.getRegistered().indexOf(type), player.worldObj, 0, 0, 0));
 	}
 
 	@Override

@@ -20,7 +20,7 @@ public final class ForgeOverlayEvents {
 
 	@SubscribeEvent
 	public void pre(final RenderGameOverlayEvent.Pre event) {
-		final ElementType type = event.getType();
+		final ElementType type = event.type;
 		if (type == ElementType.ALL) {
 			this.cameraStarted = false;
 			return;
@@ -46,7 +46,7 @@ public final class ForgeOverlayEvents {
 
 	@SubscribeEvent
 	public void post(final RenderGameOverlayEvent.Post event) {
-		final ElementType type = event.getType();
+		final ElementType type = event.type;
 		if (type == ElementType.ALL) {
 			MinecraftOverlayEvents.fireHud();
 			return;
@@ -59,42 +59,37 @@ public final class ForgeOverlayEvents {
 	}
 
 	private static boolean isLast(final ElementType type) {
-		return type != ElementType.VIGNETTE && type != ElementType.HELMET;
+		return type != ElementType.HELMET;
 	}
 
 	private static OverlayLayer getLayer(final ElementType type) {
 		switch (type) {
-			case VIGNETTE:
 			case HELMET:
 			case PORTAL:
 				return OverlayLayer.CAMERA_OVERLAYS;
-			case CROSSHAIRS:
-				return OverlayLayer.CROSSHAIR;
 			case HOTBAR:
 				return OverlayLayer.HOTBAR;
-			case ARMOR:
-				return OverlayLayer.ARMOR;
+			case CROSSHAIRS:
+				return OverlayLayer.CROSSHAIR;
+			case BOSSHEALTH:
+				return OverlayLayer.BOSS_BAR;
 			case HEALTH:
 				return OverlayLayer.HEALTH;
+			case ARMOR:
+				return OverlayLayer.ARMOR;
 			case FOOD:
 				return OverlayLayer.FOOD;
-			case AIR:
-				return OverlayLayer.AIR;
 			case HEALTHMOUNT:
 				return OverlayLayer.MOUNT_HEALTH;
+			case AIR:
+				return OverlayLayer.AIR;
 			case EXPERIENCE:
 			case JUMPBAR:
 				return OverlayLayer.CONTEXTUAL_BAR;
-			case POTION_ICONS:
-				return OverlayLayer.EFFECTS;
-			case BOSSHEALTH:
-				return OverlayLayer.BOSS_BAR;
 			case CHAT:
 				return OverlayLayer.CHAT;
 			case PLAYER_LIST:
 				return OverlayLayer.PLAYER_LIST;
-			case SUBTITLES:
-				return OverlayLayer.SUBTITLES;
 			default:
 				return null;
 		}

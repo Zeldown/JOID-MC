@@ -52,8 +52,8 @@ public class EntityNode extends Node {
 	@Override
 	public void draw(final double mouseX, final double mouseY) {
 		final Minecraft minecraft = Minecraft.getMinecraft();
-		if (this.type != null && (this.entity == null || this.entity.world != minecraft.world)) {
-			this.entity = minecraft.world == null ? null : EntityList.newEntity(this.type, minecraft.world);
+		if (this.type != null && (this.entity == null || this.entity.worldObj != minecraft.theWorld)) {
+			this.entity = minecraft.theWorld == null ? null : EntityList.createEntityByName(EntityList.classToStringMapping.get(this.type), minecraft.theWorld);
 		}
 
 		final boolean follow = this.followMouse && super.getUi().isOnTop();

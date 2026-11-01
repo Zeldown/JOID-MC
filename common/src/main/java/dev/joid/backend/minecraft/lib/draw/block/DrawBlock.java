@@ -10,7 +10,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.util.EnumBlockRenderType;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class DrawBlock {
@@ -26,14 +25,14 @@ public final class DrawBlock {
 	}
 
 	public void drawBlock(final double x, final double y, final double size, final @NonNull IBlockState state, final double rotationYaw, final double rotationPitch) {
-		if (state.getRenderType() == EnumBlockRenderType.INVISIBLE) {
+		if (state.getBlock().getRenderType() == -1) {
 			return;
 		}
 
 		DrawUtils.RASTER.drawRaster(x, y, size, size, GuiDrawableRaster.of((width, height) -> {
 			final float scale = Math.min(width, height);
 			RenderHelper.enableGUIStandardItemLighting();
-			Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+			Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.locationBlocksTexture);
 			GlStateManager.translate(width / 2F, height / 2F, 0F);
 			GlStateManager.scale(scale, -scale, scale);
 			GlStateManager.rotate((float) rotationPitch, 1F, 0F, 0F);

@@ -22,13 +22,13 @@ import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 public class ContainerUIScreen<C extends Container> extends GuiContainer {
 
-	private static final Field HOVERED_SLOT   = ObfuscationReflectionHelper.findField(GuiContainer.class, "field_147006_u");
-	private static final Field DRAG_TYPE      = ObfuscationReflectionHelper.findField(GuiContainer.class, "field_146987_F");
-	private static final Field DRAG_REMAINDER = ObfuscationReflectionHelper.findField(GuiContainer.class, "field_146996_I");
+	private static final Field HOVERED_SLOT   = ReflectionHelper.findField(GuiContainer.class, "theSlot", "field_147006_u");
+	private static final Field DRAG_TYPE      = ReflectionHelper.findField(GuiContainer.class, "dragSplittingLimit", "field_146987_F");
+	private static final Field DRAG_REMAINDER = ReflectionHelper.findField(GuiContainer.class, "dragSplittingRemnant", "field_146996_I");
 
 	private final ContainerUIBridge bridge;
 	private final Set<Integer>      consumedButtons;
@@ -75,10 +75,10 @@ public class ContainerUIScreen<C extends Container> extends GuiContainer {
 		}
 
 		final SlotNode node = this.getHoveredSlotNode();
-		this.hoveredSlot = node != null && node.getSlot().isEnabled() ? node.getSlot() : null;
+		this.hoveredSlot = node != null && node.getSlot().canBeHovered() ? node.getSlot() : null;
 		ContainerUIScreen.write(ContainerUIScreen.HOVERED_SLOT, this, this.hoveredSlot);
 		this.bridge.frame(null, mouseX, mouseY);
-		if (super.mc.player.inventory.getItemStack().isEmpty() && this.hoveredSlot != null && this.hoveredSlot.getHasStack()) {
+		if (super.mc.thePlayer.inventory.getItemStack() == null && this.hoveredSlot != null && this.hoveredSlot.getHasStack()) {
 			TooltipRenderer.draw(this.hoveredSlot.getStack(), mouseX, mouseY);
 		}
 	}
@@ -141,7 +141,7 @@ public class ContainerUIScreen<C extends Container> extends GuiContainer {
 	@Override
 	protected boolean isPointInRegion(final int left, final int top, final int width, final int height, final int mouseX, final int mouseY) {
 		final SlotNode node = this.getHoveredSlotNode();
-		return node != null && node.getSlot().xPos == left && node.getSlot().yPos == top;
+		return node != null && node.getSlot().xDisplayPosition == left && node.getSlot().yDisplayPosition == top;
 	}
 
 	@Override

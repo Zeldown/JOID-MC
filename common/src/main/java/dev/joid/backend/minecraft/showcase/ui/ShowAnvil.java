@@ -24,9 +24,10 @@ import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.inventory.ContainerRepair;
 import net.minecraft.inventory.Slot;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.play.client.CPacketCustomPayload;
+import net.minecraft.network.play.client.C17PacketCustomPayload;
 
 @UIDataMinecraft
 public class ShowAnvil extends ContainerUI<ContainerRepair> implements IShowFocus {
@@ -34,6 +35,8 @@ public class ShowAnvil extends ContainerUI<ContainerRepair> implements IShowFocu
 	public static final int INPUT_SLOT      = 0;
 	public static final int ADDITIONAL_SLOT = 1;
 	public static final int RESULT_SLOT     = 2;
+
+	private static final ItemStack EMPTY = new ItemStack((Item) null);
 
 	private final StringSignal   name;
 	private final List<SlotNode> slotNodes;
@@ -63,7 +66,7 @@ public class ShowAnvil extends ContainerUI<ContainerRepair> implements IShowFocu
 		.body(panel -> {
 			this.preview(panel);
 			TextNode.create(380, 44).text(Text.create("Anvil", ShowTheme.font(FontWeight.EXTRA_BOLD, 34F, ShowTheme.TEXT))).attach(panel);
-			TextNode.create(1160, 62).text(Text.create(() -> "Level " + Minecraft.getMinecraft().player.experienceLevel, ShowTheme.font(FontWeight.SEMI_BOLD, 16F, ShowTheme.GRASS)).alignX(Align.END)).anchorX(Align.END).attach(panel);
+			TextNode.create(1160, 62).text(Text.create(() -> "Level " + Minecraft.getMinecraft().thePlayer.experienceLevel, ShowTheme.font(FontWeight.SEMI_BOLD, 16F, ShowTheme.GRASS)).alignX(Align.END)).anchorX(Align.END).attach(panel);
 			TextNode.create(380, 104).text(Text.create("ITEM NAME", ShowTheme.label(14F, ShowTheme.FAINT))).attach(panel);
 			this.field = ShowFieldNode
 			.create(380, 128, 780, ShowTheme.GRASS)
@@ -105,7 +108,7 @@ public class ShowAnvil extends ContainerUI<ContainerRepair> implements IShowFocu
 			CircleNode.create(40, 100, 220).color(ShowTheme.DIAMOND.withAlpha(0.20F)).effect(BlurNodeEffect.create(40F)).interactive(false).attach(card);
 			ItemNode.create(70, 130, 160, 160).stack(this::item).glint(true).interactive(false).y(() -> 130D + 6D * Math.sin(this.elapsed() * 2D)).attach(card);
 			TextNode.create(150, 360).text(Text.create(this::title, TextInfo.create(MinecraftFont.DEFAULT, 16F).color(ShowTheme.TEXT).shadow(2F, 2F)).alignX(Align.CENTER)).anchorX(Align.CENTER).attach(card);
-			TextNode.create(150, 400).text(Text.create("\u00A77Sharpness V", TextInfo.create(MinecraftFont.DEFAULT, 16F).color(ShowTheme.TEXT).shadow(2F, 2F)).alignX(Align.CENTER)).anchorX(Align.CENTER).visible(() -> !this.item().isEmpty()).attach(card);
+			TextNode.create(150, 400).text(Text.create("\u00A77Sharpness V", TextInfo.create(MinecraftFont.DEFAULT, 16F).color(ShowTheme.TEXT).shadow(2F, 2F)).alignX(Align.CENTER)).anchorX(Align.CENTER).visible(() -> this.item().getItem() != null).attach(card);
 			RectNode.create(28, 480, 244, 1).color(Color.WHITE.withAlpha(0.08F)).attach(card);
 			TextNode.create(28, 504).text(Text.create("COST", ShowTheme.label(12F, ShowTheme.FAINT))).attach(card);
 			TextNode.create(28, 528).text(() -> Text.create(this.cost(), ShowTheme.font(FontWeight.EXTRA_BOLD, 26F, super.getContainer().maximumCost >= 40 ? ShowTheme.REDSTONE : ShowTheme.TEXT))).attach(card);
@@ -144,7 +147,7 @@ public class ShowAnvil extends ContainerUI<ContainerRepair> implements IShowFocu
 			.hoveredColor(Color.WHITE.withAlpha(0.16F))
 			.body(tile -> {
 				if (hotbar) {
-					RectNode.create(0, 0, 81, 81).color(ShowTheme.GRASS.withAlpha(0.14F)).visible(() -> Minecraft.getMinecraft().player.inventory.currentItem == slot - 30).effect(RoundedNodeEffect.create(16F)).interactive(false).attach(tile);
+					RectNode.create(0, 0, 81, 81).color(ShowTheme.GRASS.withAlpha(0.14F)).visible(() -> Minecraft.getMinecraft().thePlayer.inventory.currentItem == slot - 30).effect(RoundedNodeEffect.create(16F)).interactive(false).attach(tile);
 				}
 
 				final SlotNode node = SlotNode.create(4, 4, 73, 73).slot(super.getContainer().getSlot(slot)).hoveredColor((Color) null);
@@ -159,7 +162,7 @@ public class ShowAnvil extends ContainerUI<ContainerRepair> implements IShowFocu
 		final ItemStack stack = super.getContainer().getSlot(ShowAnvil.INPUT_SLOT).getStack();
 		if (stack != this.input) {
 			this.input = stack;
-			this.name.set(stack.isEmpty() ? "" : stack.getDisplayName());
+			this.name.set(stack == null ? "" : stack.getDisplayName());
 		}
 	}
 
@@ -171,18 +174,18 @@ public class ShowAnvil extends ContainerUI<ContainerRepair> implements IShowFocu
 
 		final String name = !slot.getStack().hasDisplayName() && text.equals(slot.getStack().getDisplayName()) ? "" : text;
 		super.getContainer().updateItemName(name);
-		Minecraft.getMinecraft().player.connection.sendPacket(new CPacketCustomPayload("MC|ItemName", new PacketBuffer(Unpooled.buffer()).writeString(name)));
+		Minecraft.getMinecraft().thePlayer.sendQueue.addToSendQueue(new C17PacketCustomPayload("MC|ItemName", new PacketBuffer(Unpooled.buffer()).writeString(name)));
 	}
 
 	private ItemStack item() {
 		final ItemStack result = super.getContainer().getSlot(ShowAnvil.RESULT_SLOT).getStack();
 		final ItemStack input = super.getContainer().getSlot(ShowAnvil.INPUT_SLOT).getStack();
-		return !result.isEmpty() ? result : input;
+		return result != null ? result : input != null ? input : ShowAnvil.EMPTY;
 	}
 
 	private String title() {
 		final ItemStack input = super.getContainer().getSlot(ShowAnvil.INPUT_SLOT).getStack();
-		if (input.isEmpty()) {
+		if (input == null) {
 			return "\u00A77No item";
 		}
 

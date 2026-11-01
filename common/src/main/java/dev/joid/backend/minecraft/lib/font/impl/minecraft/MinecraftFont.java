@@ -18,7 +18,7 @@ public final class MinecraftFont extends BitmapFont<MinecraftFontFace> {
 	public static final float SIZE = 8F;
 
 	public static final MinecraftFont ALT     = new MinecraftFont(new ResourceLocation("textures/font/ascii_sga.png"), () -> Minecraft.getMinecraft().standardGalacticFontRenderer);
-	public static final MinecraftFont DEFAULT = new MinecraftFont(new ResourceLocation("textures/font/ascii.png"), () -> Minecraft.getMinecraft().fontRenderer);
+	public static final MinecraftFont DEFAULT = new MinecraftFont(new ResourceLocation("textures/font/ascii.png"), () -> Minecraft.getMinecraft().fontRendererObj);
 
 	private final ResourceLocation texture;
 

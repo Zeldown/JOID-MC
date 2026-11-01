@@ -30,7 +30,7 @@ public final class ForgePayloads {
 		}
 
 		final SimpleNetworkWrapper channel = NetworkRegistry.INSTANCE.newSimpleChannel(MinecraftJoid.MOD_ID);
-		channel.registerMessage((final PayloadMessage message, final MessageContext context) -> ForgePayloads.receive(message, context.getServerHandler().player), PayloadMessage.class, 0, Side.SERVER);
+		channel.registerMessage((final PayloadMessage message, final MessageContext context) -> ForgePayloads.receive(message, context.getServerHandler().playerEntity), PayloadMessage.class, 0, Side.SERVER);
 		PayloadType.sender(payload -> channel.sendToServer(new PayloadMessage(payload)));
 		MinecraftForge.EVENT_BUS.register(new ForgePayloads());
 	}

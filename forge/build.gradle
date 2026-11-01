@@ -129,7 +129,7 @@ processResources {
     ]
 
     inputs.properties(properties)
-    filesMatching(['mcmod.info', 'pack.mcmeta', 'dev/joid/backend/minecraft/backend.properties']) {
+    filesMatching(['mcmod.info', 'dev/joid/backend/minecraft/backend.properties']) {
         expand properties
     }
 }

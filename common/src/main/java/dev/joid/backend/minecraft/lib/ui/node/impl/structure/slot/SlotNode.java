@@ -19,7 +19,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.EnumChatFormatting;
 
 @Getter
 public class SlotNode extends Node {
@@ -47,18 +47,18 @@ public class SlotNode extends Node {
 	public void draw(final double mouseX, final double mouseY) {
 		DrawUtils.SHAPE.drawRect(super.getX(), super.getY(), super.getWidth(), super.getHeight(), this.color);
 		final ContainerUIScreen<?> screen = super.getUi() instanceof ContainerUI ? BridgeHandler.UI.getBridge(ContainerUIBridge.class).getScreen((ContainerUI<?>) super.getUi()) : null;
-		if (screen == null || !this.slot.isEnabled()) {
+		if (screen == null || !this.slot.canBeHovered()) {
 			return;
 		}
 
 		final double size = this.getItemSize();
 		final double x = super.getX() + (super.getWidth() - size) / 2D;
 		final double y = super.getY() + (super.getHeight() - size) / 2D;
-		final ItemStack carried = Minecraft.getMinecraft().player.inventory.getItemStack();
+		final ItemStack carried = Minecraft.getMinecraft().thePlayer.inventory.getItemStack();
 		ItemStack stack = this.slot.getStack();
 		String count = null;
 		boolean quickCraft = false;
-		if (screen.isQuickCrafting() && screen.getQuickCraftSlots().contains(this.slot) && !carried.isEmpty()) {
+		if (screen.isQuickCrafting() && screen.getQuickCraftSlots().contains(this.slot) && carried != null) {
 			if (screen.getQuickCraftSlots().size() == 1) {
 				this.drawHighlight(screen);
 				return;
@@ -67,26 +67,25 @@ public class SlotNode extends Node {
 			if (Container.canAddItemToSlot(this.slot, carried, true) && screen.inventorySlots.canDragIntoSlot(this.slot)) {
 				final int max = Math.min(carried.getMaxStackSize(), this.slot.getItemStackLimit(carried));
 				stack = carried.copy();
-				Container.computeStackSize(screen.getQuickCraftSlots(), screen.getQuickCraftType(), stack, this.slot.getStack().getCount());
-				if (stack.getCount() > max) {
-					count = TextFormatting.YELLOW.toString() + max;
-					stack.setCount(max);
+				Container.computeStackSize(screen.getQuickCraftSlots(), screen.getQuickCraftType(), stack, this.slot.getStack() == null ? 0 : this.slot.getStack().stackSize);
+				if (stack.stackSize > max) {
+					count = EnumChatFormatting.YELLOW.toString() + max;
+					stack.stackSize = max;
 				}
 				quickCraft = true;
 			}
 		}
 
-		final TextureAtlasSprite sprite = stack.isEmpty() ? this.slot.getBackgroundSprite() : null;
+		final TextureAtlasSprite sprite = stack == null ? this.slot.getBackgroundSprite() : null;
 		if (sprite != null) {
 			DrawUtils.RESOURCE.drawResource(x, y, size, size, Resource.of(sprite));
-		} else if (!stack.isEmpty()) {
+		} else if (stack != null) {
 			if (quickCraft) {
 				DrawUtils.SHAPE.drawRect(x, y, size, size, SlotNode.QUICK_CRAFT);
 			}
 
 			DrawItem.inst().drawItem(x, y, size, stack);
 			DrawItem.inst().drawItemBar(x, y, size, stack);
-			DrawItem.inst().drawItemCooldown(x, y, size, stack);
 			if (count != null) {
 				DrawItem.inst().drawItemCount(x, y, size, stack, count);
 			} else {

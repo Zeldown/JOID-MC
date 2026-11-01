@@ -45,10 +45,10 @@ public class ShowBestiary extends UI implements IShowFocus {
 		new Entry("Ocelot", "MOB", ShowTheme.GRASS, "Jungle", "Shy until you offer it raw fish, then it keeps the creepers away.", "5", size -> EntityNode.create(0, 10 * size, 300 * size, 210 * size).type(EntityOcelot.class)),
 		new Entry("Bat", "MOB", ShowTheme.GRASS, "Dark caves", "Hangs from the ceiling by day and flutters away when you come near.", "3", size -> EntityNode.create(0, 10 * size, 300 * size, 210 * size).type(EntityBat.class)),
 		new Entry("Creeper", "MOB", ShowTheme.GRASS, "Everywhere at night", "Silent, patient and explosive. Keep your distance.", "20", size -> EntityNode.create(0, 10 * size, 300 * size, 210 * size).type(EntityCreeper.class)),
-		new Entry("Diamond Ore", "BLOCK", ShowTheme.DIAMOND, "Deep slate layers", "The rarest ore of the Overworld, mined with an iron pickaxe or better.", "3", size -> BlockNode.create(80 * size, 45 * size, 140 * size, 140 * size).block(Blocks.DIAMOND_ORE.getDefaultState())),
-		new Entry("Bookshelf", "BLOCK", ShowTheme.DIAMOND, "Villages, strongholds", "Fifteen of them around an enchanting table unlock its best offers.", "1.5", size -> BlockNode.create(80 * size, 45 * size, 140 * size, 140 * size).block(Blocks.BOOKSHELF.getDefaultState())),
-		new Entry("Bow", "ITEM", ShowTheme.AMETHYST, "Skeletons", "Draw it longer to shoot farther, and enchant it with Infinity to never run out.", "4.5", size -> ItemNode.create(80 * size, 45 * size, 140 * size, 140 * size).stack(new ItemStack(Items.BOW)).glint(true)),
-		new Entry("Nether Star", "ITEM", ShowTheme.AMETHYST, "The Wither", "Dropped by the Wither, it lights up a beacon for good.", "1", size -> ItemNode.create(86 * size, 51 * size, 128 * size, 128 * size).stack(new ItemStack(Items.NETHER_STAR)))
+		new Entry("Diamond Ore", "BLOCK", ShowTheme.DIAMOND, "Deep slate layers", "The rarest ore of the Overworld, mined with an iron pickaxe or better.", "3", size -> BlockNode.create(80 * size, 45 * size, 140 * size, 140 * size).block(Blocks.diamond_ore.getDefaultState())),
+		new Entry("Bookshelf", "BLOCK", ShowTheme.DIAMOND, "Villages, strongholds", "Fifteen of them around an enchanting table unlock its best offers.", "1.5", size -> BlockNode.create(80 * size, 45 * size, 140 * size, 140 * size).block(Blocks.bookshelf.getDefaultState())),
+		new Entry("Bow", "ITEM", ShowTheme.AMETHYST, "Skeletons", "Draw it longer to shoot farther, and enchant it with Infinity to never run out.", "4.5", size -> ItemNode.create(80 * size, 45 * size, 140 * size, 140 * size).stack(new ItemStack(Items.bow)).glint(true)),
+		new Entry("Nether Star", "ITEM", ShowTheme.AMETHYST, "The Wither", "Dropped by the Wither, it lights up a beacon for good.", "1", size -> ItemNode.create(86 * size, 51 * size, 128 * size, 128 * size).stack(new ItemStack(Items.nether_star)))
 	);
 
 	private final Node[] cards;

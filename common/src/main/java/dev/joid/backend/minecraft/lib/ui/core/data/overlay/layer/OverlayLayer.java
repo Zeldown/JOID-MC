@@ -3,18 +3,16 @@ package dev.joid.backend.minecraft.lib.ui.core.data.overlay.layer;
 public enum OverlayLayer {
 
 	CAMERA_OVERLAYS,
-	CROSSHAIR,
 	HOTBAR,
-	ARMOR,
-	HEALTH,
-	FOOD,
-	AIR,
-	MOUNT_HEALTH,
-	CONTEXTUAL_BAR,
-	EFFECTS,
+	CROSSHAIR,
 	BOSS_BAR,
+	HEALTH,
+	ARMOR,
+	FOOD,
+	MOUNT_HEALTH,
+	AIR,
+	CONTEXTUAL_BAR,
 	CHAT,
-	PLAYER_LIST,
-	SUBTITLES;
+	PLAYER_LIST;
 
 }

@@ -12,14 +12,14 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ContainerChest;
 import net.minecraft.inventory.ContainerRepair;
 import net.minecraft.inventory.InventoryBasic;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.BlockPos;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ShowcaseLauncher {
 
 	public static final InventoryBasic STORAGE = new InventoryBasic("container.chest", false, 27);
 
-	public static final ContainerTypeRegistry<ContainerChest>  CHEST = ContainerTypeRegistry.create(MinecraftJoid.MOD_ID + ":showcase/chest", player -> new ContainerChest(player.inventory, player.world.isRemote ? new InventoryBasic("container.chest", false, 27) : ShowcaseLauncher.STORAGE, player));
+	public static final ContainerTypeRegistry<ContainerChest>  CHEST = ContainerTypeRegistry.create(MinecraftJoid.MOD_ID + ":showcase/chest", player -> new ContainerChest(player.inventory, player.worldObj.isRemote ? new InventoryBasic("container.chest", false, 27) : ShowcaseLauncher.STORAGE, player));
 	public static final ContainerTypeRegistry<ContainerRepair> ANVIL = ContainerTypeRegistry.create(MinecraftJoid.MOD_ID + ":showcase/anvil", AnvilContainer::new);
 
 	public static void init() {
@@ -37,7 +37,7 @@ public final class ShowcaseLauncher {
 	private static final class AnvilContainer extends ContainerRepair {
 
 		private AnvilContainer(final EntityPlayer player) {
-			super(player.inventory, player.world, BlockPos.ORIGIN, player);
+			super(player.inventory, player.worldObj, BlockPos.ORIGIN, player);
 		}
 
 		@Override

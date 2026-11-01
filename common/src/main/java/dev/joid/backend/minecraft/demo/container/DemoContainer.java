@@ -14,7 +14,7 @@ import net.minecraft.item.ItemStack;
 
 public class DemoContainer extends Container {
 
-	public static final ContainerTypeRegistry<DemoContainer> TYPE = ContainerTypeRegistry.create(MinecraftJoid.MOD_ID + ":demo/container", player -> new DemoContainer(player.inventory, player.world.isRemote ? new InventoryBasic("Demo storage", true, 27) : OpenDemoContainerPayloadHandler.getStorage(player)));
+	public static final ContainerTypeRegistry<DemoContainer> TYPE = ContainerTypeRegistry.create(MinecraftJoid.MOD_ID + ":demo/container", player -> new DemoContainer(player.inventory, player.worldObj.isRemote ? new InventoryBasic("Demo storage", true, 27) : OpenDemoContainerPayloadHandler.getStorage(player)));
 
 	@Getter
 	private final IInventory storage;
@@ -49,17 +49,17 @@ public class DemoContainer extends Container {
 	public ItemStack transferStackInSlot(final EntityPlayer player, final int index) {
 		final Slot slot = super.inventorySlots.get(index);
 		if (slot == null || !slot.getHasStack()) {
-			return ItemStack.EMPTY;
+			return null;
 		}
 
 		final ItemStack stack = slot.getStack();
 		final ItemStack moved = stack.copy();
 		if (index < 27 ? !super.mergeItemStack(stack, 27, super.inventorySlots.size(), true) : !super.mergeItemStack(stack, 0, 27, false)) {
-			return ItemStack.EMPTY;
+			return null;
 		}
 
-		if (stack.isEmpty()) {
-			slot.putStack(ItemStack.EMPTY);
+		if (stack.stackSize == 0) {
+			slot.putStack(null);
 		} else {
 			slot.onSlotChanged();
 		}
@@ -68,7 +68,7 @@ public class DemoContainer extends Container {
 
 	@Override
 	public boolean canInteractWith(final EntityPlayer player) {
-		return this.storage.isUsableByPlayer(player);
+		return this.storage.isUseableByPlayer(player);
 	}
 
 }

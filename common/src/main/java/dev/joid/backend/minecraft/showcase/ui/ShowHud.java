@@ -112,7 +112,7 @@ public class ShowHud extends UI {
 	}
 
 	private static EntityPlayerSP player() {
-		return Minecraft.getMinecraft().player;
+		return Minecraft.getMinecraft().thePlayer;
 	}
 
 	@UIData(anchorY = Align.END)
