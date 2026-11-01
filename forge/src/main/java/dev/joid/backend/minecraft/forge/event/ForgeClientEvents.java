@@ -15,16 +15,12 @@ public final class ForgeClientEvents {
 		MinecraftForge.EVENT_BUS.addListener(ForgeClientEvents::render);
 	}
 
-	private static void tick(final TickEvent.ClientTickEvent event) {
-		if (event.phase == TickEvent.Phase.END) {
-			MinecraftClientEvents.fireTick();
-		}
+	private static void tick(final TickEvent.ClientTickEvent.Post event) {
+		MinecraftClientEvents.fireTick();
 	}
 
-	private static void render(final TickEvent.RenderTickEvent event) {
-		if (event.phase == TickEvent.Phase.END) {
-			MinecraftOverlayEvents.fireHiddenHud();
-		}
+	private static void render(final TickEvent.RenderTickEvent.Post event) {
+		MinecraftOverlayEvents.fireHiddenHud();
 	}
 
 }

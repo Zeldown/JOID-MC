@@ -85,7 +85,7 @@ processResources {
         key, value -> [(key): value instanceof String ? value.replace('\n', '\\\\n') : value]
     }
 
-    filesMatching(['META-INF/mods.toml', 'dev/joid/backend/minecraft/backend.properties']) {
+    filesMatching(['META-INF/mods.toml', 'META-INF/neoforge.mods.toml', 'dev/joid/backend/minecraft/backend.properties']) {
         expand expandProps
     }
 

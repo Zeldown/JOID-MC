@@ -225,9 +225,9 @@ public final class ShowcaseDirector {
 
 	public static void waitForWorld() {
 		ShowcaseDirector.sleep(3000);
-		ShowcaseDirector.waitFor("the chunks around the player", () -> Minecraft.getInstance().levelRenderer.hasRenderedAllChunks(), 900);
+		ShowcaseDirector.waitFor("the chunks around the player", () -> Minecraft.getInstance().levelRenderer.hasRenderedAllSections(), 900);
 		ShowcaseDirector.sleep(3000);
-		ShowcaseDirector.waitFor("the chunks around the player", () -> Minecraft.getInstance().levelRenderer.hasRenderedAllChunks(), 900);
+		ShowcaseDirector.waitFor("the chunks around the player", () -> Minecraft.getInstance().levelRenderer.hasRenderedAllSections(), 900);
 	}
 
 	public static void sleep(final long millis) {

@@ -26,6 +26,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
@@ -40,6 +41,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -91,8 +93,8 @@ public enum ShowcaseScene {
 		ShowcaseDirector.runOnServer(player -> {
 			final Inventory inventory = player.getInventory();
 			inventory.clearContent();
-			inventory.setItem(0, ShowcaseScene.enchant(new ItemStack(Items.DIAMOND_SWORD), Enchantments.SHARPNESS, 5));
-			inventory.setItem(1, ShowcaseScene.enchant(new ItemStack(Items.DIAMOND_PICKAXE), Enchantments.BLOCK_EFFICIENCY, 4));
+			inventory.setItem(0, ShowcaseScene.enchant(player.level(), new ItemStack(Items.DIAMOND_SWORD), Enchantments.SHARPNESS, 5));
+			inventory.setItem(1, ShowcaseScene.enchant(player.level(), new ItemStack(Items.DIAMOND_PICKAXE), Enchantments.EFFICIENCY, 4));
 			inventory.setItem(2, new ItemStack(Items.IRON_AXE));
 			inventory.setItem(3, new ItemStack(Items.BOW));
 			inventory.setItem(4, new ItemStack(Items.COOKED_BEEF, 24));
@@ -166,7 +168,7 @@ public enum ShowcaseScene {
 		ShowcaseDirector.runOnServer(player -> {
 			final SimpleContainer storage = new SimpleContainer(27);
 			final ItemStack[] items = {
-				ShowcaseScene.enchant(new ItemStack(Items.NETHERITE_SWORD), Enchantments.SHARPNESS, 5),
+				ShowcaseScene.enchant(player.level(), new ItemStack(Items.NETHERITE_SWORD), Enchantments.SHARPNESS, 5),
 				new ItemStack(Items.GOLDEN_APPLE, 6),
 				new ItemStack(Items.ENDER_PEARL, 16),
 				new ItemStack(Items.EMERALD, 48),
@@ -177,7 +179,7 @@ public enum ShowcaseScene {
 				new ItemStack(Items.TOTEM_OF_UNDYING),
 				new ItemStack(Items.IRON_INGOT, 64),
 				new ItemStack(Items.GOLD_INGOT, 40),
-				ShowcaseScene.enchant(new ItemStack(Items.ENCHANTED_BOOK), Enchantments.MENDING, 1),
+				ShowcaseScene.enchant(player.level(), new ItemStack(Items.ENCHANTED_BOOK), Enchantments.MENDING, 1),
 				ItemStack.EMPTY,
 				new ItemStack(Items.BREAD, 32),
 				ItemStack.EMPTY,
@@ -259,7 +261,7 @@ public enum ShowcaseScene {
 		ShowcaseDirector.hidePointer();
 		ShowcaseDirector.runOnClient(() -> Minecraft.getInstance().player.closeContainer());
 		ShowcaseDirector.frames(5);
-		ShowcaseDirector.runOnServer(player -> player.getInventory().setItem(0, ShowcaseScene.enchant(new ItemStack(Items.DIAMOND_SWORD), Enchantments.SHARPNESS, 5)));
+		ShowcaseDirector.runOnServer(player -> player.getInventory().setItem(0, ShowcaseScene.enchant(player.level(), new ItemStack(Items.DIAMOND_SWORD), Enchantments.SHARPNESS, 5)));
 		ShowcaseDirector.command("xp set @a 27 levels");
 		ShowcaseDirector.command("xp set @a 62 points");
 		ShowcaseDirector.frames(5);
@@ -501,12 +503,14 @@ public enum ShowcaseScene {
 	private static void openHud() {
 		JOID.open(new ShowHud());
 		JOID.open(new ShowHud.Food());
+		JOID.open(new ShowHud.Level());
 		JOID.open(new ShowHud.Experience());
 	}
 
 	private static void closeHud() {
 		JOID.close(JOID.getUi(ShowHud.class));
 		JOID.close(JOID.getUi(ShowHud.Food.class));
+		JOID.close(JOID.getUi(ShowHud.Level.class));
 		JOID.close(JOID.getUi(ShowHud.Experience.class));
 	}
 
@@ -520,8 +524,8 @@ public enum ShowcaseScene {
 		return ShowcaseDirector.computeOnServer(player -> ((ServerLevel) player.level()).getChunk(blockX >> 4, blockZ >> 4).getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockX & 15, blockZ & 15));
 	}
 
-	private static ItemStack enchant(final ItemStack stack, final Enchantment enchantment, final int value) {
-		stack.enchant(enchantment, value);
+	private static ItemStack enchant(final Level level, final ItemStack stack, final ResourceKey<Enchantment> enchantment, final int value) {
+		stack.enchant(level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(enchantment), value);
 		return stack;
 	}
 

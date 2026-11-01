@@ -21,6 +21,7 @@ import dev.joid.lib.ui.node.impl.shape.RectNode;
 import dev.joid.lib.ui.node.impl.text.TextNode;
 import dev.joid.lib.utils.align.Align;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.protocol.game.ServerboundRenameItemPacket;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.AnvilMenu;
@@ -166,7 +167,7 @@ public class ShowAnvil extends ContainerUI<AnvilMenu> implements IShowFocus, Con
 			return;
 		}
 
-		final String name = !slot.getItem().hasCustomHoverName() && text.equals(slot.getItem().getHoverName().getString()) ? "" : text;
+		final String name = !slot.getItem().has(DataComponents.CUSTOM_NAME) && text.equals(slot.getItem().getHoverName().getString()) ? "" : text;
 		if (super.getContainer().setItemName(name)) {
 			Minecraft.getInstance().player.connection.send(new ServerboundRenameItemPacket(name));
 		}

@@ -18,7 +18,7 @@ public final class FabricReloadListenerRegistry {
 
 				@Override
 				public ResourceLocation getFabricId() {
-					return ResourceLocation.tryParse(listener.getId());
+					return ResourceLocation.parse(listener.getId());
 				}
 
 				@Override

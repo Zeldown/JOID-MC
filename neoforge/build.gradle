@@ -2,12 +2,10 @@ plugins {
     id 'joid-loader'
 }
 
-apply plugin: 'net.neoforged.moddev.legacyforge'
+apply plugin: 'net.neoforged.moddev'
 
-legacyForge {
-    enable {
-        neoForgeVersion = "${minecraft_version}-${neoforge_version}"
-    }
+neoForge {
+    version = neoforge_version
     parchment {
         minecraftVersion = parchment_minecraft_version
         mappingsVersion = parchment_version
@@ -35,9 +33,4 @@ legacyForge {
             sourceSet sourceSets.main
         }
     }
-}
-
-obfuscation {
-    reobfuscate(tasks.named('devJar', Jar), sourceSets.main)
-    reobfuscate(tasks.named('prodJar', Jar), sourceSets.main)
 }

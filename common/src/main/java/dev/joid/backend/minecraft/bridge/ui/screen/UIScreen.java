@@ -4,10 +4,10 @@ import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
 import dev.joid.base.lwjgl3.glfw.input.GlfwKeys;
 import dev.joid.lib.input.mouse.MouseButton;
 import lombok.NonNull;
-import net.minecraft.SharedConstants;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.StringUtil;
 
 public class UIScreen extends Screen {
 
@@ -31,7 +31,7 @@ public class UIScreen extends Screen {
 	@Override
 	public void render(final GuiGraphics graphics, final int mouseX, final int mouseY, final float partialTick) {
 		if (this.hasBackground()) {
-			super.renderBackground(graphics);
+			super.renderBackground(graphics, mouseX, mouseY, partialTick);
 		}
 
 		this.bridge.frame(graphics, mouseX, mouseY);
@@ -70,8 +70,8 @@ public class UIScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseScrolled(final double x, final double y, final double scroll) {
-		return this.bridge.mouseScroll(0D, scroll);
+	public boolean mouseScrolled(final double x, final double y, final double scrollX, final double scrollY) {
+		return this.bridge.mouseScroll(scrollX, scrollY);
 	}
 
 	@Override
@@ -86,7 +86,7 @@ public class UIScreen extends Screen {
 
 	@Override
 	public boolean charTyped(final char character, final int modifiers) {
-		return SharedConstants.isAllowedChatCharacter(character) && this.bridge.charTyped(character);
+		return StringUtil.isAllowedChatCharacter(character) && this.bridge.charTyped(character);
 	}
 
 	private boolean hasBackground() {

@@ -11,17 +11,18 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.component.ResolvableProfile;
 
 @Getter
 public class EntityNode extends Node {
 
-	private Entity           entity;
-	private EntityType<?>    type;
-	private GameProfile      profile;
-	private ResourceLocation skin;
+	private Entity            entity;
+	private PlayerSkin        skin;
+	private EntityType<?>     type;
+	private ResolvableProfile profile;
 
 	private double scale;
 	private double rotationYaw;
@@ -60,7 +61,7 @@ public class EntityNode extends Node {
 		if (this.entity != null) {
 			DrawEntity.inst().drawEntity(super.getX(), super.getY(), super.getWidth(), super.getHeight(), this.entity, this.scale, this.rotationYaw, this.rotationPitch, lookX, lookY);
 		} else if (this.profile != null || this.skin != null) {
-			final ResourceLocation skin = this.skin != null ? this.skin : minecraft.getSkinManager().getInsecureSkinLocation(this.profile);
+			final PlayerSkin skin = this.skin != null ? this.skin : minecraft.getSkinManager().getInsecureSkin(this.profile.gameProfile());
 			DrawEntity.inst().drawPlayer(super.getX(), super.getY(), super.getWidth(), super.getHeight(), skin, this.scale, this.rotationYaw, this.rotationPitch, lookX, lookY);
 		}
 	}
@@ -73,11 +74,11 @@ public class EntityNode extends Node {
 		return super.follow("source", entity, value -> this.source(value, null, null, null));
 	}
 
-	public final <T extends EntityNode> @NonNull T skin(final @NonNull ResourceLocation skin) {
+	public final <T extends EntityNode> @NonNull T skin(final @NonNull PlayerSkin skin) {
 		return this.skin(Signal.from(skin));
 	}
 
-	public final <T extends EntityNode> @NonNull T skin(final @NonNull Supplier<@NonNull ResourceLocation> skin) {
+	public final <T extends EntityNode> @NonNull T skin(final @NonNull Supplier<@NonNull PlayerSkin> skin) {
 		return super.follow("source", skin, value -> this.source(null, value, null, null));
 	}
 
@@ -90,10 +91,14 @@ public class EntityNode extends Node {
 	}
 
 	public final <T extends EntityNode> @NonNull T profile(final @NonNull GameProfile profile) {
+		return this.profile(new ResolvableProfile(profile));
+	}
+
+	public final <T extends EntityNode> @NonNull T profile(final @NonNull ResolvableProfile profile) {
 		return this.profile(Signal.from(profile));
 	}
 
-	public final <T extends EntityNode> @NonNull T profile(final @NonNull Supplier<@NonNull GameProfile> profile) {
+	public final <T extends EntityNode> @NonNull T profile(final @NonNull Supplier<@NonNull ResolvableProfile> profile) {
 		return super.follow("source", profile, value -> this.source(null, null, null, value));
 	}
 
@@ -129,12 +134,19 @@ public class EntityNode extends Node {
 		return super.follow("followMouse", followMouse, value -> this.followMouse = value);
 	}
 
-	private void source(final Entity entity, final ResourceLocation skin, final EntityType<?> type, final GameProfile profile) {
+	private void source(final Entity entity, final PlayerSkin skin, final EntityType<?> type, final ResolvableProfile profile) {
 		this.entity  = entity;
 		this.skin    = skin;
 		this.type    = type;
 		this.profile = profile;
 		this.sourced = true;
+		if (profile != null && !profile.isResolved()) {
+			profile.resolve().thenAcceptAsync(resolved -> {
+				if (this.profile == profile) {
+					this.profile = resolved;
+				}
+			}, Minecraft.getInstance());
+		}
 	}
 
 }

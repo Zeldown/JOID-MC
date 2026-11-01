@@ -38,6 +38,7 @@ import dev.joid.lib.ui.shortcut.Shortcut;
 import dev.joid.lib.utils.align.Align;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
@@ -73,7 +74,7 @@ public class UIDemoMinecraft extends UIDemo {
 		final ItemStack damaged = new ItemStack(Items.DIAMOND_PICKAXE);
 		final ItemStack pearl = new ItemStack(Items.ENDER_PEARL, 16);
 		final ItemStack totem = new ItemStack(Items.TOTEM_OF_UNDYING);
-		final ResourceLocation skin = ResourceLocation.tryBuild("joid", "demo/textures/skin.png");
+		final PlayerSkin skin = new PlayerSkin(ResourceLocation.fromNamespaceAndPath("joid", "demo/textures/skin.png"), null, null, null, PlayerSkin.Model.WIDE, false);
 
 		damaged.setDamageValue(1100);
 
@@ -172,7 +173,7 @@ public class UIDemoMinecraft extends UIDemo {
 			.body(rect -> {
 				RectNode.create(20, 20, 400, 200).color(UIDemoMinecraft.PANEL).attach(rect);
 				ResourceNode.create(40, 40, 360, 0).resource(Resource.of("minecraft:textures/gui/title/minecraft.png")).attach(rect);
-				ResourceNode.create(40, 140, 64, 64).resource(Resource.of(ResourceLocation.tryParse("textures/block/diamond_block.png"))).attach(rect);
+				ResourceNode.create(40, 140, 64, 64).resource(Resource.of(ResourceLocation.parse("textures/block/diamond_block.png"))).attach(rect);
 				ResourceNode.create(140, 140, 64, 64).resource(Resource.of(Minecraft.getInstance().getTextureManager().getTexture(InventoryMenu.BLOCK_ATLAS))).attach(rect);
 				ResourceNode.create(240, 140, 64, 64).resource(Resource.of(UIDemoMinecraft.CHECKER)).attach(rect);
 				TextNode.create(220, 255).text(Text.create("Textures", caption).alignX(Align.CENTER)).anchorX(Align.CENTER).attach(rect);
@@ -184,10 +185,10 @@ public class UIDemoMinecraft extends UIDemo {
 			.color(UIDemoMinecraft.PLACEHOLDER)
 			.body(rect -> {
 				RectNode.create(20, 20, 400, 200).color(UIDemoMinecraft.PANEL).attach(rect);
-				ResourceNode.create(40, 40, 64, 64).resource(Resource.of(new Material(InventoryMenu.BLOCK_ATLAS, ResourceLocation.tryParse("item/diamond")))).attach(rect);
-				ResourceNode.create(40, 128, 64, 64).resource(Resource.of(new Material(InventoryMenu.BLOCK_ATLAS, ResourceLocation.tryParse("block/stone")))).attach(rect);
-				ResourceNode.create(140, 40, 64, 64).resource(Resource.of(new Material(InventoryMenu.BLOCK_ATLAS, ResourceLocation.tryParse("block/crafting_table_top")))).attach(rect);
-				ResourceNode.create(140, 128, 64, 64).resource(Resource.of(new Material(InventoryMenu.BLOCK_ATLAS, InventoryMenu.EMPTY_ARMOR_SLOT_HELMET))).attach(rect);
+				ResourceNode.create(40, 40, 64, 64).resource(Resource.of(new Material(InventoryMenu.BLOCK_ATLAS, ResourceLocation.parse("item/diamond")))).attach(rect);
+				ResourceNode.create(40, 128, 64, 64).resource(Resource.of(new Material(InventoryMenu.BLOCK_ATLAS, ResourceLocation.parse("block/stone")))).attach(rect);
+				ResourceNode.create(140, 40, 240, 48).resource(Resource.of(Minecraft.getInstance().getGuiSprites().getSprite(ResourceLocation.withDefaultNamespace("widget/button")))).attach(rect);
+				ResourceNode.create(140, 120, 72, 72).resource(Resource.of(Minecraft.getInstance().getGuiSprites().getSprite(ResourceLocation.withDefaultNamespace("container/slot")))).attach(rect);
 				TextNode.create(220, 255).text(Text.create("Sprites", caption).alignX(Align.CENTER)).anchorX(Align.CENTER).attach(rect);
 			})
 			.attach(container);
@@ -197,8 +198,8 @@ public class UIDemoMinecraft extends UIDemo {
 			.color(UIDemoMinecraft.PLACEHOLDER)
 			.body(rect -> {
 				RectNode.create(20, 20, 400, 200).color(UIDemoMinecraft.PANEL).attach(rect);
-				ResourceNode.create(40, 56, 128, 128).resource(Resource.of(new Material(InventoryMenu.BLOCK_ATLAS, ResourceLocation.tryParse("block/fire_0")))).attach(rect);
-				ResourceNode.create(240, 56, 128, 128).resource(Resource.of(new Material(InventoryMenu.BLOCK_ATLAS, ResourceLocation.tryParse("block/sea_lantern")))).attach(rect);
+				ResourceNode.create(40, 56, 128, 128).resource(Resource.of(new Material(InventoryMenu.BLOCK_ATLAS, ResourceLocation.parse("block/fire_0")))).attach(rect);
+				ResourceNode.create(240, 56, 128, 128).resource(Resource.of(new Material(InventoryMenu.BLOCK_ATLAS, ResourceLocation.parse("block/sea_lantern")))).attach(rect);
 				TextNode.create(220, 255).text(Text.create("Animated sprites", caption).alignX(Align.CENTER)).anchorX(Align.CENTER).attach(rect);
 			})
 			.attach(container);
@@ -366,7 +367,7 @@ public class UIDemoMinecraft extends UIDemo {
 				.color(UIDemoMinecraft.INK)
 				.hoveredColor(UIDemoMinecraft.PLACEHOLDER)
 				.body(slot -> {
-					ResourceNode.create(10, 10, 80, 80).resource(Resource.of(new Material(InventoryMenu.BLOCK_ATLAS, ResourceLocation.tryParse("block/note_block")))).attach(slot);
+					ResourceNode.create(10, 10, 80, 80).resource(Resource.of(new Material(InventoryMenu.BLOCK_ATLAS, ResourceLocation.parse("block/note_block")))).attach(slot);
 				})
 				.onClick(event -> Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_PLING, 1F)))
 				.attach(rect);

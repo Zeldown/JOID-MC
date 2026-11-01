@@ -1,76 +1,56 @@
 package dev.joid.backend.minecraft.forge.registry;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import dev.joid.backend.minecraft.lib.ui.core.data.overlay.layer.OverlayLayer;
 import dev.joid.backend.minecraft.loader.event.MinecraftOverlayEvents;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
-import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
-import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.client.event.AddGuiOverlayLayersEvent;
+import net.minecraftforge.client.gui.overlay.ForgeLayeredDraw;
 import net.minecraftforge.eventbus.api.IEventBus;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ForgeOverlayLayerRegistry {
 
-	private static final Map<ResourceLocation, OverlayLayer> LAYERS = new HashMap<>();
-
-	static {
-		for (final OverlayLayer layer : OverlayLayer.values()) {
-			for (final VanillaGuiOverlay overlay : ForgeOverlayLayerRegistry.getOverlays(layer)) {
-				ForgeOverlayLayerRegistry.LAYERS.put(overlay.id(), layer);
-			}
-		}
-	}
-
 	public static void register(final IEventBus modBus) {
-		modBus.addListener(ForgeOverlayLayerRegistry::registerOverlays);
-		MinecraftForge.EVENT_BUS.addListener(ForgeOverlayLayerRegistry::renderOverlay);
+		modBus.addListener((final AddGuiOverlayLayersEvent event) -> ForgeOverlayLayerRegistry.add(event.getLayeredDraw()));
 	}
 
-	private static void registerOverlays(final RegisterGuiOverlaysEvent event) {
+	private static void add(final ForgeLayeredDraw draw) {
 		for (final OverlayLayer layer : OverlayLayer.values()) {
-			final List<VanillaGuiOverlay> overlays = ForgeOverlayLayerRegistry.getOverlays(layer);
-			event.registerBelow(overlays.get(0).id(), MinecraftOverlayEvents.getId(layer, false).getPath(), (gui, graphics, partialTick, width, height) -> MinecraftOverlayEvents.fireLayer(graphics, layer, false));
-			event.registerAbove(overlays.get(overlays.size() - 1).id(), MinecraftOverlayEvents.getId(layer, true).getPath(), (gui, graphics, partialTick, width, height) -> MinecraftOverlayEvents.fireLayer(graphics, layer, true));
+			final ResourceLocation stack = ForgeOverlayLayerRegistry.getStack(layer);
+			final ResourceLocation vanillaLayer = ForgeOverlayLayerRegistry.getLayer(layer);
+			draw.addBelow(stack, MinecraftOverlayEvents.getId(layer, false), vanillaLayer, (graphics, deltaTracker) -> MinecraftOverlayEvents.fireLayer(graphics, layer, false));
+			draw.addAbove(stack, MinecraftOverlayEvents.getId(layer, true), vanillaLayer, (graphics, deltaTracker) -> MinecraftOverlayEvents.fireLayer(graphics, layer, true));
+			draw.addConditionTo(stack, vanillaLayer, () -> !MinecraftOverlayEvents.isCancelled(layer));
 		}
 
-		event.registerAboveAll(MinecraftOverlayEvents.getId().getPath(), (gui, graphics, partialTick, width, height) -> MinecraftOverlayEvents.fireHud(graphics));
+		draw.add(MinecraftOverlayEvents.getId(), (graphics, deltaTracker) -> MinecraftOverlayEvents.fireHud(graphics));
 	}
 
-	private static void renderOverlay(final RenderGuiOverlayEvent.Pre event) {
-		final OverlayLayer layer = ForgeOverlayLayerRegistry.LAYERS.get(event.getOverlay().id());
-		if (layer != null && MinecraftOverlayEvents.isCancelled(layer)) {
-			event.setCanceled(true);
-		}
-	}
-
-	private static List<VanillaGuiOverlay> getOverlays(final OverlayLayer layer) {
+	private static ResourceLocation getStack(final OverlayLayer layer) {
 		return switch (layer) {
-			case CAMERA_OVERLAYS -> List.of(VanillaGuiOverlay.VIGNETTE, VanillaGuiOverlay.SPYGLASS, VanillaGuiOverlay.HELMET, VanillaGuiOverlay.FROSTBITE, VanillaGuiOverlay.PORTAL);
-			case CROSSHAIR -> List.of(VanillaGuiOverlay.CROSSHAIR);
-			case HOTBAR -> List.of(VanillaGuiOverlay.HOTBAR);
-			case ARMOR -> List.of(VanillaGuiOverlay.ARMOR_LEVEL);
-			case HEALTH -> List.of(VanillaGuiOverlay.PLAYER_HEALTH);
-			case FOOD -> List.of(VanillaGuiOverlay.FOOD_LEVEL);
-			case AIR -> List.of(VanillaGuiOverlay.AIR_LEVEL);
-			case MOUNT_HEALTH -> List.of(VanillaGuiOverlay.MOUNT_HEALTH);
-			case CONTEXTUAL_BAR -> List.of(VanillaGuiOverlay.JUMP_BAR, VanillaGuiOverlay.EXPERIENCE_BAR);
-			case SELECTED_ITEM_NAME -> List.of(VanillaGuiOverlay.ITEM_NAME);
-			case EFFECTS -> List.of(VanillaGuiOverlay.POTION_ICONS);
-			case BOSS_BAR -> List.of(VanillaGuiOverlay.BOSS_EVENT_PROGRESS);
-			case SLEEP -> List.of(VanillaGuiOverlay.SLEEP_FADE);
-			case SCOREBOARD -> List.of(VanillaGuiOverlay.SCOREBOARD);
-			case ACTION_BAR -> List.of(VanillaGuiOverlay.RECORD_OVERLAY);
-			case TITLE -> List.of(VanillaGuiOverlay.TITLE_TEXT);
-			case CHAT -> List.of(VanillaGuiOverlay.CHAT_PANEL);
-			case PLAYER_LIST -> List.of(VanillaGuiOverlay.PLAYER_LIST);
-			case SUBTITLES -> List.of(VanillaGuiOverlay.SUBTITLES);
+			case CAMERA_OVERLAYS, CROSSHAIR, HOTBAR, ARMOR, HEALTH, FOOD, AIR, MOUNT_HEALTH, CONTEXTUAL_BAR, EXPERIENCE_LEVEL, SELECTED_ITEM_NAME, EFFECTS, BOSS_BAR -> ForgeLayeredDraw.PRE_SLEEP_STACK;
+			case SLEEP -> ForgeLayeredDraw.VANILLA_ROOT;
+			case SCOREBOARD, ACTION_BAR, TITLE, CHAT, PLAYER_LIST, SUBTITLES -> ForgeLayeredDraw.POST_SLEEP_STACK;
+		};
+	}
+
+	private static ResourceLocation getLayer(final OverlayLayer layer) {
+		return switch (layer) {
+			case CAMERA_OVERLAYS -> ForgeLayeredDraw.CAMERA_OVERLAY;
+			case CROSSHAIR -> ForgeLayeredDraw.CROSSHAIR;
+			case HOTBAR, ARMOR, HEALTH, FOOD, AIR, MOUNT_HEALTH, CONTEXTUAL_BAR, SELECTED_ITEM_NAME -> ForgeLayeredDraw.HOTBAR;
+			case EXPERIENCE_LEVEL -> ForgeLayeredDraw.EXPERIENCE;
+			case EFFECTS -> ForgeLayeredDraw.POTION_EFFECTS;
+			case BOSS_BAR -> ForgeLayeredDraw.BOSS_OVERLAY;
+			case SLEEP -> ForgeLayeredDraw.SLEEP_OVERLAY;
+			case SCOREBOARD -> ForgeLayeredDraw.SCOREBOARD;
+			case ACTION_BAR -> ForgeLayeredDraw.HOTBAR_MESSAGE;
+			case TITLE -> ForgeLayeredDraw.TITLE_OVERLAY;
+			case CHAT -> ForgeLayeredDraw.CHAT_OVERLAY;
+			case PLAYER_LIST -> ForgeLayeredDraw.TAB_LIST;
+			case SUBTITLES -> ForgeLayeredDraw.SUBTITLE_OVERLAY;
 		};
 	}
 

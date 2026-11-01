@@ -1,33 +1,44 @@
 package dev.joid.backend.minecraft.forge.network;
 
 import dev.joid.backend.minecraft.MinecraftJoid;
-import dev.joid.backend.minecraft.bridge.network.PayloadMessage;
+import dev.joid.backend.minecraft.bridge.network.PayloadPacket;
+import dev.joid.backend.minecraft.loader.network.IPayload;
 import dev.joid.backend.minecraft.loader.network.PayloadType;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.simple.SimpleChannel;
+import net.minecraftforge.network.Channel;
+import net.minecraftforge.network.ChannelBuilder;
+import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.network.payload.PayloadFlow;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ForgePayloads {
 
-	private static SimpleChannel channel;
+	private static Channel<CustomPacketPayload> channel;
 
 	public static void register() {
 		if (PayloadType.getRegistered().isEmpty()) {
 			return;
 		}
 
-		ForgePayloads.channel = NetworkRegistry.newSimpleChannel(ResourceLocation.tryBuild(MinecraftJoid.MOD_ID, "main"), () -> "1", NetworkRegistry.acceptMissingOr("1"), NetworkRegistry.acceptMissingOr("1"));
-		ForgePayloads.channel.messageBuilder(PayloadMessage.class, 0, NetworkDirection.PLAY_TO_SERVER).encoder(PayloadMessage::write).decoder(PayloadMessage::read).consumerMainThread((message, context) -> message.fireServer(context.get().getSender())).add();
+		PayloadFlow<RegistryFriendlyByteBuf, CustomPacketPayload> flow = ChannelBuilder.named(ResourceLocation.fromNamespaceAndPath(MinecraftJoid.MOD_ID, "main")).networkProtocolVersion(1).optional().payloadChannel().play().serverbound();
+		for (final PayloadType<?, ?> type : PayloadType.getRegistered()) {
+			flow = ForgePayloads.add(flow, type);
+		}
+		ForgePayloads.channel = flow.build();
 	}
 
 	public static void registerSender() {
 		if (ForgePayloads.channel != null) {
-			PayloadType.sender(payload -> ForgePayloads.channel.sendToServer(new PayloadMessage(payload)));
+			PayloadType.sender(payload -> ForgePayloads.channel.send(new PayloadPacket<>(payload), PacketDistributor.SERVER.noArg()));
 		}
+	}
+
+	private static <T extends IPayload> PayloadFlow<RegistryFriendlyByteBuf, CustomPacketPayload> add(final PayloadFlow<RegistryFriendlyByteBuf, CustomPacketPayload> flow, final PayloadType<T, ?> type) {
+		return flow.addMain(PayloadPacket.getType(type), PayloadPacket.codec(type), (packet, context) -> type.fireServer(packet.payload(), context.getSender()));
 	}
 
 }

@@ -43,7 +43,7 @@ public final class ForgeScreenEvents {
 	}
 
 	private static void mouseScrolled(final ScreenEvent.MouseScrolled.Pre event) {
-		if (MinecraftScreenEvents.fireMouseScrolled(0D, event.getScrollDelta())) {
+		if (MinecraftScreenEvents.fireMouseScrolled(event.getDeltaX(), event.getDeltaY())) {
 			event.setCanceled(true);
 		}
 	}

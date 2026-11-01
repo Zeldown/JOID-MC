@@ -12,7 +12,7 @@ public final class FabricContainerTypeRegistry {
 
 	public static void register() {
 		for (final ContainerTypeRegistry<?> type : ContainerTypeRegistry.getRegistered()) {
-			Registry.register(BuiltInRegistries.MENU, ResourceLocation.tryParse(type.getId()), type.getType());
+			Registry.register(BuiltInRegistries.MENU, ResourceLocation.parse(type.getId()), type.getType());
 		}
 	}
 

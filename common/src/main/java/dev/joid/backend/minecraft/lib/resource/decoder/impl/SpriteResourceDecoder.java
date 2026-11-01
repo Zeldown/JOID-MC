@@ -9,6 +9,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.Material;
 
@@ -26,7 +27,7 @@ public class SpriteResourceDecoder implements IResourceDecoder {
 
 	@Override
 	public void prepare(final @NonNull ResourceData resource) {
-		final TextureAtlasSprite sprite = this.material.sprite();
+		final TextureAtlasSprite sprite = this.getSprite();
 		if (sprite.contents().name().equals(MissingTextureAtlasSprite.getLocation()) && !this.material.texture().equals(MissingTextureAtlasSprite.getLocation())) {
 			throw new IllegalArgumentException("No sprite " + this.material.texture() + " in the atlas " + this.material.atlasLocation());
 		}
@@ -48,7 +49,7 @@ public class SpriteResourceDecoder implements IResourceDecoder {
 
 	@Override
 	public void update(final @NonNull ResourceData resource) {
-		final TextureAtlasSprite sprite = this.material.sprite();
+		final TextureAtlasSprite sprite = this.getSprite();
 		if (this.sprite != null && sprite != this.sprite) {
 			this.region(resource, sprite);
 		}
@@ -57,6 +58,10 @@ public class SpriteResourceDecoder implements IResourceDecoder {
 	private void region(final ResourceData resource, final TextureAtlasSprite sprite) {
 		resource.region(sprite.getX(), sprite.getY(), sprite.contents().width(), sprite.contents().height());
 		this.sprite = sprite;
+	}
+
+	private TextureAtlasSprite getSprite() {
+		return ((TextureAtlas) Minecraft.getInstance().getTextureManager().getTexture(this.material.atlasLocation())).getSprite(this.material.texture());
 	}
 
 	private int getAtlas() {

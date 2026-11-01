@@ -1,69 +1,57 @@
 package dev.joid.backend.minecraft.neoforge.registry;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import dev.joid.backend.minecraft.lib.ui.core.data.overlay.layer.OverlayLayer;
 import dev.joid.backend.minecraft.loader.event.MinecraftOverlayEvents;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
-import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
+import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
+import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class NeoForgeOverlayLayerRegistry {
 
-	private static final Map<ResourceLocation, OverlayLayer> LAYERS = new HashMap<>();
-
-	static {
+	public static void register(final RegisterGuiLayersEvent event) {
 		for (final OverlayLayer layer : OverlayLayer.values()) {
-			for (final VanillaGuiOverlay overlay : NeoForgeOverlayLayerRegistry.getOverlays(layer)) {
-				NeoForgeOverlayLayerRegistry.LAYERS.put(overlay.id(), layer);
+			final List<ResourceLocation> layers = NeoForgeOverlayLayerRegistry.getLayers(layer);
+			event.registerBelow(layers.getFirst(), MinecraftOverlayEvents.getId(layer, false), (graphics, deltaTracker) -> MinecraftOverlayEvents.fireLayer(graphics, layer, false));
+			event.registerAbove(layers.getLast(), MinecraftOverlayEvents.getId(layer, true), (graphics, deltaTracker) -> MinecraftOverlayEvents.fireLayer(graphics, layer, true));
+			for (final ResourceLocation vanillaLayer : layers) {
+				event.wrapLayer(vanillaLayer, vanilla -> (graphics, deltaTracker) -> {
+					if (!MinecraftOverlayEvents.isCancelled(layer)) {
+						vanilla.render(graphics, deltaTracker);
+					}
+				});
 			}
 		}
+
+		event.registerAboveAll(MinecraftOverlayEvents.getId(), (graphics, deltaTracker) -> MinecraftOverlayEvents.fireHud(graphics));
 	}
 
-	public static void register(final RegisterGuiOverlaysEvent event) {
-		for (final OverlayLayer layer : OverlayLayer.values()) {
-			final List<VanillaGuiOverlay> overlays = NeoForgeOverlayLayerRegistry.getOverlays(layer);
-			event.registerBelow(overlays.get(0).id(), MinecraftOverlayEvents.getId(layer, false).getPath(), (gui, graphics, partialTick, width, height) -> MinecraftOverlayEvents.fireLayer(graphics, layer, false));
-			event.registerAbove(overlays.get(overlays.size() - 1).id(), MinecraftOverlayEvents.getId(layer, true).getPath(), (gui, graphics, partialTick, width, height) -> MinecraftOverlayEvents.fireLayer(graphics, layer, true));
-		}
-
-		event.registerAboveAll(MinecraftOverlayEvents.getId().getPath(), (gui, graphics, partialTick, width, height) -> MinecraftOverlayEvents.fireHud(graphics));
-	}
-
-	public static void cancel(final RenderGuiOverlayEvent.Pre event) {
-		final OverlayLayer layer = NeoForgeOverlayLayerRegistry.LAYERS.get(event.getOverlay().id());
-		if (layer != null && MinecraftOverlayEvents.isCancelled(layer)) {
-			event.setCanceled(true);
-		}
-	}
-
-	private static List<VanillaGuiOverlay> getOverlays(final OverlayLayer layer) {
+	private static List<ResourceLocation> getLayers(final OverlayLayer layer) {
 		return switch (layer) {
-			case CAMERA_OVERLAYS -> List.of(VanillaGuiOverlay.VIGNETTE, VanillaGuiOverlay.SPYGLASS, VanillaGuiOverlay.HELMET, VanillaGuiOverlay.FROSTBITE, VanillaGuiOverlay.PORTAL);
-			case CROSSHAIR -> List.of(VanillaGuiOverlay.CROSSHAIR);
-			case HOTBAR -> List.of(VanillaGuiOverlay.HOTBAR);
-			case ARMOR -> List.of(VanillaGuiOverlay.ARMOR_LEVEL);
-			case HEALTH -> List.of(VanillaGuiOverlay.PLAYER_HEALTH);
-			case FOOD -> List.of(VanillaGuiOverlay.FOOD_LEVEL);
-			case AIR -> List.of(VanillaGuiOverlay.AIR_LEVEL);
-			case MOUNT_HEALTH -> List.of(VanillaGuiOverlay.MOUNT_HEALTH);
-			case CONTEXTUAL_BAR -> List.of(VanillaGuiOverlay.JUMP_BAR, VanillaGuiOverlay.EXPERIENCE_BAR);
-			case SELECTED_ITEM_NAME -> List.of(VanillaGuiOverlay.ITEM_NAME);
-			case EFFECTS -> List.of(VanillaGuiOverlay.POTION_ICONS);
-			case BOSS_BAR -> List.of(VanillaGuiOverlay.BOSS_EVENT_PROGRESS);
-			case SLEEP -> List.of(VanillaGuiOverlay.SLEEP_FADE);
-			case SCOREBOARD -> List.of(VanillaGuiOverlay.SCOREBOARD);
-			case ACTION_BAR -> List.of(VanillaGuiOverlay.RECORD_OVERLAY);
-			case TITLE -> List.of(VanillaGuiOverlay.TITLE_TEXT);
-			case CHAT -> List.of(VanillaGuiOverlay.CHAT_PANEL);
-			case PLAYER_LIST -> List.of(VanillaGuiOverlay.PLAYER_LIST);
-			case SUBTITLES -> List.of(VanillaGuiOverlay.SUBTITLES);
+			case CAMERA_OVERLAYS -> List.of(VanillaGuiLayers.CAMERA_OVERLAYS);
+			case CROSSHAIR -> List.of(VanillaGuiLayers.CROSSHAIR);
+			case HOTBAR -> List.of(VanillaGuiLayers.HOTBAR);
+			case ARMOR -> List.of(VanillaGuiLayers.ARMOR_LEVEL);
+			case HEALTH -> List.of(VanillaGuiLayers.PLAYER_HEALTH);
+			case FOOD -> List.of(VanillaGuiLayers.FOOD_LEVEL);
+			case AIR -> List.of(VanillaGuiLayers.AIR_LEVEL);
+			case MOUNT_HEALTH -> List.of(VanillaGuiLayers.VEHICLE_HEALTH);
+			case CONTEXTUAL_BAR -> List.of(VanillaGuiLayers.JUMP_METER, VanillaGuiLayers.EXPERIENCE_BAR);
+			case EXPERIENCE_LEVEL -> List.of(VanillaGuiLayers.EXPERIENCE_LEVEL);
+			case SELECTED_ITEM_NAME -> List.of(VanillaGuiLayers.SELECTED_ITEM_NAME);
+			case EFFECTS -> List.of(VanillaGuiLayers.EFFECTS);
+			case BOSS_BAR -> List.of(VanillaGuiLayers.BOSS_OVERLAY);
+			case SLEEP -> List.of(VanillaGuiLayers.SLEEP_OVERLAY);
+			case SCOREBOARD -> List.of(VanillaGuiLayers.SCOREBOARD_SIDEBAR);
+			case ACTION_BAR -> List.of(VanillaGuiLayers.OVERLAY_MESSAGE);
+			case TITLE -> List.of(VanillaGuiLayers.TITLE);
+			case CHAT -> List.of(VanillaGuiLayers.CHAT);
+			case PLAYER_LIST -> List.of(VanillaGuiLayers.TAB_LIST);
+			case SUBTITLES -> List.of(VanillaGuiLayers.SUBTITLE_OVERLAY);
 		};
 	}
 

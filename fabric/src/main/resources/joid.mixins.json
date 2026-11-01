@@ -2,11 +2,13 @@
     "required": true,
     "minVersion": "0.8",
     "package": "dev.joid.backend.minecraft.fabric.mixin",
-    "compatibilityLevel": "JAVA_17",
+    "compatibilityLevel": "JAVA_21",
     "client": [
         "GuiMixin",
+        "MouseHandlerMixin",
         "KeyboardHandlerMixin",
-        "MouseHandlerMixin"
+        "SubtitleOverlayMixin",
+        "BossHealthOverlayMixin"
     ],
     "injectors": {
         "defaultRequire": 1

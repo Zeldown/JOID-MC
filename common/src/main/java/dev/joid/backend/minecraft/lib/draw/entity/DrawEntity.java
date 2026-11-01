@@ -21,7 +21,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -33,6 +33,7 @@ public final class DrawEntity {
 	private static final DrawEntity INSTANCE = new DrawEntity();
 
 	private PlayerModel<LivingEntity> player;
+	private PlayerModel<LivingEntity> slimPlayer;
 
 	public static @NonNull DrawEntity inst() {
 		return DrawEntity.INSTANCE;
@@ -77,20 +78,23 @@ public final class DrawEntity {
 		});
 	}
 
-	public void drawPlayer(final double x, final double y, final double width, final double height, final @NonNull ResourceLocation skin) {
+	public void drawPlayer(final double x, final double y, final double width, final double height, final @NonNull PlayerSkin skin) {
 		this.drawPlayer(x, y, width, height, skin, 0D, 0D);
 	}
 
-	public void drawPlayer(final double x, final double y, final double width, final double height, final @NonNull ResourceLocation skin, final double rotationYaw, final double rotationPitch) {
+	public void drawPlayer(final double x, final double y, final double width, final double height, final @NonNull PlayerSkin skin, final double rotationYaw, final double rotationPitch) {
 		this.drawPlayer(x, y, width, height, skin, 1D, rotationYaw, rotationPitch, x + width / 2D, y + height / 2D);
 	}
 
-	public void drawPlayer(final double x, final double y, final double width, final double height, final @NonNull ResourceLocation skin, final double scale, final double rotationYaw, final double rotationPitch, final double lookX, final double lookY) {
-		if (this.player == null) {
+	public void drawPlayer(final double x, final double y, final double width, final double height, final @NonNull PlayerSkin skin, final double scale, final double rotationYaw, final double rotationPitch, final double lookX, final double lookY) {
+		final boolean slim = skin.model() == PlayerSkin.Model.SLIM;
+		if (slim && this.slimPlayer == null) {
+			this.slimPlayer = new PlayerModel<>(Minecraft.getInstance().getEntityModels().bakeLayer(ModelLayers.PLAYER_SLIM), true);
+		} else if (!slim && this.player == null) {
 			this.player = new PlayerModel<>(Minecraft.getInstance().getEntityModels().bakeLayer(ModelLayers.PLAYER), false);
 		}
 
-		final PlayerModel<LivingEntity> model = this.player;
+		final PlayerModel<LivingEntity> model = slim ? this.slimPlayer : this.player;
 		final float playerHeight = EntityType.PLAYER.getHeight();
 		this.drawModel(x, y, width, height, DrawEntity.getExtent(EntityType.PLAYER.getWidth(), playerHeight, model), playerHeight, scale, rotationYaw, rotationPitch, lookX, lookY, (pose, buffer, lookYaw, lookPitch) -> {
 			model.head.yRot = (float) Math.toRadians(lookYaw);
@@ -100,7 +104,7 @@ public final class DrawEntity {
 			pose.scale(-1F, -1F, 1F);
 			pose.scale(0.9375F, 0.9375F, 0.9375F);
 			pose.translate(0F, -1.501F, 0F);
-			model.renderToBuffer(pose, buffer.getBuffer(model.renderType(skin)), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 1F, 1F, 1F, 1F);
+			model.renderToBuffer(pose, buffer.getBuffer(model.renderType(skin.texture())), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
 		});
 	}
 
@@ -117,7 +121,7 @@ public final class DrawEntity {
 		final float center = modelHeight / 2F;
 		DrawUtils.RASTER.drawRaster(x - width / 4D, y - height / 4D, width * 1.5D, height * 1.5D, GuiDrawableRaster.of(Lighting::setupForEntityInInventory, (pose, buffer) -> {
 			final EntityRenderDispatcher dispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
-			pose.mulPoseMatrix(new Matrix4f().scaling(size, -size, -size));
+			pose.mulPose(new Matrix4f().scaling(size, -size, -size));
 			pose.translate(0F, center, 0F);
 			pose.mulPose(new Quaternionf().rotationZ((float) Math.PI).mul(tilt));
 			pose.translate(0F, center, 0F);
@@ -140,7 +144,7 @@ public final class DrawEntity {
 		}
 
 		final BoundsCapture bounds = new BoundsCapture();
-		model.renderToBuffer(new PoseStack(), bounds, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 1F, 1F, 1F, 1F);
+		model.renderToBuffer(new PoseStack(), bounds, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
 		if (bounds.maxY <= bounds.minY) {
 			return extent;
 		}
@@ -178,7 +182,7 @@ public final class DrawEntity {
 		}
 
 		@Override
-		public VertexConsumer vertex(final double x, final double y, final double z) {
+		public VertexConsumer addVertex(final float x, final float y, final float z) {
 			this.radius = Math.max(this.radius, Math.sqrt(x * x + z * z));
 			this.minY   = Math.min(this.minY, y);
 			this.maxY   = Math.max(this.maxY, y);
@@ -186,38 +190,29 @@ public final class DrawEntity {
 		}
 
 		@Override
-		public VertexConsumer color(final int red, final int green, final int blue, final int alpha) {
+		public VertexConsumer setColor(final int red, final int green, final int blue, final int alpha) {
 			return this;
 		}
 
 		@Override
-		public VertexConsumer uv(final float u, final float v) {
+		public VertexConsumer setUv(final float u, final float v) {
 			return this;
 		}
 
 		@Override
-		public VertexConsumer overlayCoords(final int u, final int v) {
+		public VertexConsumer setUv1(final int u, final int v) {
 			return this;
 		}
 
 		@Override
-		public VertexConsumer uv2(final int u, final int v) {
+		public VertexConsumer setUv2(final int u, final int v) {
 			return this;
 		}
 
 		@Override
-		public VertexConsumer normal(final float x, final float y, final float z) {
+		public VertexConsumer setNormal(final float x, final float y, final float z) {
 			return this;
 		}
-
-		@Override
-		public void endVertex() {}
-
-		@Override
-		public void defaultColor(final int red, final int green, final int blue, final int alpha) {}
-
-		@Override
-		public void unsetDefaultColor() {}
 
 	}
 

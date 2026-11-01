@@ -2,6 +2,7 @@ modLoader = "javafml"
 loaderVersion = "${forge_loader_version_range}"
 license = "${license}"
 issueTrackerURL = "https://github.com/Zeldown/JOID-MC/issues"
+clientSideOnly = true
 [[mods]]
 modId = "${mod_id}"
 version = "${version}"
@@ -11,7 +12,6 @@ displayURL = "https://github.com/Zeldown/JOID-MC"
 credits = "${credits}"
 authors = "${mod_author}"
 description = '''${description}'''
-displayTest = "IGNORE_ALL_VERSION"
 [[dependencies.${mod_id}]]
 modId = "forge"
 mandatory = true

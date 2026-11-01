@@ -103,13 +103,14 @@ import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.DisconnectedScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
-import net.minecraft.client.gui.screens.controls.KeyBindsList;
-import net.minecraft.client.gui.screens.controls.KeyBindsScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.client.gui.screens.options.controls.KeyBindsList;
+import net.minecraft.client.gui.screens.options.controls.KeyBindsScreen;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.client.resources.language.ClientLanguage;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.Material;
@@ -120,6 +121,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.ServerOpListEntry;
 import net.minecraft.sounds.SoundEvents;
@@ -160,7 +162,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	@Override
 	public String getVersion() {
-		return "1.20.1";
+		return "1.21.1";
 	}
 
 	@Override
@@ -176,8 +178,8 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	@Override
 	public Map<ClientTestScenario, String> getExclusions() {
 		final Map<ClientTestScenario, String> exclusions = new EnumMap<>(ClientTestScenario.class);
-		exclusions.put(ClientTestScenario.AUDIO_INTERFACE, "Minecraft 1.20.1 has no interface sound category, JOID follows the master volume");
-		exclusions.put(ClientTestScenario.NESTED_FEATURE_RASTER, "Minecraft 1.20.1 draws at once, it has no feature render pipeline");
+		exclusions.put(ClientTestScenario.AUDIO_INTERFACE, "Minecraft 1.21.1 has no interface sound category, JOID follows the master volume");
+		exclusions.put(ClientTestScenario.NESTED_FEATURE_RASTER, "Minecraft 1.21.1 draws at once, it has no feature render pipeline");
 		return exclusions;
 	}
 
@@ -388,7 +390,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	public boolean canOpenDemoContainer(final int level) {
 		return this.computeOnServer(player -> {
 			final MinecraftServer server = player.getServer();
-			final ServerPlayer stranger = new ServerPlayer(server, server.overworld(), new GameProfile(UUID.randomUUID(), "JOIDStranger"));
+			final ServerPlayer stranger = new ServerPlayer(server, server.overworld(), new GameProfile(UUID.randomUUID(), "JOIDStranger"), ClientInformation.createDefault());
 			if (level > 0) {
 				server.getPlayerList().getOps().add(new ServerOpListEntry(stranger.getGameProfile(), level == 1 ? 1 : 2, false));
 			}
@@ -483,7 +485,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	@Override
 	public boolean isDebugScreenShown() {
-		return Minecraft.getInstance().options.renderDebug;
+		return Minecraft.getInstance().getDebugOverlay().showDebugScreen();
 	}
 
 	@Override
@@ -591,7 +593,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	@Override
 	public void startSoundCapture() {
 		this.sounds.clear();
-		this.soundListener = (sound, accessor) -> this.sounds.add(sound.getLocation().toString());
+		this.soundListener = (sound, accessor, range) -> this.sounds.add(sound.getLocation().toString());
 		Minecraft.getInstance().getSoundManager().addListener(this.soundListener);
 	}
 
@@ -645,7 +647,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	@Override
 	public Resource createSprite(final ClientTestItem item) {
-		return Resource.of(new Material(InventoryMenu.BLOCK_ATLAS, ResourceLocation.tryParse("item/" + item.name().toLowerCase(Locale.ROOT))));
+		return Resource.of(new Material(InventoryMenu.BLOCK_ATLAS, ResourceLocation.parse("item/" + item.name().toLowerCase(Locale.ROOT))));
 	}
 
 	@Override
@@ -686,7 +688,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 			case PIG -> node.type(EntityType.PIG);
 			case ZOMBIE -> node.type(EntityType.ZOMBIE);
 			case PLAYER_PROFILE -> node.profile(new GameProfile(new UUID(0L, 15L), "Steve"));
-			case PLAYER_SKIN -> node.skin(ResourceLocation.tryBuild("joid", "demo/textures/skin.png"));
+			case PLAYER_SKIN -> node.skin(new PlayerSkin(ResourceLocation.fromNamespaceAndPath("joid", "demo/textures/skin.png"), null, null, null, PlayerSkin.Model.WIDE, false));
 		};
 	}
 
@@ -713,7 +715,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	@Override
 	public BufferedImage readTexture(final ClientTestTexture texture) {
-		try (final InputStream stream = Minecraft.getInstance().getResourceManager().getResource(ResourceLocation.tryParse(MinecraftClientTestPilot.texture(texture))).orElseThrow().open()) {
+		try (final InputStream stream = Minecraft.getInstance().getResourceManager().getResource(ResourceLocation.parse(MinecraftClientTestPilot.texture(texture))).orElseThrow().open()) {
 			return ImageIO.read(stream);
 		} catch (final IOException exception) {
 			throw new AssertionError("Unable to read the texture " + texture, exception);

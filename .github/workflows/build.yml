@@ -3,10 +3,10 @@ name: Build
 on:
   push:
     branches:
-      - version/1.20.1
+      - version/1.21.1
   pull_request:
     branches:
-      - version/1.20.1
+      - version/1.21.1
   workflow_dispatch:
     inputs:
       showcase:

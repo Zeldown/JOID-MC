@@ -18,8 +18,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 
@@ -70,7 +69,7 @@ public final class DrawItem {
 			return;
 		}
 
-		final float cooldown = minecraft.player.getCooldowns().getCooldownPercent(stack.getItem(), minecraft.getFrameTime());
+		final float cooldown = minecraft.player.getCooldowns().getCooldownPercent(stack.getItem(), minecraft.getTimer().getGameTimeDeltaPartialTick(true));
 		if (cooldown <= 0F) {
 			return;
 		}
@@ -97,57 +96,46 @@ public final class DrawItem {
 	}
 
 	private static boolean isGlint(final RenderType type) {
-		return type == RenderType.glint() || type == RenderType.glintDirect() || type == RenderType.glintTranslucent() || type == RenderType.entityGlint() || type == RenderType.entityGlintDirect() || type == RenderType.armorGlint() || type == RenderType.armorEntityGlint();
+		return type == RenderType.glint() || type == RenderType.glintTranslucent() || type == RenderType.entityGlint() || type == RenderType.entityGlintDirect() || type == RenderType.armorEntityGlint();
 	}
 
 	private static ItemStack withFoil(final ItemStack stack) {
 		final ItemStack copy = stack.copy();
-		final ListTag enchantments = new ListTag();
-		enchantments.add(new CompoundTag());
-		copy.getOrCreateTag().put("Enchantments", enchantments);
+		copy.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
 		return copy;
 	}
 
 	private static final class NoVertexConsumer implements VertexConsumer {
 
 		@Override
-		public VertexConsumer vertex(final double x, final double y, final double z) {
+		public VertexConsumer addVertex(final float x, final float y, final float z) {
 			return this;
 		}
 
 		@Override
-		public VertexConsumer color(final int red, final int green, final int blue, final int alpha) {
+		public VertexConsumer setColor(final int red, final int green, final int blue, final int alpha) {
 			return this;
 		}
 
 		@Override
-		public VertexConsumer uv(final float u, final float v) {
+		public VertexConsumer setUv(final float u, final float v) {
 			return this;
 		}
 
 		@Override
-		public VertexConsumer overlayCoords(final int u, final int v) {
+		public VertexConsumer setUv1(final int u, final int v) {
 			return this;
 		}
 
 		@Override
-		public VertexConsumer uv2(final int u, final int v) {
+		public VertexConsumer setUv2(final int u, final int v) {
 			return this;
 		}
 
 		@Override
-		public VertexConsumer normal(final float x, final float y, final float z) {
+		public VertexConsumer setNormal(final float x, final float y, final float z) {
 			return this;
 		}
-
-		@Override
-		public void endVertex() {}
-
-		@Override
-		public void defaultColor(final int red, final int green, final int blue, final int alpha) {}
-
-		@Override
-		public void unsetDefaultColor() {}
 
 	}
 

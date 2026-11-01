@@ -127,7 +127,7 @@ public class ShowServers extends UI implements IShowFocus {
 			TextNode.create(102, 28).text(Text.create(server.name(), ShowTheme.font(FontWeight.SEMI_BOLD, 24F, ShowTheme.TEXT))).anchorY(Align.CENTER).attach(row);
 			TextNode.create(102, 54).text(Text.create(server.motd(), TextInfo.create(MinecraftFont.DEFAULT, 16F).color(ShowTheme.TEXT).shadow(2F, 2F))).attach(row);
 			TextNode.create(820, 44).text(Text.create(server.players(), ShowTheme.font(FontWeight.SEMI_BOLD, 20F, ShowTheme.MUTED)).alignX(Align.END)).anchorX(Align.END).anchorY(Align.CENTER).attach(row);
-			ResourceNode.create(850, 36, 30, 24).resource(ResourceBuilder.create().nearest().textureCoords(0D, (176D + (5 - server.ping()) * 8D) / 256D, 10D / 256D, (184D + (5 - server.ping()) * 8D) / 256D).of("minecraft:textures/gui/icons.png")).interactive(false).attach(row);
+			ResourceNode.create(850, 36, 30, 24).resource(ResourceBuilder.create().nearest().of("minecraft:textures/gui/sprites/server_list/ping_" + server.ping() + ".png")).interactive(false).attach(row);
 		})
 		.hoverDuration(160L)
 		.attach(list);

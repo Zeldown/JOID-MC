@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.BiConsumer;
 
 import org.joml.Matrix4f;
+import org.joml.Matrix4fStack;
 
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -38,26 +39,26 @@ public final class GuiDrawableRaster implements DrawableRaster {
 		final float size = Math.min(width, height);
 		final Matrix4f projection = RenderSystem.getProjectionMatrix();
 		final VertexSorting sorting = RenderSystem.getVertexSorting();
-		final PoseStack modelView = RenderSystem.getModelViewStack();
+		final Matrix4fStack modelView = RenderSystem.getModelViewStack();
 		final PoseStack pose = GuiDrawableRaster.getPose(GuiDrawableRaster.rasterDepth);
 		final MultiBufferSource.BufferSource buffer = GuiDrawableRaster.getBuffer(GuiDrawableRaster.rasterDepth);
 		RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(0F, width, height, 0F, -10000F, 10000F), VertexSorting.ORTHOGRAPHIC_Z);
-		modelView.pushPose();
-		modelView.setIdentity();
+		modelView.pushMatrix();
+		modelView.identity();
 		RenderSystem.applyModelViewMatrix();
 		this.lighting.run();
 		pose.pushPose();
 		GuiDrawableRaster.rasterDepth++;
 		try {
 			pose.translate(width / 2F, height / 2F, 0F);
-			pose.mulPoseMatrix(new Matrix4f().scaling(size, -size, size));
+			pose.mulPose(new Matrix4f().scaling(size, -size, size));
 			this.draw.accept(pose, buffer);
 			buffer.endBatch();
 		} finally {
 			GuiDrawableRaster.rasterDepth--;
 			pose.popPose();
 			Lighting.setupFor3DItems();
-			modelView.popPose();
+			modelView.popMatrix();
 			RenderSystem.applyModelViewMatrix();
 			RenderSystem.setProjectionMatrix(projection, sorting);
 		}
@@ -73,7 +74,7 @@ public final class GuiDrawableRaster implements DrawableRaster {
 
 	private static MultiBufferSource.BufferSource getBuffer(final int depth) {
 		if (depth == GuiDrawableRaster.BUFFER_LIST.size()) {
-			GuiDrawableRaster.BUFFER_LIST.add(new RenderBuffers().bufferSource());
+			GuiDrawableRaster.BUFFER_LIST.add(new RenderBuffers(1).bufferSource());
 		}
 
 		return GuiDrawableRaster.BUFFER_LIST.get(depth);

@@ -12,11 +12,11 @@ import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.input.mouse.MouseButton;
 import lombok.Getter;
 import lombok.NonNull;
-import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.StringUtil;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
@@ -58,7 +58,7 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 	@Override
 	public void render(final GuiGraphics graphics, final int mouseX, final int mouseY, final float partialTick) {
 		if (this.hasBackground()) {
-			super.renderBackground(graphics);
+			super.renderBackground(graphics, mouseX, mouseY, partialTick);
 		}
 
 		if (!this.ui.getNodeList().contains(this.ui.getCarriedNode())) {
@@ -106,8 +106,8 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 	}
 
 	@Override
-	public boolean mouseScrolled(final double x, final double y, final double scroll) {
-		return this.bridge.mouseScroll(0D, scroll) || super.mouseScrolled(x, y, scroll);
+	public boolean mouseScrolled(final double x, final double y, final double scrollX, final double scrollY) {
+		return this.bridge.mouseScroll(scrollX, scrollY) || super.mouseScrolled(x, y, scrollX, scrollY);
 	}
 
 	@Override
@@ -122,7 +122,7 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 
 	@Override
 	public boolean charTyped(final char character, final int modifiers) {
-		return SharedConstants.isAllowedChatCharacter(character) && this.bridge.charTyped(character) || super.charTyped(character, modifiers);
+		return StringUtil.isAllowedChatCharacter(character) && this.bridge.charTyped(character) || super.charTyped(character, modifiers);
 	}
 
 	public Slot getHoveredSlot() {

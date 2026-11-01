@@ -14,7 +14,7 @@ public final class ForgeContainerTypeRegistry {
 	public static void register(final IEventBus modBus) {
 		modBus.addListener((final RegisterEvent event) -> event.register(Registries.MENU, helper -> {
 			for (final ContainerTypeRegistry<?> type : ContainerTypeRegistry.getRegistered()) {
-				helper.register(ResourceLocation.tryParse(type.getId()), type.getType());
+				helper.register(ResourceLocation.parse(type.getId()), type.getType());
 			}
 		}));
 	}

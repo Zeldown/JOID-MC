@@ -15,5 +15,7 @@ dependencies {
     // see https://maven.fabricmc.net/fabric-loom/fabric-loom.gradle.plugin/maven-metadata.xml for new versions
     implementation('fabric-loom:fabric-loom.gradle.plugin:1.17.21')
     // see https://projects.neoforged.net/neoforged/moddevgradle for new versions
-    implementation('net.neoforged.moddev.legacyforge:net.neoforged.moddev.legacyforge.gradle.plugin:2.0.148')
+    implementation('net.neoforged.moddev:net.neoforged.moddev.gradle.plugin:2.0.148')
+    // see https://plugins.gradle.org/plugin/net.minecraftforge.gradle for new versions
+    implementation('net.minecraftforge.gradle:net.minecraftforge.gradle.gradle.plugin:7.0.40')
 }

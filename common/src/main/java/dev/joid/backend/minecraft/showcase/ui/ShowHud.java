@@ -30,8 +30,8 @@ import net.minecraft.client.player.LocalPlayer;
 @UIDataOverlayLayer(layer = OverlayLayer.HEALTH, cancel = true)
 public class ShowHud extends UI {
 
-	private static final Resource FOOD  = ResourceBuilder.create().nearest().textureCoords(52D / 256D, 27D / 256D, 61D / 256D, 36D / 256D).of("minecraft:textures/gui/icons.png");
-	private static final Resource HEART = ResourceBuilder.create().nearest().textureCoords(52D / 256D, 0D, 61D / 256D, 9D / 256D).of("minecraft:textures/gui/icons.png");
+	private static final Resource FOOD  = ResourceBuilder.create().nearest().of("minecraft:textures/gui/sprites/hud/food_full.png");
+	private static final Resource HEART = ResourceBuilder.create().nearest().of("minecraft:textures/gui/sprites/hud/heart/full.png");
 
 	private double start;
 
@@ -129,6 +129,16 @@ public class ShowHud extends UI {
 	@UIDataOverlay(active = true)
 	@UIDataOverlayLayer(layer = OverlayLayer.CONTEXTUAL_BAR, cancel = true)
 	public static class Experience extends UI {
+
+		@Override
+		public void init() {}
+
+	}
+
+	@UIData(anchorY = Align.END)
+	@UIDataOverlay(active = true)
+	@UIDataOverlayLayer(layer = OverlayLayer.EXPERIENCE_LEVEL, cancel = true)
+	public static class Level extends UI {
 
 		@Override
 		public void init() {}

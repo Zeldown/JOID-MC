@@ -1,26 +1,30 @@
 package dev.joid.backend.minecraft.neoforge.network;
 
-import dev.joid.backend.minecraft.MinecraftJoid;
-import dev.joid.backend.minecraft.bridge.network.PayloadMessage;
+import dev.joid.backend.minecraft.bridge.network.PayloadPacket;
+import dev.joid.backend.minecraft.loader.network.IPayload;
 import dev.joid.backend.minecraft.loader.network.PayloadType;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.simple.SimpleChannel;
+import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class NeoForgePayloads {
 
-	public static void register() {
-		if (PayloadType.getRegistered().isEmpty()) {
-			return;
+	public static void register(final RegisterPayloadHandlersEvent event) {
+		final PayloadRegistrar registrar = event.registrar("1").optional();
+		for (final PayloadType<?, ?> type : PayloadType.getRegistered()) {
+			NeoForgePayloads.register(registrar, type);
 		}
+	}
 
-		final SimpleChannel channel = NetworkRegistry.newSimpleChannel(ResourceLocation.tryBuild(MinecraftJoid.MOD_ID, "main"), () -> "1", NetworkRegistry.acceptMissingOr("1"), NetworkRegistry.acceptMissingOr("1"));
-		channel.messageBuilder(PayloadMessage.class, 0, NetworkDirection.PLAY_TO_SERVER).encoder(PayloadMessage::write).decoder(PayloadMessage::read).consumerMainThread((message, context) -> message.fireServer(context.get().getSender())).add();
-		PayloadType.sender(payload -> channel.sendToServer(new PayloadMessage(payload)));
+	public static void registerSender() {
+		PayloadType.sender(payload -> PacketDistributor.sendToServer(new PayloadPacket<>(payload)));
+	}
+
+	private static <T extends IPayload> void register(final PayloadRegistrar registrar, final PayloadType<T, ?> type) {
+		registrar.playToServer(PayloadPacket.getType(type), PayloadPacket.codec(type), (packet, context) -> type.fireServer(packet.payload(), context.player()));
 	}
 
 }
