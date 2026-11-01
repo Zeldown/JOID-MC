@@ -1,16 +1,16 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.12.2/docs/images/logo.png" width="128" alt="JOID logo">
+<img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.8.9/docs/images/logo.png" width="128" alt="JOID logo">
 
 # JOID-MC
 ## JOID interfaces inside Minecraft
 
 <div align="center">
-  <img align="center" src="https://img.shields.io/badge/minecraft-1.12.2-brightgreen">
+  <img align="center" src="https://img.shields.io/badge/minecraft-1.8.9-brightgreen">
   <img align="center" src="https://img.shields.io/badge/joid-8.0.0-blue">
   <img align="center" src="https://img.shields.io/badge/loader-Forge-orange">
   <img align="center" src="https://img.shields.io/badge/license-Apache--2.0-blue">
-  <img align="center" src="https://github.com/Zeldown/JOID-MC/actions/workflows/build.yml/badge.svg?branch=version/1.12.2">
+  <img align="center" src="https://github.com/Zeldown/JOID-MC/actions/workflows/build.yml/badge.svg?branch=version/1.8.9">
   <a href="https://discord.joid.dev"><img align="center" src="https://img.shields.io/badge/discord-join-5865F2"></a>
 </div>
 
@@ -41,41 +41,41 @@ JOID-MC brings [JOID](https://github.com/Zeldown/JOID), the Java UI engine, insi
 Draw your screen in your design tool, copy each layer's values, and get the same result in the game.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.12.2/docs/images/copy-the-design.webp" alt="A quest panel in its mockup, then the same panel in the Minecraft window, identical" width="100%">
+  <img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.8.9/docs/images/copy-the-design.webp" alt="A quest panel in its mockup, then the same panel in the Minecraft window, identical" width="100%">
 </p>
 
 ## Showcase
 
-Real renders inside the game window, styled for this showcase: JOID ships with no design of its own. Watch them in the [1080p video](https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.12.2/docs/images/showcase.mp4).
+Real renders inside the game window, styled for this showcase: JOID ships with no design of its own. Watch them in the [1080p video](https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.8.9/docs/images/showcase.mp4).
 
 <table>
   <tr>
-    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.12.2/docs/images/showcase-hud.webp" alt="Health, hunger and experience replaced by an animated JOID HUD, in game"></td>
-    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.12.2/docs/images/showcase-chest.webp" alt="A chest redrawn with JOID over the world: real slots, a rotating player, items dragged with the mouse"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.8.9/docs/images/showcase-hud.webp" alt="Health, hunger and experience replaced by an animated JOID HUD, in game"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.8.9/docs/images/showcase-chest.webp" alt="A chest redrawn with JOID over the world: real slots, a rotating player, items dragged with the mouse"></td>
   </tr>
   <tr>
     <td align="center"><sub><b>HUD.</b> Replace any layer, in game.</sub></td>
     <td align="center"><sub><b>Containers.</b> Real slots, synced with the server.</sub></td>
   </tr>
   <tr>
-    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.12.2/docs/images/showcase-bestiary.webp" alt="Cards of mobs, blocks and items turning in 3D, with a detail panel"></td>
-    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.12.2/docs/images/showcase-fonts.webp" alt="The Minecraft font from 8 to 72 px, chat colors and formats, the enchanting table alphabet decoded, then a 6x zoom that stays pixel-sharp"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.8.9/docs/images/showcase-bestiary.webp" alt="Cards of mobs, blocks and items turning in 3D, with a detail panel"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.8.9/docs/images/showcase-fonts.webp" alt="The Minecraft font from 8 to 72 px, chat colors and formats, the enchanting table alphabet decoded, then a 6x zoom that stays pixel-sharp"></td>
   </tr>
   <tr>
     <td align="center"><sub><b>Game objects.</b> Entities, blocks and items, rendered in 3D.</sub></td>
     <td align="center"><sub><b>Fonts.</b> The Minecraft font, sharp at any size, with § colors.</sub></td>
   </tr>
   <tr>
-    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.12.2/docs/images/showcase-anvil.webp" alt="A redesigned anvil: a word of the sword name is selected with a double click and retyped, the preview and the cost follow, then the renamed sword is taken"></td>
-    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.12.2/docs/images/showcase-servers.webp" alt="A server list with colored messages of the day: a server is dragged to the top, then the list scrolls"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.8.9/docs/images/showcase-anvil.webp" alt="A redesigned anvil: a word of the sword name is selected with a double click and retyped, the preview and the cost follow, then the renamed sword is taken"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.8.9/docs/images/showcase-servers.webp" alt="A server list with colored messages of the day: a server is dragged to the top, then the list scrolls"></td>
   </tr>
   <tr>
     <td align="center"><sub><b>Forms.</b> Type, check and preview, in a real anvil.</sub></td>
     <td align="center"><sub><b>Lists.</b> Drag to reorder, scroll smoothly.</sub></td>
   </tr>
   <tr>
-    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.12.2/docs/images/showcase-daylight.webp" alt="A daylight panel over the live world: the sun dial, the clock, the sky, the moon phase and the world follow one time value, first as the game advances it, then as the slider is dragged"></td>
-    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.12.2/docs/images/showcase-video.webp" alt="A video with sound inside the game window, paused and resumed with its own controls, then previewed frame by frame while the pointer hovers the timeline"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.8.9/docs/images/showcase-daylight.webp" alt="A daylight panel over the live world: the sun dial, the clock, the sky, the moon phase and the world follow one time value, first as the game advances it, then as the slider is dragged"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/Zeldown/JOID-MC/version/1.8.9/docs/images/showcase-video.webp" alt="A video with sound inside the game window, paused and resumed with its own controls, then previewed frame by frame while the pointer hovers the timeline"></td>
   </tr>
   <tr>
     <td align="center"><sub><b>Reactive.</b> Bind once, never refresh.</sub></td>
@@ -107,7 +107,7 @@ Download the `dev` jar of your loader from the [releases](https://github.com/Zel
 
 ```gradle
 dependencies {
-    implementation files("libs/joid-backend-minecraft-forge-1.12.2-1.0.0-dev.jar")
+    implementation files("libs/joid-backend-minecraft-forge-1.8.9-1.0.0-dev.jar")
 }
 ```
 
@@ -120,16 +120,21 @@ JOID-MC is a separate mod that players install next to yours, like any library m
 1. **Do not bundle it** in your jar: no shadow, no copy of its classes.
 2. **Declare it as required on the client** in the metadata of your mod, with the mod id `joid`:
 
-**Forge** · `@Mod`
+**Forge** · `@Mod` and `mcmod.info`
 
 ```java
-@Mod(modid = "yourmod", dependencies = "required-client-after:joid@[1.0.0,)")
+@Mod(modid = "yourmod", dependencies = "required-after:joid@[1.0.0,)")
 public class YourMod {
 
 }
 ```
 
-`required-client` makes JOID-MC required on the client only: a dedicated server starts without it. A mod that also runs on servers calls JOID-MC from its client proxy only.
+```json
+"requiredMods": ["joid"],
+"dependencies": ["joid"]
+```
+
+Forge 1.8.9 has no client-side dependency: use `required-after` when your mod runs on the client only. A mod that also runs on servers declares `after:joid`, since a `required-after` stops a dedicated server that does not have JOID-MC, and calls JOID-MC from its client proxy only.
 
 3. **Mark JOID-MC as a required dependency** on CurseForge and Modrinth, so that launchers install it with your mod.
 
@@ -190,7 +195,7 @@ public class WelcomeUI extends UI {
 | `pause` | `true` | Pauses a singleplayer game while the screen is open. The paused game also holds the payloads sent to its server until it resumes: a screen that sends one sets `pause = false`. Container UIs never pause. |
 | `background` | `true` | Draws the Minecraft menu background behind the UI, screens and containers alike: the darkened world in game, the dirt on the title screen. `false` draws no Minecraft background. |
 
-A screen of Minecraft 1.12.2 has no title, so `@UIDataMinecraft` has none. The Minecraft background and the UI backdrop of JOID (`@UIData(background)`, default `false`, see [UIs](https://documentation.joid.dev/use/learn/describing-the-ui/uis/)) are independent: add `@UIData(background = true)` to draw the backdrop as well.
+A screen of Minecraft 1.8.9 has no title, so `@UIDataMinecraft` has none. The Minecraft background and the UI backdrop of JOID (`@UIData(background)`, default `false`, see [UIs](https://documentation.joid.dev/use/learn/describing-the-ui/uis/)) are independent: add `@UIData(background = true)` to draw the backdrop as well.
 
 - `JOID.open(ui)` opens the screen, `JOID.close(ui)` closes it, and `Escape` closes the top UI unless it is `@UIData(closeable = false)`. Several UIs open at once share one screen, which closes with the last of them.
 - When the game or another mod opens its own screen, the JOID UIs of the screen close.
@@ -243,7 +248,7 @@ public Object getClientGuiElement(final int id, final EntityPlayer player, final
 |---|---|
 | `ContainerUI(container)` | The constructor takes the container that the screen shows. |
 | `getContainer()` | The container: its `inventorySlots`, `getSlot(index)` and your own fields. |
-| `getCarried()` | The stack held by the mouse, `ItemStack.EMPTY` when there is none. |
+| `getCarried()` | The stack held by the mouse, `null` when there is none. |
 | `bounds(node)` | The panel is this node, wherever it moves. |
 | `bounds(x, y, width, height)` | The panel is this fixed area, in canvas units. |
 | `getBounds()` | The panel used right now: `{x, y, width, height}`. |
@@ -252,7 +257,7 @@ public Object getClientGuiElement(final int id, final EntityPlayer player, final
 
 The panel is the area of the container: a click outside it drops the held stack, a click inside it on no slot does nothing, like in vanilla. Without `bounds(...)`, the panel is the box around all visible nodes; when that box covers the whole window (a full-screen background, for example), no click can fall outside, and the dev mode warns about it in the console.
 
-The lib draws the held stack under the mouse, with its count, durability bar and cooldown, at the item size of the last hovered slot. During a drag, it shows what is left to place.
+The lib draws the held stack under the mouse, with its count and durability bar, at the item size of the last hovered slot. During a drag, it shows what is left to place.
 
 ### SlotNode
 
@@ -269,9 +274,9 @@ SlotNode.create(0, 0, 72, 72).slot(super.getContainer().getSlot(0)).color(Color.
 | `hoveredColor(Color)` | `#FFFFFF80` | Drawn over the node while the slot is hovered. `Color.TRANSPARENT` turns it off. |
 | `getItemSize()` | | Size of the item: 16/18 of the smallest side of the node, like a 16 px item in an 18 px vanilla slot. |
 
-The slot draws its item centered with its count, durability bar and cooldown, the empty-slot icon of armor and offhand slots, the preview of a drag (the count turns yellow when the slot is full) and the vanilla tooltip of the hovered item. Every vanilla slot action works: click, right-click, shift-click, double-click, drag to split, number keys and `Q` to drop. Shift-click moves stacks with the `transferStackInSlot` of your container.
+The slot draws its item centered with its count and durability bar, the empty-slot icon of armor slots, the preview of a drag (the count turns yellow when the slot is full) and the vanilla tooltip of the hovered item. Every vanilla slot action works: click, right-click, shift-click, double-click, drag to split, number keys and `Q` to drop. Shift-click moves stacks with the `transferStackInSlot` of your container.
 
-The `xPos` and `yPos` of a `Slot` are not used: the `SlotNode` places it. The player inventory comes after your own slots in your container: the 27 slots of the inventory, then the 9 of the hotbar. For a container with 27 slots of its own:
+The `xDisplayPosition` and `yDisplayPosition` of a `Slot` are not used: the `SlotNode` places it. The player inventory comes after your own slots in your container: the 27 slots of the inventory, then the 9 of the hotbar. For a container with 27 slots of its own:
 
 ```java
 for (int index = 0; index < 27; index++) {
@@ -321,26 +326,24 @@ An overlay without `@UIDataOverlayLayer` is drawn above the whole HUD; an open s
 
 | `OverlayLayer` | Vanilla layer |
 |---|---|
-| `CAMERA_OVERLAYS` | Full-screen effects: the vignette, the pumpkin and the nether portal (`VIGNETTE`, `HELMET`, `PORTAL` of Forge). |
-| `CROSSHAIR` | The crosshair and the attack indicator (`CROSSHAIRS`). |
-| `HOTBAR` | The hotbar and the offhand slot (`HOTBAR`). |
-| `ARMOR` | The armor bar (`ARMOR`). |
+| `CAMERA_OVERLAYS` | Full-screen effects: the pumpkin and the nether portal (`HELMET`, `PORTAL` of Forge). |
+| `HOTBAR` | The hotbar (`HOTBAR`). |
+| `CROSSHAIR` | The crosshair (`CROSSHAIRS`). |
+| `BOSS_BAR` | The boss bar (`BOSSHEALTH`). |
 | `HEALTH` | The hearts (`HEALTH`). |
+| `ARMOR` | The armor bar (`ARMOR`). |
 | `FOOD` | The hunger bar (`FOOD`). |
-| `AIR` | The air bubbles (`AIR`). |
 | `MOUNT_HEALTH` | The hearts of the ridden mob (`HEALTHMOUNT`). |
+| `AIR` | The air bubbles (`AIR`). |
 | `CONTEXTUAL_BAR` | The experience bar, or the jump bar of a horse (`EXPERIENCE`, `JUMPBAR`). |
-| `EFFECTS` | The status effect icons (`POTION_ICONS`). |
-| `BOSS_BAR` | The boss bars (`BOSSHEALTH`). |
 | `CHAT` | The chat (`CHAT`). |
 | `PLAYER_LIST` | The player list, `Tab` (`PLAYER_LIST`). |
-| `SUBTITLES` | The subtitles of sounds (`SUBTITLES`). |
 
 ## Minecraft components
 
 | Node | Shows |
 |---|---|
-| `ItemNode` | An item stack, with its count, durability bar, cooldown, glint and tooltip. |
+| `ItemNode` | An item stack, with its count, durability bar, glint and tooltip. |
 | `BlockNode` | A block state in 3D, with its rotation. |
 | `EntityNode` | An entity or a player skin in 3D, which can follow the mouse. |
 | `SlotNode` | A slot of a container (see [SlotNode](#slotnode)). |
@@ -356,12 +359,11 @@ Items, blocks and entities are lit like in the vanilla inventory. Every setter a
 | `bar(boolean)` | `true` | Draws the durability bar of a damaged item. |
 | `glint(boolean)` | the item's | `true` adds the enchantment glint, `false` removes it. |
 | `tooltip(boolean)` | `false` | Shows the vanilla tooltip of the item on hover. |
-| `cooldown(boolean)` | `true` | Draws the cooldown of the local player on the item. |
 
 ```java
-ItemNode.create(100, 100, 64, 64).stack(new ItemStack(Items.DIAMOND_SWORD)).glint(true).tooltip(true).attach(this);
+ItemNode.create(100, 100, 64, 64).stack(new ItemStack(Items.diamond_sword)).glint(true).tooltip(true).attach(this);
 
-ItemNode.create(200, 100, 64, 64).stack(() -> Minecraft.getMinecraft().player.getHeldItemMainhand()).count(false).attach(this);
+ItemNode.create(200, 100, 64, 64).stack(() -> Minecraft.getMinecraft().thePlayer.getHeldItem()).count(false).attach(this);
 ```
 
 ### BlockNode
@@ -373,7 +375,7 @@ ItemNode.create(200, 100, 64, 64).stack(() -> Minecraft.getMinecraft().player.ge
 | `rotationPitch(double)` | `30D` | Tilt toward you, in degrees. The defaults give the inventory view. |
 
 ```java
-BlockNode.create(300, 100, 64, 64).block(Blocks.FURNACE.getDefaultState()).rotationYaw(() -> System.currentTimeMillis() % 3600L / 10D).attach(this);
+BlockNode.create(300, 100, 64, 64).block(Blocks.furnace.getDefaultState()).rotationYaw(() -> System.currentTimeMillis() % 3600L / 10D).attach(this);
 ```
 
 ### EntityNode
@@ -394,7 +396,7 @@ BlockNode.create(300, 100, 64, 64).block(Blocks.FURNACE.getDefaultState()).rotat
 ```java
 EntityNode.create(100, 300, 120, 200).type(EntityWolf.class).followMouse(true).attach(this);
 
-EntityNode.create(240, 300, 120, 200).entity(() -> Minecraft.getMinecraft().player).rotationYaw(-30D).attach(this);
+EntityNode.create(240, 300, 120, 200).entity(() -> Minecraft.getMinecraft().thePlayer).rotationYaw(-30D).attach(this);
 
 EntityNode.create(380, 300, 120, 200).profile(new GameProfile(null, "Notch")).attach(this);
 
@@ -405,7 +407,7 @@ The last one reads its skin from `assets/yourmod/textures/entity/guard.png`, a 6
 
 ### Tooltips
 
-Tooltips are vanilla tooltips. The text tooltip of any node takes `§` codes, and `drawHover` of a UI takes an `ItemStack`, an `ITextComponent` or a list of lines:
+Tooltips are vanilla tooltips. The text tooltip of any node takes `§` codes, and `drawHover` of a UI takes an `ItemStack`, an `IChatComponent` or a list of lines:
 
 ```java
 RectNode.create(100, 520, 64, 64).color(Color.decode("#8B8B8B")).hover(() -> "§6Quest board").attach(this);
@@ -420,7 +422,7 @@ final TextInfo info = TextInfo.create(MinecraftFont.DEFAULT, MinecraftFont.SIZE 
 
 TextNode.create(100, 100).text(Text.create("§6Gold §lbold §kmagic", info)).attach(this);
 
-TextNode.create(100, 160).text(Text.create(new TextComponentTranslation("menu.game"), info)).attach(this);
+TextNode.create(100, 160).text(Text.create(new ChatComponentTranslation("menu.game"), info)).attach(this);
 ```
 
 | Member | Font |
@@ -439,7 +441,7 @@ The vanilla shadow is `shadowTint(0.25F)`, the color of each glyph at 25 %, with
 
 `LegacyTextColor` gives the 16 colors as JOID colors: `LegacyTextColor.GOLD.getColor()`.
 
-A chat `ITextComponent` keeps its colors and styles, and translates its translation parts in the language of the game. The `§` codes and the chat components work with every JOID font, and the Minecraft fonts with everything else of [Text](https://documentation.joid.dev/use/learn/describing-the-ui/text/): markup, effects, alignment, wrapping. Like the vanilla text boxes, JOID text fields drop a typed `§`: the codes come from your code, never from the player.
+A chat `IChatComponent` keeps its colors and styles, and translates its translation parts in the language of the game. The `§` codes and the chat components work with every JOID font, and the Minecraft fonts with everything else of [Text](https://documentation.joid.dev/use/learn/describing-the-ui/text/): markup, effects, alignment, wrapping. Like the vanilla text boxes, JOID text fields drop a typed `§`: the codes come from your code, never from the player.
 
 ## Textures and resources
 
@@ -452,7 +454,7 @@ ResourceNode.create(200, 100, 64, 64).resource(Resource.of(Minecraft.getMinecraf
 
 ResourceNode.create(300, 100, 64, 64).resource(Resource.of(Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:blocks/crafting_table_top"))).attach(this);
 
-ResourceNode.create(560, 100, 64, 64).resource(Resource.of(Minecraft.getMinecraft().getTextureManager().getTexture(TextureMap.LOCATION_BLOCKS_TEXTURE))).attach(this);
+ResourceNode.create(560, 100, 64, 64).resource(Resource.of(Minecraft.getMinecraft().getTextureManager().getTexture(TextureMap.locationBlocksTexture))).attach(this);
 ```
 
 | `Resource.of(...)` takes | Draws |
@@ -465,7 +467,7 @@ Animated sprites and `.mcmeta` animations play like in game, and the resources f
 
 ## Sound and key bindings
 
-JOID videos play at the volume of the game: the volume of the `ResourcePlayerNode`, times `Master Volume`. Minecraft 1.12.2 has no `UI` slider; `audioGroup` adds another slider of the Music & Sounds options:
+JOID videos play at the volume of the game: the volume of the `ResourcePlayerNode`, times `Master Volume`. Minecraft 1.8.9 has no `UI` slider; `audioGroup` adds another slider of the Music & Sounds options:
 
 ```java
 ResourcePlayerNode.create(430, 10, 640, 360).resource(Resource.of(new File("videos/intro.mp4"))).audioGroup(SoundCategory.MUSIC).attach(this);
@@ -488,8 +490,8 @@ In a custom node, `DrawItem`, `DrawBlock` and `DrawEntity` draw Minecraft object
 public void draw(final double mouseX, final double mouseY) {
 	DrawItem.inst().drawItem(super.getX(), super.getY(), 64D, this.stack);
 	DrawItem.inst().drawItemCount(super.getX(), super.getY(), 64D, this.stack, "§ex3");
-	DrawBlock.inst().drawBlock(super.getX() + 80D, super.getY(), 64D, Blocks.CHEST.getDefaultState(), 200D, 20D);
-	DrawEntity.inst().drawEntity(super.getX() + 160D, super.getY(), 64D, 128D, Minecraft.getMinecraft().player, 1D, 0D, 0D, super.toDrawX(mouseX), super.toDrawY(mouseY));
+	DrawBlock.inst().drawBlock(super.getX() + 80D, super.getY(), 64D, Blocks.chest.getDefaultState(), 200D, 20D);
+	DrawEntity.inst().drawEntity(super.getX() + 160D, super.getY(), 64D, 128D, Minecraft.getMinecraft().thePlayer, 1D, 0D, 0D, super.toDrawX(mouseX), super.toDrawY(mouseY));
 }
 ```
 
@@ -498,7 +500,6 @@ public void draw(final double mouseX, final double mouseY) {
 | `DrawItem.inst().drawItem(x, y, size, stack)` | The item model in a square of `size`. |
 | `drawItem(x, y, size, stack, glint)` | With the glint forced on (`true`) or off (`false`), `null` for the glint of the item. |
 | `drawItemBar(x, y, size, stack)` | The durability bar of a damaged item. |
-| `drawItemCooldown(x, y, size, stack)` | The cooldown of the local player on the item. |
 | `drawItemCount(x, y, size, stack)` | The count, when it is not 1. |
 | `drawItemCount(x, y, size, stack, text)` | Any text in place of the count, `§` codes included. |
 | `DrawBlock.inst().drawBlock(x, y, size, state)` | The block state in the inventory view. |
@@ -508,7 +509,7 @@ public void draw(final double mouseX, final double mouseY) {
 | `drawEntity(x, y, width, height, entity, scale, rotationYaw, rotationPitch, lookX, lookY)` | With its scale, and the head turned toward the point `lookX`, `lookY`. |
 | `DrawEntity.inst().drawPlayer(...)` | The same three forms with a skin `ResourceLocation` in place of the entity. |
 
-Draw the item, then its bar, cooldown and count, to match a slot. `toDrawX` and `toDrawY` turn the mouse into the coordinates of `draw`. See [Custom nodes](https://documentation.joid.dev/use/learn/going-further/custom-nodes/) and [Drawing shapes and text](https://documentation.joid.dev/use/learn/going-further/drawing/).
+Draw the item, then its bar and count, to match a slot. `toDrawX` and `toDrawY` turn the mouse into the coordinates of `draw`. See [Custom nodes](https://documentation.joid.dev/use/learn/going-further/custom-nodes/) and [Drawing shapes and text](https://documentation.joid.dev/use/learn/going-further/drawing/).
 
 ## Community
 
