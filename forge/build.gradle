@@ -130,6 +130,14 @@ tasks.named('javadoc', Javadoc) {
     source = sourceSets.main.allJava
 }
 
+tasks.matching { it.name == 'runClient' }.configureEach {
+    doFirst {
+        def config = file('runs/client/config/fml.toml')
+        config.parentFile.mkdirs()
+        config.text = 'splashscreen = true\nmaxThreads = -1\nversionCheck = true\ndefaultConfigPath = "defaultconfigs"\n'
+    }
+}
+
 ['devJar', 'prodJar'].each { name ->
     def jar = tasks.named(name, Jar)
     jar.configure {
