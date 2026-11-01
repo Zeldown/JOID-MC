@@ -9,6 +9,7 @@ import org.lwjgl.opengl.GL11;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 
 import dev.joid.backend.minecraft.bridge.render.MinecraftGlState;
@@ -59,6 +60,7 @@ public final class GuiDrawableRaster implements DrawableRaster {
 			try {
 				pose.translate(width / 2F, height / 2F, 0F);
 				pose.last().pose().multiply(Matrix4f.createScaleMatrix(size, -size, size));
+				pose.last().normal().mul(Matrix3f.createScaleMatrix(1F, -1F, 1F));
 				this.draw.accept(pose, buffer);
 				buffer.endBatch();
 			} finally {

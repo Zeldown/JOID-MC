@@ -3,6 +3,7 @@ package dev.joid.backend.minecraft.lib.draw.entity;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
@@ -127,6 +128,7 @@ public final class DrawEntity {
 			camera.conj();
 			camera.mul(Vector3f.YP.rotation((float) Math.PI));
 			pose.last().pose().multiply(Matrix4f.createScaleMatrix(size, -size, -size));
+			pose.last().normal().mul(Matrix3f.createScaleMatrix(1F, -1F, -1F));
 			pose.translate(0F, center, 0F);
 			pose.mulPose(flip);
 			pose.translate(0F, center, 0F);
