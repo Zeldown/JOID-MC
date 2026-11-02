@@ -3,26 +3,34 @@ package dev.joid.backend.minecraft.bridge.ui;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.mojang.blaze3d.platform.Window;
+import com.mojang.blaze3d.vertex.PoseStack;
+
 import dev.joid.lib.font.converter.TextConverter;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class TooltipRenderer {
 
-	public static void draw(final GuiGraphics graphics, final Object content, final int mouseX, final int mouseY) {
+	private static final TooltipScreen SCREEN = new TooltipScreen();
+
+	public static void draw(final PoseStack pose, final Object content, final int mouseX, final int mouseY) {
+		final Minecraft minecraft = Minecraft.getInstance();
+		final Window window = minecraft.getWindow();
+		TooltipRenderer.SCREEN.init(minecraft, window.getGuiScaledWidth(), window.getGuiScaledHeight());
 		if (content instanceof final ItemStack stack) {
-			graphics.renderTooltip(Minecraft.getInstance().font, stack, mouseX, mouseY);
+			TooltipRenderer.SCREEN.drawStack(pose, stack, mouseX, mouseY);
 			return;
 		}
 
 		final List<Component> lines = TooltipRenderer.getLines(content);
 		if (!lines.isEmpty()) {
-			graphics.renderComponentTooltip(Minecraft.getInstance().font, lines, mouseX, mouseY);
+			TooltipRenderer.SCREEN.renderComponentTooltip(pose, lines, mouseX, mouseY);
 		}
 	}
 
@@ -40,6 +48,18 @@ public final class TooltipRenderer {
 			lines.add(TooltipRenderer.getLine(content));
 		}
 		return lines;
+	}
+
+	private static final class TooltipScreen extends Screen {
+
+		private TooltipScreen() {
+			super(Component.empty());
+		}
+
+		private void drawStack(final PoseStack pose, final ItemStack stack, final int mouseX, final int mouseY) {
+			super.renderTooltip(pose, stack, mouseX, mouseY);
+		}
+
 	}
 
 }

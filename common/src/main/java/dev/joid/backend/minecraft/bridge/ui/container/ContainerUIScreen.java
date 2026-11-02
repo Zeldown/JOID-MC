@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+
 import dev.joid.backend.minecraft.lib.ui.core.container.ContainerUI;
 import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
 import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
@@ -14,7 +16,6 @@ import lombok.Getter;
 import lombok.NonNull;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
@@ -38,11 +39,6 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 	}
 
 	@Override
-	public void added() {
-		this.bridge.added(this);
-	}
-
-	@Override
 	public void removed() {
 		super.removed();
 		this.bridge.removed(this);
@@ -50,15 +46,19 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 
 	@Override
 	protected void init() {
+		if (this.bridge.getScreen() != this) {
+			this.bridge.added(this);
+		}
+
 		super.init();
 		this.bridge.load();
 		this.updateBounds();
 	}
 
 	@Override
-	public void render(final GuiGraphics graphics, final int mouseX, final int mouseY, final float partialTick) {
+	public void render(final PoseStack pose, final int mouseX, final int mouseY, final float partialTick) {
 		if (this.hasBackground()) {
-			super.renderBackground(graphics);
+			super.renderBackground(pose);
 		}
 
 		if (!this.ui.getNodeList().contains(this.ui.getCarriedNode())) {
@@ -68,8 +68,8 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 		this.updateBounds();
 		this.updateQuickCraft();
 		super.hoveredSlot = this.findSlot(mouseX, mouseY);
-		this.bridge.frame(graphics, mouseX, mouseY);
-		super.renderTooltip(graphics, mouseX, mouseY);
+		this.bridge.frame(pose, mouseX, mouseY);
+		super.renderTooltip(pose, mouseX, mouseY);
 	}
 
 	@Override
@@ -157,7 +157,7 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 	}
 
 	@Override
-	protected void renderBg(final GuiGraphics graphics, final float partialTick, final int mouseX, final int mouseY) {}
+	protected void renderBg(final PoseStack pose, final float partialTick, final int mouseX, final int mouseY) {}
 
 	private UIDataMinecraft getMinecraftData() {
 		return this.ui.getClass().getAnnotation(UIDataMinecraft.class);

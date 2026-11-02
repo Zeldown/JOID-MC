@@ -21,7 +21,7 @@ public final class ForgeScreenEvents {
 	}
 
 	private static void render(final ScreenEvent.Render.Post event) {
-		MinecraftScreenEvents.fireRender(event.getGuiGraphics());
+		MinecraftScreenEvents.fireRender(event.getPoseStack());
 	}
 
 	private static void mouseMoved(final ScreenEvent.MouseDragged.Pre event) {

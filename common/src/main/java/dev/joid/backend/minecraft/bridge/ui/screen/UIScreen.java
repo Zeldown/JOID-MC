@@ -1,11 +1,12 @@
 package dev.joid.backend.minecraft.bridge.ui.screen;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+
 import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
 import dev.joid.base.lwjgl3.glfw.input.GlfwKeys;
 import dev.joid.lib.input.mouse.MouseButton;
 import lombok.NonNull;
 import net.minecraft.SharedConstants;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
@@ -29,12 +30,12 @@ public class UIScreen extends Screen {
 	}
 
 	@Override
-	public void render(final GuiGraphics graphics, final int mouseX, final int mouseY, final float partialTick) {
+	public void render(final PoseStack pose, final int mouseX, final int mouseY, final float partialTick) {
 		if (this.hasBackground()) {
-			super.renderBackground(graphics);
+			super.renderBackground(pose);
 		}
 
-		this.bridge.frame(graphics, mouseX, mouseY);
+		this.bridge.frame(pose, mouseX, mouseY);
 	}
 
 	@Override

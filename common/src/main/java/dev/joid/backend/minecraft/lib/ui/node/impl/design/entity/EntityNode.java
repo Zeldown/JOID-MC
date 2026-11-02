@@ -47,7 +47,7 @@ public class EntityNode extends Node {
 	@Override
 	public void draw(final double mouseX, final double mouseY) {
 		final Minecraft minecraft = Minecraft.getInstance();
-		if (this.type != null && (this.entity == null || this.entity.level() != minecraft.level)) {
+		if (this.type != null && (this.entity == null || this.entity.level != minecraft.level)) {
 			this.entity = minecraft.level == null ? null : this.type.create(minecraft.level);
 			if (this.entity != null) {
 				this.entity.setId(-1);

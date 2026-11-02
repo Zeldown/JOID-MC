@@ -36,11 +36,11 @@ public final class ForgeOverlayLayerRegistry {
 	private static void registerOverlays(final RegisterGuiOverlaysEvent event) {
 		for (final OverlayLayer layer : OverlayLayer.values()) {
 			final List<VanillaGuiOverlay> overlays = ForgeOverlayLayerRegistry.getOverlays(layer);
-			event.registerBelow(overlays.get(0).id(), MinecraftOverlayEvents.getId(layer, false).getPath(), (gui, graphics, partialTick, width, height) -> MinecraftOverlayEvents.fireLayer(graphics, layer, false));
-			event.registerAbove(overlays.get(overlays.size() - 1).id(), MinecraftOverlayEvents.getId(layer, true).getPath(), (gui, graphics, partialTick, width, height) -> MinecraftOverlayEvents.fireLayer(graphics, layer, true));
+			event.registerBelow(overlays.get(0).id(), MinecraftOverlayEvents.getId(layer, false).getPath(), (gui, pose, partialTick, width, height) -> MinecraftOverlayEvents.fireLayer(pose, layer, false));
+			event.registerAbove(overlays.get(overlays.size() - 1).id(), MinecraftOverlayEvents.getId(layer, true).getPath(), (gui, pose, partialTick, width, height) -> MinecraftOverlayEvents.fireLayer(pose, layer, true));
 		}
 
-		event.registerAboveAll(MinecraftOverlayEvents.getId().getPath(), (gui, graphics, partialTick, width, height) -> MinecraftOverlayEvents.fireHud(graphics));
+		event.registerAboveAll(MinecraftOverlayEvents.getId().getPath(), (gui, pose, partialTick, width, height) -> MinecraftOverlayEvents.fireHud(pose));
 	}
 
 	private static void renderOverlay(final RenderGuiOverlayEvent.Pre event) {

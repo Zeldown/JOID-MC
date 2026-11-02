@@ -27,7 +27,7 @@ public class SpriteResourceDecoder implements IResourceDecoder {
 	@Override
 	public void prepare(final @NonNull ResourceData resource) {
 		final TextureAtlasSprite sprite = this.material.sprite();
-		if (sprite.contents().name().equals(MissingTextureAtlasSprite.getLocation()) && !this.material.texture().equals(MissingTextureAtlasSprite.getLocation())) {
+		if (sprite.getName().equals(MissingTextureAtlasSprite.getLocation()) && !this.material.texture().equals(MissingTextureAtlasSprite.getLocation())) {
 			throw new IllegalArgumentException("No sprite " + this.material.texture() + " in the atlas " + this.material.atlasLocation());
 		}
 
@@ -55,7 +55,7 @@ public class SpriteResourceDecoder implements IResourceDecoder {
 	}
 
 	private void region(final ResourceData resource, final TextureAtlasSprite sprite) {
-		resource.region(sprite.getX(), sprite.getY(), sprite.contents().width(), sprite.contents().height());
+		resource.region(sprite.getX(), sprite.getY(), sprite.getWidth(), sprite.getHeight());
 		this.sprite = sprite;
 	}
 

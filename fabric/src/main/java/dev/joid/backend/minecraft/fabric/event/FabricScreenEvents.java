@@ -12,7 +12,7 @@ public final class FabricScreenEvents {
 
 	public static void register() {
 		ScreenEvents.AFTER_INIT.register((minecraft, screen, width, height) -> {
-			ScreenEvents.afterRender(screen).register((current, graphics, mouseX, mouseY, partialTick) -> MinecraftScreenEvents.fireRender(graphics));
+			ScreenEvents.afterRender(screen).register((current, pose, mouseX, mouseY, partialTick) -> MinecraftScreenEvents.fireRender(pose));
 			ScreenKeyboardEvents.allowKeyPress(screen).register((current, key, scanCode, modifiers) -> !MinecraftScreenEvents.fireKeyPressed(key));
 			ScreenKeyboardEvents.allowKeyRelease(screen).register((current, key, scanCode, modifiers) -> !MinecraftScreenEvents.fireKeyReleased(key));
 			ScreenMouseEvents.allowMouseClick(screen).register((current, mouseX, mouseY, button) -> !MinecraftScreenEvents.fireMousePressed(button));

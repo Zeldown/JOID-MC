@@ -4,12 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 
-import org.joml.Matrix4f;
-
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexSorting;
+import com.mojang.math.Matrix4f;
 
 import dev.joid.lib.draw.raster.DrawableRaster;
 import lombok.AccessLevel;
@@ -37,11 +35,10 @@ public final class GuiDrawableRaster implements DrawableRaster {
 	public void draw(final int width, final int height) {
 		final float size = Math.min(width, height);
 		final Matrix4f projection = RenderSystem.getProjectionMatrix();
-		final VertexSorting sorting = RenderSystem.getVertexSorting();
 		final PoseStack modelView = RenderSystem.getModelViewStack();
 		final PoseStack pose = GuiDrawableRaster.getPose(GuiDrawableRaster.rasterDepth);
 		final MultiBufferSource.BufferSource buffer = GuiDrawableRaster.getBuffer(GuiDrawableRaster.rasterDepth);
-		RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(0F, width, height, 0F, -10000F, 10000F), VertexSorting.ORTHOGRAPHIC_Z);
+		RenderSystem.setProjectionMatrix(Matrix4f.orthographic(0F, width, 0F, height, -10000F, 10000F));
 		modelView.pushPose();
 		modelView.setIdentity();
 		RenderSystem.applyModelViewMatrix();
@@ -50,7 +47,7 @@ public final class GuiDrawableRaster implements DrawableRaster {
 		GuiDrawableRaster.rasterDepth++;
 		try {
 			pose.translate(width / 2F, height / 2F, 0F);
-			pose.mulPoseMatrix(new Matrix4f().scaling(size, -size, size));
+			pose.mulPoseMatrix(Matrix4f.createScaleMatrix(size, -size, size));
 			this.draw.accept(pose, buffer);
 			buffer.endBatch();
 		} finally {
@@ -59,7 +56,7 @@ public final class GuiDrawableRaster implements DrawableRaster {
 			Lighting.setupFor3DItems();
 			modelView.popPose();
 			RenderSystem.applyModelViewMatrix();
-			RenderSystem.setProjectionMatrix(projection, sorting);
+			RenderSystem.setProjectionMatrix(projection);
 		}
 	}
 

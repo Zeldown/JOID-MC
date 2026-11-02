@@ -1,5 +1,7 @@
 package dev.joid.backend.minecraft.bridge.ui.overlay;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+
 import dev.joid.backend.minecraft.bridge.render.GuiFrameCounter;
 import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
 import dev.joid.backend.minecraft.bridge.ui.TooltipRenderer;
@@ -10,9 +12,8 @@ import dev.joid.backend.minecraft.lib.ui.core.data.overlay.layer.UIDataOverlayLa
 import dev.joid.lib.ui.core.UI;
 import lombok.NonNull;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 
-public final class OverlayUIBridge extends BaseOverlayUIBridge<GuiGraphics, OverlayLayer> {
+public final class OverlayUIBridge extends BaseOverlayUIBridge<PoseStack, OverlayLayer> {
 
 	private final GuiCompositor         compositor;
 	private final MinecraftWindowBridge window;
@@ -29,23 +30,23 @@ public final class OverlayUIBridge extends BaseOverlayUIBridge<GuiGraphics, Over
 	}
 
 	@Override
-	protected long countFrame(final GuiGraphics graphics) {
-		return GuiFrameCounter.inst().getFrame(graphics);
+	protected long countFrame(final PoseStack pose) {
+		return GuiFrameCounter.inst().getFrame(pose);
 	}
 
 	@Override
-	protected void requestCursor(final GuiGraphics graphics) {
+	protected void requestCursor(final PoseStack pose) {
 		this.window.requestCursor(this.window.getCursor());
 	}
 
 	@Override
-	protected void compositeFrame(final GuiGraphics graphics, final Runnable draw) {
-		this.compositor.composite(graphics, draw);
+	protected void compositeFrame(final PoseStack pose, final Runnable draw) {
+		this.compositor.composite(draw);
 	}
 
 	@Override
-	protected void drawTooltip(final GuiGraphics graphics, final Object content, final int mouseX, final int mouseY) {
-		TooltipRenderer.draw(graphics, content, mouseX, mouseY);
+	protected void drawTooltip(final PoseStack pose, final Object content, final int mouseX, final int mouseY) {
+		TooltipRenderer.draw(pose, content, mouseX, mouseY);
 	}
 
 	@Override

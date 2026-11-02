@@ -167,9 +167,8 @@ public class ShowAnvil extends ContainerUI<AnvilMenu> implements IShowFocus, Con
 		}
 
 		final String name = !slot.getItem().hasCustomHoverName() && text.equals(slot.getItem().getHoverName().getString()) ? "" : text;
-		if (super.getContainer().setItemName(name)) {
-			Minecraft.getInstance().player.connection.send(new ServerboundRenameItemPacket(name));
-		}
+		super.getContainer().setItemName(name);
+		Minecraft.getInstance().player.connection.send(new ServerboundRenameItemPacket(name));
 	}
 
 	private ItemStack item() {

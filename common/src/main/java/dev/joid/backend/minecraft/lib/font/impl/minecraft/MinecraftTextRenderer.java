@@ -3,12 +3,12 @@ package dev.joid.backend.minecraft.lib.font.impl.minecraft;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.math.Matrix4f;
 
 import dev.joid.base.opengl.render.texture.GlBorrowedTexture;
 import dev.joid.lib.bridge.BridgeHandler;
@@ -29,7 +29,7 @@ public final class MinecraftTextRenderer extends BitmapTextRenderer<MinecraftFon
 
 	private static final MinecraftTextRenderer INSTANCE = new MinecraftTextRenderer();
 
-	private static final Matrix4f IDENTITY = new Matrix4f();
+	private static final Matrix4f IDENTITY = Matrix4f.createScaleMatrix(1F, 1F, 1F);
 
 	private final GlyphVertexCapture     capture  = new GlyphVertexCapture();
 	private final Map<RenderType, Sheet> sheetMap = new HashMap<>();

@@ -37,20 +37,22 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.screens.AccessibilityOnboardingScreen;
 import net.minecraft.client.gui.screens.BackupConfirmScreen;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.DisconnectedScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
-import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
-import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
 import net.minecraft.client.tutorial.TutorialSteps;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.level.DataPackConfig;
 import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.LevelSettings;
+import net.minecraft.world.level.levelgen.presets.WorldPresets;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ShowcaseDirector {
@@ -66,7 +68,6 @@ public final class ShowcaseDirector {
 	public static void start() {
 		final Minecraft minecraft = Minecraft.getInstance();
 		minecraft.options.pauseOnLostFocus = false;
-		minecraft.options.onboardAccessibility = false;
 		minecraft.options.tutorialStep = TutorialSteps.NONE;
 		minecraft.options.framerateLimit().set(260);
 		minecraft.options.renderDistance().set(16);
@@ -263,11 +264,7 @@ public final class ShowcaseDirector {
 	}
 
 	private static void joinWorld() {
-		ShowcaseDirector.waitFor("the end of the game loading", () -> ShowcaseDirector.isLoaded() || Minecraft.getInstance().screen instanceof AccessibilityOnboardingScreen || Minecraft.getInstance().screen instanceof BackupConfirmScreen, 600);
-		if (ShowcaseDirector.computeOnClient(() -> Minecraft.getInstance().screen instanceof AccessibilityOnboardingScreen)) {
-			ShowcaseDirector.runOnClient(() -> Minecraft.getInstance().screen.onClose());
-			ShowcaseDirector.waitFor("the end of the accessibility onboarding", () -> ShowcaseDirector.isLoaded() || Minecraft.getInstance().screen instanceof BackupConfirmScreen, 600);
-		}
+		ShowcaseDirector.waitFor("the end of the game loading", () -> ShowcaseDirector.isLoaded() || Minecraft.getInstance().screen instanceof BackupConfirmScreen, 600);
 
 		if (ShowcaseDirector.computeOnClient(() -> Minecraft.getInstance().screen instanceof BackupConfirmScreen)) {
 			ShowcaseDirector.runOnClient(() -> ShowcaseDirector.pressButton(Minecraft.getInstance().screen, "selectWorld.backupJoinSkipButton"));
@@ -280,21 +277,17 @@ public final class ShowcaseDirector {
 			callback.invoke(window, true);
 		});
 		if (ShowcaseDirector.computeOnClient(() -> Minecraft.getInstance().level == null && !Minecraft.getInstance().getLevelSource().levelExists("joid-showcase"))) {
-			ShowcaseDirector.runOnClient(() -> CreateWorldScreen.openFresh(Minecraft.getInstance(), new TitleScreen()));
-			ShowcaseDirector.waitFor("the world creation screen", () -> Minecraft.getInstance().screen instanceof CreateWorldScreen, 120);
 			ShowcaseDirector.runOnClient(() -> {
-				final CreateWorldScreen screen = (CreateWorldScreen) Minecraft.getInstance().screen;
-				final WorldCreationUiState state = screen.getUiState();
-				state.setName("joid-showcase");
-				state.setSeed(System.getProperty("joid.showcase.seed", "1700"));
-				state.setDifficulty(Difficulty.NORMAL);
-				state.getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(false, null);
-				state.getGameRules().getRule(GameRules.RULE_WEATHER_CYCLE).set(false, null);
-				state.getGameRules().getRule(GameRules.RULE_DOMOBSPAWNING).set(false, null);
-				state.getGameRules().getRule(GameRules.RULE_RANDOMTICKING).set(0, null);
-				state.getGameRules().getRule(GameRules.RULE_NATURAL_REGENERATION).set(false, null);
-				state.getGameRules().getRule(GameRules.RULE_ANNOUNCE_ADVANCEMENTS).set(false, null);
-				ShowcaseDirector.pressButton(screen, "selectWorld.create");
+				final RegistryAccess.Frozen registries = RegistryAccess.builtinCopy().freeze();
+				final GameRules rules = new GameRules();
+				rules.getRule(GameRules.RULE_DAYLIGHT).set(false, null);
+				rules.getRule(GameRules.RULE_WEATHER_CYCLE).set(false, null);
+				rules.getRule(GameRules.RULE_DOMOBSPAWNING).set(false, null);
+				rules.getRule(GameRules.RULE_RANDOMTICKING).set(0, null);
+				rules.getRule(GameRules.RULE_NATURAL_REGENERATION).set(false, null);
+				rules.getRule(GameRules.RULE_ANNOUNCE_ADVANCEMENTS).set(false, null);
+				final LevelSettings settings = new LevelSettings("joid-showcase", GameType.SURVIVAL, false, Difficulty.NORMAL, false, rules, DataPackConfig.DEFAULT);
+				Minecraft.getInstance().createWorldOpenFlows().createFreshLevel("joid-showcase", settings, registries, WorldPresets.createNormalWorldFromPreset(registries, Long.parseLong(System.getProperty("joid.showcase.seed", "1700")), true, false));
 			});
 			ShowcaseDirector.waitFor("the world creation", () -> Minecraft.getInstance().level != null || Minecraft.getInstance().screen instanceof ConfirmScreen, 900);
 			if (ShowcaseDirector.computeOnClient(() -> Minecraft.getInstance().screen instanceof ConfirmScreen)) {

@@ -1,11 +1,11 @@
 package dev.joid.backend.minecraft.lib.draw.entity;
 
-import org.joml.Matrix4f;
-import org.joml.Quaternionf;
-
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Quaternion;
+import com.mojang.math.Vector3f;
 
 import dev.joid.backend.minecraft.lib.draw.raster.GuiDrawableRaster;
 import dev.joid.lib.draw.DrawUtils;
@@ -96,7 +96,7 @@ public final class DrawEntity {
 			model.head.yRot = (float) Math.toRadians(lookYaw);
 			model.head.xRot = (float) Math.toRadians(-lookPitch);
 			model.hat.copyFrom(model.head);
-			pose.mulPose(new Quaternionf().rotationY((float) Math.toRadians(-lookYaw)));
+			pose.mulPose(Vector3f.YP.rotation((float) Math.toRadians(-lookYaw)));
 			pose.scale(-1F, -1F, 1F);
 			pose.scale(0.9375F, 0.9375F, 0.9375F);
 			pose.translate(0F, -1.501F, 0F);
@@ -112,18 +112,22 @@ public final class DrawEntity {
 		final double unit = Math.min(width / (2D * extent[0]), height / (2D * extent[1])) * scale;
 		final float lookYaw = (float) Math.atan((x + width / 2D - lookX) * 0.75D / unit);
 		final float lookPitch = (float) Math.atan((y + height / 2D - lookY) * 0.75D / unit);
-		final Quaternionf tilt = new Quaternionf().rotationX((float) Math.toRadians(lookPitch * 20F));
+		final Quaternion tilt = Vector3f.XP.rotation((float) Math.toRadians(lookPitch * 20F));
 		final float size = (float) (unit / Math.min(width, height) / 1.5D);
 		final float center = modelHeight / 2F;
 		DrawUtils.RASTER.drawRaster(x - width / 4D, y - height / 4D, width * 1.5D, height * 1.5D, GuiDrawableRaster.of(Lighting::setupForEntityInInventory, (pose, buffer) -> {
 			final EntityRenderDispatcher dispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
-			pose.mulPoseMatrix(new Matrix4f().scaling(size, -size, -size));
+			pose.mulPoseMatrix(Matrix4f.createScaleMatrix(size, -size, -size));
 			pose.translate(0F, center, 0F);
-			pose.mulPose(new Quaternionf().rotationZ((float) Math.PI).mul(tilt));
+			pose.mulPose(Vector3f.ZP.rotation((float) Math.PI));
+			pose.mulPose(tilt);
 			pose.translate(0F, center, 0F);
-			pose.mulPose(new Quaternionf().rotationXYZ((float) Math.toRadians(-rotationPitch), (float) Math.toRadians(rotationYaw), 0F));
+			pose.mulPose(Quaternion.fromXYZ((float) Math.toRadians(-rotationPitch), (float) Math.toRadians(rotationYaw), 0F));
 			pose.translate(0F, -center, 0F);
-			dispatcher.overrideCameraOrientation(tilt.conjugate(new Quaternionf()).rotateY((float) Math.PI));
+			final Quaternion camera = tilt.copy();
+			camera.conj();
+			camera.mul(Vector3f.YP.rotation((float) Math.PI));
+			dispatcher.overrideCameraOrientation(camera);
 			dispatcher.setRenderShadow(false);
 			try {
 				draw.draw(pose, buffer, lookYaw * 20F, lookPitch * 20F);

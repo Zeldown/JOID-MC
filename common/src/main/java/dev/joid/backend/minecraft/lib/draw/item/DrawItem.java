@@ -16,11 +16,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -50,7 +50,7 @@ public final class DrawItem {
 		final BakedModel model = minecraft.getItemRenderer().getModel(drawn, minecraft.level, minecraft.player, 0);
 		DrawUtils.RASTER.drawRaster(x, y, size, size, GuiDrawableRaster.of(model.usesBlockLight() ? Lighting::setupFor3DItems : Lighting::setupForFlatItems, (pose, buffer) -> {
 			final MultiBufferSource source = glint != null && !glint ? type -> DrawItem.isGlint(type) ? DrawItem.NO_VERTEX : buffer.getBuffer(type) : buffer;
-			minecraft.getItemRenderer().render(drawn, ItemDisplayContext.GUI, false, pose, source, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, model);
+			minecraft.getItemRenderer().render(drawn, ItemTransforms.TransformType.GUI, false, pose, source, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, model);
 		}));
 	}
 

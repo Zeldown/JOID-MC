@@ -1,16 +1,17 @@
 package dev.joid.backend.minecraft.loader.event;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+
 import dev.joid.backend.minecraft.bridge.ui.overlay.OverlayInputForwarder;
 import dev.joid.backend.minecraft.bridge.ui.overlay.OverlayLayerRenderer;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import net.minecraft.client.gui.GuiGraphics;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MinecraftScreenEvents {
 
-	public static void fireRender(final GuiGraphics graphics) {
-		OverlayLayerRenderer.extractScreen(graphics);
+	public static void fireRender(final PoseStack pose) {
+		OverlayLayerRenderer.extractScreen(pose);
 	}
 
 	public static boolean fireMouseMoved() {

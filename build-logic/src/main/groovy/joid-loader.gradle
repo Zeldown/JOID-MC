@@ -156,7 +156,7 @@ ext.joidClient = { run ->
     }
     if (project.hasProperty('joid.showcase')) {
         project.properties.findAll { it.key.startsWith('joid.showcase') }.each { run.systemProperty(it.key, it.value.toString()) }
-        run.programArguments.addAll('--quickPlaySingleplayer', 'joid-showcase', '--width', '1920', '--height', '1080', '--username', 'JOID')
+        run.programArguments.addAll('--width', '1920', '--height', '1080', '--username', 'JOID')
     }
 }
 

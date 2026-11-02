@@ -18,7 +18,7 @@ public class SpriteResourceResolver implements IResourceResolver {
 
 	@Override
 	public @NonNull Resource resolve(final @NonNull ResourceBuilder builder, final @NonNull Object input) {
-		final Material material = input instanceof Material ? (Material) input : new Material(((TextureAtlasSprite) input).atlasLocation(), ((TextureAtlasSprite) input).contents().name());
+		final Material material = input instanceof Material ? (Material) input : new Material(((TextureAtlasSprite) input).atlas().location(), ((TextureAtlasSprite) input).getName());
 		final String uniqueId = "sprite:" + material.atlasLocation() + "#" + material.texture();
 		return builder.compute(uniqueId, () -> ResourceData.create(uniqueId, SpriteResourceDecoder.create(material))).nearest();
 	}

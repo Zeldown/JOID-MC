@@ -12,7 +12,6 @@ import dev.joid.lib.bridge.render.texture.TextureFilter;
 import dev.joid.lib.bridge.window.IWindowBridge;
 import dev.joid.lib.draw.DrawUtils;
 import lombok.Getter;
-import net.minecraft.client.gui.GuiGraphics;
 
 public final class GuiCompositor {
 
@@ -29,10 +28,9 @@ public final class GuiCompositor {
 		this.window = window;
 	}
 
-	public void composite(final GuiGraphics graphics, final Runnable draw) {
+	public void composite(final Runnable draw) {
 		final int width = this.window.getWidth();
 		final int height = this.window.getHeight();
-		graphics.flush();
 		if (this.target == null || !this.target.hasSize(width, height)) {
 			if (this.target != null) {
 				this.target.delete();

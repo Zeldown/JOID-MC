@@ -375,7 +375,7 @@ public enum ShowcaseScene {
 
 		ShowcaseDirector.waitForWorld();
 		final List<double[]> places = ShowcaseDirector.computeOnServer(player -> {
-			final ServerLevel level = (ServerLevel) player.level();
+			final ServerLevel level = (ServerLevel) player.level;
 			final List<double[]> found = new ArrayList<>();
 			final BlockPos origin = player.blockPosition();
 			final BlockPos village = level.findNearestMapStructure(StructureTags.VILLAGE, origin, 100, false);
@@ -383,7 +383,7 @@ public enum ShowcaseScene {
 				found.add(new double[] {village.getX(), village.getZ()});
 			}
 
-			for (final ResourceKey<Biome> biome : List.of(Biomes.CHERRY_GROVE, Biomes.RIVER, Biomes.FLOWER_FOREST, Biomes.MEADOW)) {
+			for (final ResourceKey<Biome> biome : List.of(Biomes.SUNFLOWER_PLAINS, Biomes.RIVER, Biomes.FLOWER_FOREST, Biomes.MEADOW)) {
 				final Pair<BlockPos, Holder<Biome>> nearest = level.findClosestBiome3d(holder -> holder.is(biome), origin, 6400, 32, 64);
 				if (nearest != null) {
 					found.add(new double[] {nearest.getFirst().getX(), nearest.getFirst().getZ()});
@@ -393,7 +393,7 @@ public enum ShowcaseScene {
 		});
 		for (int index = 0; index < places.size(); index++) {
 			final double[] place = places.get(index);
-			final int height = ShowcaseDirector.computeOnServer(player -> ((ServerLevel) player.level()).getChunk((int) place[0] >> 4, (int) place[1] >> 4).getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, (int) place[0] & 15, (int) place[1] & 15));
+			final int height = ShowcaseDirector.computeOnServer(player -> ((ServerLevel) player.level).getChunk((int) place[0] >> 4, (int) place[1] >> 4).getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, (int) place[0] & 15, (int) place[1] & 15));
 			System.out.println("[JOID] Showcase spot " + index + ": " + place[0] + " " + (height + 6) + " " + place[1]);
 			for (int yaw = 0; yaw < 360; yaw += 90) {
 				ShowcaseDirector.command(String.format(Locale.ROOT, "tp @a %.1f %d %.1f %d 15", place[0], height + 6, place[1], yaw));
@@ -517,7 +517,7 @@ public enum ShowcaseScene {
 	private static int ground(final double x, final double z) {
 		final int blockX = (int) Math.floor(x);
 		final int blockZ = (int) Math.floor(z);
-		return ShowcaseDirector.computeOnServer(player -> ((ServerLevel) player.level()).getChunk(blockX >> 4, blockZ >> 4).getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockX & 15, blockZ & 15));
+		return ShowcaseDirector.computeOnServer(player -> ((ServerLevel) player.level).getChunk(blockX >> 4, blockZ >> 4).getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockX & 15, blockZ & 15));
 	}
 
 	private static ItemStack enchant(final ItemStack stack, final Enchantment enchantment, final int value) {

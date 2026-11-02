@@ -67,12 +67,14 @@ public class SlotNode extends Node {
 			}
 
 			final int max = Math.min(carried.getMaxStackSize(), this.slot.getMaxStackSize(carried));
-			final int placed = AbstractContainerMenu.getQuickCraftPlaceCount(screen.getQuickCraftSlots(), screen.getQuickCraftType(), carried) + (stack.isEmpty() ? 0 : stack.getCount());
-			if (placed > max) {
+			final ItemStack placed = carried.copy();
+			AbstractContainerMenu.getQuickCraftSlotCount(screen.getQuickCraftSlots(), screen.getQuickCraftType(), placed, stack.isEmpty() ? 0 : stack.getCount());
+			if (placed.getCount() > max) {
 				count = ChatFormatting.YELLOW.toString() + max;
+				placed.setCount(max);
 			}
 
-			stack = carried.copyWithCount(Math.min(placed, max));
+			stack = placed;
 			quickCraft = true;
 		}
 
@@ -126,7 +128,7 @@ public class SlotNode extends Node {
 	}
 
 	private void drawHighlight(final ContainerUIScreen<?> screen) {
-		if (this.hoveredColor != null && screen.getHoveredSlot() == this.slot && this.slot.isHighlightable()) {
+		if (this.hoveredColor != null && screen.getHoveredSlot() == this.slot) {
 			DrawUtils.SHAPE.drawRect(super.getX(), super.getY(), super.getWidth(), super.getHeight(), this.hoveredColor);
 		}
 	}
