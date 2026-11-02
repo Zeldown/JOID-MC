@@ -79,12 +79,16 @@ public class UIScreen extends Screen {
 
 	@Override
 	public boolean keyPressed(final int key, final int scanCode, final int modifiers) {
-		return this.bridge.keyPressed(GlfwKeys.getPhysicalKey(key), GlfwKeys.getKey(key));
+		final boolean result = this.bridge.keyPressed(GlfwKeys.getPhysicalKey(key), GlfwKeys.getKey(key));
+		System.out.println("[JOIDDIAG] screen pressed " + key + " -> " + result + " uis " + this.bridge.getUiList());
+		return result;
 	}
 
 	@Override
 	public boolean keyReleased(final int key, final int scanCode, final int modifiers) {
-		return this.bridge.keyReleased(GlfwKeys.getPhysicalKey(key), GlfwKeys.getKey(key));
+		final boolean result = this.bridge.keyReleased(GlfwKeys.getPhysicalKey(key), GlfwKeys.getKey(key));
+		System.out.println("[JOIDDIAG] screen released " + key + " -> " + result);
+		return result;
 	}
 
 	@Override
