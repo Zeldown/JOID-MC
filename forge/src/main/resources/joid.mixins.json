@@ -1,0 +1,13 @@
+{
+    "required": true,
+    "minVersion": "0.8",
+    "package": "dev.joid.backend.minecraft.forge.mixin",
+    "compatibilityLevel": "JAVA_8",
+    "client": [
+        "IngameGuiMixin",
+        "ForgeIngameGuiMixin"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

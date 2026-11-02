@@ -26,6 +26,7 @@ minecraft {
             }
         }
         register('client') {
+            args('--mixin.config', 'joid.mixins.json')
             if (project.hasProperty('joid.test')) {
                 systemProperty('joid.test', 'true')
                 systemProperty('joid.loader', project.name)
@@ -125,6 +126,12 @@ tasks.named('prodJar', Jar) {
 
 dependencies {
     compileOnly(files(commonDirectory).builtBy(unpackCommon))
+}
+
+jar {
+    manifest {
+        attributes('MixinConfigs': 'joid.mixins.json')
+    }
 }
 
 tasks.named('compileJava', JavaCompile) {

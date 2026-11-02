@@ -20,7 +20,7 @@ public final class ForgeJoidClient {
 		ForgePayloads.registerSender();
 		ForgeKeyBindRegistry.register(modBus);
 		ForgeContainerUIRegistry.register(modBus);
-		ForgeOverlayLayerRegistry.register(modBus);
+		ForgeOverlayLayerRegistry.register();
 		ForgeReloadListenerRegistry.register();
 	}
 
