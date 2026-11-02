@@ -48,6 +48,7 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 
 	@Override
 	protected void init() {
+		super.minecraft.keyboardHandler.setSendRepeatsToGui(false);
 		if (this.bridge.getScreen() != this) {
 			this.bridge.added(this);
 		}

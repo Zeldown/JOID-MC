@@ -23,6 +23,7 @@ public class UIScreen extends Screen {
 
 	@Override
 	protected void init() {
+		super.minecraft.keyboardHandler.setSendRepeatsToGui(false);
 		this.bridge.load();
 	}
 
