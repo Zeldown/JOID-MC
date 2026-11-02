@@ -3,7 +3,9 @@ package dev.joid.backend.minecraft.demo.test.scenario;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import dev.joid.backend.minecraft.demo.test.ClientTestContext;
@@ -17,14 +19,20 @@ import dev.joid.lib.JOIDEnv;
 import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.bridge.audio.IAudioSource;
 import dev.joid.lib.bridge.clock.IClockBridge;
+import dev.joid.lib.font.IFont;
+import dev.joid.lib.font.TextInfo;
 import dev.joid.lib.font.converter.TextConverter;
 import dev.joid.lib.input.key.Key;
 import dev.joid.lib.input.key.resolver.KeyResolver;
 import dev.joid.lib.resource.decoder.impl.VideoResourceDecoder;
 import dev.joid.lib.ui.core.UI;
+import dev.joid.lib.ui.event.EventListener;
+import dev.joid.lib.ui.event.EventPriority;
 import dev.joid.lib.ui.node.Node;
+import dev.joid.lib.ui.node.impl.control.field.TextFieldNode;
 import dev.joid.lib.ui.node.impl.resource.ResourcePlayerNode;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -131,6 +139,33 @@ public final class HostScenarios {
 		context.check(vanilla, "F3 without a JOID UI does not show the debug screen of Minecraft");
 	}
 
+	public static void verifyKeyRepeat(final ClientTestContext context) {
+		final KeyRepeatUI ui = new KeyRepeatUI();
+		context.open(ui);
+		context.holdKey(Key.K);
+		for (int repeat = 0; repeat < 3; repeat++) {
+			context.repeatKey(Key.K);
+		}
+		context.releaseKey(Key.K);
+		final int[] counts = context.compute(() -> new int[] {ui.countPresses(Key.K), ui.countReleases(Key.K)});
+		context.check(counts[0] == 1 && counts[1] == 1, "K held through 3 repeats of the system gives the JOID screen " + counts[0] + " presses and " + counts[1] + " releases instead of 1 each");
+		context.run(() -> ui.getField().text("0123456789ABCDEF").focus().cursorPosition(16));
+		context.waitFrames(2);
+		context.holdKey(Key.BACKSPACE);
+		try {
+			for (int repeat = 0; repeat < 3; repeat++) {
+				context.repeatKey(Key.BACKSPACE);
+			}
+			context.waitFor("the text field to repeat Backspace by itself", () -> ui.getField().getText().length() <= 12, 30);
+		} finally {
+			context.releaseKey(Key.BACKSPACE);
+		}
+
+		final int presses = context.compute(() -> ui.countPresses(Key.BACKSPACE));
+		context.check(presses == 1, "Backspace held through 3 repeats of the system gives the JOID text field " + presses + " presses instead of 1");
+		context.closeScreens();
+	}
+
 	public static void verifyHostBindings(final ClientTestContext context) {
 		final IClientTestPilot pilot = context.getPilot();
 		context.openChoice();
@@ -223,6 +258,31 @@ public final class HostScenarios {
 			}
 		}
 		return 0;
+	}
+
+	public static final class KeyRepeatUI extends UI {
+
+		private final Map<Key, Integer> pressMap   = new EnumMap<>(Key.class);
+		private final Map<Key, Integer> releaseMap = new EnumMap<>(Key.class);
+
+		@Getter
+		private TextFieldNode field;
+
+		@Override
+		public void init() {
+			super.handleKeyPressed(EventListener.priority(EventPriority.MONITOR, event -> this.pressMap.merge(event.getPhysicalKey(), 1, Integer::sum)));
+			super.handleKeyReleased(EventListener.priority(EventPriority.MONITOR, event -> this.releaseMap.merge(event.getPhysicalKey(), 1, Integer::sum)));
+			this.field = TextFieldNode.create(660, 520, 600).info(TextInfo.create((IFont) ClientTestDemos.constant(ClientTestDemos.FONT, "DEFAULT"), 32F)).attach(this);
+		}
+
+		public int countPresses(final Key key) {
+			return this.pressMap.getOrDefault(key, 0);
+		}
+
+		public int countReleases(final Key key) {
+			return this.releaseMap.getOrDefault(key, 0);
+		}
+
 	}
 
 }

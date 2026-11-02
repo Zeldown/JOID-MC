@@ -23,6 +23,7 @@ public enum ClientTestScenario {
 	AUDIO_CONTEXT(ClientTestStage.WORLD, HostScenarios::verifyAudioContext),
 	KEY_BIND(ClientTestStage.WORLD, HostScenarios::verifyKeyBind),
 	DEBUG_KEY(ClientTestStage.WORLD, HostScenarios::verifyDebugKey),
+	KEY_REPEAT(ClientTestStage.WORLD, HostScenarios::verifyKeyRepeat),
 	DEMO_CHOICE(ClientTestStage.WORLD, ScreenScenarios::verifyDemoChoice),
 	HOST_BINDINGS(ClientTestStage.WORLD, HostScenarios::verifyHostBindings),
 	DEMO_CAPTURES(ClientTestStage.WORLD, ScreenScenarios::verifyDemoCaptures),

@@ -35,6 +35,7 @@ public interface IClientTestPilot {
 	public void runOnClient(final Runnable runnable);
 	public <T> T computeOnClient(final Callable<T> callable, final int seconds);
 
+	public void repeatKey(final Key key);
 	public void scroll(final double amount);
 	public void pressMouse(final boolean press);
 	public BufferedImage capture(final String name);

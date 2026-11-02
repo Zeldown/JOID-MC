@@ -123,6 +123,11 @@ public final class ClientTestContext {
 		this.waitFrames(2);
 	}
 
+	public void repeatKey(final Key key) {
+		this.pilot.repeatKey(key);
+		this.waitFrames(1);
+	}
+
 	public void releaseKey(final Key key) {
 		this.pilot.pressKey(key, false);
 		this.waitFrames(2);
