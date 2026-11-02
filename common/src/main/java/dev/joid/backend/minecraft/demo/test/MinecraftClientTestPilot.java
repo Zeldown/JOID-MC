@@ -26,8 +26,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.imageio.ImageIO;
 
@@ -805,11 +803,12 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	private void pressHeldKey(final Key key, final boolean press) {
 		if (this.window == null) {
-			this.window = MinecraftClientTestPilot.xdotool("search", "--sync", "--limit", "1", "--name", "^Minecraft").trim();
-			MinecraftClientTestPilot.xdotool("windowfocus", "--sync", this.window);
+			this.window = MinecraftClientTestPilot.x11("xdotool", "search", "--sync", "--limit", "1", "--name", "^Minecraft").trim();
+			MinecraftClientTestPilot.x11("xdotool", "windowfocus", "--sync", this.window);
+			MinecraftClientTestPilot.x11("xset", "r", "off");
 		}
 
-		MinecraftClientTestPilot.xdotool(press ? "keydown" : "keyup", key == Key.F3 ? "F3" : "shift");
+		MinecraftClientTestPilot.x11("xdotool", press ? "keydown" : "keyup", key == Key.F3 ? "F3" : "shift");
 		final int code = GlfwKeys.getCode(key);
 		this.waitFor("the key " + key + (press ? " down" : " up"), () -> (GLFW.glfwGetKey(Minecraft.getInstance().getWindow().getWindow(), code) == GLFW.GLFW_PRESS) == press, 30);
 	}
@@ -912,19 +911,19 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 		return GuiDrawableRaster.of(Lighting::setupFor3DItems, (pose, buffer) -> minecraft.getItemRenderer().render(stack, ItemTransforms.TransformType.GUI, false, pose, buffer, LightTexture.pack(15, 15), OverlayTexture.NO_OVERLAY, model));
 	}
 
-	private static String xdotool(final String... arguments) {
+	private static String x11(final String... command) {
 		try {
-			final Process process = new ProcessBuilder(Stream.concat(Stream.of("xdotool"), Arrays.stream(arguments)).collect(Collectors.toList())).redirectErrorStream(true).start();
+			final Process process = new ProcessBuilder(command).redirectErrorStream(true).start();
 			final String output = IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8);
 			if (!process.waitFor(30, TimeUnit.SECONDS) || process.exitValue() != 0) {
-				throw new AssertionError("xdotool " + String.join(" ", arguments) + " failed: " + output);
+				throw new AssertionError(String.join(" ", command) + " failed: " + output);
 			}
 			return output;
 		} catch (final IOException exception) {
-			throw new AssertionError("xdotool cannot run", exception);
+			throw new AssertionError(command[0] + " cannot run", exception);
 		} catch (final InterruptedException exception) {
 			Thread.currentThread().interrupt();
-			throw new AssertionError("Interrupted while running xdotool", exception);
+			throw new AssertionError("Interrupted while running " + command[0], exception);
 		}
 	}
 
