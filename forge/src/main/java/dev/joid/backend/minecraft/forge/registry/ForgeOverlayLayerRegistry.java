@@ -17,7 +17,8 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ForgeOverlayLayerRegistry {
 
-	private static boolean cameraStarted;
+	private static boolean     cameraStarted;
+	private static MatrixStack pose;
 
 	public static void register(final IEventBus modBus) {
 		modBus.addListener((final FMLClientSetupEvent event) -> event.enqueueWork(() -> Minecraft.getInstance().gui = new ForgeOverlayGui(Minecraft.getInstance())));
@@ -29,6 +30,7 @@ public final class ForgeOverlayLayerRegistry {
 		final ElementType type = event.getType();
 		if (type == ElementType.ALL) {
 			ForgeOverlayLayerRegistry.cameraStarted = false;
+			ForgeOverlayLayerRegistry.pose          = event.getMatrixStack();
 			return;
 		}
 
@@ -37,7 +39,7 @@ public final class ForgeOverlayLayerRegistry {
 			return;
 		}
 
-		final MatrixStack pose = event.getMatrixStack();
+		final MatrixStack pose = ForgeOverlayLayerRegistry.pose;
 		if (layer != OverlayLayer.CAMERA_OVERLAYS || !ForgeOverlayLayerRegistry.cameraStarted) {
 			ForgeOverlayLayerRegistry.cameraStarted |= layer == OverlayLayer.CAMERA_OVERLAYS;
 			MinecraftOverlayEvents.fireLayer(pose, layer, false);
@@ -60,7 +62,7 @@ public final class ForgeOverlayLayerRegistry {
 
 		final OverlayLayer layer = ForgeOverlayLayerRegistry.getLayer(type);
 		if (layer != null && ForgeOverlayLayerRegistry.isLast(type)) {
-			MinecraftOverlayEvents.fireLayer(event.getMatrixStack(), layer, true);
+			MinecraftOverlayEvents.fireLayer(ForgeOverlayLayerRegistry.pose, layer, true);
 		}
 	}
 
