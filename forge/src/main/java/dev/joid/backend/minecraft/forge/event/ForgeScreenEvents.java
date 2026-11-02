@@ -55,14 +55,12 @@ public final class ForgeScreenEvents {
 	}
 
 	private static void keyPressed(final GuiScreenEvent.KeyboardKeyPressedEvent.Pre event) {
-		System.out.println("[JOIDDIAG] forge KeyPressed " + event.getKeyCode() + " " + event.getGui());
 		if (MinecraftScreenEvents.fireKeyPressed(event.getKeyCode())) {
 			event.setCanceled(true);
 		}
 	}
 
 	private static void keyReleased(final GuiScreenEvent.KeyboardKeyReleasedEvent.Pre event) {
-		System.out.println("[JOIDDIAG] forge KeyReleased " + event.getKeyCode() + " " + event.getGui());
 		if (MinecraftScreenEvents.fireKeyReleased(event.getKeyCode())) {
 			event.setCanceled(true);
 		}
