@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.openal.AL10;
 import org.lwjgl.opengl.GL11;
 
@@ -64,6 +66,7 @@ import dev.joid.backend.minecraft.lib.ui.core.data.overlay.layer.UIDataOverlayLa
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.block.BlockNode;
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.entity.EntityNode;
 import dev.joid.backend.minecraft.lib.ui.node.impl.design.item.ItemNode;
+import dev.joid.base.lwjgl2.input.Lwjgl2Keys;
 import dev.joid.base.lwjgl2.openal.Lwjgl2AlBinding;
 import dev.joid.lib.bridge.BridgeHandler;
 import dev.joid.lib.bridge.render.texture.ITexture;
@@ -236,6 +239,22 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	@Override
 	public <T> T computeOnClient(final Callable<T> callable, final int seconds) {
 		return (T) MinecraftClientTestPilot.await(Minecraft.getMinecraft().addScheduledTask(callable), "computing on the client", seconds);
+	}
+
+	@Override
+	public void repeatKey(final Key key) {
+		this.runOnClient(() -> {
+			try {
+				final Field field = Keyboard.class.getDeclaredField("readBuffer");
+				field.setAccessible(true);
+				final ByteBuffer buffer = (ByteBuffer) field.get(null);
+				buffer.compact();
+				buffer.putInt(Lwjgl2Keys.getCode(key)).put((byte) 1).putInt(Keyboard.CHAR_NONE).putLong(System.nanoTime()).put((byte) 1);
+				buffer.flip();
+			} catch (final ReflectiveOperationException exception) {
+				throw new AssertionError("Unable to queue a repeat of " + key + " in the keyboard of LWJGL 2", exception);
+			}
+		});
 	}
 
 	@Override
@@ -820,6 +839,8 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 		switch (key) {
 			case ESCAPE:
 				return "Escape";
+			case BACKSPACE:
+				return "BackSpace";
 			case LEFT_SHIFT:
 				return "shift";
 			default:
