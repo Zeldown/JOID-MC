@@ -2,6 +2,7 @@ package dev.joid.backend.minecraft.bridge.ui.overlay;
 
 import dev.joid.base.lwjgl3.glfw.input.GlfwKeys;
 import dev.joid.lib.bridge.BridgeHandler;
+import dev.joid.lib.input.key.Key;
 import dev.joid.lib.input.mouse.MouseButton;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -37,12 +38,24 @@ public final class OverlayInputForwarder {
 
 	public static boolean keyPressed(final int code) {
 		final OverlayUIBridge bridge = BridgeHandler.UI.getBridge(OverlayUIBridge.class);
-		return bridge != null && bridge.keyPressed(GlfwKeys.getPhysicalKey(code), GlfwKeys.getKey(code));
+		if (bridge == null) {
+			return false;
+		}
+
+		final Key physicalKey = GlfwKeys.getPhysicalKey(code);
+		final Key key = GlfwKeys.getKey(code);
+		return bridge.getKeyRepeats().press(physicalKey) ? bridge.keyPressed(physicalKey, key) : bridge.isKeyConsumed(key);
 	}
 
 	public static boolean keyReleased(final int code) {
 		final OverlayUIBridge bridge = BridgeHandler.UI.getBridge(OverlayUIBridge.class);
-		return bridge != null && bridge.keyReleased(GlfwKeys.getPhysicalKey(code), GlfwKeys.getKey(code));
+		if (bridge == null) {
+			return false;
+		}
+
+		final Key physicalKey = GlfwKeys.getPhysicalKey(code);
+		bridge.getKeyRepeats().release(physicalKey);
+		return bridge.keyReleased(physicalKey, GlfwKeys.getKey(code));
 	}
 
 }
