@@ -262,6 +262,11 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	}
 
 	@Override
+	public void repeatKey(final Key key) {
+		this.sendKey(key, GLFW.GLFW_REPEAT);
+	}
+
+	@Override
 	public void scroll(final double amount) {
 		this.runOnClient(() -> {
 			final long window = Minecraft.getInstance().getWindow().getWindow();
@@ -316,18 +321,12 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 			this.heldKeys.remove(key);
 		}
 
-		if (key == Key.LEFT_SHIFT || key == Key.F3) {
+		if (key == Key.LEFT_SHIFT || key == Key.F3 || key == Key.BACKSPACE) {
 			this.pressHeldKey(key, press);
 			return;
 		}
 
-		this.runOnClient(() -> {
-			final long window = Minecraft.getInstance().getWindow().getWindow();
-			final GLFWKeyCallback callback = GLFW.glfwSetKeyCallback(window, null);
-			GLFW.glfwSetKeyCallback(window, callback);
-			final int code = GlfwKeys.getCode(key);
-			callback.invoke(window, code, GLFW.glfwGetKeyScancode(code), press ? GLFW.GLFW_PRESS : GLFW.GLFW_RELEASE, this.getModifiers());
-		});
+		this.sendKey(key, press ? GLFW.GLFW_PRESS : GLFW.GLFW_RELEASE);
 	}
 
 	@Override
@@ -791,13 +790,23 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 		return this.heldKeys.contains(Key.LEFT_SHIFT) ? GLFW.GLFW_MOD_SHIFT : 0;
 	}
 
+	private void sendKey(final Key key, final int action) {
+		this.runOnClient(() -> {
+			final long window = Minecraft.getInstance().getWindow().getWindow();
+			final GLFWKeyCallback callback = GLFW.glfwSetKeyCallback(window, null);
+			GLFW.glfwSetKeyCallback(window, callback);
+			final int code = GlfwKeys.getCode(key);
+			callback.invoke(window, code, GLFW.glfwGetKeyScancode(code), action, this.getModifiers());
+		});
+	}
+
 	private void pressHeldKey(final Key key, final boolean press) {
 		if (this.window == null) {
 			this.window = MinecraftClientTestPilot.xdotool("search", "--sync", "--limit", "1", "--name", "^Minecraft").trim();
 			MinecraftClientTestPilot.xdotool("windowfocus", "--sync", this.window);
 		}
 
-		MinecraftClientTestPilot.xdotool(press ? "keydown" : "keyup", key == Key.F3 ? "F3" : "shift");
+		MinecraftClientTestPilot.xdotool(press ? "keydown" : "keyup", key == Key.F3 ? "F3" : key == Key.BACKSPACE ? "BackSpace" : "shift");
 		final int code = GlfwKeys.getCode(key);
 		this.waitFor("the key " + key + (press ? " down" : " up"), () -> (GLFW.glfwGetKey(Minecraft.getInstance().getWindow().getWindow(), code) == GLFW.GLFW_PRESS) == press, 30);
 	}

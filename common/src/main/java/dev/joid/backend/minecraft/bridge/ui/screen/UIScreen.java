@@ -1,7 +1,9 @@
 package dev.joid.backend.minecraft.bridge.ui.screen;
 
+import dev.joid.backend.minecraft.bridge.input.KeyRepeatFilter;
 import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
 import dev.joid.base.lwjgl3.glfw.input.GlfwKeys;
+import dev.joid.lib.input.key.Key;
 import dev.joid.lib.input.mouse.MouseButton;
 import lombok.NonNull;
 import net.minecraft.client.gui.GuiGraphics;
@@ -11,15 +13,18 @@ import net.minecraft.util.StringUtil;
 
 public class UIScreen extends Screen {
 
-	private final ScreenUIBridge bridge;
+	private final ScreenUIBridge  bridge;
+	private final KeyRepeatFilter keyRepeats;
 
 	public UIScreen(final ScreenUIBridge bridge) {
 		super(Component.empty());
-		this.bridge = bridge;
+		this.bridge     = bridge;
+		this.keyRepeats = new KeyRepeatFilter();
 	}
 
 	@Override
 	protected void init() {
+		this.keyRepeats.reset();
 		this.bridge.load();
 	}
 
@@ -75,13 +80,17 @@ public class UIScreen extends Screen {
 	}
 
 	@Override
-	public boolean keyPressed(final int key, final int scanCode, final int modifiers) {
-		return this.bridge.keyPressed(GlfwKeys.getPhysicalKey(key), GlfwKeys.getKey(key));
+	public boolean keyPressed(final int code, final int scanCode, final int modifiers) {
+		final Key physicalKey = GlfwKeys.getPhysicalKey(code);
+		final Key key = GlfwKeys.getKey(code);
+		return this.keyRepeats.press(physicalKey) ? this.bridge.keyPressed(physicalKey, key) : this.bridge.isKeyConsumed(key);
 	}
 
 	@Override
-	public boolean keyReleased(final int key, final int scanCode, final int modifiers) {
-		return this.bridge.keyReleased(GlfwKeys.getPhysicalKey(key), GlfwKeys.getKey(key));
+	public boolean keyReleased(final int code, final int scanCode, final int modifiers) {
+		final Key physicalKey = GlfwKeys.getPhysicalKey(code);
+		this.keyRepeats.release(physicalKey);
+		return this.bridge.keyReleased(physicalKey, GlfwKeys.getKey(code));
 	}
 
 	@Override
