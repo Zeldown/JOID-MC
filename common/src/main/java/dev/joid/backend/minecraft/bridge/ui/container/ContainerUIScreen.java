@@ -6,11 +6,13 @@ import java.util.Set;
 
 import com.mojang.blaze3d.platform.Window;
 
+import dev.joid.backend.minecraft.bridge.input.KeyRepeatFilter;
 import dev.joid.backend.minecraft.lib.ui.core.container.ContainerUI;
 import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
 import dev.joid.backend.minecraft.lib.ui.node.impl.structure.slot.SlotNode;
 import dev.joid.base.lwjgl3.glfw.input.GlfwKeys;
 import dev.joid.lib.bridge.BridgeHandler;
+import dev.joid.lib.input.key.Key;
 import dev.joid.lib.input.mouse.MouseButton;
 import lombok.Getter;
 import lombok.NonNull;
@@ -30,6 +32,7 @@ import net.minecraft.world.item.ItemStack;
 public class ContainerUIScreen<M extends AbstractContainerMenu> extends AbstractContainerScreen<M> {
 
 	private final ContainerUIBridge bridge;
+	private final KeyRepeatFilter   keyRepeats;
 	private final Set<Integer>      consumedButtons;
 
 	@Getter
@@ -38,6 +41,7 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 	public ContainerUIScreen(final M container, final Inventory inventory, final ContainerUI<M> ui) {
 		super(container, inventory, ContainerUIScreen.toTitle(ui));
 		this.bridge          = BridgeHandler.UI.getBridge(ContainerUIBridge.class);
+		this.keyRepeats      = new KeyRepeatFilter();
 		this.consumedButtons = new HashSet<>();
 		this.ui              = ui;
 	}
@@ -56,6 +60,7 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 	@Override
 	protected void init() {
 		super.init();
+		this.keyRepeats.reset();
 		this.bridge.load();
 		this.updateBounds();
 	}
@@ -130,12 +135,16 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 
 	@Override
 	public boolean keyPressed(final KeyEvent event) {
-		return this.bridge.keyPressed(GlfwKeys.getPhysicalKey(event.key()), GlfwKeys.getKey(event.key())) || super.keyPressed(event);
+		final Key physicalKey = GlfwKeys.getPhysicalKey(event.key());
+		final Key key = GlfwKeys.getKey(event.key());
+		return (this.keyRepeats.press(physicalKey) ? this.bridge.keyPressed(physicalKey, key) : this.bridge.isKeyConsumed(key)) || super.keyPressed(event);
 	}
 
 	@Override
 	public boolean keyReleased(final KeyEvent event) {
-		return this.bridge.keyReleased(GlfwKeys.getPhysicalKey(event.key()), GlfwKeys.getKey(event.key())) || super.keyReleased(event);
+		final Key physicalKey = GlfwKeys.getPhysicalKey(event.key());
+		this.keyRepeats.release(physicalKey);
+		return this.bridge.keyReleased(physicalKey, GlfwKeys.getKey(event.key())) || super.keyReleased(event);
 	}
 
 	@Override

@@ -5,9 +5,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
@@ -24,6 +26,8 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.imageio.ImageIO;
 
@@ -149,6 +153,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	private final Set<Key>     heldKeys = new HashSet<>();
 	private final List<String> sounds   = new ArrayList<>();
 
+	private String             window;
 	private String             graphicsBackend;
 	private DemoContainer      demoContainer;
 	private SoundEventListener soundListener;
@@ -266,6 +271,11 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	}
 
 	@Override
+	public void repeatKey(final Key key) {
+		this.sendKey(key, GLFW.GLFW_REPEAT);
+	}
+
+	@Override
 	public void scroll(final double amount) {
 		this.runOnClient(() -> {
 			final long window = Minecraft.getInstance().getWindow().handle();
@@ -323,13 +333,12 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 			this.heldKeys.remove(key);
 		}
 
-		this.runOnClient(() -> {
-			final long window = Minecraft.getInstance().getWindow().handle();
-			final GLFWKeyCallback callback = GLFW.glfwSetKeyCallback(window, null);
-			GLFW.glfwSetKeyCallback(window, callback);
-			final int code = GlfwKeys.getCode(key);
-			callback.invoke(window, code, GLFW.glfwGetKeyScancode(code), press ? GLFW.GLFW_PRESS : GLFW.GLFW_RELEASE, this.getModifiers());
-		});
+		if (key == Key.BACKSPACE) {
+			this.pressBackspace(press);
+			return;
+		}
+
+		this.sendKey(key, press ? GLFW.GLFW_PRESS : GLFW.GLFW_RELEASE);
 	}
 
 	@Override
@@ -800,6 +809,27 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 		return this.heldKeys.contains(Key.LEFT_SHIFT) ? GLFW.GLFW_MOD_SHIFT : 0;
 	}
 
+	private void sendKey(final Key key, final int action) {
+		this.runOnClient(() -> {
+			final long window = Minecraft.getInstance().getWindow().handle();
+			final GLFWKeyCallback callback = GLFW.glfwSetKeyCallback(window, null);
+			GLFW.glfwSetKeyCallback(window, callback);
+			final int code = GlfwKeys.getCode(key);
+			callback.invoke(window, code, GLFW.glfwGetKeyScancode(code), action, this.getModifiers());
+		});
+	}
+
+	private void pressBackspace(final boolean press) {
+		if (this.window == null) {
+			this.window = MinecraftClientTestPilot.xdotool("search", "--sync", "--limit", "1", "--name", "^Minecraft").trim();
+			MinecraftClientTestPilot.xdotool("windowfocus", "--sync", this.window);
+		}
+
+		MinecraftClientTestPilot.xdotool(press ? "keydown" : "keyup", "BackSpace");
+		final int code = GlfwKeys.getCode(Key.BACKSPACE);
+		this.waitFor("the key BACKSPACE" + (press ? " down" : " up"), () -> (GLFW.glfwGetKey(Minecraft.getInstance().getWindow().handle(), code) == GLFW.GLFW_PRESS) == press, 30);
+	}
+
 	private <T> T computeOnServer(final Function<ServerPlayer, T> function) {
 		final MinecraftServer server = this.computeOnClient(() -> Minecraft.getInstance().getSingleplayerServer(), 120);
 		return MinecraftClientTestPilot.await(server.submit(() -> function.apply(server.getPlayerList().getPlayers().getFirst())), "computing on the server", 120);
@@ -890,6 +920,22 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 		final ItemStackRenderState state = new ItemStackRenderState();
 		minecraft.getItemModelResolver().updateForTopItem(state, stack, ItemDisplayContext.GUI, minecraft.level, minecraft.player, 0);
 		return state;
+	}
+
+	private static String xdotool(final String... arguments) {
+		try {
+			final Process process = new ProcessBuilder(Stream.concat(Stream.of("xdotool"), Arrays.stream(arguments)).collect(Collectors.toList())).redirectErrorStream(true).start();
+			final String output = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+			if (!process.waitFor(30, TimeUnit.SECONDS) || process.exitValue() != 0) {
+				throw new AssertionError("xdotool " + String.join(" ", arguments) + " failed: " + output);
+			}
+			return output;
+		} catch (final IOException exception) {
+			throw new AssertionError("xdotool cannot run", exception);
+		} catch (final InterruptedException exception) {
+			Thread.currentThread().interrupt();
+			throw new AssertionError("Interrupted while running xdotool", exception);
+		}
 	}
 
 	private static <T> T await(final CompletableFuture<T> future, final String label, final int seconds) {
