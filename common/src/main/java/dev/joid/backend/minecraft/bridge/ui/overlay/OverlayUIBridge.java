@@ -1,5 +1,6 @@
 package dev.joid.backend.minecraft.bridge.ui.overlay;
 
+import dev.joid.backend.minecraft.bridge.input.KeyRepeatFilter;
 import dev.joid.backend.minecraft.bridge.render.GuiFrameCounter;
 import dev.joid.backend.minecraft.bridge.render.MinecraftRenderBridge;
 import dev.joid.backend.minecraft.bridge.ui.TooltipRenderer;
@@ -8,6 +9,7 @@ import dev.joid.backend.minecraft.bridge.window.MinecraftWindowBridge;
 import dev.joid.backend.minecraft.lib.ui.core.data.overlay.layer.OverlayLayer;
 import dev.joid.backend.minecraft.lib.ui.core.data.overlay.layer.UIDataOverlayLayer;
 import dev.joid.lib.ui.core.UI;
+import lombok.Getter;
 import lombok.NonNull;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -17,10 +19,14 @@ public final class OverlayUIBridge extends BaseOverlayUIBridge<GuiGraphics, Over
 	private final GuiCompositor         compositor;
 	private final MinecraftWindowBridge window;
 
+	@Getter
+	private final KeyRepeatFilter keyRepeats;
+
 	public OverlayUIBridge(final MinecraftRenderBridge render, final MinecraftWindowBridge window) {
 		super(window);
 		this.window     = window;
 		this.compositor = new GuiCompositor(render, window);
+		this.keyRepeats = new KeyRepeatFilter();
 	}
 
 	@Override

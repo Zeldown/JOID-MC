@@ -4,6 +4,7 @@ import dev.joid.backend.minecraft.lib.ui.core.data.overlay.layer.OverlayLayer;
 import dev.joid.lib.bridge.BridgeHandler;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -26,6 +27,7 @@ public final class OverlayLayerRenderer {
 	public static void extractScreen(final GuiGraphics graphics) {
 		final OverlayUIBridge bridge = BridgeHandler.UI.getBridge(OverlayUIBridge.class);
 		if (bridge != null) {
+			bridge.getKeyRepeats().follow(Minecraft.getInstance().screen);
 			bridge.drawAboveScreen(graphics);
 		}
 	}
