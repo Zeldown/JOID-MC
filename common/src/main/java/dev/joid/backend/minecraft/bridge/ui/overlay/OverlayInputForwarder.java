@@ -3,6 +3,7 @@ package dev.joid.backend.minecraft.bridge.ui.overlay;
 import dev.joid.base.lwjgl3.sdl.input.SdlKeys;
 import dev.joid.base.lwjgl3.sdl.input.SdlMouseButtons;
 import dev.joid.lib.bridge.BridgeHandler;
+import dev.joid.lib.input.key.Key;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.minecraft.util.StringUtil;
@@ -37,12 +38,24 @@ public final class OverlayInputForwarder {
 
 	public static boolean keyPressed(final int code) {
 		final OverlayUIBridge bridge = BridgeHandler.UI.getBridge(OverlayUIBridge.class);
-		return bridge != null && bridge.keyPressed(SdlKeys.getPhysicalKey(code), SdlKeys.getKey(code));
+		if (bridge == null) {
+			return false;
+		}
+
+		final Key physicalKey = SdlKeys.getPhysicalKey(code);
+		final Key key = SdlKeys.getKey(code);
+		return bridge.getKeyRepeats().press(physicalKey) ? bridge.keyPressed(physicalKey, key) : bridge.isKeyConsumed(key);
 	}
 
 	public static boolean keyReleased(final int code) {
 		final OverlayUIBridge bridge = BridgeHandler.UI.getBridge(OverlayUIBridge.class);
-		return bridge != null && bridge.keyReleased(SdlKeys.getPhysicalKey(code), SdlKeys.getKey(code));
+		if (bridge == null) {
+			return false;
+		}
+
+		final Key physicalKey = SdlKeys.getPhysicalKey(code);
+		bridge.getKeyRepeats().release(physicalKey);
+		return bridge.keyReleased(physicalKey, SdlKeys.getKey(code));
 	}
 
 }

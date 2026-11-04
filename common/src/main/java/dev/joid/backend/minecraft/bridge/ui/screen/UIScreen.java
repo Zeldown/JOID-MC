@@ -1,8 +1,10 @@
 package dev.joid.backend.minecraft.bridge.ui.screen;
 
+import dev.joid.backend.minecraft.bridge.input.KeyRepeatFilter;
 import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
 import dev.joid.base.lwjgl3.sdl.input.SdlKeys;
 import dev.joid.base.lwjgl3.sdl.input.SdlMouseButtons;
+import dev.joid.lib.input.key.Key;
 import lombok.NonNull;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
@@ -14,15 +16,18 @@ import net.minecraft.util.StringUtil;
 
 public class UIScreen extends Screen {
 
-	private final ScreenUIBridge bridge;
+	private final ScreenUIBridge  bridge;
+	private final KeyRepeatFilter keyRepeats;
 
 	public UIScreen(final ScreenUIBridge bridge) {
 		super(Component.empty());
-		this.bridge = bridge;
+		this.bridge     = bridge;
+		this.keyRepeats = new KeyRepeatFilter();
 	}
 
 	@Override
 	protected void init() {
+		this.keyRepeats.reset();
 		this.bridge.load();
 	}
 
@@ -92,12 +97,16 @@ public class UIScreen extends Screen {
 
 	@Override
 	public boolean keyPressed(final KeyEvent event) {
-		return this.bridge.keyPressed(SdlKeys.getPhysicalKey(event.key()), SdlKeys.getKey(event.key()));
+		final Key physicalKey = SdlKeys.getPhysicalKey(event.key());
+		final Key key = SdlKeys.getKey(event.key());
+		return this.keyRepeats.press(physicalKey) ? this.bridge.keyPressed(physicalKey, key) : this.bridge.isKeyConsumed(key);
 	}
 
 	@Override
 	public boolean keyReleased(final KeyEvent event) {
-		return this.bridge.keyReleased(SdlKeys.getPhysicalKey(event.key()), SdlKeys.getKey(event.key()));
+		final Key physicalKey = SdlKeys.getPhysicalKey(event.key());
+		this.keyRepeats.release(physicalKey);
+		return this.bridge.keyReleased(physicalKey, SdlKeys.getKey(event.key()));
 	}
 
 	@Override
