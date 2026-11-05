@@ -924,10 +924,10 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	private static String xdotool(final String... arguments) {
 		try {
-			final Process process = new ProcessBuilder(Stream.concat(Stream.of("xdotool"), Arrays.stream(arguments)).collect(Collectors.toList())).redirectErrorStream(true).start();
+			final Process process = new ProcessBuilder(Stream.concat(Stream.of("timeout", "30", "xdotool"), Arrays.stream(arguments)).collect(Collectors.toList())).redirectErrorStream(true).start();
 			final String output = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-			if (!process.waitFor(30, TimeUnit.SECONDS) || process.exitValue() != 0) {
-				throw new AssertionError("xdotool " + String.join(" ", arguments) + " failed: " + output);
+			if (process.waitFor() != 0) {
+				throw new AssertionError("xdotool " + String.join(" ", arguments) + " failed or ran past 30 s: " + output);
 			}
 			return output;
 		} catch (final IOException exception) {
