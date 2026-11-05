@@ -30,6 +30,7 @@ import dev.joid.lib.ui.event.EventListener;
 import dev.joid.lib.ui.event.EventPriority;
 import dev.joid.lib.ui.node.Node;
 import dev.joid.lib.ui.node.impl.control.field.TextFieldNode;
+import dev.joid.lib.ui.node.impl.layout.ContainerNode;
 import dev.joid.lib.ui.node.impl.resource.ResourcePlayerNode;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -166,6 +167,20 @@ public final class HostScenarios {
 		context.closeScreens();
 	}
 
+	public static void verifySlowFrame(final ClientTestContext context) {
+		final SlowFrameUI ui = new SlowFrameUI();
+		context.open(ui);
+		try {
+			for (int task = 0; task < 3; task++) {
+				context.compute(() -> true, 30);
+			}
+		} finally {
+			ui.finish();
+		}
+
+		context.closeScreens();
+	}
+
 	public static void verifyHostBindings(final ClientTestContext context) {
 		final IClientTestPilot pilot = context.getPilot();
 		context.openChoice();
@@ -258,6 +273,25 @@ public final class HostScenarios {
 			}
 		}
 		return 0;
+	}
+
+	public static final class SlowFrameUI extends UI {
+
+		private volatile boolean finished;
+
+		@Override
+		public void init() {
+			ContainerNode.create(0, 0, 1920, 1080).onDraw(event -> {
+				if (!this.finished) {
+					ClientTestContext.sleep(1100L);
+				}
+			}).attach(this);
+		}
+
+		public void finish() {
+			this.finished = true;
+		}
+
 	}
 
 	public static final class KeyRepeatUI extends UI {

@@ -24,6 +24,7 @@ public enum ClientTestScenario {
 	KEY_BIND(ClientTestStage.WORLD, HostScenarios::verifyKeyBind),
 	DEBUG_KEY(ClientTestStage.WORLD, HostScenarios::verifyDebugKey),
 	KEY_REPEAT(ClientTestStage.WORLD, HostScenarios::verifyKeyRepeat),
+	SLOW_FRAME(ClientTestStage.WORLD, HostScenarios::verifySlowFrame),
 	DEMO_CHOICE(ClientTestStage.WORLD, ScreenScenarios::verifyDemoChoice),
 	HOST_BINDINGS(ClientTestStage.WORLD, HostScenarios::verifyHostBindings),
 	DEMO_CAPTURES(ClientTestStage.WORLD, ScreenScenarios::verifyDemoCaptures),
