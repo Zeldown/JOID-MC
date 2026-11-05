@@ -1,8 +1,6 @@
 package dev.joid.backend.minecraft.showcase.ui;
 
-import java.util.List;
 import java.util.Locale;
-import java.util.stream.IntStream;
 
 import dev.joid.backend.minecraft.lib.ui.core.data.minecraft.UIDataMinecraft;
 import dev.joid.lib.bridge.render.state.BlendState;
@@ -39,8 +37,8 @@ public class ShowDaylight extends UI implements IShowFocus {
 
 	private static final BlendState ADDITIVE = BlendState.of(Equation.ADD, Factor.SRC_ALPHA, Factor.ONE);
 
-	private static final Resource       SUN   = Resource.of("minecraft:textures/environment/sun.png");
-	private static final List<Resource> MOONS = IntStream.range(0, 8).mapToObj(phase -> ResourceBuilder.create().nearest().textureCoords(phase % 4 / 4D, phase / 4 / 2D, (phase % 4 + 1) / 4D, (phase / 4 + 1) / 2D).of("minecraft:textures/environment/moon_phases.png")).toList();
+	private static final Resource SUN  = Resource.of("minecraft:textures/environment/sun.png");
+	private static final Resource MOON = ResourceBuilder.create().nearest().of("minecraft:textures/environment/moon_phases.png");
 
 	@Getter
 	private final DoubleSignal time;
@@ -109,8 +107,9 @@ public class ShowDaylight extends UI implements IShowFocus {
 			RectNode.create(0, 139, 280, 2).color(Color.WHITE.withAlpha(0.25F)).attach(dial);
 			RectNode.create(0, 141, 280, 139).color(Color.BLACK.withAlpha(0.25F)).attach(dial);
 			RectNode.create(0, 0, 280, 280).color(Color.TRANSPARENT).interactive(false).layer((node, mouseX, mouseY) -> {
-				ShowDaylight.celestial(ShowDaylight.SUN, this.orbitX(0D), this.orbitY(0D));
-				ShowDaylight.celestial(ShowDaylight.MOONS.get(this.day() % 8), this.orbitX(Math.PI), this.orbitY(Math.PI));
+				ShowDaylight.celestial(ShowDaylight.SUN, this.orbitX(0D), this.orbitY(0D), 0D, 0D, 1D, 1D);
+				final int phase = this.day() % 8;
+				ShowDaylight.celestial(ShowDaylight.MOON, this.orbitX(Math.PI), this.orbitY(Math.PI), phase % 4 / 4D, phase / 4 / 2D, (phase % 4 + 1) / 4D, (phase / 4 + 1) / 2D);
 			}).attach(dial);
 		})
 		.attach(panel);
@@ -154,12 +153,12 @@ public class ShowDaylight extends UI implements IShowFocus {
 		return ShowTheme.now() - this.start;
 	}
 
-	private static void celestial(final Resource resource, final double x, final double y) {
+	private static void celestial(final Resource resource, final double x, final double y, final double u0, final double v0, final double u1, final double v1) {
 		resource.request(48, 48);
 		resource.bind(TextureWrap.CLAMP_TO_EDGE, () -> {
 			final ITexture texture = resource.getTexture();
 			if (texture != null) {
-				DrawUtils.RESOURCE.drawTexture(x, y, 48D, 48D, texture, 0D, 0D, 1D, 1D, TextureFilter.NEAREST, ShowDaylight.ADDITIVE);
+				DrawUtils.RESOURCE.drawTexture(x, y, 48D, 48D, texture, u0, v0, u1, v1, TextureFilter.NEAREST, ShowDaylight.ADDITIVE);
 			}
 		});
 	}
