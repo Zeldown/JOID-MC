@@ -36,6 +36,8 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.sdl.SDLEvents;
 import org.lwjgl.sdl.SDLKeyboard;
 import org.lwjgl.sdl.SDLKeycode;
+import org.lwjgl.sdl.SDLProperties;
+import org.lwjgl.sdl.SDLVideo;
 import org.lwjgl.sdl.SDL_Event;
 import org.lwjgl.system.MemoryStack;
 
@@ -813,7 +815,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	private void pressBackspace(final boolean press) {
 		if (this.window == null) {
-			this.window = MinecraftClientTestPilot.xdotool("search", "--sync", "--limit", "1", "--name", "^Minecraft").trim();
+			this.window = String.valueOf(this.computeOnClient(() -> SDLProperties.SDL_GetNumberProperty(SDLVideo.SDL_GetWindowProperties(Minecraft.getInstance().getWindow().handle()), SDLVideo.SDL_PROP_WINDOW_X11_WINDOW_NUMBER, 0L), 120));
 			MinecraftClientTestPilot.xdotool("windowfocus", "--sync", this.window);
 		}
 
