@@ -846,14 +846,14 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	private static String xdotool(final String... arguments) {
 		final List<String> command = new ArrayList<>();
-		command.add("xdotool");
+		command.addAll(Arrays.asList("timeout", "30", "xdotool"));
 		command.addAll(Arrays.asList(arguments));
 		try {
 			final Process process = new ProcessBuilder(command).redirectErrorStream(true).start();
 			try (final BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
 				final String output = reader.lines().collect(Collectors.joining(System.lineSeparator()));
-				if (!process.waitFor(30, TimeUnit.SECONDS) || process.exitValue() != 0) {
-					throw new AssertionError("xdotool " + String.join(" ", arguments) + " failed: " + output);
+				if (process.waitFor() != 0) {
+					throw new AssertionError("xdotool " + String.join(" ", arguments) + " failed or ran past 30 s: " + output);
 				}
 				return output;
 			}
