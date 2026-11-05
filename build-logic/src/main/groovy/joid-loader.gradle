@@ -169,11 +169,7 @@ if (project.hasProperty('joid.test') || project.hasProperty('joid.showcase')) {
         doFirst {
             def config = file('runs/client/config/fml.toml')
             config.parentFile.mkdirs()
-            config.text = 'splashscreen = true
-maxThreads = -1
-versionCheck = true
-defaultConfigPath = "defaultconfigs"
-'
+            config.text = ['splashscreen = true', 'maxThreads = -1', 'versionCheck = true', 'defaultConfigPath = "defaultconfigs"'].join(System.lineSeparator())
         }
     }
 }
