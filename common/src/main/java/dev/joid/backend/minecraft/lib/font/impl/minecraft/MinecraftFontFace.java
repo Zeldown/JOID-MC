@@ -63,7 +63,7 @@ public final class MinecraftFontFace implements IFontFace {
 
 	@Override
 	public float getAdvance(final int codepoint) {
-		return this.getFontSet().getGlyphInfo(codepoint, false).getAdvance(this.isBold()) / MinecraftFont.SIZE;
+		return this.getFontSet().getGlyphInfo(codepoint).getAdvance(this.isBold()) / MinecraftFont.SIZE;
 	}
 
 	@Override

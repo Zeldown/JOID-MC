@@ -117,6 +117,8 @@ import net.minecraft.client.tutorial.TutorialSteps;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -138,7 +140,11 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.presets.WorldPresets;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.levelgen.FlatLevelSource;
+import net.minecraft.world.level.levelgen.WorldGenSettings;
+import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
+import net.minecraft.world.level.levelgen.structure.StructureSet;
 
 public final class MinecraftClientTestPilot implements IClientTestPilot {
 
@@ -162,7 +168,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	@Override
 	public String getVersion() {
-		return "1.19.2";
+		return "1.18.2";
 	}
 
 	@Override
@@ -178,8 +184,8 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	@Override
 	public Map<ClientTestScenario, String> getExclusions() {
 		final Map<ClientTestScenario, String> exclusions = new EnumMap<>(ClientTestScenario.class);
-		exclusions.put(ClientTestScenario.AUDIO_INTERFACE, "Minecraft 1.19.2 has no interface sound category, JOID follows the master volume");
-		exclusions.put(ClientTestScenario.NESTED_FEATURE_RASTER, "Minecraft 1.19.2 draws at once, it has no feature render pipeline");
+		exclusions.put(ClientTestScenario.AUDIO_INTERFACE, "Minecraft 1.18.2 has no interface sound category, JOID follows the master volume");
+		exclusions.put(ClientTestScenario.NESTED_FEATURE_RASTER, "Minecraft 1.18.2 draws at once, it has no feature render pipeline");
 		return exclusions;
 	}
 
@@ -210,11 +216,13 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 		if (this.computeOnClient(() -> Minecraft.getInstance().level == null && !Minecraft.getInstance().getLevelSource().levelExists("joid-test"), 120)) {
 			this.runOnClient(() -> {
 				final RegistryAccess.Frozen registries = RegistryAccess.builtinCopy().freeze();
+				final Registry<StructureSet> structures = registries.registryOrThrow(Registry.STRUCTURE_SET_REGISTRY);
 				final GameRules rules = new GameRules();
 				rules.getRule(GameRules.RULE_DAYLIGHT).set(false, null);
 				rules.getRule(GameRules.RULE_DOMOBSPAWNING).set(false, null);
 				final LevelSettings settings = new LevelSettings("joid-test", GameType.SURVIVAL, false, Difficulty.NORMAL, false, rules, DataPackConfig.DEFAULT);
-				Minecraft.getInstance().createWorldOpenFlows().createFreshLevel("joid-test", settings, registries, registries.registryOrThrow(Registry.WORLD_PRESET_REGISTRY).getHolderOrThrow(WorldPresets.FLAT).value().createWorldGenSettings(1L, false, false));
+				final FlatLevelSource generator = new FlatLevelSource(structures, FlatLevelGeneratorSettings.getDefault(registries.registryOrThrow(Registry.BIOME_REGISTRY), structures));
+				Minecraft.getInstance().createLevel("joid-test", settings, registries, new WorldGenSettings(1L, false, false, WorldGenSettings.withOverworld(registries.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY), DimensionType.defaultDimensions(registries, 1L), generator)));
 			});
 			this.waitFor("the world creation", () -> Minecraft.getInstance().level != null || Minecraft.getInstance().screen instanceof ConfirmScreen, 600);
 			if (this.computeOnClient(() -> Minecraft.getInstance().screen instanceof ConfirmScreen, 120)) {
@@ -380,7 +388,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	public boolean canOpenDemoContainer(final int level) {
 		return this.computeOnServer(player -> {
 			final MinecraftServer server = player.getServer();
-			final ServerPlayer stranger = new ServerPlayer(server, server.overworld(), new GameProfile(UUID.randomUUID(), "JOIDStranger"), null);
+			final ServerPlayer stranger = new ServerPlayer(server, server.overworld(), new GameProfile(UUID.randomUUID(), "JOIDStranger"));
 			if (level > 0) {
 				server.getPlayerList().getOps().add(new ServerOpListEntry(stranger.getGameProfile(), level == 1 ? 1 : 2, false));
 			}
@@ -486,7 +494,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	@Override
 	public void applyGuiScale(final int guiScale) {
 		final Minecraft minecraft = Minecraft.getInstance();
-		minecraft.options.guiScale().set(guiScale);
+		minecraft.options.guiScale = guiScale;
 		minecraft.resizeDisplay();
 	}
 
@@ -534,7 +542,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	@Override
 	public Object createRedChat(final String text) {
-		return Component.literal(text).withStyle(ChatFormatting.RED);
+		return new TextComponent(text).withStyle(ChatFormatting.RED);
 	}
 
 	@Override
@@ -549,7 +557,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	@Override
 	public int measureText(final IFont font, final String text) {
-		return Minecraft.getInstance().font.width(Component.literal(text).withStyle(style -> style.withFont(((MinecraftFont) font).getId())));
+		return Minecraft.getInstance().font.width(new TextComponent(text).withStyle(style -> style.withFont(((MinecraftFont) font).getId())));
 	}
 
 	@Override
@@ -610,7 +618,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	@Override
 	public void setSubtitles(final boolean subtitles) {
-		Minecraft.getInstance().options.showSubtitles().set(subtitles);
+		Minecraft.getInstance().options.showSubtitles = subtitles;
 	}
 
 	@Override
@@ -678,7 +686,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 			case PIG -> node.type(EntityType.PIG);
 			case ZOMBIE -> node.type(EntityType.ZOMBIE);
 			case PLAYER_PROFILE -> node.profile(new GameProfile(new UUID(0L, 15L), "Steve"));
-			case PLAYER_SKIN -> node.skin(ResourceLocation.tryBuild("joid", "demo/textures/skin.png"));
+			case PLAYER_SKIN -> node.skin(new ResourceLocation("joid", "demo/textures/skin.png"));
 		};
 	}
 
@@ -705,7 +713,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	@Override
 	public BufferedImage readTexture(final ClientTestTexture texture) {
-		try (final InputStream stream = Minecraft.getInstance().getResourceManager().getResource(ResourceLocation.tryParse(MinecraftClientTestPilot.texture(texture))).orElseThrow().open()) {
+		try (final InputStream stream = Minecraft.getInstance().getResourceManager().getResource(ResourceLocation.tryParse(MinecraftClientTestPilot.texture(texture))).getInputStream()) {
 			return ImageIO.read(stream);
 		} catch (final IOException exception) {
 			throw new AssertionError("Unable to read the texture " + texture, exception);
@@ -827,7 +835,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 	}
 
 	private static void pressButton(final Screen screen, final String translationKey) {
-		final String message = Component.translatable(translationKey).getString();
+		final String message = new TranslatableComponent(translationKey).getString();
 		for (final GuiEventListener child : screen.children()) {
 			if (child instanceof final Button button && button.getMessage().getString().equals(message)) {
 				button.onPress();

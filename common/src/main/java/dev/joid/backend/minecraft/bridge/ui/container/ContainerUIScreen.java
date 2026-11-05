@@ -20,6 +20,8 @@ import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
@@ -206,7 +208,7 @@ public class ContainerUIScreen<M extends AbstractContainerMenu> extends Abstract
 
 	private static Component toTitle(final ContainerUI<?> ui) {
 		final UIDataMinecraft data = ui.getClass().getAnnotation(UIDataMinecraft.class);
-		return data == null || data.title().isEmpty() ? Component.empty() : Component.translatable(data.title());
+		return data == null || data.title().isEmpty() ? TextComponent.EMPTY : new TranslatableComponent(data.title());
 	}
 
 }

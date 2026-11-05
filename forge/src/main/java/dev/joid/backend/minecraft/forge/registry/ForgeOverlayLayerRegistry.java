@@ -8,69 +8,66 @@ import dev.joid.backend.minecraft.lib.ui.core.data.overlay.layer.OverlayLayer;
 import dev.joid.backend.minecraft.loader.event.MinecraftOverlayEvents;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
-import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.gui.ForgeIngameGui;
+import net.minecraftforge.client.gui.IIngameOverlay;
+import net.minecraftforge.client.gui.OverlayRegistry;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ForgeOverlayLayerRegistry {
 
-	private static final Map<ResourceLocation, OverlayLayer> LAYERS = new HashMap<>();
-
-	static {
-		for (final OverlayLayer layer : OverlayLayer.values()) {
-			for (final VanillaGuiOverlay overlay : ForgeOverlayLayerRegistry.getOverlays(layer)) {
-				ForgeOverlayLayerRegistry.LAYERS.put(overlay.id(), layer);
-			}
-		}
-	}
+	private static final Map<IIngameOverlay, OverlayLayer> LAYERS = new HashMap<>();
 
 	public static void register(final IEventBus modBus) {
-		modBus.addListener(ForgeOverlayLayerRegistry::registerOverlays);
+		modBus.addListener((final FMLClientSetupEvent event) -> ForgeOverlayLayerRegistry.registerOverlays());
 		MinecraftForge.EVENT_BUS.addListener(ForgeOverlayLayerRegistry::renderOverlay);
 	}
 
-	private static void registerOverlays(final RegisterGuiOverlaysEvent event) {
+	private static void registerOverlays() {
 		for (final OverlayLayer layer : OverlayLayer.values()) {
-			final List<VanillaGuiOverlay> overlays = ForgeOverlayLayerRegistry.getOverlays(layer);
-			event.registerBelow(overlays.get(0).id(), MinecraftOverlayEvents.getId(layer, false).getPath(), (gui, pose, partialTick, width, height) -> MinecraftOverlayEvents.fireLayer(pose, layer, false));
-			event.registerAbove(overlays.get(overlays.size() - 1).id(), MinecraftOverlayEvents.getId(layer, true).getPath(), (gui, pose, partialTick, width, height) -> MinecraftOverlayEvents.fireLayer(pose, layer, true));
+			final List<IIngameOverlay> overlays = ForgeOverlayLayerRegistry.getOverlays(layer);
+			for (final IIngameOverlay overlay : overlays) {
+				ForgeOverlayLayerRegistry.LAYERS.put(overlay, layer);
+			}
+
+			OverlayRegistry.registerOverlayBelow(overlays.get(0), MinecraftOverlayEvents.getId(layer, false).getPath(), (gui, pose, partialTick, width, height) -> MinecraftOverlayEvents.fireLayer(pose, layer, false));
+			OverlayRegistry.registerOverlayAbove(overlays.get(overlays.size() - 1), MinecraftOverlayEvents.getId(layer, true).getPath(), (gui, pose, partialTick, width, height) -> MinecraftOverlayEvents.fireLayer(pose, layer, true));
 		}
 
-		event.registerAboveAll(MinecraftOverlayEvents.getId().getPath(), (gui, pose, partialTick, width, height) -> MinecraftOverlayEvents.fireHud(pose));
+		OverlayRegistry.registerOverlayTop(MinecraftOverlayEvents.getId().getPath(), (gui, pose, partialTick, width, height) -> MinecraftOverlayEvents.fireHud(pose));
 	}
 
-	private static void renderOverlay(final RenderGuiOverlayEvent.Pre event) {
-		final OverlayLayer layer = ForgeOverlayLayerRegistry.LAYERS.get(event.getOverlay().id());
+	private static void renderOverlay(final RenderGameOverlayEvent.PreLayer event) {
+		final OverlayLayer layer = ForgeOverlayLayerRegistry.LAYERS.get(event.getOverlay());
 		if (layer != null && MinecraftOverlayEvents.isCancelled(layer)) {
 			event.setCanceled(true);
 		}
 	}
 
-	private static List<VanillaGuiOverlay> getOverlays(final OverlayLayer layer) {
+	private static List<IIngameOverlay> getOverlays(final OverlayLayer layer) {
 		return switch (layer) {
-			case CAMERA_OVERLAYS -> List.of(VanillaGuiOverlay.VIGNETTE, VanillaGuiOverlay.SPYGLASS, VanillaGuiOverlay.HELMET, VanillaGuiOverlay.FROSTBITE, VanillaGuiOverlay.PORTAL);
-			case CROSSHAIR -> List.of(VanillaGuiOverlay.CROSSHAIR);
-			case HOTBAR -> List.of(VanillaGuiOverlay.HOTBAR);
-			case ARMOR -> List.of(VanillaGuiOverlay.ARMOR_LEVEL);
-			case HEALTH -> List.of(VanillaGuiOverlay.PLAYER_HEALTH);
-			case FOOD -> List.of(VanillaGuiOverlay.FOOD_LEVEL);
-			case AIR -> List.of(VanillaGuiOverlay.AIR_LEVEL);
-			case MOUNT_HEALTH -> List.of(VanillaGuiOverlay.MOUNT_HEALTH);
-			case CONTEXTUAL_BAR -> List.of(VanillaGuiOverlay.JUMP_BAR, VanillaGuiOverlay.EXPERIENCE_BAR);
-			case SELECTED_ITEM_NAME -> List.of(VanillaGuiOverlay.ITEM_NAME);
-			case EFFECTS -> List.of(VanillaGuiOverlay.POTION_ICONS);
-			case BOSS_BAR -> List.of(VanillaGuiOverlay.BOSS_EVENT_PROGRESS);
-			case SLEEP -> List.of(VanillaGuiOverlay.SLEEP_FADE);
-			case SCOREBOARD -> List.of(VanillaGuiOverlay.SCOREBOARD);
-			case ACTION_BAR -> List.of(VanillaGuiOverlay.RECORD_OVERLAY);
-			case TITLE -> List.of(VanillaGuiOverlay.TITLE_TEXT);
-			case CHAT -> List.of(VanillaGuiOverlay.CHAT_PANEL);
-			case PLAYER_LIST -> List.of(VanillaGuiOverlay.PLAYER_LIST);
-			case SUBTITLES -> List.of(VanillaGuiOverlay.SUBTITLES);
+			case CAMERA_OVERLAYS -> List.of(ForgeIngameGui.VIGNETTE_ELEMENT, ForgeIngameGui.SPYGLASS_ELEMENT, ForgeIngameGui.HELMET_ELEMENT, ForgeIngameGui.FROSTBITE_ELEMENT, ForgeIngameGui.PORTAL_ELEMENT);
+			case CROSSHAIR -> List.of(ForgeIngameGui.CROSSHAIR_ELEMENT);
+			case HOTBAR -> List.of(ForgeIngameGui.HOTBAR_ELEMENT);
+			case ARMOR -> List.of(ForgeIngameGui.ARMOR_LEVEL_ELEMENT);
+			case HEALTH -> List.of(ForgeIngameGui.PLAYER_HEALTH_ELEMENT);
+			case FOOD -> List.of(ForgeIngameGui.FOOD_LEVEL_ELEMENT);
+			case AIR -> List.of(ForgeIngameGui.AIR_LEVEL_ELEMENT);
+			case MOUNT_HEALTH -> List.of(ForgeIngameGui.MOUNT_HEALTH_ELEMENT);
+			case CONTEXTUAL_BAR -> List.of(ForgeIngameGui.JUMP_BAR_ELEMENT, ForgeIngameGui.EXPERIENCE_BAR_ELEMENT);
+			case SELECTED_ITEM_NAME -> List.of(ForgeIngameGui.ITEM_NAME_ELEMENT);
+			case EFFECTS -> List.of(ForgeIngameGui.POTION_ICONS_ELEMENT);
+			case BOSS_BAR -> List.of(ForgeIngameGui.BOSS_HEALTH_ELEMENT);
+			case SLEEP -> List.of(ForgeIngameGui.SLEEP_FADE_ELEMENT);
+			case SCOREBOARD -> List.of(ForgeIngameGui.SCOREBOARD_ELEMENT);
+			case ACTION_BAR -> List.of(ForgeIngameGui.RECORD_OVERLAY_ELEMENT);
+			case TITLE -> List.of(ForgeIngameGui.TITLE_TEXT_ELEMENT);
+			case CHAT -> List.of(ForgeIngameGui.CHAT_PANEL_ELEMENT);
+			case PLAYER_LIST -> List.of(ForgeIngameGui.PLAYER_LIST_ELEMENT);
+			case SUBTITLES -> List.of(ForgeIngameGui.SUBTITLES_ELEMENT);
 		};
 	}
 

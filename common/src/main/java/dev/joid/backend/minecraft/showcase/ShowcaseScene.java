@@ -26,10 +26,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.tags.StructureTags;
+import net.minecraft.tags.ConfiguredStructureTags;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -197,7 +197,7 @@ public enum ShowcaseScene {
 			for (int index = 0; index < items.length; index++) {
 				storage.setItem(index, items[index]);
 			}
-			player.openMenu(new SimpleMenuProvider((containerId, inventory, owner) -> new ChestMenu(ShowcaseLauncher.CHEST, containerId, inventory, storage, 3), Component.translatable("container.chest")));
+			player.openMenu(new SimpleMenuProvider((containerId, inventory, owner) -> new ChestMenu(ShowcaseLauncher.CHEST, containerId, inventory, storage, 3), new TranslatableComponent("container.chest")));
 		});
 		ShowcaseDirector.waitFor("the showcase chest", () -> JOID.isOpen(ShowChest.class), 60);
 		ShowcaseDirector.frames(25);
@@ -231,7 +231,7 @@ public enum ShowcaseScene {
 				final AnvilMenu menu = new AnvilMenu(containerId, inventory, ContainerLevelAccess.NULL);
 				menu.getSlot(AnvilMenu.INPUT_SLOT).set(sword);
 				return menu;
-			}, Component.translatable("container.repair")));
+			}, new TranslatableComponent("container.repair")));
 		});
 		ShowcaseDirector.waitFor("the showcase anvil", () -> JOID.isOpen(ShowAnvil.class), 60);
 		final ShowAnvil ui = ShowcaseDirector.computeOnClient(() -> JOID.getUi(ShowAnvil.class));
@@ -378,13 +378,13 @@ public enum ShowcaseScene {
 			final ServerLevel level = (ServerLevel) player.level;
 			final List<double[]> found = new ArrayList<>();
 			final BlockPos origin = player.blockPosition();
-			final BlockPos village = level.findNearestMapStructure(StructureTags.VILLAGE, origin, 100, false);
+			final BlockPos village = level.findNearestMapFeature(ConfiguredStructureTags.VILLAGE, origin, 100, false);
 			if (village != null) {
 				found.add(new double[] {village.getX(), village.getZ()});
 			}
 
 			for (final ResourceKey<Biome> biome : List.of(Biomes.SUNFLOWER_PLAINS, Biomes.RIVER, Biomes.FLOWER_FOREST, Biomes.MEADOW)) {
-				final Pair<BlockPos, Holder<Biome>> nearest = level.findClosestBiome3d(holder -> holder.is(biome), origin, 6400, 32, 64);
+				final Pair<BlockPos, Holder<Biome>> nearest = level.findNearestBiome(holder -> holder.is(biome), origin, 6400, 32);
 				if (nearest != null) {
 					found.add(new double[] {nearest.getFirst().getX(), nearest.getFirst().getZ()});
 				}

@@ -42,9 +42,10 @@ import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.DisconnectedScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.client.gui.screens.worldselection.WorldPreset;
 import net.minecraft.client.tutorial.TutorialSteps;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
@@ -52,7 +53,6 @@ import net.minecraft.world.level.DataPackConfig;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
-import net.minecraft.world.level.levelgen.presets.WorldPresets;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ShowcaseDirector {
@@ -69,11 +69,11 @@ public final class ShowcaseDirector {
 		final Minecraft minecraft = Minecraft.getInstance();
 		minecraft.options.pauseOnLostFocus = false;
 		minecraft.options.tutorialStep = TutorialSteps.NONE;
-		minecraft.options.framerateLimit().set(260);
-		minecraft.options.renderDistance().set(16);
-		minecraft.options.bobView().set(false);
-		minecraft.options.guiScale().set(4);
-		minecraft.options.fov().set(70);
+		minecraft.options.framerateLimit = 260;
+		minecraft.options.renderDistance = 16;
+		minecraft.options.bobView = false;
+		minecraft.options.guiScale = 4;
+		minecraft.options.fov = 70D;
 		final Thread thread = new Thread(ShowcaseDirector::run, "JOID Showcase Director");
 		thread.setDaemon(true);
 		thread.start();
@@ -190,7 +190,7 @@ public final class ShowcaseDirector {
 
 	public static void command(final String command) {
 		final MinecraftServer server = ShowcaseDirector.computeOnClient(() -> Minecraft.getInstance().getSingleplayerServer());
-		ShowcaseDirector.await(server.submit(() -> server.getCommands().performPrefixedCommand(server.createCommandSourceStack().withSuppressedOutput(), command)), "running /" + command);
+		ShowcaseDirector.await(server.submit(() -> server.getCommands().performCommand(server.createCommandSourceStack().withSuppressedOutput(), command)), "running /" + command);
 	}
 
 	public static void runOnServer(final Consumer<ServerPlayer> consumer) {
@@ -254,7 +254,7 @@ public final class ShowcaseDirector {
 		} catch (final Throwable throwable) {
 			ShowcaseClock.release();
 			final AssertionError error = new AssertionError("The showcase stopped after " + ShowcaseDirector.captures + " captures", throwable);
-			minecraft.execute(() -> minecraft.delayCrash(CrashReport.forThrowable(error, "JOID showcase")));
+			minecraft.execute(() -> minecraft.delayCrash(() -> CrashReport.forThrowable(error, "JOID showcase")));
 			return;
 		}
 
@@ -287,7 +287,7 @@ public final class ShowcaseDirector {
 				rules.getRule(GameRules.RULE_NATURAL_REGENERATION).set(false, null);
 				rules.getRule(GameRules.RULE_ANNOUNCE_ADVANCEMENTS).set(false, null);
 				final LevelSettings settings = new LevelSettings("joid-showcase", GameType.SURVIVAL, false, Difficulty.NORMAL, false, rules, DataPackConfig.DEFAULT);
-				Minecraft.getInstance().createWorldOpenFlows().createFreshLevel("joid-showcase", settings, registries, WorldPresets.createNormalWorldFromPreset(registries, Long.parseLong(System.getProperty("joid.showcase.seed", "1700")), true, false));
+				Minecraft.getInstance().createLevel("joid-showcase", settings, registries, WorldPreset.NORMAL.create(registries, Long.parseLong(System.getProperty("joid.showcase.seed", "1700")), true, false));
 			});
 			ShowcaseDirector.waitFor("the world creation", () -> Minecraft.getInstance().level != null || Minecraft.getInstance().screen instanceof ConfirmScreen, 900);
 			if (ShowcaseDirector.computeOnClient(() -> Minecraft.getInstance().screen instanceof ConfirmScreen)) {
@@ -313,7 +313,7 @@ public final class ShowcaseDirector {
 	}
 
 	private static void pressButton(final Screen screen, final String translationKey) {
-		final String message = Component.translatable(translationKey).getString();
+		final String message = new TranslatableComponent(translationKey).getString();
 		for (final GuiEventListener child : screen.children()) {
 			if (child instanceof final Button button && button.getMessage().getString().equals(message)) {
 				button.onPress();

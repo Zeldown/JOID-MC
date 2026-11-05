@@ -11,6 +11,8 @@ import lombok.NonNull;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 
 public class UIScreen extends Screen {
 
@@ -18,7 +20,7 @@ public class UIScreen extends Screen {
 	private final KeyRepeatFilter keyRepeats;
 
 	public UIScreen(final ScreenUIBridge bridge) {
-		super(Component.empty());
+		super(TextComponent.EMPTY);
 		this.bridge     = bridge;
 		this.keyRepeats = new KeyRepeatFilter();
 	}
@@ -57,7 +59,7 @@ public class UIScreen extends Screen {
 	@Override
 	public @NonNull Component getTitle() {
 		final UIDataMinecraft data = this.bridge.getMinecraftData();
-		return data == null || data.title().isEmpty() ? super.getTitle() : Component.translatable(data.title());
+		return data == null || data.title().isEmpty() ? super.getTitle() : new TranslatableComponent(data.title());
 	}
 
 	@Override

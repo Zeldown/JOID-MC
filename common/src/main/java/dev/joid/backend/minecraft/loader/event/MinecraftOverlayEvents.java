@@ -32,11 +32,11 @@ public final class MinecraftOverlayEvents {
 	}
 
 	public static @NonNull ResourceLocation getId() {
-		return ResourceLocation.tryBuild(MinecraftJoid.MOD_ID, "overlay");
+		return new ResourceLocation(MinecraftJoid.MOD_ID, "overlay");
 	}
 
 	public static @NonNull ResourceLocation getId(final OverlayLayer layer, final boolean post) {
-		return ResourceLocation.tryBuild(MinecraftJoid.MOD_ID, "overlay/" + layer.name().toLowerCase(Locale.ROOT) + (post ? "_post" : "_pre"));
+		return new ResourceLocation(MinecraftJoid.MOD_ID, "overlay/" + layer.name().toLowerCase(Locale.ROOT) + (post ? "_post" : "_pre"));
 	}
 
 }

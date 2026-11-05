@@ -20,47 +20,47 @@ public final class ForgeScreenEvents {
 		MinecraftForge.EVENT_BUS.addListener(ForgeScreenEvents::mouseScrolled);
 	}
 
-	private static void render(final ScreenEvent.Render.Post event) {
+	private static void render(final ScreenEvent.DrawScreenEvent.Post event) {
 		MinecraftScreenEvents.fireRender(event.getPoseStack());
 	}
 
-	private static void mouseMoved(final ScreenEvent.MouseDragged.Pre event) {
+	private static void mouseMoved(final ScreenEvent.MouseDragEvent.Pre event) {
 		if (MinecraftScreenEvents.fireMouseMoved()) {
 			event.setCanceled(true);
 		}
 	}
 
-	private static void mousePressed(final ScreenEvent.MouseButtonPressed.Pre event) {
+	private static void mousePressed(final ScreenEvent.MouseClickedEvent.Pre event) {
 		if (MinecraftScreenEvents.fireMousePressed(event.getButton())) {
 			event.setCanceled(true);
 		}
 	}
 
-	private static void mouseReleased(final ScreenEvent.MouseButtonReleased.Pre event) {
+	private static void mouseReleased(final ScreenEvent.MouseReleasedEvent.Pre event) {
 		if (MinecraftScreenEvents.fireMouseReleased(event.getButton())) {
 			event.setCanceled(true);
 		}
 	}
 
-	private static void mouseScrolled(final ScreenEvent.MouseScrolled.Pre event) {
+	private static void mouseScrolled(final ScreenEvent.MouseScrollEvent.Pre event) {
 		if (MinecraftScreenEvents.fireMouseScrolled(0D, event.getScrollDelta())) {
 			event.setCanceled(true);
 		}
 	}
 
-	private static void charTyped(final ScreenEvent.CharacterTyped.Pre event) {
+	private static void charTyped(final ScreenEvent.KeyboardCharTypedEvent.Pre event) {
 		if (MinecraftScreenEvents.fireCharTyped(event.getCodePoint())) {
 			event.setCanceled(true);
 		}
 	}
 
-	private static void keyPressed(final ScreenEvent.KeyPressed.Pre event) {
+	private static void keyPressed(final ScreenEvent.KeyboardKeyPressedEvent.Pre event) {
 		if (MinecraftScreenEvents.fireKeyPressed(event.getKeyCode())) {
 			event.setCanceled(true);
 		}
 	}
 
-	private static void keyReleased(final ScreenEvent.KeyReleased.Pre event) {
+	private static void keyReleased(final ScreenEvent.KeyboardKeyReleasedEvent.Pre event) {
 		if (MinecraftScreenEvents.fireKeyReleased(event.getKeyCode())) {
 			event.setCanceled(true);
 		}

@@ -276,8 +276,9 @@ def verifyJar = { String kind, File archive, File common, List<String> patterns,
             server << 'fabric.mod.json'
         }
 
-        if (loaderName != 'fabric' && !new String(zip.getInputStream(zip.getEntry('META-INF/mods.toml')).bytes, 'UTF-8').readLines().contains('displayTest = "IGNORE_ALL_VERSION"')) {
-            server << 'META-INF/mods.toml'
+        def mod = zip.getEntry('dev/joid/backend/minecraft/forge/ForgeJoid.class')
+        if (loaderName != 'fabric' && (mod == null || !new String(zip.getInputStream(mod).bytes, 'ISO-8859-1').contains('IExtensionPoint\$DisplayTest'))) {
+            server << 'dev/joid/backend/minecraft/forge/ForgeJoid.class'
         }
     }
     if (!server.isEmpty()) {

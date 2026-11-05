@@ -7,7 +7,7 @@ import java.util.UUID;
 import dev.joid.backend.minecraft.demo.container.DemoContainer;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.SimpleMenuProvider;
@@ -23,7 +23,7 @@ public final class OpenDemoContainerPayloadHandler {
 		}
 
 		final SimpleContainer storage = OpenDemoContainerPayloadHandler.STORAGES.computeIfAbsent(player.getUUID(), uuid -> new SimpleContainer(27));
-		player.openMenu(new SimpleMenuProvider((containerId, inventory, owner) -> new DemoContainer(containerId, inventory, storage), Component.literal("Demo storage")));
+		player.openMenu(new SimpleMenuProvider((containerId, inventory, owner) -> new DemoContainer(containerId, inventory, storage), new TextComponent("Demo storage")));
 	}
 
 	public static boolean canOpen(final ServerPlayer player) {

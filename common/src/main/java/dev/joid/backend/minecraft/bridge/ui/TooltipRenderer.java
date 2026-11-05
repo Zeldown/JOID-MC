@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.ItemStack;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -35,7 +36,7 @@ public final class TooltipRenderer {
 	}
 
 	private static Component getLine(final Object line) {
-		return line instanceof final Component component ? component : Component.literal(TextConverter.convert(line));
+		return line instanceof final Component component ? component : new TextComponent(TextConverter.convert(line));
 	}
 
 	private static List<Component> getLines(final Object content) {
@@ -53,7 +54,7 @@ public final class TooltipRenderer {
 	private static final class TooltipScreen extends Screen {
 
 		private TooltipScreen() {
-			super(Component.empty());
+			super(TextComponent.EMPTY);
 		}
 
 		private void drawStack(final PoseStack pose, final ItemStack stack, final int mouseX, final int mouseY) {

@@ -41,6 +41,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityType;
@@ -69,11 +71,11 @@ public class UIDemoMinecraft extends UIDemo {
 	public void init() {
 		final TextInfo caption = TextInfo.create(DemoFont.MONTSERRAT, 24).color(UIDemoMinecraft.INK);
 		final TextInfo info = TextInfo.create(MinecraftFont.DEFAULT, MinecraftFont.SIZE * 3).color(Color.WHITE).shadowTint(0.25F).shadow(3F, 3F);
-		final Component component = Component.literal("Hex ").withStyle(style -> style.withColor(0x12ABCD)).append(Component.translatable("menu.game").withStyle(ChatFormatting.GOLD, ChatFormatting.UNDERLINE)).append(Component.literal(" plain"));
+		final Component component = new TextComponent("Hex ").withStyle(style -> style.withColor(0x12ABCD)).append(new TranslatableComponent("menu.game").withStyle(ChatFormatting.GOLD, ChatFormatting.UNDERLINE)).append(new TextComponent(" plain"));
 		final ItemStack damaged = new ItemStack(Items.DIAMOND_PICKAXE);
 		final ItemStack pearl = new ItemStack(Items.ENDER_PEARL, 16);
 		final ItemStack totem = new ItemStack(Items.TOTEM_OF_UNDYING);
-		final ResourceLocation skin = ResourceLocation.tryBuild("joid", "demo/textures/skin.png");
+		final ResourceLocation skin = new ResourceLocation("joid", "demo/textures/skin.png");
 
 		damaged.setDamageValue(1100);
 
@@ -409,7 +411,7 @@ public class UIDemoMinecraft extends UIDemo {
 			.color(UIDemoMinecraft.PLACEHOLDER)
 			.body(rect -> {
 				RectNode.create(20, 20, 400, 200).color(UIDemoMinecraft.PANEL).attach(rect);
-				TextNode.create(30, 30, 380, 0).text(Text.create(() -> Component.translatable("joid.demo.minecraft.keybind", Minecraft.getInstance().options.keyInventory.getTranslatedKeyMessage()), info)).mode(TextMode.SPLIT).attach(rect);
+				TextNode.create(30, 30, 380, 0).text(Text.create(() -> new TranslatableComponent("joid.demo.minecraft.keybind", Minecraft.getInstance().options.keyInventory.getTranslatedKeyMessage()), info)).mode(TextMode.SPLIT).attach(rect);
 				TextNode.create(30, 150).text(Text.create(() -> "JOID key " + KeyResolver.resolve(Minecraft.getInstance().options.keyInventory), info)).attach(rect);
 				TextNode.create(220, 255).text(Text.create("Key bind", caption).alignX(Align.CENTER)).anchorX(Align.CENTER).attach(rect);
 			})
@@ -420,7 +422,7 @@ public class UIDemoMinecraft extends UIDemo {
 			.color(UIDemoMinecraft.PLACEHOLDER)
 			.body(rect -> {
 				RectNode.create(20, 20, 360, 200).color(UIDemoMinecraft.PANEL).attach(rect);
-				TextNode.create(30, 30).text(Text.create(() -> Minecraft.getInstance().screen != null ? Minecraft.getInstance().screen.getTitle() : Component.empty(), info)).attach(rect);
+				TextNode.create(30, 30).text(Text.create(() -> Minecraft.getInstance().screen != null ? Minecraft.getInstance().screen.getTitle() : TextComponent.EMPTY, info)).attach(rect);
 				TextNode.create(30, 80).text(Text.create(() -> "Pause screen " + (Minecraft.getInstance().screen != null && Minecraft.getInstance().screen.isPauseScreen()), info)).attach(rect);
 				TextNode.create(30, 130).text(Text.create(() -> "Game paused " + Minecraft.getInstance().isPaused(), info)).attach(rect);
 				TextNode.create(200, 255).text(Text.create("Screen data", caption).alignX(Align.CENTER)).anchorX(Align.CENTER).attach(rect);
