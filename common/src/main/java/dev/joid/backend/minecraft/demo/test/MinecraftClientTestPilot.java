@@ -41,6 +41,7 @@ import com.mojang.authlib.GameProfile;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
+import cpw.mods.fml.common.gameevent.TickEvent.RenderTickEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
 import dev.joid.backend.minecraft.MinecraftBackend;
 import dev.joid.backend.minecraft.bridge.render.GuiFrameCounter;
@@ -117,6 +118,7 @@ import net.minecraft.util.ChatStyle;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.ScreenShotHelper;
+import net.minecraft.util.Timer;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
@@ -136,6 +138,7 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 
 	private String  window;
 	private boolean soundCapture;
+	private long    frameTime;
 
 	public MinecraftClientTestPilot() {
 		FMLCommonHandler.instance().bus().register(this);
@@ -155,6 +158,20 @@ public final class MinecraftClientTestPilot implements IClientTestPilot {
 		for (Runnable task = this.serverTasks.poll(); task != null; task = this.serverTasks.poll()) {
 			task.run();
 		}
+	}
+
+	@SubscribeEvent
+	public void renderTick(final RenderTickEvent event) {
+		if (event.phase != Phase.START) {
+			return;
+		}
+
+		final long time = Minecraft.getSystemTime();
+		if (time - this.frameTime > 1000L) {
+			((Timer) MinecraftClientTestPilot.field(Minecraft.getMinecraft(), "timer")).elapsedPartialTicks += 1F;
+		}
+
+		this.frameTime = time;
 	}
 
 	@SubscribeEvent
